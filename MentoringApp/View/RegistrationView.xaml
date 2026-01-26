@@ -1,0 +1,86 @@
+﻿<UserControl x:Class="MentoringApp.View.RegistrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model">
+
+    <Grid Margin="20">
+        <StackPanel>
+            <TextBlock Text="Username:"/>
+            <TextBox Text="{Binding UserName}" Tag="Username"/>
+            <TextBox Text="{Binding Email}" Tag="Email"/>
+            <TextBox Text="{Binding NationalId}" Tag="National ID"/>
+
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Mentor}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Mentee}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+
+                <TextBlock Text="Choose your grade:"/>
+                <TextBox Text="{Binding Grade}"/>
+            </StackPanel>
+
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Mentee}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+
+                <TextBlock Text="Choose subject to Learn:"/>
+                <TextBox Text="{Binding SubjectToLearn}"/>
+            </StackPanel>
+
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Mentor}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+
+                <TextBlock Text="Choose subject to Teach:"/>
+                <TextBox Text="{Binding SubjectToTeach}"/>
+            </StackPanel>
+
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Supervisor}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                
+                <!--supervisor specific data-->
+            </StackPanel>
+
+            <Button Content="Submit Registration" 
+                    Command="{Binding RegisterCommand}" 
+                    Margin="0,20,0,0" Height="30"/>
+
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,5"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
