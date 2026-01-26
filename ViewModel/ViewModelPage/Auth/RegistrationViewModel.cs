@@ -14,9 +14,14 @@ namespace MentoringApp.ViewModel.ViewModelPage
         
         public ICommand RegisterCommand { get; }
 
+        private bool _isMentor;
+        public bool IsMentor { get => _isMentor; set => SetProperty(ref _isMentor, value); }
 
-        private UserRole _registringUserRole = UserRole.InvalidUserRole;
-        public UserRole RegisteringUserRole { get => _registringUserRole; set => SetProperty(ref _registringUserRole, value); }
+        private bool _isMentee;
+        public bool IsMentee { get => _isMentee; set => SetProperty(ref _isMentee, value); }
+
+        private bool _supervisorOrStudentIsSupervisor;
+        public bool SupervisorOrStudentIsSupervisor { get => _supervisorOrStudentIsSupervisor; set => SetProperty(ref _supervisorOrStudentIsSupervisor, value); }
 
         private int _subjectToTeach = -1;
         public int SubjectToTeach { get => _subjectToTeach; set => SetProperty(ref _subjectToTeach, value); }
@@ -47,47 +52,37 @@ namespace MentoringApp.ViewModel.ViewModelPage
             RegisterCommand = new RelayCommand(Register);
         }
 
+
+
         private void Register()
         {
-            // Use the C# switch expression correctly
-            User user = RegisteringUserRole switch
-            {
-                UserRole.Supervisor => new Supervisor 
-                { 
-                    UserName = UserName, 
-                    Email = Email, 
-                    NationalId = NationalId 
-                },
-                UserRole.Mentee => new Student 
-                { 
-                    UserName = UserName, 
-                    Email = Email, 
-                    NationalId = NationalId, 
-                    Grade = Grade,
-                    // Ensure the Profile object is created
-                    MenteeProfile = new MenteeProfile { SubjectToLearn = SubjectToLearn } 
-                },
-                UserRole.Mentor => new Student 
-                { 
-                    UserName = UserName, 
-                    Email = Email, 
-                    NationalId = NationalId, 
-                    Grade = Grade,
-                    // Ensure the Profile object is created
-                    MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach } 
-                },
-                _ => throw new System.NotImplementedException("Role not supported")
-            };
+            User user;
 
-            if (!_authService.Register(user))
+            if (SupervisorOrStudentIsSupervisor)
             {
-                ErrorMessage = "Could not register";
+                user = new Supervisor { UserName = UserName, Email = Email, NationalId = NationalId };
             }
-            else
+            else // Student
             {
-                ErrorMessage = ""; 
-                RequestClose?.Invoke();
+                var student = new Student 
+                { 
+                    UserName = UserName, 
+                    Email = Email, 
+                    NationalId = NationalId, 
+                    Grade = Grade 
+                };
+
+                // A student can have one or both profiles!
+                if (IsMentee) student.MenteeProfile = new MenteeProfile { SubjectToLearn = SubjectToLearn };
+                if (IsMentor) student.MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach };
+
+                user = student;
             }
+
+            if (_authService.Register(user))
+                {
+                    RequestClose?.Invoke();
+                }
         }
     }
 }

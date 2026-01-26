@@ -1,17 +1,25 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.Service
 {
     public static class ServiceDependencyInjection
     {
-        public static IServiceCollection AddServices(this IServiceCollection services)
+        public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<AuthService>();
+            // Note: Changed to AddScoped because AuthService uses the Database (Repository)
+            services.AddScoped<AuthService>();
+
+            // Pull settings from the "EmailSettings" section of appsettings.json
+            var emailSection = configuration.GetSection("EmailSettings");
+
+            services.AddSingleton<EmailService>(sp =>
+                new EmailService(
+                    smtpHost: emailSection["SmtpHost"],
+                    smtpPort: int.Parse(emailSection["SmtpPort"] ?? "587"),
+                    fromEmail: emailSection["FromEmail"],
+                    fromPassword: emailSection["FromPassword"]
+                ));
 
             return services;
         }

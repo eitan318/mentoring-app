@@ -1,14 +1,16 @@
 ﻿
+using System.ComponentModel;
+using System.Reflection;
+using System;
+
 namespace MentoringApp.Model
 {
-
     public enum UserRole
     {
-        InvalidUserRole = 0,
-        Admin = 1,
-        Supervisor = 2,
-        Mentor = 3,
-        Mentee = 4,
+        None = 0,
+        Admin,
+        Supervisor,
+        Student,
     }
     public abstract class User
     {
@@ -16,6 +18,18 @@ namespace MentoringApp.Model
         public string Email { get; set; }
         public string UserName { get; set; }
         public string NationalId { get; set; }
+
+        public VerificationCode CurrentVerificationCode { get; set; }
+    }
+
+    /* 
+     * VerificationCode is part of the User aggregate.
+     * It represents temporary user state and is persisted via the User repository.
+    */
+    public class VerificationCode
+    {
+        public string Code { get; set; }
+        public DateTime CreationDate { get; set; }
     }
 
     public class Admin : User { /* Admin specific logic */ }

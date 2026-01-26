@@ -5,34 +5,63 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Service;
 using MentoringApp.Model;
-using MentoringApp.ViewModel.ViewModelPage;
 
 namespace MentoringApp.ViewModel.ViewModelPage
 {
     public class LoginViewModel : ViewModelBase
     {
-        private readonly AuthService _loginService;
+        private readonly AuthService _authService;
         private readonly INavigationService _navigationService;
         private readonly UserStore _userStore;
+
+        private static readonly bool _debugWithoutVerification = true;
 
         public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService loginService)
         {  
             _userStore = userStore;
-            _loginService = loginService;
+            _authService = loginService;
             _navigationService = navigationService;
             LoginCommand = new RelayCommand(Login);
+            SendVerificationCodeCommand = new RelayCommand(SendVerificationCode);
         }
+        private bool _wasCodeSent = false;
+        public bool WasCodeSent { get => _wasCodeSent; set => SetProperty(ref _wasCodeSent, value); }
 
         private string _nationalId = "";
         public string NationalId { get => _nationalId; set => SetProperty(ref _nationalId, value); }
+
+        private string _verificationCode = "";
+        public string VerificationCode { get => _verificationCode; set => SetProperty(ref _verificationCode, value); }
         private string _errorMessage = "";
         public string ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
 
         public ICommand LoginCommand { get; }
+        public ICommand SendVerificationCodeCommand { get; }
 
-        private async void Login() // Use async if your navigation is Task-based
+        private async void SendVerificationCode()
         {
-            var loggedInUser = _loginService.Login(NationalId);
+            if (_debugWithoutVerification)
+            {
+                Login();
+            }
+
+            bool result = await _authService.SendVerificationCodeAsync(NationalId);
+            if (!result)
+            {
+                ErrorMessage = $"Couldnt send verification code: {NationalId}";
+                return;
+            }
+            WasCodeSent = true;
+        }
+
+        private async void Login()
+        {
+            if (!_debugWithoutVerification && !await _authService.VerificationCodeValid(VerificationCode))
+            {
+                ErrorMessage = "Verification code invalid";
+                return;
+            }
+            var loggedInUser = _authService.Login(NationalId);
 
             if (loggedInUser is User user)
             {

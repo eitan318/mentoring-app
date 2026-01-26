@@ -5,9 +5,12 @@
 
     <Grid Margin="20">
         <StackPanel>
-            <TextBox Text="{Binding UserName}" Tag="Username"/>
-            <TextBox Text="{Binding Email}" Tag="Email"/>
-            <TextBox Text="{Binding NationalId}" Tag="National ID"/>
+            <TextBlock Text="Username:"/>
+            <TextBox Text="{Binding UserName}"/>
+            <TextBlock Text="Email:"/>
+            <TextBox Text="{Binding Email}"/>
+            <TextBlock Text="National ID:"/>
+            <TextBox Text="{Binding NationalId}"/>
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource BoolToVis}}">
                 <TextBlock Text="Supervisor data: no data"/>
