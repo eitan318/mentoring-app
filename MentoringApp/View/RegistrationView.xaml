@@ -5,75 +5,29 @@
 
     <Grid Margin="20">
         <StackPanel>
-            <TextBlock Text="Username:"/>
             <TextBox Text="{Binding UserName}" Tag="Username"/>
             <TextBox Text="{Binding Email}" Tag="Email"/>
             <TextBox Text="{Binding NationalId}" Tag="National ID"/>
 
-            <StackPanel>
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Mentor}">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Mentee}">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
+            <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="Supervisor data: no data"/>
+            </StackPanel>
 
-                <TextBlock Text="Choose your grade:"/>
+            <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
+                <TextBlock Text="Grade:"/>
                 <TextBox Text="{Binding Grade}"/>
+                <CheckBox Content="Is Mentor" IsChecked="{Binding IsMentor}"/>
+                <CheckBox Content="Is Mentee" IsChecked="{Binding IsMentee}"/>
             </StackPanel>
 
-            <StackPanel>
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Mentee}">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-
-                <TextBlock Text="Choose subject to Learn:"/>
-                <TextBox Text="{Binding SubjectToLearn}"/>
-            </StackPanel>
-
-            <StackPanel>
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Mentor}">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-
-                <TextBlock Text="Choose subject to Teach:"/>
+            <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="Subject to Teach:"/>
                 <TextBox Text="{Binding SubjectToTeach}"/>
             </StackPanel>
 
-            <StackPanel>
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding RegisteringUserRole}" Value="{x:Static model:UserRole.Supervisor}">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-                
-                <!--supervisor specific data-->
+            <StackPanel Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="Subject to Learn:"/>
+                <TextBox Text="{Binding SubjectToLearn}"/>
             </StackPanel>
 
             <Button Content="Submit Registration" 

@@ -9,8 +9,7 @@
     <Grid>
         <StackPanel>
             <Button Content="Register Supervisor" Command="{Binding RegisterSupervisorCommand}"/>
-            <Button Content="Register Mentor" Command="{Binding RegisterMentorCommand}"/>
-            <Button Content="Register Mentee" Command="{Binding RegisterMenteeCommand}"/>
+            <Button Content="Register Student" Command="{Binding RegisterStudentCommand}"/>
             <Button Content="Logout" Command="{Binding LogoutCommand}"/>
         </StackPanel>
     </Grid>

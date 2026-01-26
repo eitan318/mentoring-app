@@ -2,28 +2,17 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:MentoringApp"
-             xmlns:views="clr-namespace:MentoringApp.View"
-             xmlns:vm="clr-namespace:MentoringApp.ViewModel.ViewModelPage;assembly=MentoringApp.ViewModel">
+             
+             >
     <Application.Resources>
+
         <ResourceDictionary>
-            <DataTemplate DataType="{x:Type vm:LoginViewModel}">
-                <views:LoginView/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:AdminDashboardViewModel}">
-                <views:AdminDashboardView/>
-            </DataTemplate>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Converter/ConverterDictionary.xaml"/>
+                <ResourceDictionary Source="/ViewModelViewMap.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-            <DataTemplate DataType="{x:Type vm:SupervisorDashboardViewModel}">
-                <views:SupervisorDashboardView/>
-            </DataTemplate>
-
-            <DataTemplate DataType="{x:Type vm:StudentHomeViewModel}">
-                <views:StudentHomeView/>
-            </DataTemplate>
-
-            <DataTemplate DataType="{x:Type vm:RegistrationViewModel}">
-                <views:RegistrationView/>
-            </DataTemplate>
+        
         </ResourceDictionary>
     </Application.Resources>
 
