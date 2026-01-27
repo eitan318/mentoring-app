@@ -1,9 +1,4 @@
-﻿
-using System.ComponentModel;
-using System.Reflection;
-using System;
-
-namespace MentoringApp.Model
+﻿namespace MentoringApp.Model
 {
     public enum UserRole
     {

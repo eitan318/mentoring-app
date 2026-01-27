@@ -1,5 +1,4 @@
 ﻿using MentoringApp.ViewModel.Store;
-
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
@@ -45,10 +44,10 @@ namespace MentoringApp.ViewModel.ViewModelPage
                 Login();
             }
 
-            bool result = await _authService.SendVerificationCodeAsync(NationalId);
-            if (!result)
+            var result = await _authService.SendVerificationCodeAsync(NationalId);
+            if (!result.Success)
             {
-                ErrorMessage = $"Couldnt send verification code: {NationalId}";
+                ErrorMessage = result.ErrorMessage;
                 return;
             }
             WasCodeSent = true;
@@ -56,35 +55,35 @@ namespace MentoringApp.ViewModel.ViewModelPage
 
         private async void Login()
         {
-            if (!_debugWithoutVerification && !await _authService.VerificationCodeValid(VerificationCode))
+            // Verification step
+            if (!_debugWithoutVerification)
             {
-                ErrorMessage = "Verification code invalid";
-                return;
+                var verificationResult = await _authService.VerificationCodeValid(VerificationCode);
+                if (!verificationResult.Success)
+                {
+                    ErrorMessage = verificationResult.ErrorMessage;
+                    return;
+                }
             }
-            var loggedInUser = _authService.Login(NationalId);
 
-            if (loggedInUser is User user)
+            // Login step
+            var loginResult = _authService.Login(NationalId);
+            if (!loginResult.Success)
             {
-                _userStore.User = user;
-                ErrorMessage = "";
-
-                if (user is Admin)
-                {
-                    await _navigationService.NavigateToAsync<AdminDashboardViewModel>();
-                }
-                if (user is Supervisor)
-                {
-                    await _navigationService.NavigateToAsync<SupervisorDashboardViewModel>();
-                }
-                else if (user is Student student)
-                {
-                    await _navigationService.NavigateToAsync<StudentHomeViewModel>();
-                }
-
+                ErrorMessage = loginResult.ErrorMessage;
                 return;
             }
 
-            ErrorMessage = $"No user with national ID: {NationalId}";
+            // Success - Navigation logic
+            var user = loginResult.Data;
+            _userStore.User = user;
+    
+            switch (user)
+            {
+                case Admin: await _navigationService.NavigateToAsync<AdminDashboardViewModel>(); break;
+                case Supervisor: await _navigationService.NavigateToAsync<SupervisorDashboardViewModel>(); break;
+                case Student: await _navigationService.NavigateToAsync<StudentHomeViewModel>(); break;
+            }
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MentoringApp.Service.Validation;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.Service
@@ -9,6 +10,9 @@ namespace MentoringApp.Service
         {
             // Note: Changed to AddScoped because AuthService uses the Database (Repository)
             services.AddScoped<AuthService>();
+            
+            // Validator
+            services.AddSingleton<UserValidator>();
 
             // Pull settings from the "EmailSettings" section of appsettings.json
             var emailSection = configuration.GetSection("EmailSettings");

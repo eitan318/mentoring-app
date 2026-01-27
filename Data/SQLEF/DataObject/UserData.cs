@@ -18,7 +18,6 @@
     {
         public int UserId { get; set; }
         public int SubjectToTeach { get; set; } 
-
     }
 
     internal class UserStudentData
@@ -43,6 +42,4 @@
         public string Code { get; set; }
         public DateTime CreationDate { get; set; }
     }
-
-
 }

@@ -62,7 +62,7 @@ namespace MentoringApp.ViewModel.ViewModelPage
             {
                 user = new Supervisor { UserName = UserName, Email = Email, NationalId = NationalId };
             }
-            else // Student
+            else
             {
                 var student = new Student 
                 { 
@@ -79,10 +79,21 @@ namespace MentoringApp.ViewModel.ViewModelPage
                 user = student;
             }
 
-            if (_authService.Register(user))
-                {
-                    RequestClose?.Invoke();
-                }
+            Result<User> result = _authService.Register(user).Result;
+            if (result.Success)
+            {
+                RequestClose?.Invoke();
+                return;
+            }
+
+            if (result.ValidationErrors != null && result.ValidationErrors.Any())
+            {
+                ErrorMessage = string.Join(Environment.NewLine, result.ValidationErrors.Values);
+            }
+            else
+            {
+                ErrorMessage = result.ErrorMessage ?? "An unknown error occurred.";
+            }
         }
     }
 }
