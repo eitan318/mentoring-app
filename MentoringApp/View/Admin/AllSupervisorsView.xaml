@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="MentoringApp.View.Admin.AllSupervisorsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MentoringApp.View.Admin"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <StackPanel>
+            <ListView ItemsSource="{Binding SupervisorsList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <TextBlock Text="Name: " FontWeight="Bold"/>
+                            <TextBlock Text="{Binding UserName}" Margin="0,0,10,0"/>
+
+                            <TextBlock Text="Pairs supervised: "/>
+                            <TextBlock Text="{Binding PairsSupervised}" Margin="0,0,10,0"/>
+
+                            <TextBlock Text="Pending: " Foreground="Red"/>
+                            <TextBlock Text="{Binding PendingIssues.Count}" Margin="0,0,10,0"/>
+
+                            <TextBlock Text="Resolved: " Foreground="Green"/>
+                            <TextBlock Text="{Binding ResolvedIssues.Count}" Margin="0,0,10,0"/>
+
+                            <Button Content="Inspect More" 
+                                Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                CommandParameter="{Binding}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Button Content="Back" Command="{Binding BackCommand}"/>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

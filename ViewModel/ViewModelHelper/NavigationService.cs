@@ -1,61 +1,49 @@
-﻿using MentoringApp.ViewModel.Store;
+﻿using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection.Metadata;
 
-namespace MentoringApp.ViewModel.ViewModelHelper
+public class NavigationService : INavigationService
 {
-    public delegate TViewModel ViewModelFactory<TParameter, TViewModel>(TParameter parameter);
+    private readonly IServiceProvider _serviceProvider;
+    private readonly NavigationStore _navigationStore;
 
-
-    public class NavigationService : INavigationService
+    public NavigationService(IServiceProvider serviceProvider, NavigationStore navigationStore)
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly NavigationStore _navigationStore;
+        _serviceProvider = serviceProvider;
+        _navigationStore = navigationStore;
+    }
 
-        public NavigationService(IServiceProvider serviceProvider, NavigationStore navigationStore)
-        {
-            _serviceProvider = serviceProvider;
-            _navigationStore = navigationStore;
-        }
+    private async Task NavigateCoreAsync<TViewModel>(TViewModel vm, Func<Task> onNavigatedTo)
+        where TViewModel : class, INavigatable
+    {
+        var viewModel = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
+        if (_navigationStore.CurrentViewModel is INavigatable oldVm)
+            await oldVm.OnNavigatedFromAsync();
 
-        public Task NavigateToAsync<TViewModel, TParameter>(TParameter parameter) 
-            where TViewModel : ViewModelBase, INavigatable<TParameter>
-        {
-            // ActivatorUtilities still does the heavy lifting of DI
-            var viewModel = ActivatorUtilities.CreateInstance<TViewModel>(
-                _serviceProvider, 
-                new object[] { parameter! }
-            );
+        await onNavigatedTo();
 
-            _navigationStore.CurrentViewModel = viewModel;
-            return Task.CompletedTask;
-        }
-        public Task NavigateToAsync<TViewModel>() 
-            where TViewModel : ViewModelBase
-        {
-            // No extra parameters passed; ActivatorUtilities gets everything from DI
-            TViewModel viewModel = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
+        _navigationStore.CurrentViewModel = vm;
+    }
 
-            _navigationStore.CurrentViewModel = viewModel;
+    public async Task NavigateToAsync<TViewModel>()
+        where TViewModel : class, INavigatable
+    {
+        var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
+        await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync());
+    }
 
-            return Task.CompletedTask;
-        }
+    public async Task NavigateToAsync<TViewModel, TParameter>(TParameter parameter)
+        where TViewModel : class, INavigatable<TParameter>
+    {
+        var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
+        await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync(parameter));
+    }
 
-        public Task GoBackAsync()
-        {
-            if(_navigationStore.CanGoBack())
-            {
-                _navigationStore.GoBack();
-            }
-            return Task.CompletedTask;
-        }
-
+    public Task GoBackAsync()
+    {
+        _navigationStore.GoBack();
+        return Task.CompletedTask;
     }
 }
-
-

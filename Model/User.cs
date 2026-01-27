@@ -29,7 +29,17 @@
 
     public class Admin : User { /* Admin specific logic */ }
 
-    public class Supervisor : User { /* Supervisor specific logic */ }
+    public class Supervisor : User { 
+        public int PairsSupervised { get; set;}
+        public List<Issue> PendingIssues { get; set; }
+        public List<Issue> ResulvedIssues { get; set; }
+    }
+
+    public class Issue
+    {
+        public string Description { get; set; }
+        public int Cateory { get; set; }
+    }
 
     public class Student : User
     {

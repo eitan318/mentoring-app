@@ -1,99 +1,93 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.ViewModelHelper;
-using System.Windows.Input;
+using System.ComponentModel.DataAnnotations;
 
-namespace MentoringApp.ViewModel.ViewModelPage
+namespace MentoringApp.ViewModel.ViewModelPage.Auth
 {
-    public class RegistrationViewModel : ViewModelBase, ICloseable
+    public partial class RegistrationViewModel : ObservableValidator, INavigatable<bool>, ICloseable
     {
         private readonly AuthService _authService;
-
         public event Action? RequestClose;
-        
-        public ICommand RegisterCommand { get; }
-
-        private bool _isMentor;
-        public bool IsMentor { get => _isMentor; set => SetProperty(ref _isMentor, value); }
-
-        private bool _isMentee;
-        public bool IsMentee { get => _isMentee; set => SetProperty(ref _isMentee, value); }
-
-        private bool _supervisorOrStudentIsSupervisor;
-        public bool SupervisorOrStudentIsSupervisor { get => _supervisorOrStudentIsSupervisor; set => SetProperty(ref _supervisorOrStudentIsSupervisor, value); }
-
-        private int _subjectToTeach = -1;
-        public int SubjectToTeach { get => _subjectToTeach; set => SetProperty(ref _subjectToTeach, value); }
-
-        private int _subjectToLearn = -1;
-        public int SubjectToLearn { get => _subjectToLearn; set => SetProperty(ref _subjectToLearn, value); }
-
-        private int _grade = -1;
-        public int Grade { get => _grade; set => SetProperty(ref _grade, value); }
-
-        private string _email = "";
-        public string Email { get => _email; set => SetProperty(ref _email, value); }
-
-        private string _userName = "";
-        public string UserName { get => _userName; set => SetProperty(ref _userName, value); }
-
-        private string _nationalId = "";
-        public string NationalId { get => _nationalId; set => SetProperty(ref _nationalId, value); }
-
-        private string _errorMessage = "";
-        public string ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
 
         public RegistrationViewModel(AuthService authService)
         {
             _authService = authService;
-            
-            // Point the command to the local method
-            RegisterCommand = new RelayCommand(Register);
         }
 
+        [ObservableProperty] private bool _isMentor;
+        [ObservableProperty] private bool _isMentee;
+        [ObservableProperty] private bool _supervisorOrStudentIsSupervisor;
+        [ObservableProperty] private int _subjectToTeach = -1;
+        [ObservableProperty] private int _subjectToLearn = -1;
+        [ObservableProperty] private int _grade = -1;
+        [ObservableProperty] private string _errorMessage = "";
+        [ObservableProperty] [Required] private string _nationalId = "";
 
+        [ObservableProperty]
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        private string _email = "";
 
-        private void Register()
+        [ObservableProperty]
+        [Required(ErrorMessage = "Username is required")]
+        [MinLength(3)] 
+        private string _userName = "";
+
+        [RelayCommand]
+        private async Task RegisterAsync()
         {
-            User user;
+            ValidateAllProperties();
+            if (HasErrors) return;
 
-            if (SupervisorOrStudentIsSupervisor)
-            {
-                user = new Supervisor { UserName = UserName, Email = Email, NationalId = NationalId };
-            }
-            else
-            {
-                var student = new Student 
-                { 
-                    UserName = UserName, 
-                    Email = Email, 
-                    NationalId = NationalId, 
-                    Grade = Grade 
-                };
+            ErrorMessage = ""; 
+            ClearErrors(); 
 
-                // A student can have one or both profiles!
-                if (IsMentee) student.MenteeProfile = new MenteeProfile { SubjectToLearn = SubjectToLearn };
-                if (IsMentor) student.MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach };
+            var user = CreateUserFromState();
+            var result = await _authService.Register(user);
 
-                user = student;
-            }
-
-            Result<User> result = _authService.Register(user).Result;
             if (result.Success)
             {
                 RequestClose?.Invoke();
-                return;
-            }
-
-            if (result.ValidationErrors != null && result.ValidationErrors.Any())
-            {
-                ErrorMessage = string.Join(Environment.NewLine, result.ValidationErrors.Values);
             }
             else
             {
-                ErrorMessage = result.ErrorMessage ?? "An unknown error occurred.";
+                HandleServerResult(result);
             }
+        }
+        partial void OnIsMentorChanged(bool value) => ValidateProperty(SubjectToTeach, nameof(SubjectToTeach));
+
+        private User CreateUserFromState()
+        {
+            if (SupervisorOrStudentIsSupervisor)
+            {
+                return new Supervisor { UserName = UserName, Email = Email, NationalId = NationalId };
+            }
+            var student = new Student { UserName = UserName, Email = Email, NationalId = NationalId, Grade = Grade };
+            if (IsMentee) student.MenteeProfile = new MenteeProfile { SubjectToLearn = SubjectToLearn };
+            if (IsMentor) student.MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach };
+            
+            return student;
+        }
+
+        private void HandleServerResult(Result<User> result)
+        {
+            if (result.ValidationErrors != null)
+            {
+                foreach (var error in result.ValidationErrors)
+                {
+                    var valResult = new ValidationResult(error.Value, new[] { error.Key });
+                    ErrorMessage = error.Value;
+                }
+            }
+        }
+
+        public Task OnNavigatedToAsync(bool supervisorOrStudentIsSupervisor)
+        {
+            this.SupervisorOrStudentIsSupervisor = supervisorOrStudentIsSupervisor;
+            return Task.CompletedTask;
         }
     }
 }

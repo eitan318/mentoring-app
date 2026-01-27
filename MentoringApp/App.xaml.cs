@@ -2,8 +2,9 @@
 using MentoringApp.Model;
 using MentoringApp.Service;
 using MentoringApp.ViewModel;
-using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelPage;
+using MentoringApp.ViewModel.ViewModelPage.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -29,6 +30,7 @@ namespace MentoringApp
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
             services.AddSingleton<IWindowService, WindowService>();
+            services.AddSingleton<IFileService, FileService>();
             services.AddSingleton<MainWindow>();
             services.AddViewModels();
             services.AddDataRepositories(connectionString);

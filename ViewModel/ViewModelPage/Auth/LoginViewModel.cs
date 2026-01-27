@@ -1,13 +1,17 @@
-﻿using MentoringApp.ViewModel.Store;
-using MentoringApp.ViewModel.ViewModelHelper;
-using System.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Service;
 using MentoringApp.Model;
+using MentoringApp.Service;
+using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Store;
+using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.ViewModel.ViewModelPage.Admin;
+using MentoringApp.ViewModel.ViewModelPage.Dashboard;
+using System.ComponentModel.DataAnnotations;
 
-namespace MentoringApp.ViewModel.ViewModelPage
+namespace MentoringApp.ViewModel.ViewModelPage.Auth
 {
-    public class LoginViewModel : ViewModelBase
+    public partial class LoginViewModel : ObservableValidator, INavigatable
     {
         private readonly AuthService _authService;
         private readonly INavigationService _navigationService;
@@ -15,76 +19,84 @@ namespace MentoringApp.ViewModel.ViewModelPage
 
         private static readonly bool _debugWithoutVerification = true;
 
-        public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService loginService)
-        {  
-            _userStore = userStore;
-            _authService = loginService;
-            _navigationService = navigationService;
-            LoginCommand = new RelayCommand(Login);
-            SendVerificationCodeCommand = new RelayCommand(SendVerificationCode);
-        }
-        private bool _wasCodeSent = false;
-        public bool WasCodeSent { get => _wasCodeSent; set => SetProperty(ref _wasCodeSent, value); }
-
-        private string _nationalId = "";
-        public string NationalId { get => _nationalId; set => SetProperty(ref _nationalId, value); }
-
-        private string _verificationCode = "";
-        public string VerificationCode { get => _verificationCode; set => SetProperty(ref _verificationCode, value); }
-        private string _errorMessage = "";
-        public string ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
-
-        public ICommand LoginCommand { get; }
-        public ICommand SendVerificationCodeCommand { get; }
-
-        private async void SendVerificationCode()
+        public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService authService)
         {
+            _userStore = userStore;
+            _authService = authService;
+            _navigationService = navigationService;
+        }
+
+        [ObservableProperty] private bool _wasCodeSent;
+
+        [ObservableProperty]
+        [Required(ErrorMessage = "National ID is required")]
+        private string _nationalId = "";
+        
+        [Required(ErrorMessage = "Code is required")]
+        [ObservableProperty] private string _verificationCode = "";
+        [ObservableProperty] private string _errorMessage = "";
+
+        [RelayCommand]
+        private async Task SendVerificationCode()
+        {
+            ValidateProperty(NationalId, nameof(NationalId));
             if (_debugWithoutVerification)
             {
-                Login();
-            }
-
-            var result = await _authService.SendVerificationCodeAsync(NationalId);
-            if (!result.Success)
-            {
-                ErrorMessage = result.ErrorMessage;
+                await Login();
                 return;
             }
+
+            ErrorMessage = "";
+            var result = await _authService.SendVerificationCodeAsync(NationalId);
+            
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage ?? "Failed to send code.";
+                return;
+            }
+            
             WasCodeSent = true;
         }
 
-        private async void Login()
+        [RelayCommand]
+        private async Task Login()
         {
-            // Verification step
+            ValidateProperty(VerificationCode, nameof(VerificationCode));
             if (!_debugWithoutVerification)
             {
                 var verificationResult = await _authService.VerificationCodeValid(VerificationCode);
                 if (!verificationResult.Success)
                 {
-                    ErrorMessage = verificationResult.ErrorMessage;
+                    ErrorMessage = verificationResult.ErrorMessage ?? "Invalid code.";
                     return;
                 }
             }
 
-            // Login step
-            var loginResult = _authService.Login(NationalId);
+            var loginResult = await _authService.LoginAsync(NationalId);
             if (!loginResult.Success)
             {
-                ErrorMessage = loginResult.ErrorMessage;
+                ErrorMessage = loginResult.ErrorMessage ?? "Login failed.";
                 return;
             }
 
-            // Success - Navigation logic
             var user = loginResult.Data;
             _userStore.User = user;
-    
-            switch (user)
+
+            if (user != null)
             {
-                case Admin: await _navigationService.NavigateToAsync<AdminDashboardViewModel>(); break;
-                case Supervisor: await _navigationService.NavigateToAsync<SupervisorDashboardViewModel>(); break;
-                case Student: await _navigationService.NavigateToAsync<StudentHomeViewModel>(); break;
+                await NavigateBasedOnRole(user);
             }
         }
 
+        private async Task NavigateBasedOnRole(User user)
+        {
+            await (user switch
+            {
+                Model.Admin => _navigationService.NavigateToAsync<AdminDashboardViewModel>(),
+                Supervisor => _navigationService.NavigateToAsync<SupervisorDashboardViewModel>(),
+                Student => _navigationService.NavigateToAsync<StudentHomeViewModel>(),
+                _ => Task.CompletedTask
+            });
+        }
     }
 }

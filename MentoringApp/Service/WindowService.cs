@@ -1,4 +1,5 @@
-﻿using MentoringApp.ViewModel.ViewModelHelper;
+﻿using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Windows;
@@ -15,18 +16,27 @@ namespace MentoringApp.Service
             _serviceProvider = serviceProvider;
         }
 
-
-
-        // Generic method to show ANY ViewModel as a window
-        public void ShowDialog<TViewModel>(Action<TViewModel>? configure = null) 
-            where TViewModel : ViewModelBase
+        public async Task ShowDialogAsync<TViewModel>() 
+            where TViewModel : class, INavigatable
         {
-            var vm = _serviceProvider.GetRequiredService<TViewModel>();
-            configure?.Invoke(vm);
+            var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
+            await vm.OnNavigatedToAsync();
+            OpenWindow(vm);
+        }
 
+        public async Task ShowDialogAsync<TViewModel, TParameter>(TParameter parameter) 
+            where TViewModel : class, INavigatable<TParameter>
+        {
+            var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
+            await vm.OnNavigatedToAsync(parameter);
+            OpenWindow(vm);
+        }
+
+        private void OpenWindow(INavigatable vm)
+        {
             var window = new Window
             {
-                Content = vm, // WPF finds the View via App.xaml DataTemplates
+                Content = vm, // WPF will look for DataTemplate
                 SizeToContent = SizeToContent.WidthAndHeight,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = Application.Current.MainWindow
@@ -34,9 +44,12 @@ namespace MentoringApp.Service
 
             if (vm is ICloseable closeable)
             {
-                closeable.RequestClose += () => window.Close();
+                closeable.RequestClose += async () => 
+                {
+                    await vm.OnNavigatedFromAsync();
+                    window.Close();
+                };
             }
-
             window.ShowDialog();
         }
     }

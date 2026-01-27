@@ -1,10 +1,13 @@
-﻿using MentoringApp.ViewModel.Store;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.ViewModel.ViewModelPage.Auth;
 
 
 namespace MentoringApp.ViewModel.ViewModelPage
 {
-    public class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel : ObservableObject, INavigatable
     {
         private readonly NavigationStore _navigationStore;
         private readonly INavigationService _navigationService;
@@ -21,7 +24,7 @@ namespace MentoringApp.ViewModel.ViewModelPage
             _navigationService.NavigateToAsync<LoginViewModel>();
         }
 
-        public ViewModelBase CurrentViewModel => _navigationStore.CurrentViewModel;
+        public INavigatable CurrentViewModel => _navigationStore.CurrentViewModel;
 
         private void OnCurrentViewModelChanged()
         {

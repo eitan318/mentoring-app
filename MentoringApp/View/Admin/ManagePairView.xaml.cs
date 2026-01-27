@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MentoringApp.View
+namespace MentoringApp.View.Admin
 {
     /// <summary>
-    /// Interaction logic for AdminDashboard.xaml
+    /// Interaction logic for ManagePairViewModel.xaml
     /// </summary>
-    public partial class AdminDashboardView : UserControl
+    public partial class ManagePairViewModel : UserControl
     {
-        public AdminDashboardView()
+        public ManagePairViewModel()
         {
             InitializeComponent();
         }

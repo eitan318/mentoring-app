@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MentoringApp.View.Auth
+namespace MentoringApp.View.Admin
 {
     /// <summary>
-    /// Interaction logic for R.xaml
+    /// Interaction logic for Supervisors.xaml
     /// </summary>
-    public partial class RegistrationView : UserControl
+    public partial class AllSupervisorsView : UserControl
     {
-        public RegistrationView()
+        public AllSupervisorsView()
         {
             InitializeComponent();
         }

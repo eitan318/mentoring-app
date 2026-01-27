@@ -1,41 +1,94 @@
-﻿<UserControl x:Class="MentoringApp.View.RegistrationView"
+﻿<UserControl x:Class="MentoringApp.View.Auth.RegistrationView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="ErrorTemplate">
+            <StackPanel>
+                <AdornedElementPlaceholder x:Name="textBox"/>
+                <ItemsControl ItemsSource="{Binding}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding ErrorContent}" 
+                                   Foreground="Red" FontSize="11" 
+                                   Margin="0,2,0,0" FontStyle="Italic"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ControlTemplate>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ErrorTemplate}" />
+            <Setter Property="Margin" Value="0,0,0,20"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <Border x:Name="border"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                SnapsToDevicePixels="True">
+                                <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                            </Border>
+
+                            <TextBlock x:Name="HintText"
+                                   Text="{TemplateBinding Tag}"
+                                   Foreground="Gray"
+                                   IsHitTestVisible="False"
+                                   Visibility="Collapsed"
+                                   Margin="7,2,0,0"
+                                   FontStyle="Italic"
+                                   VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value=""/>
+                                    <Condition Binding="{Binding IsFocused, RelativeSource={RelativeSource Self}}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="HintText" Property="Visibility" Value="Visible"/>
+                            </MultiDataTrigger>
+                            <Trigger Property="Validation.HasError" Value="true">
+                                <Setter TargetName="border" Property="BorderBrush" Value="Red"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
     <Grid Margin="20">
         <StackPanel>
-            <TextBlock Text="Username:"/>
-            <TextBox Text="{Binding UserName}"/>
-            <TextBlock Text="Email:"/>
-            <TextBox Text="{Binding Email}"/>
-            <TextBlock Text="National ID:"/>
-            <TextBox Text="{Binding NationalId}"/>
+            <TextBox Text="{Binding UserName}" Tag="Username" />
+            <TextBox Text="{Binding Email}" Tag="Email Address" />
+            <TextBox Text="{Binding NationalId}" Tag="National ID"/>
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="Supervisor data: no data"/>
+                <TextBlock Text="Supervisor data: no data" Margin="0,5" Foreground="Gray"/>
             </StackPanel>
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
-                <TextBlock Text="Grade:"/>
-                <TextBox Text="{Binding Grade}"/>
-                <CheckBox Content="Is Mentor" IsChecked="{Binding IsMentor}"/>
-                <CheckBox Content="Is Mentee" IsChecked="{Binding IsMentee}"/>
+                <TextBox Text="{Binding Grade}" Tag="Grade (e.g. 10)"/>
+                <CheckBox Content="Is Mentor" IsChecked="{Binding IsMentor}" Margin="0,5"/>
+                <CheckBox Content="Is Mentee" IsChecked="{Binding IsMentee}" Margin="0,5"/>
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="Subject to Teach:"/>
-                <TextBox Text="{Binding SubjectToTeach}"/>
+                <TextBox Text="{Binding SubjectToTeach}" Tag="Subject to Teach"/>
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="Subject to Learn:"/>
-                <TextBox Text="{Binding SubjectToLearn}"/>
+                <TextBox Text="{Binding SubjectToLearn}" Tag="Subject to Learn"/>
             </StackPanel>
 
             <Button Content="Submit Registration" 
-                    Command="{Binding RegisterCommand}" 
-                    Margin="0,20,0,0" Height="30"/>
+            Command="{Binding RegisterCommand}" 
+            Margin="0,10,0,0" Height="35"/>
 
             <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,5"/>
         </StackPanel>

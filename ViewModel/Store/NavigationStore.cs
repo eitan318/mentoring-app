@@ -4,8 +4,8 @@ namespace MentoringApp.ViewModel.Store
 {
  public class NavigationStore : StoreBase
     {
-        private readonly Stack<ViewModelBase> _navigationHistory = new();
-        private ViewModelBase _currentViewModel;
+        private readonly Stack<INavigatable> _navigationHistory = new();
+        private INavigatable _currentViewModel;
 
         public bool CanGoBack() => _navigationHistory.Count > 0;
 
@@ -17,7 +17,7 @@ namespace MentoringApp.ViewModel.Store
             }
         }
 
-        public ViewModelBase CurrentViewModel
+        public INavigatable CurrentViewModel
         {
             get => _currentViewModel;
             set
@@ -33,11 +33,7 @@ namespace MentoringApp.ViewModel.Store
                         _navigationHistory.Push(_currentViewModel);
                     }
                 }
-
-                _currentViewModel?.OnNavigatedFrom();
                 _currentViewModel = value;
-                _currentViewModel?.OnNavigatedTo();
-
                 OnPropertyChanged(nameof(CurrentViewModel));
                 CurrentViewModelChanged?.Invoke();
             }
