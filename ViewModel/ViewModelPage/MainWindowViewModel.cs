@@ -1,0 +1,37 @@
+﻿using MentoringApp.ViewModel.Store;
+using MentoringApp.ViewModel.ViewModelHelper;
+
+
+namespace MentoringApp.ViewModel.ViewModelPage
+{
+    public class MainWindowViewModel : ViewModelBase
+    {
+        private readonly NavigationStore _navigationStore;
+        private readonly INavigationService _navigationService;
+
+        public MainWindowViewModel(
+            NavigationStore navigationStore,
+            INavigationService navigationService)
+        {
+            _navigationStore = navigationStore;
+            _navigationService = navigationService;
+
+            // Bind event handlers
+            _navigationStore.CurrentViewModelChanged += OnCurrentViewModelChanged;
+            _navigationService.NavigateToAsync<LoginViewModel>();
+        }
+
+        public ViewModelBase CurrentViewModel => _navigationStore.CurrentViewModel;
+
+        private void OnCurrentViewModelChanged()
+        {
+            OnPropertyChanged(nameof(CurrentViewModel));
+        }
+
+        public void OnWindowClosed()
+        {
+            // Unsubscribe event handlers to prevent memory leaks
+            _navigationStore.CurrentViewModelChanged -= OnCurrentViewModelChanged;
+        }
+    }
+}
