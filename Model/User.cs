@@ -32,20 +32,6 @@ namespace MentoringApp.Model
         }
     }
 
-    public class VerificationCode
-    {
-        public required string Code { get; set; }
-        public DateTime CreationDate { get; set; }
-
-        public VerificationCode() { }
-
-        [SetsRequiredMembers]
-        public VerificationCode(string code)
-        {
-            Code = code;
-            CreationDate = DateTime.Now;
-        }
-    }
 
     public class Admin : User 
     {
@@ -63,36 +49,31 @@ namespace MentoringApp.Model
         public Supervisor(string name) : base(name) { }
     }
 
-    public class Issue
-    {
-        public required string Description { get; set; }
-        public int Category { get; set; }
-
-        public Issue() { }
-
-        [SetsRequiredMembers]
-        public Issue(string desc, int cat = 0)
-        {
-            Description = desc;
-            Category = cat;
-        }
-    }
 
     public class Student : User
     {
-        public int Grade { get; set; }
+        public required Grade Grade { get; set; }
         public MentorProfile? MentorProfile { get; set; }
         public MenteeProfile? MenteeProfile { get; set; }
 
         public bool IsMentor => MentorProfile != null;
         public bool IsMentee => MenteeProfile != null;
 
-        public Student() : base() { }
+        public Student() : base() { 
+            Grade = new Grade("Grade Name");
+        }
 
         [SetsRequiredMembers]
-        public Student(string name) : base(name) { }
+        public Student(string name) : base(name) { 
+            Grade = new Grade("Grade Name");
+        }
     }
 
-    public class MentorProfile { public int SubjectToTeach { get; set; } }
-    public class MenteeProfile { public int SubjectToLearn { get; set; } }
+    public class MentorProfile { 
+        public int SubjectToTeach { get; set; }
+    }
+    public class MenteeProfile { 
+        public int SubjectToLearn { get; set; }
+    
+    }
 }

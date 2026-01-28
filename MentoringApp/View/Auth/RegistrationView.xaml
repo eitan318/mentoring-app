@@ -3,63 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model">
     <UserControl.Resources>
-        <ControlTemplate x:Key="ErrorTemplate">
-            <StackPanel>
-                <AdornedElementPlaceholder x:Name="textBox"/>
-                <ItemsControl ItemsSource="{Binding}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding ErrorContent}" 
-                                   Foreground="Red" FontSize="11" 
-                                   Margin="0,2,0,0" FontStyle="Italic"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-        </ControlTemplate>
-
-        <Style TargetType="TextBox">
-            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ErrorTemplate}" />
-            <Setter Property="Margin" Value="0,0,0,20"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="5,2"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Grid>
-                            <Border x:Name="border"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Background="{TemplateBinding Background}"
-                                SnapsToDevicePixels="True">
-                                <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-                            </Border>
-
-                            <TextBlock x:Name="HintText"
-                                   Text="{TemplateBinding Tag}"
-                                   Foreground="Gray"
-                                   IsHitTestVisible="False"
-                                   Visibility="Collapsed"
-                                   Margin="7,2,0,0"
-                                   FontStyle="Italic"
-                                   VerticalAlignment="Center"/>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value=""/>
-                                    <Condition Binding="{Binding IsFocused, RelativeSource={RelativeSource Self}}" Value="False"/>
-                                </MultiDataTrigger.Conditions>
-                                <Setter TargetName="HintText" Property="Visibility" Value="Visible"/>
-                            </MultiDataTrigger>
-                            <Trigger Property="Validation.HasError" Value="true">
-                                <Setter TargetName="border" Property="BorderBrush" Value="Red"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        
     </UserControl.Resources>
 
     <Grid Margin="20">
@@ -73,17 +17,31 @@
             </StackPanel>
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
-                <TextBox Text="{Binding Grade}" Tag="Grade (e.g. 10)"/>
+                <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
+                    <ComboBox ItemsSource="{Binding Grades}"
+                      SelectedValue="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                      SelectedValuePath="Id"
+                      DisplayMemberPath="Name"
+                      Tag="Grade (e.g. 10)" />
+                </StackPanel>
                 <CheckBox Content="Is Mentor" IsChecked="{Binding IsMentor}" Margin="0,5"/>
                 <CheckBox Content="Is Mentee" IsChecked="{Binding IsMentee}" Margin="0,5"/>
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
-                <TextBox Text="{Binding SubjectToTeach}" Tag="Subject to Teach"/>
+                <ComboBox ItemsSource="{Binding Subjects}"
+                      SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                      SelectedValuePath="Id"
+                      DisplayMemberPath="Name"
+                      Tag="Subject to Teach" />
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
-                <TextBox Text="{Binding SubjectToLearn}" Tag="Subject to Learn"/>
+                <ComboBox ItemsSource="{Binding Subjects}"
+              SelectedValue="{Binding SubjectToLearn, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+              SelectedValuePath="Id"
+              DisplayMemberPath="Name"
+              Tag="Subject to Learn" />
             </StackPanel>
 
             <Button Content="Submit Registration" 

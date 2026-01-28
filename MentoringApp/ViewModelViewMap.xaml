@@ -3,31 +3,30 @@
                     
                     xmlns:adminv="clr-namespace:MentoringApp.View.Admin"
                     xmlns:authv="clr-namespace:MentoringApp.View.Auth"
-                    xmlns:dashboardv="clr-namespace:MentoringApp.View"
+                    xmlns:supervisorv="clr-namespace:MentoringApp.View.Supervisor"
+                    xmlns:studentv="clr-namespace:MentoringApp.View.Student"
 
                     xmlns:adminvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Admin;assembly=MentoringApp.ViewModel"
                     xmlns:authvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Auth;assembly=MentoringApp.ViewModel"
-                    xmlns:dashboardvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Dashboard;assembly=MentoringApp.ViewModel"
+                    xmlns:supervisorvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Supervisor;assembly=MentoringApp.ViewModel"
+                    xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Student;assembly=MentoringApp.ViewModel"
                     
                     >
 
     <DataTemplate DataType="{x:Type authvm:LoginViewModel}">
         <authv:LoginView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type authvm:RegistrationViewModel}">
+        <authv:RegistrationView/>
+    </DataTemplate>
+    
     <DataTemplate DataType="{x:Type adminvm:AdminDashboardViewModel}">
         <adminv:AdminDashboardView/>
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type dashboardvm:SupervisorDashboardViewModel}">
-        <dashboardv:SupervisorDashboardView/>
-    </DataTemplate>
-
-    <DataTemplate DataType="{x:Type dashboardvm:StudentHomeViewModel}">
-        <dashboardv:StudentHomeView/>
-    </DataTemplate>
-
-    <DataTemplate DataType="{x:Type authvm:RegistrationViewModel}">
-        <authv:RegistrationView/>
+    <DataTemplate DataType="{x:Type adminvm:AdminRegisterViewModel}">
+        <adminv:AdminRegisterView/>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type adminvm:ManagePairsViewModel}">
@@ -38,12 +37,22 @@
         <adminv:CreatePairView/>
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type adminvm:SupervisorViewModel}">
-        <adminv:SupervisorView/>
-    </DataTemplate>
-
     <DataTemplate DataType="{x:Type adminvm:AllSupervisorsViewModel}">
         <adminv:AllSupervisorsView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type studentvm:StudentDashboardViewModel}">
+        <studentv:StudentHomeView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type studentvm:AddIssueViewModel}">
+        <studentv:AddIssueView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type supervisorvm:SupervisorDashboardViewModel}">
+        <supervisorv:SupervisorDashboardView/>
+    </DataTemplate>
+
+
 
 </ResourceDictionary>

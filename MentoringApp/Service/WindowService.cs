@@ -32,7 +32,7 @@ namespace MentoringApp.Service
             OpenWindow(vm);
         }
 
-        private void OpenWindow(INavigatable vm)
+        private static void OpenWindow(INavigatable vm)
         {
             var window = new Window
             {

@@ -5,7 +5,8 @@ using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage;
 using MentoringApp.ViewModel.ViewModelPage.Admin;
 using MentoringApp.ViewModel.ViewModelPage.Auth;
-using MentoringApp.ViewModel.ViewModelPage.Dashboard;
+using MentoringApp.ViewModel.ViewModelPage.Student;
+using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -28,12 +29,12 @@ namespace MentoringApp.ViewModel
             services.AddTransient<LoginViewModel>();
             services.AddTransient<RegistrationViewModel>();
             services.AddTransient<AdminDashboardViewModel>();
-            services.AddTransient<SupervisorDashboardViewModel>();
-            services.AddTransient<StudentHomeViewModel>();
+            services.AddTransient<StudentDashboardViewModel>();
             services.AddTransient<ManagePairsViewModel>();
             services.AddTransient<CreatePairViewModel>();
-            services.AddTransient<SupervisorViewModel>();
+            services.AddTransient<SupervisorDashboardViewModel>();
             services.AddTransient<AllSupervisorsViewModel>();
+            services.AddTransient<AddIssueViewModel>();
 
             return services;
         }

@@ -6,7 +6,8 @@ using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.Admin;
-using MentoringApp.ViewModel.ViewModelPage.Dashboard;
+using MentoringApp.ViewModel.ViewModelPage.Supervisor;
+using MentoringApp.ViewModel.ViewModelPage.Student;
 using System.ComponentModel.DataAnnotations;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Auth
@@ -80,10 +81,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.Auth
             }
 
             var user = loginResult.Data;
-            _userStore.User = user;
-
             if (user != null)
             {
+                _userStore.User = user;
                 await NavigateBasedOnRole(user);
             }
         }
@@ -93,8 +93,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Auth
             await (user switch
             {
                 Model.Admin => _navigationService.NavigateToAsync<AdminDashboardViewModel>(),
-                Supervisor => _navigationService.NavigateToAsync<SupervisorDashboardViewModel>(),
-                Student => _navigationService.NavigateToAsync<StudentHomeViewModel>(),
+                Model.Supervisor => _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(user.Id),
+                Model.Student => _navigationService.NavigateToAsync<StudentDashboardViewModel>(),
                 _ => Task.CompletedTask
             });
         }

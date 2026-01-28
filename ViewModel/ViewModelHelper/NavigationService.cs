@@ -18,12 +18,12 @@ public class NavigationService : INavigationService
     private async Task NavigateCoreAsync<TViewModel>(TViewModel vm, Func<Task> onNavigatedTo)
         where TViewModel : class, INavigatable
     {
-        var viewModel = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
         if (_navigationStore.CurrentViewModel is INavigatable oldVm)
+        {
             await oldVm.OnNavigatedFromAsync();
+        }
 
         await onNavigatedTo();
-
         _navigationStore.CurrentViewModel = vm;
     }
 

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
@@ -10,7 +11,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 
     public class SupervisorSummary
     {
-        public required Supervisor Supervisor { get; set; }
+        public required Model.Supervisor Supervisor { get; set; }
         public int PairsCount { get; set; }
         public int PendingIssuesCount { get; set; }
     }
@@ -28,24 +29,26 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             SupervisorsList = new ObservableCollection<SupervisorSummary>
             {
                 new SupervisorSummary {
-                    Supervisor = new Supervisor("John Doe"),
+                    Supervisor = new Model.Supervisor("John Doe"),
                     PairsCount = 5,
                     PendingIssuesCount = 2
                 },
                 new SupervisorSummary {
-                    Supervisor = new Supervisor("Jane Smith"),
+                    Supervisor = new Model.Supervisor("Jane Smith"),
                     PairsCount = 3,
                     PendingIssuesCount = 0
                 }
             };
         }
 
+        [RelayCommand] private async Task Back() => await _navigationService.GoBackAsync();
+
         [RelayCommand]
         private async Task InspectSupervisor(SupervisorSummary chosenSummary)
         {
             if (chosenSummary?.Supervisor != null)
             {
-                await _navigationService.NavigateToAsync<SupervisorViewModel, int>(chosenSummary.Supervisor.Id);
+                await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(chosenSummary.Supervisor.Id);
             }
         }
     }

@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MentoringApp.View.Admin
+namespace MentoringApp.View.Student
 {
     /// <summary>
-    /// Interaction logic for Supervisorview.xaml
+    /// Interaction logic for AddIssueView.xaml
     /// </summary>
-    public partial class SupervisorView : UserControl
+    public partial class AddIssueView : UserControl
     {
-        public SupervisorView()
+        public AddIssueView()
         {
             InitializeComponent();
         }

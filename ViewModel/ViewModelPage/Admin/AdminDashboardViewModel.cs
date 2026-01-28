@@ -5,6 +5,7 @@ using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.Auth;
+using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -12,54 +13,33 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
     public partial class AdminDashboardViewModel : ObservableObject, INavigatable
     {
-        private readonly IWindowService _windowService;
-        private readonly IFileService _fileService;
         private readonly INavigationService _navigationService;
-        public ObservableCollection<Supervisor> SupervisorsListPreview { get; set; }
+        public ObservableCollection<Model.Supervisor> SupervisorsListPreview { get; set; }
 
-        public AdminDashboardViewModel(IFileService fileService, IWindowService windowService, INavigationService navigationService)
+        public AdminDashboardViewModel( INavigationService navigationService)
         {
-            _fileService = fileService;
-            _windowService = windowService;
             _navigationService = navigationService;
 
-            SupervisorsListPreview = new ObservableCollection<Supervisor>();
-            SupervisorsListPreview.Add(new Supervisor("Name1"));
-            SupervisorsListPreview.Add(new Supervisor("Name2"));
-            SupervisorsListPreview.Add(new Supervisor("Name3"));
-            SupervisorsListPreview.Add(new Supervisor("Name4"));
+            SupervisorsListPreview = new ObservableCollection<Model.Supervisor>();
+            SupervisorsListPreview.Add(new Model.Supervisor("Name1"));
+            SupervisorsListPreview.Add(new Model.Supervisor("Name2"));
+            SupervisorsListPreview.Add(new Model.Supervisor("Name3"));
+            SupervisorsListPreview.Add(new Model.Supervisor("Name4"));
         }
 
         [RelayCommand]
-        private async Task InspectSupervisor(Supervisor chosen)
+        private async Task InspectSupervisor(Model.Supervisor chosen)
         {
             if (chosen != null)
             {
-                await _navigationService.NavigateToAsync<SupervisorViewModel, int>(chosen.Id);
+                await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(chosen.Id);
             }
         }
 
-        [RelayCommand] private async Task Back() => await _navigationService.GoBackAsync();
+        [RelayCommand] private async Task RegisterUsers() => await _navigationService.NavigateToAsync<AdminRegisterViewModel>();
         [RelayCommand] private async Task Logout() => await _navigationService.NavigateToAsync<LoginViewModel>();
-        [RelayCommand] private async Task RegisterStudent() => 
-            await _windowService.ShowDialogAsync<RegistrationViewModel, bool>(false);
-        [RelayCommand] private async Task RegisterSupervisor() => 
-            await _windowService.ShowDialogAsync<RegistrationViewModel, bool>(true);
+
         [RelayCommand] private async Task ViewAllSupervisors() => await _navigationService.NavigateToAsync<AllSupervisorsViewModel>();
         [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
-
-
-
-        [RelayCommand]
-        private void RegisterFromFile()
-        {
-            string selectedFile = _fileService.OpenFile("Text files (*.txt)|*.txt");
-
-            if (!string.IsNullOrEmpty(selectedFile))
-            {
-                // Logic to process the file
-                System.Diagnostics.Debug.WriteLine($"Selected: {selectedFile}");
-            }
-        }
     }
 }

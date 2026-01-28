@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MentoringApp.View
+namespace MentoringApp.View.Student
 {
     /// <summary>
     /// Interaction logic for StudentHomeView.xaml

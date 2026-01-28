@@ -8,27 +8,28 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
     public partial class CreatePairViewModel : ObservableObject, INavigatable, ICloseable
     {
-        [ObservableProperty] private Supervisor? _selectedSupervisor;
-        [ObservableProperty] private Student? _selectedMentor;
-        [ObservableProperty] private Student? _selectedMentee;
+        [ObservableProperty] private Model.Supervisor? _selectedSupervisor;
+        [ObservableProperty] private Model.Student? _selectedMentor;
+        [ObservableProperty] private Model.Student? _selectedMentee;
 
-        [ObservableProperty] private ObservableCollection<Supervisor> _availableSupervisors = new();
-        [ObservableProperty] private ObservableCollection<Student> _availableMentors = new();
-        [ObservableProperty] private ObservableCollection<Student> _availableMentees = new();
+        [ObservableProperty] private ObservableCollection<Model.Supervisor> _availableSupervisors = [];
+        [ObservableProperty] private ObservableCollection<Model.Student> _availableMentors = [];
+        [ObservableProperty] private ObservableCollection<Model.Student> _availableMentees = [];
 
         public event Action? RequestClose;
 
         public CreatePairViewModel() { }
 
         [RelayCommand]
-        private async Task CreatePair()
+        private Task CreatePair()
         {
             if (SelectedSupervisor == null || SelectedMentor == null || SelectedMentee == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             RequestClose?.Invoke();
+            return Task.CompletedTask;
         }
     }
 }
