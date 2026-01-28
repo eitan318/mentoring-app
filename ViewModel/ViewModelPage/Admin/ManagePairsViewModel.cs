@@ -14,8 +14,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 
         [ObservableProperty] private ObservableCollection<Pair> _pairList = new();
 
-
-
         public ManagePairsViewModel(IWindowService windowService, INavigationService navigationService)
         {
             _windowService = windowService;

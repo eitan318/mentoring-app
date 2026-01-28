@@ -8,7 +8,7 @@ namespace MentoringApp.Model
 {
     public class Pair
     {
-        Student Mentee { get; set; }
-        Student Mentor { get; set; }
+        public Student Mentee { get; set; }
+        public Student Mentor { get; set; }
     }
 }

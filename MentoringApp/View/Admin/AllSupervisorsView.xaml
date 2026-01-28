@@ -13,20 +13,18 @@
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <TextBlock Text="Name: " FontWeight="Bold"/>
-                            <TextBlock Text="{Binding UserName}" Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding Supervisor.UserName}" Margin="0,0,10,0"/>
 
                             <TextBlock Text="Pairs supervised: "/>
-                            <TextBlock Text="{Binding PairsSupervised}" Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding PairsCount}" Margin="0,0,10,0"/>
 
                             <TextBlock Text="Pending: " Foreground="Red"/>
-                            <TextBlock Text="{Binding PendingIssues.Count}" Margin="0,0,10,0"/>
-
-                            <TextBlock Text="Resolved: " Foreground="Green"/>
-                            <TextBlock Text="{Binding ResolvedIssues.Count}" Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding PendingIssuesCount}" Margin="0,0,10,0"/>
 
                             <Button Content="Inspect More" 
-                                Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                CommandParameter="{Binding}"/>
+                        Margin="10,0,0,0"
+                        Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                        CommandParameter="{Binding}"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>

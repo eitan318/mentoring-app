@@ -1,4 +1,7 @@
-﻿namespace MentoringApp.Model
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
+
+namespace MentoringApp.Model
 {
     public enum UserRole
     {
@@ -7,59 +10,89 @@
         Supervisor,
         Student,
     }
+
     public abstract class User
     {
         public int Id { get; set; }
-        public string Email { get; set; }
-        public string UserName { get; set; }
-        public string NationalId { get; set; }
+        public required string Email { get; set; }
+        public required string UserName { get; set; }
+        public required string NationalId { get; set; }
+        public VerificationCode? CurrentVerificationCode { get; set; }
 
-        public VerificationCode CurrentVerificationCode { get; set; }
+        // Empty Constructor for frameworks/serializers
+        protected User() { }
+
+        // Dummy Constructor for testing
+        [SetsRequiredMembers]
+        protected User(string dummyName)
+        {
+            UserName = dummyName;
+            Email = "dummy@example.com";
+            NationalId = "000000000";
+        }
     }
 
-    /* 
-     * VerificationCode is part of the User aggregate.
-     * It represents temporary user state and is persisted via the User repository.
-    */
     public class VerificationCode
     {
-        public string Code { get; set; }
+        public required string Code { get; set; }
         public DateTime CreationDate { get; set; }
+
+        public VerificationCode() { }
+
+        [SetsRequiredMembers]
+        public VerificationCode(string code)
+        {
+            Code = code;
+            CreationDate = DateTime.Now;
+        }
     }
 
-    public class Admin : User { /* Admin specific logic */ }
+    public class Admin : User 
+    {
+        public Admin() : base() { }
 
-    public class Supervisor : User { 
-        public int PairsSupervised { get; set;}
-        public List<Issue> PendingIssues { get; set; }
-        public List<Issue> ResulvedIssues { get; set; }
+        [SetsRequiredMembers]
+        public Admin(string name) : base(name) { }
+    }
+
+    public class Supervisor : User 
+    { 
+        public Supervisor() : base() { }
+
+        [SetsRequiredMembers]
+        public Supervisor(string name) : base(name) { }
     }
 
     public class Issue
     {
-        public string Description { get; set; }
-        public int Cateory { get; set; }
+        public required string Description { get; set; }
+        public int Category { get; set; }
+
+        public Issue() { }
+
+        [SetsRequiredMembers]
+        public Issue(string desc, int cat = 0)
+        {
+            Description = desc;
+            Category = cat;
+        }
     }
 
     public class Student : User
     {
         public int Grade { get; set; }
-
         public MentorProfile? MentorProfile { get; set; }
         public MenteeProfile? MenteeProfile { get; set; }
 
-        // Helper logic for the UI/Service
         public bool IsMentor => MentorProfile != null;
         public bool IsMentee => MenteeProfile != null;
+
+        public Student() : base() { }
+
+        [SetsRequiredMembers]
+        public Student(string name) : base(name) { }
     }
 
-    public class MentorProfile
-    {
-        public int SubjectToTeach { get; set; }
-    }
-
-    public class MenteeProfile
-    {
-        public int SubjectToLearn { get; set; }
-    }
+    public class MentorProfile { public int SubjectToTeach { get; set; } }
+    public class MenteeProfile { public int SubjectToLearn { get; set; } }
 }

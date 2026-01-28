@@ -24,10 +24,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             _navigationService = navigationService;
 
             SupervisorsListPreview = new ObservableCollection<Supervisor>();
-            SupervisorsListPreview.Add(new Supervisor());
-            SupervisorsListPreview.Add(new Supervisor());
-            SupervisorsListPreview.Add(new Supervisor());
-            SupervisorsListPreview.Add(new Supervisor());
+            SupervisorsListPreview.Add(new Supervisor("Name1"));
+            SupervisorsListPreview.Add(new Supervisor("Name2"));
+            SupervisorsListPreview.Add(new Supervisor("Name3"));
+            SupervisorsListPreview.Add(new Supervisor("Name4"));
         }
 
         [RelayCommand]
@@ -35,7 +35,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         {
             if (chosen != null)
             {
-                await _navigationService.NavigateToAsync<SupervisorViewModel, Supervisor>(chosen);
+                await _navigationService.NavigateToAsync<SupervisorViewModel, int>(chosen.Id);
             }
         }
 

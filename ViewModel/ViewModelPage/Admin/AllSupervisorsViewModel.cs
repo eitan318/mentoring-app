@@ -7,33 +7,46 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
-    public partial class AllSupervisorsViewModel : ObservableObject, INavigatable
+
+    public class SupervisorSummary
+    {
+        public required Supervisor Supervisor { get; set; }
+        public int PairsCount { get; set; }
+        public int PendingIssuesCount { get; set; }
+    }
+
+
+    public partial class AllSupervisorsViewModel : ObservableObject,INavigatable 
     {
         private readonly INavigationService _navigationService;
-        public ObservableCollection<Supervisor> SupervisorsList { get; set; }
+        public ObservableCollection<SupervisorSummary> SupervisorsList { get; set; }
 
         public AllSupervisorsViewModel(INavigationService navigationService)
         {
             _navigationService = navigationService;
-            
-            // Mock data
-            SupervisorsList = new ObservableCollection<Supervisor>
+
+            SupervisorsList = new ObservableCollection<SupervisorSummary>
             {
-                new Supervisor { UserName = "John Doe", PairsSupervised = 5 },
-                new Supervisor { UserName = "Jane Smith", PairsSupervised = 3 }
+                new SupervisorSummary {
+                    Supervisor = new Supervisor("John Doe"),
+                    PairsCount = 5,
+                    PendingIssuesCount = 2
+                },
+                new SupervisorSummary {
+                    Supervisor = new Supervisor("Jane Smith"),
+                    PairsCount = 3,
+                    PendingIssuesCount = 0
+                }
             };
         }
 
         [RelayCommand]
-        private async Task InspectSupervisor(Supervisor chosen)
+        private async Task InspectSupervisor(SupervisorSummary chosenSummary)
         {
-            if (chosen != null)
+            if (chosenSummary?.Supervisor != null)
             {
-                await _navigationService.NavigateToAsync<SupervisorViewModel, Supervisor>(chosen);
+                await _navigationService.NavigateToAsync<SupervisorViewModel, int>(chosenSummary.Supervisor.Id);
             }
         }
-
-        [RelayCommand]
-        private async Task Back() => await _navigationService.GoBackAsync();
     }
 }
