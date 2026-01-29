@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MentoringApp.View.Auth
+namespace MentoringApp.View.User
 {
     /// <summary>
-    /// Interaction logic for R.xaml
+    /// Interaction logic for AuthenticatedDashboardView.xaml
     /// </summary>
-    public partial class RegistrationView : UserControl
+    public partial class AuthenticatedDashboardView : UserControl
     {
-        public RegistrationView()
+        public AuthenticatedDashboardView()
         {
             InitializeComponent();
         }

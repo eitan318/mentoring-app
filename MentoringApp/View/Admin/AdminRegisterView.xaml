@@ -8,6 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <StackPanel>
+
             <Button Content="Register Supervisor" Command="{Binding RegisterSupervisorCommand}"/>
             <Button Content="Register Student" Command="{Binding RegisterStudentCommand}"/>
             <Button Content="Register from a File"  Command="{Binding RegisterFromFileCommand}"/>

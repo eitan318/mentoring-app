@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.Auth;
+using MentoringApp.ViewModel.ViewModelPage.User;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

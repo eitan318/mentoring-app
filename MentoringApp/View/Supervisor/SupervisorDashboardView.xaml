@@ -9,6 +9,8 @@
         <StackPanel Margin="20">
             <TextBlock Text="{Binding SelectedSupervisor.UserName}" FontSize="24" FontWeight="Bold"/>
 
+            <Button Content="ViewProfile"  Command="{Binding ViewProfileCommand}"/>
+
             <Grid Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>

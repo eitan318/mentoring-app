@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace MentoringApp.View.Auth
+namespace MentoringApp.View.User
 {
     /// <summary>
     /// Interaction logic for LoginView.xaml

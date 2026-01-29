@@ -2,33 +2,53 @@
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection.Metadata;
 
 public class NavigationService : INavigationService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly NavigationStore _navigationStore;
+    private readonly Stack<Action<INavigatable>> _contextStack = new();
+    private readonly Stack<NavigationStore> _storeStack = new();
 
-    public NavigationService(IServiceProvider serviceProvider, NavigationStore navigationStore)
+    public NavigationService(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _navigationStore = navigationStore;
+    }
+
+    public IDisposable UseContext(Action<INavigatable> contextSetter)
+    {
+        var store = new NavigationStore();
+
+        // When the store's VM changes, push that change to the UI context (MainWindow, etc.)
+        Action updateUi = () => contextSetter(store.CurrentViewModel);
+        store.CurrentViewModelChanged += updateUi;
+
+        _contextStack.Push(contextSetter);
+        _storeStack.Push(store);
+
+        // Return a disposer that cleans up the stacks and events
+        return new ContextReliever(() =>
+        {
+            store.CurrentViewModelChanged -= updateUi;
+            _contextStack.Pop();
+            _storeStack.Pop();
+        });
     }
 
     private async Task NavigateCoreAsync<TViewModel>(TViewModel vm, Func<Task> onNavigatedTo)
         where TViewModel : class, INavigatable
     {
-        if (_navigationStore.CurrentViewModel is INavigatable oldVm)
+        if (!_storeStack.TryPeek(out var currentStore)) return;
+
+        if (currentStore.CurrentViewModel != null)
         {
-            await oldVm.OnNavigatedFromAsync();
+            await currentStore.CurrentViewModel.OnNavigatedFromAsync();
         }
 
+        currentStore.CurrentViewModel = vm;
         await onNavigatedTo();
-        _navigationStore.CurrentViewModel = vm;
     }
 
-    public async Task NavigateToAsync<TViewModel>()
-        where TViewModel : class, INavigatable
+    public async Task NavigateToAsync<TViewModel>() where TViewModel : class, INavigatable
     {
         var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
         await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync());
@@ -43,7 +63,55 @@ public class NavigationService : INavigationService
 
     public Task GoBackAsync()
     {
-        _navigationStore.GoBack();
+        if (_storeStack.TryPeek(out var store))
+        {
+            store.GoBack();
+        }
         return Task.CompletedTask;
+    }
+    private class ContextReliever : IDisposable
+    {
+        private readonly Action _onDispose;
+        public ContextReliever(Action onDispose) => _onDispose = onDispose;
+        public void Dispose() => _onDispose();
+    }
+
+    private class NavigationStore : StoreBase
+    {
+        private readonly Stack<INavigatable> _navigationHistory = new();
+        private INavigatable _currentViewModel;
+        public bool CanGoBack() => _navigationHistory.Count > 0;
+        public void GoBack()
+        {
+            if (CanGoBack())
+            {
+                CurrentViewModel = _navigationHistory.Peek();
+            }
+        }
+
+        public INavigatable CurrentViewModel
+        {
+            get => _currentViewModel;
+            set
+            {
+                if (_currentViewModel != null)
+                {
+                    if (_navigationHistory.Contains(value))
+                    {
+                        while (_navigationHistory.Pop() != value) { }
+                    }
+                    else
+                    {
+                        _navigationHistory.Push(_currentViewModel);
+                    }
+                }
+                _currentViewModel = value;
+                OnPropertyChanged(nameof(CurrentViewModel));
+                CurrentViewModelChanged?.Invoke();
+            }
+        }
+
+        public event Action CurrentViewModelChanged;
+
     }
 }

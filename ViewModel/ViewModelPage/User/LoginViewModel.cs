@@ -10,7 +10,7 @@ using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using MentoringApp.ViewModel.ViewModelPage.Student;
 using System.ComponentModel.DataAnnotations;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Auth
+namespace MentoringApp.ViewModel.ViewModelPage.User
 {
     public partial class LoginViewModel : ObservableValidator, INavigatable
     {
@@ -84,19 +84,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Auth
             if (user != null)
             {
                 _userStore.User = user;
-                await NavigateBasedOnRole(user);
+                await _navigationService.NavigateToAsync<AuthenticatedDashboardViewModel, Model.User>(user);
             }
-        }
-
-        private async Task NavigateBasedOnRole(User user)
-        {
-            await (user switch
-            {
-                Model.Admin => _navigationService.NavigateToAsync<AdminDashboardViewModel>(),
-                Model.Supervisor => _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(user.Id),
-                Model.Student => _navigationService.NavigateToAsync<StudentDashboardViewModel>(),
-                _ => Task.CompletedTask
-            });
         }
     }
 }

@@ -4,7 +4,7 @@ using MentoringApp.Service;
 using MentoringApp.ViewModel;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelPage;
-using MentoringApp.ViewModel.ViewModelPage.Auth;
+using MentoringApp.ViewModel.ViewModelPage.User;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;

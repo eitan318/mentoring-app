@@ -2,23 +2,31 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     
                     xmlns:adminv="clr-namespace:MentoringApp.View.Admin"
-                    xmlns:authv="clr-namespace:MentoringApp.View.Auth"
+                    xmlns:userv="clr-namespace:MentoringApp.View.User"
                     xmlns:supervisorv="clr-namespace:MentoringApp.View.Supervisor"
                     xmlns:studentv="clr-namespace:MentoringApp.View.Student"
 
                     xmlns:adminvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Admin;assembly=MentoringApp.ViewModel"
-                    xmlns:authvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Auth;assembly=MentoringApp.ViewModel"
+                    xmlns:uservm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.User;assembly=MentoringApp.ViewModel"
                     xmlns:supervisorvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Supervisor;assembly=MentoringApp.ViewModel"
                     xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Student;assembly=MentoringApp.ViewModel"
                     
                     >
 
-    <DataTemplate DataType="{x:Type authvm:LoginViewModel}">
-        <authv:LoginView/>
+    <DataTemplate DataType="{x:Type uservm:LoginViewModel}">
+        <userv:LoginView/>
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type authvm:RegistrationViewModel}">
-        <authv:RegistrationView/>
+    <DataTemplate DataType="{x:Type uservm:RegistrationViewModel}">
+        <userv:RegistrationView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type uservm:ProfileViewModel}">
+        <userv:ProfileView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type uservm:AuthenticatedDashboardViewModel}">
+        <userv:AuthenticatedDashboardView/>
     </DataTemplate>
     
     <DataTemplate DataType="{x:Type adminvm:AdminDashboardViewModel}">

@@ -13,6 +13,9 @@ namespace MentoringApp.ViewModel.IService
         Task NavigateToAsync<TViewModel>()
             where TViewModel : class, INavigatable;
 
+
+        IDisposable UseContext(Action<INavigatable> contextSetter);
+
         public Task GoBackAsync();
     }
 

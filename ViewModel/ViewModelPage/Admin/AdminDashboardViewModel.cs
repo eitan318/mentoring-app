@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.Auth;
+using MentoringApp.ViewModel.ViewModelPage.User;
 using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -39,6 +39,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [RelayCommand] private async Task RegisterUsers() => await _navigationService.NavigateToAsync<AdminRegisterViewModel>();
         [RelayCommand] private async Task Logout() => await _navigationService.NavigateToAsync<LoginViewModel>();
 
+        [RelayCommand] private async Task ViewProfile() => await _navigationService.NavigateToAsync<ProfileViewModel>();
         [RelayCommand] private async Task ViewAllSupervisors() => await _navigationService.NavigateToAsync<AllSupervisorsViewModel>();
         [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
     }

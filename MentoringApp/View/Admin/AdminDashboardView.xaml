@@ -8,6 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <StackPanel>
+            <Button Content="ViewProfile"  Command="{Binding ViewProfileCommand}"/>
 
             <Button Content="ManagePairs"  Command="{Binding ManagePairsCommand}"/>
             <Button Content="Register users"  Command="{Binding RegisterUsersCommand}"/>

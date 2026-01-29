@@ -19,10 +19,8 @@ namespace MentoringApp.Model
         public required string NationalId { get; set; }
         public VerificationCode? CurrentVerificationCode { get; set; }
 
-        // Empty Constructor for frameworks/serializers
         protected User() { }
 
-        // Dummy Constructor for testing
         [SetsRequiredMembers]
         protected User(string dummyName)
         {

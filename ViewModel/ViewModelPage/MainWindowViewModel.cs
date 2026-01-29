@@ -1,40 +1,26 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.ViewModel.IService;
-using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.Auth;
+using MentoringApp.ViewModel.ViewModelPage.User;
 
-
-namespace MentoringApp.ViewModel.ViewModelPage
+public partial class MainWindowViewModel : ObservableObject, INavigatable
 {
-    public class MainWindowViewModel : ObservableObject, INavigatable
+    private readonly INavigationService _navigationService;
+    private readonly IDisposable _navContext;
+
+    [ObservableProperty] private INavigatable _activeSubPage;
+
+    public MainWindowViewModel(INavigationService navigationService)
     {
-        private readonly NavigationStore _navigationStore;
-        private readonly INavigationService _navigationService;
+        _navigationService = navigationService;
 
-        public MainWindowViewModel(
-            NavigationStore navigationStore,
-            INavigationService navigationService)
-        {
-            _navigationStore = navigationStore;
-            _navigationService = navigationService;
-
-            // Bind event handlers
-            _navigationStore.CurrentViewModelChanged += OnCurrentViewModelChanged;
-            _navigationService.NavigateToAsync<LoginViewModel>();
-        }
-
-        public INavigatable CurrentViewModel => _navigationStore.CurrentViewModel;
-
-        private void OnCurrentViewModelChanged()
-        {
-            OnPropertyChanged(nameof(CurrentViewModel));
-        }
-
-        public void OnWindowClosed()
-        {
-            // Unsubscribe event handlers to prevent memory leaks
-            _navigationStore.CurrentViewModelChanged -= OnCurrentViewModelChanged;
-        }
+        _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
+        _ = _navigationService.NavigateToAsync<LoginViewModel>();
     }
+
+    public void OnWindowClosed()
+    {
+        _navContext?.Dispose(); 
+    }
+
 }

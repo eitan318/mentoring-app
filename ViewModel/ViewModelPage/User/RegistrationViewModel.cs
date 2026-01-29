@@ -7,9 +7,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Auth
+namespace MentoringApp.ViewModel.ViewModelPage.User 
 {
-    public partial class RegistrationViewModel : ObservableValidator, INavigatable<bool>, ICloseable
+    public partial class RegistrationViewModel : ObservableObject, INavigatable<bool>, ICloseable
     {
         private readonly AuthService _authService;
         public event Action? RequestClose;
@@ -19,18 +19,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.Auth
         [ObservableProperty] private ObservableCollection<Grade> _grades = [];
 
         [ObservableProperty]
-        [NotifyDataErrorInfo]
-        [Range(1, int.MaxValue, ErrorMessage = "Please select a grade")]
         private Grade _selectedGrade = new Grade("hello");
 
         [ObservableProperty]
-        [NotifyDataErrorInfo]
-        [Range(1, int.MaxValue, ErrorMessage = "Please select a subject to teach")]
         private int _subjectToTeach = -1;
 
         [ObservableProperty]
-        [NotifyDataErrorInfo]
-        [Range(1, int.MaxValue, ErrorMessage = "Please select a subject to learn")]
         private int _subjectToLearn = -1;
 
         public RegistrationViewModel(AuthService authService)
@@ -78,7 +72,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Auth
         }
         partial void OnIsMentorChanged(bool value) => ValidateProperty(SubjectToTeach, nameof(SubjectToTeach));
 
-        private User CreateUserFromState()
+        private Model.User CreateUserFromState()
         {
             if (SupervisorOrStudentIsSupervisor)
             {
@@ -92,7 +86,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Auth
             return student;
         }
 
-        private void HandleServerResult(Result<User> result)
+        private void HandleServerResult(Result<Model.User> result)
         {
             if (result.ValidationErrors != null && result.ValidationErrors.Any())
             {

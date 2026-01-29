@@ -80,11 +80,9 @@ namespace MentoringApp.Service
 
         public async Task<Result<User>> Register(User user)
         {
-            // Use the FluentValidator you created
             var validationResult = await _userValidator.ValidateAsync(user);
             if (!validationResult.IsValid)
             {
-                // Grouping by property to ensure only one err per property (not putting duplicated keys)
                 var errors = validationResult.Errors
                     .GroupBy(e => e.PropertyName)
                     .ToDictionary(

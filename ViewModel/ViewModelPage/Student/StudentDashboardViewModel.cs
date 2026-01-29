@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.Auth;
+using MentoringApp.ViewModel.ViewModelPage.User;
 using System.Collections.ObjectModel;
 
 
@@ -48,17 +48,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             _navigationService = navigationService;
         }
 
-        [RelayCommand]
-        private void MessageCounterpart()
-        {
-
-        }
-
-        [RelayCommand]
-        private async Task ScheduleMeeting()
-        {
-
-        }
     }
 
     public partial class MenteeDashboardViewModel : PairMemberDashboardViewModel
