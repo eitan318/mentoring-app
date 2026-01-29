@@ -14,7 +14,6 @@ public partial class MainWindowViewModel : ObservableObject, INavigatable
     {
         _navigationService = navigationService;
 
-        _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
         _ = _navigationService.NavigateToAsync<LoginViewModel>();
     }
 

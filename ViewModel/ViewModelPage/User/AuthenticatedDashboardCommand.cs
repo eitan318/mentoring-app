@@ -11,7 +11,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private IDisposable _navContext;
         private readonly INavigationService _navigationService;
 
-    [ObservableProperty] private INavigatable _;
+        [ObservableProperty] private INavigatable _activeSubPage;
 
         public AuthenticatedDashboardViewModel(INavigationService navigationService)
         {

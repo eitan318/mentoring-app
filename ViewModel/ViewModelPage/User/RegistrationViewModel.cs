@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MentoringApp.ViewModel.ViewModelPage.User 
 {
-    public partial class RegistrationViewModel : ObservableObject, INavigatable<bool>, ICloseable
+    public partial class RegistrationViewModel : ObservableValidator, INavigatable<bool>, ICloseable
     {
         private readonly AuthService _authService;
         public event Action? RequestClose;
@@ -37,7 +37,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private bool _isMentee;
         [ObservableProperty] private bool _supervisorOrStudentIsSupervisor;
         [ObservableProperty] private string _errorMessage = "";
-        [ObservableProperty][Required] private string _nationalId = "";
+        [ObservableProperty] [Required] private string _nationalId = "";
 
         [ObservableProperty]
         [Required(ErrorMessage = "Email is required")]
