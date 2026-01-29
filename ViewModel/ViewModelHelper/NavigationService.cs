@@ -9,6 +9,7 @@ public class NavigationService : INavigationService
     private readonly Stack<Action<INavigatable>> _contextStack = new();
     private readonly Stack<NavigationStore> _storeStack = new();
 
+
     public NavigationService(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -60,14 +61,19 @@ public class NavigationService : INavigationService
         var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
         await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync(parameter));
     }
+    public bool CanGoBack() => _storeStack.TryPeek(out var store) && store.CanGoBack();
 
-    public Task GoBackAsync()
+    public async Task GoBackAsync()
     {
-        if (_storeStack.TryPeek(out var store))
+        if (_storeStack.TryPeek(out var store) && store.CanGoBack())
         {
+            if (store.CurrentViewModel != null)
+            {
+                await store.CurrentViewModel.OnNavigatedFromAsync();
+            }
+
             store.GoBack();
         }
-        return Task.CompletedTask;
     }
     private class ContextReliever : IDisposable
     {

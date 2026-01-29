@@ -41,7 +41,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             };
         }
 
-        [RelayCommand] private async Task Back() => await _navigationService.GoBackAsync();
 
         [RelayCommand]
         private async Task InspectSupervisor(SupervisorSummary chosenSummary)

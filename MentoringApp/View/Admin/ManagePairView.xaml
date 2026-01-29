@@ -12,8 +12,6 @@
             Command="{Binding CreatePairCommand}" 
             Margin="5"/>
 
-            <Button Content="Back" Command="{Binding BackCommand}"/>
-
             <ListView Grid.Row="1" ItemsSource="{Binding PairList}" Margin="5">
                 <ListView.ItemTemplate>
                     <DataTemplate>

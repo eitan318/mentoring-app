@@ -30,8 +30,6 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <Button Content="Back" Command="{Binding BackCommand}"/>
-
         </StackPanel>
     </Grid>
 </UserControl>

@@ -30,8 +30,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             _navigationService = navigationService;
         }
 
-        [RelayCommand] private async Task Back() => await _navigationService.GoBackAsync();
-
 
         [RelayCommand]
         private void RegisterFromFile()

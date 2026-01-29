@@ -31,7 +31,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             Pairs.Add(new MenteeDashboardViewModel(1, _navigationService));
         }
 
-        [RelayCommand] private async Task Logout() => await _navigationService.NavigateToAsync<LoginViewModel>();
     }
 
     public abstract partial class PairMemberDashboardViewModel : ObservableObject

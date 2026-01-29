@@ -13,10 +13,6 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <Button Content="Logout" Command="{Binding LogoutCommand}" HorizontalAlignment="Left"/>
-
-            <Button Content="ViewProfile"  Command="{Binding ViewProfileCommand}"/>
-
             <ListBox ItemsSource="{Binding Pairs}" 
                      SelectedItem="{Binding SelectedPair}">
                 <ListBox.ItemsPanel>

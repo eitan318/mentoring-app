@@ -16,7 +16,8 @@ namespace MentoringApp.ViewModel.IService
 
         IDisposable UseContext(Action<INavigatable> contextSetter);
 
-        public Task GoBackAsync();
+        Task GoBackAsync();
+        bool CanGoBack();
     }
 
 }

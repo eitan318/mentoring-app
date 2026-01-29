@@ -10,6 +10,7 @@ public partial class MainWindowViewModel : ObservableObject, INavigatable
 
     [ObservableProperty] private INavigatable _currentViewModel;
 
+
     public MainWindowViewModel(INavigationService navigationService)
     {
         _navigationService = navigationService;

@@ -53,9 +53,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             });
         }
 
-        [RelayCommand] private async Task Back() => await _navigationService.GoBackAsync();
-
-
         public virtual async Task OnNavigatedToAsync(int supervisorId)
         {
             await LoadSupervisorDataAsync(supervisorId);

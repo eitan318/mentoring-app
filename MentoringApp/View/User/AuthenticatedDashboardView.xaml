@@ -7,25 +7,16 @@
              mc:Ignorable="d" 
              >
         <DockPanel>
-            <Grid DockPanel.Dock="Top" Background="#F5F5F5" Height="40">
+        <Grid DockPanel.Dock="Top" Background="#F5F5F5" Height="40">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="MENTOR APP" VerticalAlignment="Center" Margin="15,0" FontWeight="Bold"/>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="{Binding CurrentUser.UserName}" 
-                        Padding="10,0"
-                        Background="Transparent" 
-                        BorderThickness="0">
-                        <Button.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Edit Profile" Command="{Binding NavigateProfileCommand}"/>
-                                <Separator/>
-                                <MenuItem Header="Logout" Command="{Binding LogoutCommand}"/>
-                            </ContextMenu>
-                        </Button.ContextMenu>
-                    </Button>
+                <Button Content="{Binding CurrentUser.UserName}" Command="{Binding NavigateProfileCommand}" Visibility="{Binding IsProfileButtonVisible, Converter={StaticResource BoolToVis}}"/>
+                <Button Content="logout" Command="{Binding LogoutCommand}"/>
+                <Button Content="Back" Command="{Binding BackCommand}" Visibility="{Binding IsBackVisible, Converter={StaticResource BoolToVis}}"/>
                 </StackPanel>
             </Grid>
 
-            <ContentControl Content="{Binding ActiveSubPage}" />
-        </DockPanel>
+        <ContentControl Content="{Binding ActiveSubPage}" />
+    </DockPanel>
+                
     </UserControl>

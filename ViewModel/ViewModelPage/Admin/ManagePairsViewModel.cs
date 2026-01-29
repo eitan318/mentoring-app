@@ -24,7 +24,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             PairList.Add(new Pair());
             PairList.Add(new Pair());
         }
-        [RelayCommand] private async Task Back() => await _navigationService.GoBackAsync();
 
         [RelayCommand]
         private void CreatePair()

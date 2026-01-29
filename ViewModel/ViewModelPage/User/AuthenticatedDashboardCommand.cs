@@ -1,40 +1,67 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.Admin;
+using MentoringApp.ViewModel.ViewModelPage.Student;
 using MentoringApp.ViewModel.ViewModelPage.Supervisor;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace MentoringApp.ViewModel.ViewModelPage.User
 {
-    public partial class AuthenticatedDashboardViewModel : ObservableObject, INavigatable<Model.User>
+    public partial class AuthenticatedDashboardViewModel : ObservableObject, INavigatable
     {
         private IDisposable _navContext;
         private readonly INavigationService _navigationService;
+        private readonly UserStore _userStore;
 
-        [ObservableProperty] private INavigatable _activeSubPage;
-
-        public AuthenticatedDashboardViewModel(INavigationService navigationService)
+        public AuthenticatedDashboardViewModel(UserStore userStore, INavigationService navigationService)
         {
+            _userStore = userStore;
             _navigationService = navigationService;
         }
 
-        public async Task OnNavigatedToAsync(Model.User user)
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsBackVisible))]
+        [NotifyPropertyChangedFor(nameof(IsProfileButtonVisible))]
+        private INavigatable? _activeSubPage;
+
+        // Returns true only if we are NOT currently on the Profile page
+        public bool IsProfileButtonVisible => ActiveSubPage is not ProfileViewModel;
+        public bool IsBackVisible => _navigationService.CanGoBack();
+
+        [ObservableProperty] private Model.User? _currentUser;
+
+        [RelayCommand]
+        public async Task Back()
         {
+            await _navigationService.GoBackAsync();
+            OnPropertyChanged(nameof(IsBackVisible));
+        }
+
+        public async Task OnNavigatedToAsync()
+        {
+            CurrentUser = _userStore.User;
             _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
-            await (user switch
+            await (CurrentUser switch
             {
                 Model.Admin => _navigationService.NavigateToAsync<AdminDashboardViewModel>(),
-                Model.Supervisor => _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(user.Id),
-                Model.Student => _navigationService.NavigateToAsync<SupervisorDashboardViewModel>(),
+                Model.Supervisor => _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id),
+                Model.Student => _navigationService.NavigateToAsync<StudentDashboardViewModel>(),
                 _ => Task.CompletedTask
             });
 
         }
 
-        public async Task OnNavigatedFromAsync()
+        [RelayCommand] private void NavigateProfile()
+        {
+            _navigationService.NavigateToAsync<ProfileViewModel>();
+        }
+        [RelayCommand] private void Logout()
         {
             _navContext?.Dispose();
-            await Task.CompletedTask;
+            _navigationService.NavigateToAsync<LoginViewModel>();
         }
     }
 }

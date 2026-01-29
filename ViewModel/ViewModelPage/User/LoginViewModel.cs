@@ -84,7 +84,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             if (user != null)
             {
                 _userStore.User = user;
-                await _navigationService.NavigateToAsync<AuthenticatedDashboardViewModel, Model.User>(user);
+                await _navigationService.NavigateToAsync<AuthenticatedDashboardViewModel>();
             }
         }
     }

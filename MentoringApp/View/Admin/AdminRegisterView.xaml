@@ -12,7 +12,6 @@
             <Button Content="Register Supervisor" Command="{Binding RegisterSupervisorCommand}"/>
             <Button Content="Register Student" Command="{Binding RegisterStudentCommand}"/>
             <Button Content="Register from a File"  Command="{Binding RegisterFromFileCommand}"/>
-            <Button Content="Back"  Command="{Binding BackCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>
