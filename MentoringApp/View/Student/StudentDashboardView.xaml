@@ -22,7 +22,21 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Counterpart.Name}" Margin="5"/>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                <Ellipse Fill="#E0E0E0" Stroke="Gray" StrokeThickness="1"/>
+                                <TextBlock Text="..." 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           Foreground="#757575"/>
+                            </Grid>
+
+                            <TextBlock Text="{Binding Counterpart.Name}" 
+                       VerticalAlignment="Center" 
+                       FontSize="14"/>
+                        </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

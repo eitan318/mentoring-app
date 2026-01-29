@@ -23,6 +23,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             _navigationService = navigationService;
             Pairs = [];
             LoadData();
+            SelectedPair = Pairs[0];
         }
 
         private void LoadData()
