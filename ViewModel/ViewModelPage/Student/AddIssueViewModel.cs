@@ -22,8 +22,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [MinLength(5, ErrorMessage = "Description is too short.")]
         private string _issueDescription = string.Empty;
 
-        // The result that the MentorViewModel will consume
-        public Issue? Result { get; private set; }
 
         public event Action? RequestClose;
 
@@ -48,11 +46,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             if (HasErrors || SelectedIssueCategory == null)
                 return;
 
-            Result = new Issue 
-            { 
+            Issue issue = new Issue
+            {
                 Description = IssueDescription,
                 Category = SelectedIssueCategory,
-                CreationDate = DateTime.Now
+                CreationDate = DateTime.Now,
+                Id = -1
             };
 
             RequestClose?.Invoke();

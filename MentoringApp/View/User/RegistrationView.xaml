@@ -1,51 +1,70 @@
-﻿<UserControl x:Class="MentoringApp.View.User.RegistrationView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model">
+﻿<UserControl
+    x:Class="MentoringApp.View.User.RegistrationView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model">
 
     <Grid Margin="20">
         <StackPanel>
-            <TextBox Text="{Binding UserName}" Tag="Username" />
-            <TextBox Text="{Binding Email}" Tag="Email Address" />
-            <TextBox Text="{Binding NationalId}" Tag="National ID"/>
+            <TextBox Tag="Username" Text="{Binding UserName}" />
+            <TextBox Tag="Email Address" Text="{Binding Email}" />
+            <TextBox Tag="National ID" Text="{Binding NationalId}" />
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="Supervisor data: no data" Margin="0,5" Foreground="Gray"/>
+                <TextBlock
+                    Margin="0,5"
+                    Foreground="Gray"
+                    Text="Supervisor data: no data" />
             </StackPanel>
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
                 <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
-                    <ComboBox ItemsSource="{Binding Grades}"
-                      SelectedValue="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                      SelectedValuePath="Id"
-                      DisplayMemberPath="Name"
-                      Tag="Grade (e.g. 10)" />
+                    <ComboBox
+                        DisplayMemberPath="Name"
+                        ItemsSource="{Binding Grades}"
+                        SelectedValue="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                        SelectedValuePath="Id"
+                        Tag="Grade (e.g. 10)" />
                 </StackPanel>
-                <CheckBox Content="Is Mentor" IsChecked="{Binding IsMentor}" Margin="0,5"/>
-                <CheckBox Content="Is Mentee" IsChecked="{Binding IsMentee}" Margin="0,5"/>
+                <CheckBox
+                    Margin="0,5"
+                    Content="Is Mentor"
+                    IsChecked="{Binding IsMentor}" />
+                <CheckBox
+                    Margin="0,5"
+                    Content="Is Mentee"
+                    IsChecked="{Binding IsMentee}" />
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
-                <ComboBox ItemsSource="{Binding Subjects}"
-                      SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                      SelectedValuePath="Id"
-                      DisplayMemberPath="Name"
-                      Tag="Subject to Teach" />
+                <ComboBox
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding Subjects}"
+                    SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                    SelectedValuePath="Id"
+                    Tag="Subject to Teach" />
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
-                <ComboBox ItemsSource="{Binding Subjects}"
+                <ComboBox
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding Subjects}"
                     SelectedValue="{Binding SubjectToLearn, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                     SelectedValuePath="Id"
-                    DisplayMemberPath="Name"
                     Tag="Subject to Learn" />
             </StackPanel>
 
-            <Button Content="Submit Registration" 
-            Command="{Binding RegisterCommand}" 
-            Margin="0,10,0,0" Height="35"/>
+            <Button
+                Height="35"
+                Margin="0,10,0,0"
+                Command="{Binding RegisterCommand}"
+                Content="Submit Registration" />
 
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,5"/>
+            <TextBlock
+                Margin="0,5"
+                Foreground="Red"
+                Text="{Binding ErrorMessage}"
+                TextWrapping="Wrap" />
         </StackPanel>
     </Grid>
 </UserControl>

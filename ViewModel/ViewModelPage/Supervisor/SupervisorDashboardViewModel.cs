@@ -16,41 +16,31 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [ObservableProperty] private Model.Supervisor? _selectedSupervisor;
 
         public ObservableCollection<Pair> PairsSupervised { get; } = [];
-        public ObservableCollection<Issue> PendingIssues { get; } = [];
-        public ObservableCollection<Issue> ResolvedIssues { get; } = [];
+        public ObservableCollection<Issue> AllIssues { get; } = [];
 
         public SupervisorDashboardViewModel(INavigationService navigationService)
         {
             _navigationService = navigationService;
         }
 
+        [RelayCommand]
+        private async Task SelectIssue(Issue issue)
+        {
+            await _navigationService.NavigateToAsync<IssueViewModel, int>(issue.Id);
+        }
+
         private async Task LoadSupervisorDataAsync(int supervisorId)
         {
             PairsSupervised.Clear();
-            PendingIssues.Clear();
-            ResolvedIssues.Clear();
-
-            await Task.Delay(500);
+            AllIssues.Clear();
 
             PairsSupervised.Add(new Pair { Mentor = new Model.Student("Name1")});
             PairsSupervised.Add(new Pair { Mentee = new Model.Student("Name2")});
 
-            PendingIssues.Add(new Issue 
-            { 
-                Description = "Inconsistent meeting schedule", 
-                Category = new IssueCategory("Sigma")
-            });
-            PendingIssues.Add(new Issue 
-            { 
-                Description = "Communication barrier reported by mentee", 
-                Category = new IssueCategory("Sigma")
-            });
-
-            ResolvedIssues.Add(new Issue 
-            { 
-                Description = "Initial goal setting completed", 
-                Category = new IssueCategory("Sigma") 
-            });
+            AllIssues.Add(new Issue("Inconsistent meeting schedulee", new IssueCategory("Sigma"), true));
+            AllIssues.Add(new Issue("Communication barrier reported by mentee", new IssueCategory("Sigma"), true));
+            AllIssues.Add(new Issue("Communication barrier reported by mentee", new IssueCategory("Sigma"), false));
+            AllIssues.Add(new Issue("Communication barrier reported by mentee", new IssueCategory("Sigma"), false));
         }
 
         public virtual async Task OnNavigatedToAsync(int supervisorId)

@@ -1,5 +1,7 @@
 ﻿
+using MentoringApp.Model;
 using System.Windows.Controls;
+using System.Windows.Data;
 namespace MentoringApp.View.Supervisor
 {
     /// <summary>
@@ -11,5 +13,11 @@ namespace MentoringApp.View.Supervisor
         {
             InitializeComponent();
         }
+
+        private void FilterPending(object sender, FilterEventArgs e) => e.Accepted = e.Item is Issue issue && !issue.IsResolved;
+
+        private void FilterResolved(object sender, FilterEventArgs e) => e.Accepted = e.Item is Issue issue && issue.IsResolved;
+
     }
+
 }

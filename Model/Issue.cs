@@ -9,17 +9,21 @@ namespace MentoringApp.Model
 {
     public class Issue
     {
+        public required int Id { get; set; }
         public required string Description { get; set; }
         public required IssueCategory Category { get; set; } 
         public DateTime CreationDate { get; set; }
+        public bool IsResolved { get; set; }
 
         public Issue() { }
 
         [SetsRequiredMembers]
-        public Issue(string desc, IssueCategory category)
+        public Issue(string desc, IssueCategory category, bool isResulved)
         {
             Description = desc;
             Category = category;
+            IsResolved = isResulved;
+            Id = -1;
         }
     }
     public class IssueCategory
