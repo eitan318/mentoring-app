@@ -28,7 +28,11 @@
     <DataTemplate DataType="{x:Type uservm:AuthenticatedDashboardViewModel}">
         <userv:AuthenticatedDashboardView/>
     </DataTemplate>
-    
+
+    <DataTemplate DataType="{x:Type uservm:IssueViewModel}">
+        <userv:IssueView/>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type adminvm:AdminDashboardViewModel}">
         <adminv:AdminDashboardView/>
     </DataTemplate>

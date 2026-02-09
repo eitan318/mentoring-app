@@ -24,9 +24,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         }
 
         [RelayCommand]
-        private async Task SelectIssue(Issue issue)
+        private async Task SelectIssue(Issue? issue)
         {
-            await _navigationService.NavigateToAsync<IssueViewModel, int>(issue.Id);
+            if (issue != null)
+            {
+                await _navigationService.NavigateToAsync<IssueViewModel, int>(issue.Id);
+            }
         }
 
         private async Task LoadSupervisorDataAsync(int supervisorId)

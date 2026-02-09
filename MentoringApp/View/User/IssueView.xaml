@@ -54,7 +54,7 @@
                     Background="DarkGreen"
                     Content="Mark as Resolved"
                     Foreground="White"
-                    Visibility="{Binding CurrentIssue.IsResolved, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                    Visibility="{Binding CurrentIssue.IsResolved, Converter={StaticResource InverseBoolToVis}}" />
             </StackPanel>
         </StackPanel>
     </Grid>

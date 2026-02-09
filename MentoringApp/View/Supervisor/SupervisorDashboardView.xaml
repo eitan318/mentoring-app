@@ -4,24 +4,43 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="600" d:DesignWidth="800" mc:Ignorable="d">
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
 
     <UserControl.Resources>
-        <CollectionViewSource x:Key="PendingFilter" 
-                      Source="{Binding AllIssues}" 
-                      Filter="FilterPending" />
+        <CollectionViewSource
+            x:Key="PendingFilter"
+            Filter="FilterPending"
+            Source="{Binding AllIssues}" />
 
-        <CollectionViewSource x:Key="ResolvedFilter" 
-                      Source="{Binding AllIssues}" 
-                      Filter="FilterResolved" />
+        <CollectionViewSource
+            x:Key="ResolvedFilter"
+            Filter="FilterResolved"
+            Source="{Binding AllIssues}" />
 
         <DataTemplate x:Key="IssueItemTemplate">
             <StackPanel Margin="5">
-                <TextBlock x:Name="Desc" Text="{Binding Description}" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
-                <StackPanel Orientation="Horizontal" Opacity="0.7">
-                    <TextBlock Text="{Binding Category.Name}" FontStyle="Italic" Margin="0,0,10,0"/>
-                    <TextBlock x:Name="Stat" Text="Pending" FontSize="10" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding CreationDate, StringFormat='{} | Created: {0:d}'}" FontSize="10" VerticalAlignment="Center"/>
+                <TextBlock
+                    x:Name="Desc"
+                    FontSize="14"
+                    FontWeight="Medium"
+                    Text="{Binding Description}"
+                    TextWrapping="Wrap" />
+                <StackPanel Opacity="0.7" Orientation="Horizontal">
+                    <TextBlock
+                        Margin="0,0,10,0"
+                        FontStyle="Italic"
+                        Text="{Binding Category.Name}" />
+                    <TextBlock
+                        x:Name="Stat"
+                        VerticalAlignment="Center"
+                        FontSize="10"
+                        Text="Pending" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="10"
+                        Text="{Binding CreationDate, StringFormat='{} | Created: {0:d}'}" />
                 </StackPanel>
             </StackPanel>
             <DataTemplate.Triggers>
@@ -33,6 +52,23 @@
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
+
+        <Style x:Key="IssueListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="OnIssueItemClick" />
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F0F0F0" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E0E0E0" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="20">
@@ -44,46 +80,65 @@
         </Grid.RowDefinitions>
 
         <StackPanel Margin="0,0,0,15">
-            <TextBlock FontSize="28" FontWeight="Bold" Text="{Binding SelectedSupervisor.UserName}" />
-            <TextBlock Text="{Binding PairsSupervised.Count, StringFormat='Total Pairs Supervised: {0}'}" FontWeight="Medium" />
+            <TextBlock
+                FontSize="28"
+                FontWeight="Bold"
+                Text="{Binding SelectedSupervisor.UserName}" />
+            <TextBlock FontWeight="Medium" Text="{Binding PairsSupervised.Count, StringFormat='Total Pairs Supervised: {0}'}" />
         </StackPanel>
 
         <UniformGrid Grid.Row="1" Columns="2">
             <DockPanel Margin="0,0,5,0">
-                <TextBlock DockPanel.Dock="Top" Text="Pending Issues" FontWeight="Bold" Foreground="DarkRed" Margin="0,0,0,5"/>
-                <ListView ItemsSource="{Binding Source={StaticResource PendingFilter}}" 
-                          ItemTemplate="{StaticResource IssueItemTemplate}"
-                          SelectedItem="{Binding SelectedIssue}">
-                    <ListView.InputBindings>
-                        <MouseBinding Gesture="LeftClick" Command="{Binding SelectIssueCommand}" CommandParameter="{Binding SelectedIssue}" />
-                    </ListView.InputBindings>
-                </ListView>
+                <TextBlock
+                    Margin="0,0,0,5"
+                    DockPanel.Dock="Top"
+                    FontWeight="Bold"
+                    Foreground="DarkRed"
+                    Text="Pending Issues" />
+                <ListView
+                    ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
+                    ItemTemplate="{StaticResource IssueItemTemplate}"
+                    ItemsSource="{Binding Source={StaticResource PendingFilter}}" />
+
+
+
             </DockPanel>
 
             <DockPanel Margin="5,0,0,0">
-                <TextBlock DockPanel.Dock="Top" Text="Resolved Issues" FontWeight="Bold" Foreground="DarkGreen" Margin="0,0,0,5"/>
-                <ListView ItemsSource="{Binding Source={StaticResource ResolvedFilter}}" 
-                          ItemTemplate="{StaticResource IssueItemTemplate}"
-                          SelectedItem="{Binding SelectedIssue}">
-                    <ListView.InputBindings>
-                        <MouseBinding Gesture="LeftClick" Command="{Binding SelectIssueCommand}" CommandParameter="{Binding SelectedIssue}" />
-                    </ListView.InputBindings>
-                </ListView>
+                <TextBlock
+                    Margin="0,0,0,5"
+                    DockPanel.Dock="Top"
+                    FontWeight="Bold"
+                    Foreground="DarkGreen"
+                    Text="Resolved Issues" />
+
+                <ListView
+                    ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
+                    ItemTemplate="{StaticResource IssueItemTemplate}"
+                    ItemsSource="{Binding Source={StaticResource ResolvedFilter}}" />
             </DockPanel>
         </UniformGrid>
 
-        <TextBlock Grid.Row="2" Text="Managed Mentoring Pairs" FontSize="18" FontWeight="SemiBold" Margin="0,15,0,5" />
+        <TextBlock
+            Grid.Row="2"
+            Margin="0,15,0,5"
+            FontSize="18"
+            FontWeight="SemiBold"
+            Text="Managed Mentoring Pairs" />
 
         <ListView Grid.Row="3" ItemsSource="{Binding PairsSupervised}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <DockPanel LastChildFill="True" Margin="5">
-                        <Button DockPanel.Dock="Right" Content="Separate Pair" Padding="10,2"
-                                Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                CommandParameter="{Binding}" />
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <DockPanel Margin="5" LastChildFill="True">
+                        <Button
+                            Padding="10,2"
+                            Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                            CommandParameter="{Binding}"
+                            Content="Separate Pair"
+                            DockPanel.Dock="Right" />
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <TextBlock FontWeight="Bold" Text="Mentor: " />
-                            <TextBlock Text="{Binding Mentor.UserName}" Margin="0,0,15,0" />
+                            <TextBlock Margin="0,0,15,0" Text="{Binding Mentor.UserName}" />
                             <TextBlock FontWeight="Bold" Text="Mentee: " />
                             <TextBlock Text="{Binding Mentee.UserName}" />
                         </StackPanel>
