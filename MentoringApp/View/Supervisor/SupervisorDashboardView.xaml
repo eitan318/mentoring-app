@@ -130,12 +130,6 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <DockPanel Margin="5" LastChildFill="True">
-                        <Button
-                            Padding="10,2"
-                            Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                            CommandParameter="{Binding}"
-                            Content="Separate Pair"
-                            DockPanel.Dock="Right" />
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <TextBlock FontWeight="Bold" Text="Mentor: " />
                             <TextBlock Margin="0,0,15,0" Text="{Binding Mentor.UserName}" />

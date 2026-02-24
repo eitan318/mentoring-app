@@ -5,9 +5,9 @@ namespace MentoringApp.View.User
     /// <summary>
     /// Interaction logic for ProfileView.xaml
     /// </summary>
-    public partial class ProfileView : UserControl
+    public partial class MyProfileView : UserControl
     {
-        public ProfileView()
+        public MyProfileView()
         {
             InitializeComponent();
         }

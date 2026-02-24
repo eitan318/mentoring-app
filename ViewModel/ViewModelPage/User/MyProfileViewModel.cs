@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MentoringApp.ViewModel.ViewModelPage.User
 {
-    public partial class ProfileViewModel : ObservableValidator, INavigatable
+    public partial class MyProfileViewModel : ObservableValidator, INavigatable
     {
         private readonly AuthService _authService;
         private readonly UserStore _userStore;
@@ -44,7 +44,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private int _subjectToTeach = -1;
         [ObservableProperty] private int _subjectToLearn = -1;
 
-        public ProfileViewModel(UserStore userStore, AuthService authService)
+        public MyProfileViewModel(UserStore userStore, AuthService authService)
         {
             _userStore = userStore;
             _authService = authService;

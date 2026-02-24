@@ -13,74 +13,135 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
-            <ListBox ItemsSource="{Binding Pairs}" SelectedItem="{Binding SelectedPair}">
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Margin="5" Orientation="Horizontal">
-                            <Grid
-                                Width="40"
-                                Height="40"
-                                Margin="0,0,10,0">
-                                <Ellipse
-                                    Fill="#E0E0E0"
-                                    Stroke="Gray"
-                                    StrokeThickness="1" />
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    FontSize="18"
-                                    FontWeight="Bold"
-                                    Foreground="#757575"
-                                    Text="..." />
-                            </Grid>
-
+        <!-- Pair selector tabs -->
+        <ListBox Grid.Row="0" ItemsSource="{Binding Pairs}" SelectedItem="{Binding SelectedPair}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="5" Orientation="Horizontal">
+                        <Grid Width="36" Height="36" Margin="0,0,8,0">
+                            <Ellipse Fill="#E0E0E0" Stroke="Gray" StrokeThickness="1" />
                             <TextBlock
+                                HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontSize="14"
-                                Text="{Binding Counterpart.Name}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </StackPanel>
+                                FontSize="14" FontWeight="Bold" Foreground="#757575"
+                                Text="{Binding CounterpartRole}" />
+                        </Grid>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" Text="{Binding Counterpart.Name}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
-        <ContentControl Grid.Row="1" Content="{Binding SelectedPair}">
+        <!-- Dashboard panel -->
+        <ContentControl Grid.Row="1" Content="{Binding SelectedPair}" Margin="10">
             <ContentControl.Resources>
 
+                <!-- Mentor view: you are mentoring a mentee -->
                 <DataTemplate DataType="{x:Type studentvm:MentorDashboardViewModel}">
                     <DockPanel>
-                        <StackPanel DockPanel.Dock="Top">
-                            <TextBlock FontWeight="Bold" Text="{Binding Counterpart.UserName}" />
-                            <TextBlock Text="{Binding CounterpartRole}" />
-                            <ProgressBar Height="10" Value="{Binding MenteeProgress}" />
+                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                            <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding Counterpart.UserName}" />
+                            <TextBlock Foreground="Gray" Text="Your Mentee" />
+                            <TextBlock
+                                Margin="0,8,0,2"
+                                Foreground="#555"
+                                Text="{Binding MenteeProgress, StringFormat='Progress: {0:0}%'}" />
+                            <ProgressBar Height="12" Maximum="100" Value="{Binding MenteeProgress}" />
                         </StackPanel>
 
-                        <Button
-                            Command="{Binding AddIssueCommand}"
-                            Content="Add Issue"
-                            DockPanel.Dock="Bottom" />
+                        <UniformGrid DockPanel.Dock="Bottom" Columns="2" Margin="0,8,0,0">
+                            <Button Command="{Binding CreateReviewCommand}" Content="Write Meeting Review" Margin="0,0,4,0" Background="LightBlue" />
+                            <Button Command="{Binding IssueToSupervisorCommand}" Content="Report Issue" Margin="4,0,0,0" />
+                        </UniformGrid>
 
-                        <ListView ItemsSource="{Binding MyIssues}">
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Description}" />
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
+                        <ScrollViewer>
+                            <StackPanel>
+                                <TextBlock Margin="0,10,0,4" FontWeight="Bold" Foreground="#333" Text="Recent Meeting Reviews" />
+                                <ItemsControl ItemsSource="{Binding RecentReviews}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="4,6">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Content}" TextWrapping="Wrap" />
+                                                    <TextBlock
+                                                        Margin="0,2,0,0"
+                                                        FontSize="11"
+                                                        Foreground="#999"
+                                                        Text="{Binding Date, StringFormat='{}{0:MMM d, yyyy}'}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
                     </DockPanel>
                 </DataTemplate>
 
+                <!-- Mentee view: you are being mentored -->
                 <DataTemplate DataType="{x:Type studentvm:MenteeDashboardViewModel}">
-                    <StackPanel>
-                        <TextBlock FontWeight="Bold" Text="{Binding Counterpart.UserName}" />
-                        <TextBlock Text="{Binding CounterpartRole}" />
-                    </StackPanel>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                            <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding Counterpart.UserName}" />
+                            <TextBlock Foreground="#2E7D32" FontWeight="SemiBold"
+                                       Text="{Binding MentorSubject, StringFormat='Expert in: {0}'}" />
+                        </StackPanel>
+
+                        <Button DockPanel.Dock="Bottom" Margin="0,8,0,0"
+                                Command="{Binding IssueToSupervisorCommand}"
+                                Content="Raise Issue to Supervisor" />
+
+                        <ScrollViewer>
+                            <StackPanel>
+                                <TextBlock Margin="0,10,0,4" FontWeight="Bold" Foreground="#333" Text="Mentor's Meeting Feedback" />
+                                <ItemsControl ItemsSource="{Binding RecentReviews}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="4,6">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Content}" TextWrapping="Wrap" />
+                                                    <TextBlock
+                                                        Margin="0,2,0,0"
+                                                        FontSize="11"
+                                                        Foreground="#999"
+                                                        Text="{Binding Date, StringFormat='{}{0:MMM d, yyyy}'}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Margin="0,14,0,4" FontWeight="Bold" Foreground="#333" Text="My Active Issues" />
+                                <ItemsControl ItemsSource="{Binding MyIssues}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="4,5">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock
+                                                        Width="8" Height="8"
+                                                        Margin="0,3,8,0"
+                                                        VerticalAlignment="Top"
+                                                        Foreground="#E53935"
+                                                        Text="●" />
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                                                        <TextBlock
+                                                            FontSize="11" Foreground="#999"
+                                                            Text="{Binding Category.Name}" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
                 </DataTemplate>
 
             </ContentControl.Resources>

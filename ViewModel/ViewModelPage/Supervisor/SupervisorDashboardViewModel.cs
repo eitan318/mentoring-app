@@ -37,8 +37,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             PairsSupervised.Clear();
             AllIssues.Clear();
 
-            PairsSupervised.Add(new Pair { Mentor = new Model.Student("Name1")});
-            PairsSupervised.Add(new Pair { Mentee = new Model.Student("Name2")});
+            PairsSupervised.Add(new Pair());
+            PairsSupervised.Add(new Pair());
 
             AllIssues.Add(new Issue("Inconsistent meeting schedulee", new IssueCategory("Sigma"), true));
             AllIssues.Add(new Issue("Communication barrier reported by mentee", new IssueCategory("Sigma"), true));

@@ -36,7 +36,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             }
         }
 
-        [RelayCommand] private async Task RegisterUsers() => await _navigationService.NavigateToAsync<AdminRegisterViewModel>();
+        [RelayCommand] private async Task ManageUsers() => await _navigationService.NavigateToAsync<ManageUsersViewModel>();
         [RelayCommand] private async Task ViewAllSupervisors() => await _navigationService.NavigateToAsync<AllSupervisorsViewModel>();
         [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
     }

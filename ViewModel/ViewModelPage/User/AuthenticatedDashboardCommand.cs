@@ -28,7 +28,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private INavigatable? _activeSubPage;
 
         // Returns true only if we are NOT currently on the Profile page
-        public bool IsProfileButtonVisible => ActiveSubPage is not ProfileViewModel;
+        public bool IsProfileButtonVisible => ActiveSubPage is not MyProfileViewModel;
         public bool IsBackVisible => _navigationService.CanGoBack();
 
         [ObservableProperty] private Model.User? _currentUser;
@@ -56,7 +56,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
 
         [RelayCommand] private void NavigateProfile()
         {
-            _navigationService.NavigateToAsync<ProfileViewModel>();
+            _navigationService.NavigateToAsync<MyProfileViewModel>();
         }
         [RelayCommand] private void Logout()
         {

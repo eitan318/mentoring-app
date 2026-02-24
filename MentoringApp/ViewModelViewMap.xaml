@@ -21,8 +21,12 @@
         <userv:RegistrationView/>
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type uservm:ProfileViewModel}">
-        <userv:ProfileView/>
+    <DataTemplate DataType="{x:Type uservm:MyProfileViewModel}">
+        <userv:MyProfileView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type uservm:OtherProfileViewModel}">
+        <userv:OtherProfileView/>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type uservm:AuthenticatedDashboardViewModel}">
@@ -37,8 +41,8 @@
         <adminv:AdminDashboardView/>
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type adminvm:AdminRegisterViewModel}">
-        <adminv:AdminRegisterView/>
+    <DataTemplate DataType="{x:Type adminvm:ManageUsersViewModel}">
+        <adminv:ManageUsersView/>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type adminvm:ManagePairsViewModel}">

@@ -32,7 +32,7 @@ namespace MentoringApp.ViewModel
             services.AddTransient<SupervisorDashboardViewModel>();
             services.AddTransient<AllSupervisorsViewModel>();
             services.AddTransient<AddIssueViewModel>();
-            services.AddTransient<ProfileViewModel>();
+            services.AddTransient<MyProfileViewModel>();
 
             return services;
         }
