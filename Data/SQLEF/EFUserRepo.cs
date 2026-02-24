@@ -138,7 +138,7 @@ namespace MentoringApp.Data.SQLEF
 
         private User? MapToDomain(UserData userData)
         {
-            User user = null;
+            User? user = null;
 
             if (_context.Supervisors.Any(s => s.UserId == userData.Id))
             {
@@ -171,7 +171,7 @@ namespace MentoringApp.Data.SQLEF
                         UserName = userData.UserName,
                         Email = userData.Email,
                         NationalId = userData.NationalId,
-                        Grade = studentData.Grade
+                        Grade = new Grade("1")
                     };
 
                     var mentorData = _context.Mentors.FirstOrDefault(m => m.UserId == userData.Id);
@@ -211,7 +211,7 @@ namespace MentoringApp.Data.SQLEF
             switch (user)
             {
                 case Student student:
-                    _context.Students.Add(new UserStudentData { UserId = userId, Grade = student.Grade });
+                    _context.Students.Add(new UserStudentData { UserId = userId, GradeId = student.Grade.Id });
 
                     if (student.IsMentor)
                         _context.Mentors.Add(new UserMentorData { UserId = userId, SubjectToTeach = student.MentorProfile.SubjectToTeach });
@@ -235,7 +235,7 @@ namespace MentoringApp.Data.SQLEF
             if (user is Student student)
             {
                 var studentData = await _context.Students.FirstOrDefaultAsync(s => s.UserId == student.Id);
-                if (studentData != null) studentData.Grade = student.Grade;
+                if (studentData != null) studentData.GradeId = student.Grade.Id;
 
                 // Mentor
                 var mentorData = await _context.Mentors.FirstOrDefaultAsync(m => m.UserId == student.Id);

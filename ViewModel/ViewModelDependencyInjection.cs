@@ -1,6 +1,10 @@
-﻿using MentoringApp.ViewModel.Store;
-using MentoringApp.ViewModel.ViewModelHelper;
+﻿using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelPage;
+using MentoringApp.ViewModel.ViewModelPage.Admin;
+using MentoringApp.ViewModel.ViewModelPage.User;
+using MentoringApp.ViewModel.ViewModelPage.Student;
+using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -11,7 +15,6 @@ namespace MentoringApp.ViewModel
         public static IServiceCollection AddViewModels(this IServiceCollection services)
         {
             // Stores (Singletons because they hold state)
-            services.AddSingleton<NavigationStore>();
             services.AddSingleton<UserStore>();
 
             // Services
@@ -23,8 +26,13 @@ namespace MentoringApp.ViewModel
             services.AddTransient<LoginViewModel>();
             services.AddTransient<RegistrationViewModel>();
             services.AddTransient<AdminDashboardViewModel>();
+            services.AddTransient<StudentDashboardViewModel>();
+            services.AddTransient<ManagePairsViewModel>();
+            services.AddTransient<CreatePairViewModel>();
             services.AddTransient<SupervisorDashboardViewModel>();
-            services.AddTransient<StudentHomeViewModel>();
+            services.AddTransient<AllSupervisorsViewModel>();
+            services.AddTransient<AddIssueViewModel>();
+            services.AddTransient<MyProfileViewModel>();
 
             return services;
         }

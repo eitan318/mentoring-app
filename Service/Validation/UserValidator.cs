@@ -23,7 +23,7 @@ namespace MentoringApp.Service.Validation
 
             // --- Conditional Rules for Students ---
             // This only runs if the object being validated is a Student
-            RuleFor(user => (user as Student).Grade)
+            RuleFor(user => (user as Student).Grade.Num)
                 .InclusiveBetween(1, 12).WithMessage("Grade must be between 1 and 12.")
                 .When(user => user is Student);
 

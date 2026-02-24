@@ -2,8 +2,9 @@
 using MentoringApp.Model;
 using MentoringApp.Service;
 using MentoringApp.ViewModel;
-using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelPage;
+using MentoringApp.ViewModel.ViewModelPage.User;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -26,9 +27,14 @@ namespace MentoringApp
                 .Build();
 
             var services = new ServiceCollection();
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+            if (connectionString == null)
+            {
+                throw new Exception("No connection string provided in config");
+            }
 
             services.AddSingleton<IWindowService, WindowService>();
+            services.AddSingleton<IFileService, FileService>();
             services.AddSingleton<MainWindow>();
             services.AddViewModels();
             services.AddDataRepositories(connectionString);
@@ -36,7 +42,7 @@ namespace MentoringApp
 
             _serviceProvider = services.BuildServiceProvider();
         }
-        
+
         protected override void OnStartup(StartupEventArgs e)
         {
             bool recreateInitialDb = true;
@@ -50,7 +56,37 @@ namespace MentoringApp
                     dbInitializer.Recreate();
 
                     var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepo>();
-                    userRepo.CreateUser(new Admin { Id = 0, Email = "eitanamir09@gmail.com", NationalId = "0", UserName = "Admin" });
+                    userRepo.CreateUser(new Admin { Id = 0, Email = "eitanamir09@gmail.com", NationalId = "0", UserName = "Admin username" });
+                    userRepo.CreateUser(new Supervisor { Id = 1, Email = "eitanamir09@gmail.com", NationalId = "1", UserName = "Supervisor username" });
+                    userRepo.CreateUser(new Student
+                    {
+                        Id = 2,
+                        Email = "eitanamir09@gmail.com",
+                        NationalId = "2",
+                        UserName = "Mentor username 1",
+                        Grade = new Grade("10th"),
+                        MentorProfile = new MentorProfile { SubjectToTeach = -1 }
+                    });
+                    userRepo.CreateUser(new Student
+                    {
+                        Id = 3,
+                        Email = "eitanamir09@gmail.com",
+                        NationalId = "3",
+                        UserName = "Mentee username 2",
+                        Grade = new Grade("10th"),
+                        MenteeProfile = new MenteeProfile { SubjectToLearn = -1 }
+                    });
+
+                    userRepo.CreateUser(new Student
+                    {
+                        Id = 3,
+                        Email = "eitanamir09@gmail.com",
+                        NationalId = "4",
+                        UserName = "Mentee and mentro username 2",
+                        Grade = new Grade("10th"),
+                        MenteeProfile = new MenteeProfile { SubjectToLearn = -1 },
+                        MentorProfile = new MentorProfile { SubjectToTeach = -1 },
+                    });
                 }
             }
 
@@ -62,7 +98,7 @@ namespace MentoringApp
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             var mainVM = _serviceProvider.GetRequiredService<MainWindowViewModel>();
             mainWindow.DataContext = mainVM;
-            
+
             mainWindow.Show();
         }
     }

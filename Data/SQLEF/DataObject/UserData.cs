@@ -3,9 +3,9 @@
     internal class UserData
     {
         public int Id { get; set; }        
-        public string Email { get; set; }
-        public string UserName { get; set; }
-        public string NationalId { get; set; }
+        public required string Email { get; set; }
+        public required string UserName { get; set; }
+        public required string NationalId { get; set; }
     }
 
     internal class UserMenteeData
@@ -22,8 +22,8 @@
 
     internal class UserStudentData
     {
-        public int UserId { get; set; } // Id in user table
-        public int Grade { get; set; }
+        public int UserId { get; set; }
+        public int GradeId { get; set; }
     }
 
     internal class UserSupervisorData
@@ -39,7 +39,7 @@
     internal class VerificationCodeData
     {      
         public int UserId { get; set; }
-        public string Code { get; set; }
+        public required string Code { get; set; }
         public DateTime CreationDate { get; set; }
     }
 }

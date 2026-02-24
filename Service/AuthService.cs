@@ -42,17 +42,18 @@ namespace MentoringApp.Service
             return sent ? Result.Ok() : Result.Failure("Failed to send email. Please check your connection.");
         }
 
-        public Result<User> Login(string nationalId)
-        {
+        public async Task<Result<User>> LoginAsync(string nationalId)
+        { 
             if (string.IsNullOrWhiteSpace(nationalId))
                 return Result<User>.Failure("National ID cannot be empty.");
 
-            var user = _userRepository.LoadUserByNationalId(nationalId);
+            var user = await Task.Run(() => _userRepository.LoadUserByNationalId(nationalId));
             if (user == null)
                 return Result<User>.Failure("No user found with this National ID.");
 
             return Result<User>.Ok(user);
         }
+
 
         public async Task<Result> VerificationCodeValid(string verificationCodeInput)
         {
@@ -79,11 +80,9 @@ namespace MentoringApp.Service
 
         public async Task<Result<User>> Register(User user)
         {
-            // Use the FluentValidator you created
             var validationResult = await _userValidator.ValidateAsync(user);
             if (!validationResult.IsValid)
             {
-                // Grouping by property to ensure only one err per property (not putting duplicated keys)
                 var errors = validationResult.Errors
                     .GroupBy(e => e.PropertyName)
                     .ToDictionary(

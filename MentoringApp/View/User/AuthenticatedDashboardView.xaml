@@ -1,0 +1,35 @@
+﻿<UserControl
+    x:Class="MentoringApp.View.User.AuthenticatedDashboardView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MentoringApp.View.User"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <DockPanel>
+        <Grid
+            Height="40"
+            Background="#F5F5F5"
+            DockPanel.Dock="Top">
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                <TextBlock
+                    Margin="15,0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="MENTOR APP" />
+                <Button
+                    Command="{Binding NavigateProfileCommand}"
+                    Content="{Binding CurrentUser.UserName}"
+                    Visibility="{Binding IsProfileButtonVisible, Converter={StaticResource BoolToVis}}" />
+                <Button Command="{Binding LogoutCommand}" Content="logout" />
+                <Button
+                    Command="{Binding BackCommand}"
+                    Content="Back"
+                    Visibility="{Binding IsBackVisible, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
+        </Grid>
+
+        <ContentControl Content="{Binding ActiveSubPage}" />
+    </DockPanel>
+
+</UserControl>

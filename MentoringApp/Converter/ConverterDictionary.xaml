@@ -1,6 +1,7 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:conv="clr-namespace:MentoringApp.Converter">
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:MentoringApp.Converter">
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
+    <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
 </ResourceDictionary>

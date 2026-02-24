@@ -7,10 +7,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
-    <Window.Resources>
-
-    </Window.Resources>
-
     <Grid>
         <ContentControl Content="{Binding CurrentViewModel}"
                         HorizontalContentAlignment="Stretch"
