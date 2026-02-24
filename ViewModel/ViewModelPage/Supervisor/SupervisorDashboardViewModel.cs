@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
+using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.User;
@@ -12,15 +13,21 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
     public partial class SupervisorDashboardViewModel : ObservableObject, INavigatable<int>
     {
         protected readonly INavigationService _navigationService;
+        protected readonly PairService _pairService;
+        protected readonly IssueService _issueService;
+        protected readonly UserService _userService;
 
         [ObservableProperty] private Model.Supervisor? _selectedSupervisor;
 
-        public ObservableCollection<Pair> PairsSupervised { get; } = [];
-        public ObservableCollection<Issue> AllIssues { get; } = [];
+        public ObservableCollection<Pair> PairsSupervised { get; set; } = [];
+        public ObservableCollection<Issue> AllIssues { get; set; } = [];
 
-        public SupervisorDashboardViewModel(INavigationService navigationService)
+        public SupervisorDashboardViewModel(INavigationService navigationService, PairService pairService, IssueService issueService, UserService userService)
         {
             _navigationService = navigationService;
+            _pairService = pairService;
+            _issueService = issueService;
+            _userService = userService;
         }
 
         [RelayCommand]
@@ -34,22 +41,23 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
         private async Task LoadSupervisorDataAsync(int supervisorId)
         {
-            PairsSupervised.Clear();
-            AllIssues.Clear();
+            var pairsResult = await Task.Run(() => _pairService.GetPairsBySupervisor(supervisorId));
+            var issuesResult = await Task.Run(() => _issueService.GetAllIssues());
 
-            PairsSupervised.Add(new Pair());
-            PairsSupervised.Add(new Pair());
+            if (pairsResult.Success && pairsResult.Data != null)
+            {
+                PairsSupervised = new ObservableCollection<Pair>(pairsResult.Data);
+            }
+            if(issuesResult.Success && issuesResult.Data != null)
+            {
+                AllIssues = new ObservableCollection<Issue>(issuesResult.Data);
+            }
 
-            AllIssues.Add(new Issue("Inconsistent meeting schedulee", new IssueCategory("Sigma"), true));
-            AllIssues.Add(new Issue("Communication barrier reported by mentee", new IssueCategory("Sigma"), true));
-            AllIssues.Add(new Issue("Communication barrier reported by mentee", new IssueCategory("Sigma"), false));
-            AllIssues.Add(new Issue("Communication barrier reported by mentee", new IssueCategory("Sigma"), false));
         }
-
         public virtual async Task OnNavigatedToAsync(int supervisorId)
         {
             await LoadSupervisorDataAsync(supervisorId);
-            SelectedSupervisor = new Model.Supervisor("Primo");
+            SelectedSupervisor = _userService.GetUserByIdAsync(supervisorId).Result.Data as Model.Supervisor;
         }
     }
 }

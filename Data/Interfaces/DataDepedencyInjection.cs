@@ -12,7 +12,12 @@ namespace MentoringApp.Data.Interfaces
 
             services.AddSingleton<IVerificationCodeRepo, EFVerificationCodeRepo>(); 
             services.AddSingleton<IUserRepo, EFUserRepo>(); 
-            services.AddSingleton<IDbRepo, EFDbRepo>(); 
+            services.AddSingleton<IDbRepo, EFDbRepo>();
+            services.AddScoped<IPairRepo, EFPairRepo>();
+            services.AddScoped<IIssueRepo, EFIssueRepo>();
+            services.AddScoped<IReviewRepo, EFReviewRepo>();
+            services.AddScoped<ISubjectRepo, EFSubjectRepo>();
+            services.AddScoped<IGradeRepo, EFGradeRepo>();
             return services;
         }
     }

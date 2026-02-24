@@ -10,6 +10,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MentoringApp.Data.Interfaces;
+using MentoringApp.Service;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
@@ -28,7 +30,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             await _navigationService.NavigateToAsync<RegistrationViewModel, bool>(true);
 
         
-        public ObservableCollection<Model.User> AllUsers { get; } = [];
+        public ObservableCollection<Model.User> AllUsers { get; set; } = [];
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(DeleteUserCommand))]
@@ -40,26 +42,31 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         private string _searchText = string.Empty;
 
         private bool HasSelectedUser => SelectedUser != null;
-        public ManageUsersViewModel(IFileService fileService, IWindowService windowService, INavigationService navigationService)
+        private readonly UserService _userService;
+
+        public ManageUsersViewModel(IFileService fileService, IWindowService windowService, INavigationService navigationService, UserService userService)
         {
             _fileService = fileService;
             _windowService = windowService;
             _navigationService = navigationService;
+            _userService = userService;
 
-
-            AllUsers = new ObservableCollection<Model.User>()
-            {
-                new Model.Supervisor("hello"),
-                new Model.Student("jhi")
-            };
         }
 
 
+        public async Task OnNavigatedToAsync()
+        {
+            var users = await _userService.GetAllUsersAsync();
+            AllUsers = new(users);
+        }
+
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
-        private void DeleteUser()
+        private async Task DeleteUser()
         {
             if (SelectedUser != null)
             {
+
+                await _userService.DeleteUserAsync(SelectedUser.Id);
                 AllUsers.Remove(SelectedUser);
                 SelectedUser = null;
             }
@@ -80,9 +87,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
                                   u.Email.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
 
         partial void OnSearchTextChanged(string value) => OnPropertyChanged(nameof(FilteredUsers));
-
-
-
 
 
         [RelayCommand]

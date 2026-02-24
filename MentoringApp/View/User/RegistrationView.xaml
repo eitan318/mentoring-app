@@ -18,15 +18,14 @@
             </StackPanel>
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
-                <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
+            
                     <ComboBox
                         DisplayMemberPath="Name"
                         ItemsSource="{Binding Grades}"
                         SelectedValue="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                         SelectedValuePath="Id"
                         Tag="Grade (e.g. 10)" />
-                </StackPanel>
-                <CheckBox
+                    <CheckBox
                     Margin="0,5"
                     Content="Is Mentor"
                     IsChecked="{Binding IsMentor}" />

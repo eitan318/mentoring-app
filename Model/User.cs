@@ -57,14 +57,7 @@ namespace MentoringApp.Model
         public bool IsMentor => MentorProfile != null;
         public bool IsMentee => MenteeProfile != null;
 
-        public Student() : base() { 
-            Grade = new Grade("Grade Name");
-        }
 
-        [SetsRequiredMembers]
-        public Student(string name) : base(name) { 
-            Grade = new Grade("Grade Name");
-        }
     }
 
     public class MentorProfile { 

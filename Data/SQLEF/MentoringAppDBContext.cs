@@ -15,6 +15,12 @@ namespace MentoringApp.Data.SQLEF
         public DbSet<UserMenteeData> Mentees { get; set; }
         public DbSet<UserSupervisorData> Supervisors { get; set; }
         public DbSet<UserAdminData> Admins { get; set; }
+        public DbSet<PairData> Pairs { get; set; }
+        public DbSet<IssueData> Issues { get; set; }
+        public DbSet<IssueCategoryData> IssueCategories { get; set; }
+        public DbSet<ReviewData> Reviews { get; set; }
+        public DbSet<SubjectData> Subjects { get; set; }
+        public DbSet<GradeData> Grades { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -96,7 +102,78 @@ namespace MentoringApp.Data.SQLEF
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            // PairData Configuration
+            modelBuilder.Entity<PairData>(entity =>
+            {
+                entity.ToTable("Pairs");
+                entity.HasKey(e => e.Id);
+                entity.HasOne<UserData>()
+                    .WithMany()
+                    .HasForeignKey(e => e.MentorId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<UserData>()
+                    .WithMany()
+                    .HasForeignKey(e => e.MenteeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<UserData>()
+                    .WithMany()
+                    .HasForeignKey(e => e.SupervisorId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
+            // IssueCategoryData Configuration
+            modelBuilder.Entity<IssueCategoryData>(entity =>
+            {
+                entity.ToTable("IssueCategories");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            });
+
+            // IssueData Configuration
+            modelBuilder.Entity<IssueData>(entity =>
+            {
+                entity.ToTable("Issues");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Description).IsRequired();
+                entity.HasOne<UserData>()
+                    .WithMany()
+                    .HasForeignKey(e => e.ReportedByUserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne<IssueCategoryData>()
+                    .WithMany()
+                    .HasForeignKey(e => e.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ReviewData Configuration
+            modelBuilder.Entity<ReviewData>(entity =>
+            {
+                entity.ToTable("Reviews");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Content).IsRequired();
+                entity.HasOne<PairData>()
+                    .WithMany()
+                    .HasForeignKey(e => e.PairId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne<UserData>()
+                    .WithMany()
+                    .HasForeignKey(e => e.AuthorUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<SubjectData>(entity =>
+            {
+                entity.ToTable("Subjects");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired();
+            });
+
+            modelBuilder.Entity<GradeData>(entity =>
+            {
+                entity.ToTable("Grades");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired();
+            });
         }
     }
 }

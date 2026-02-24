@@ -1,10 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.Model;
+using MentoringApp.Service;
 using MentoringApp.ViewModel.ViewModelHelper;
 
 namespace MentoringApp.ViewModel.ViewModelPage.User
 {
-    public partial class OtherProfileViewModel : ObservableObject, INavigatable
+    public partial class OtherProfileViewModel : ObservableObject, INavigatable<int>
     {
         [ObservableProperty] private string _userName = "";
         [ObservableProperty] private string _email = "";
@@ -16,10 +17,19 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private string _teachingSubject = "None";
         [ObservableProperty] private string _learningSubject = "None";
 
-        public OtherProfileViewModel() { }
+        private readonly UserService _userService;
 
-        // This method would be called by your NavigationService when opening the profile
-        public void LoadUserData(Model.User user)
+        public OtherProfileViewModel(UserService userService) { 
+            this._userService = userService;
+        }
+
+        public async Task OnNavigatedToAsync(int userId)
+        {
+            Model.User user = _userService.GetUserByIdAsync(userId).Result.Data;
+            await LoadUserData(user);
+        }
+
+        private async Task LoadUserData(Model.User user)
         {
             if (user == null) return;
 

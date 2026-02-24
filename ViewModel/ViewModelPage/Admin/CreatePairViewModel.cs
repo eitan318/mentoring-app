@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.Data.Interfaces;
+using MentoringApp.Service;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
@@ -31,12 +33,25 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [ObservableProperty] private string _mentorSearchText = string.Empty;
         [ObservableProperty] private string _menteeSearchText = string.Empty;
 
-        public CreatePairViewModel()
+        private readonly UserService _userService;
+        private readonly PairService _pairService;
+
+        public CreatePairViewModel(UserService userService, PairService pairService)
         {
-            // Sample Data
-            AvailableSupervisors = [new Model.Supervisor("Dr. Smith"), new Model.Supervisor("Prof. Jones")];
-            AvailableMentors = [new Model.Student("Alice"), new Model.Student("Alex")];
-            AvailableMentees = [new Model.Student("Bob"), new Model.Student("Charlie")];
+            _userService = userService;
+            LoadAvailableUsers();
+        }
+
+        private void LoadAvailableUsers()
+        {
+            var allUsers = _userService.GetAllUsersAsync().Result;
+            var supervisors = allUsers.OfType<Model.Supervisor>().ToList();
+            var mentors = allUsers.OfType<Model.Student>().Where(s => s.IsMentor).ToList();
+            var mentees = allUsers.OfType<Model.Student>().Where(s => s.IsMentee).ToList();
+
+            AvailableSupervisors = new ObservableCollection<Model.Supervisor>(supervisors);
+            AvailableMentors = new ObservableCollection<Model.Student>(mentors);
+            AvailableMentees = new ObservableCollection<Model.Student>(mentees);
         }
 
         // Filtered Properties
@@ -61,10 +76,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [RelayCommand(CanExecute = nameof(CanCreatePair))]
         private async Task CreatePair()
         {
-            // Logic to save pair here
-            // e.g., await _dataService.SavePair(SelectedSupervisor, SelectedMentor, SelectedMentee);
-
-            await Task.CompletedTask;
+            await _pairService.CreatePairAsync(SelectedSupervisor.Id, SelectedMentor.Id, SelectedMentee.Id);
         }
     }
 }

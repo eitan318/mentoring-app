@@ -23,7 +23,7 @@ namespace MentoringApp.Service
         public async Task<Result> SendVerificationCodeAsync(string nationalId)
         {
             // Initial Checks
-            var user = _userRepository.LoadUserByNationalId(nationalId);
+            var user = await _userRepository.LoadUserByNationalIdAsync(nationalId);
             if (user == null) 
                 return Result.Failure("User does not exist.");
 
@@ -47,7 +47,7 @@ namespace MentoringApp.Service
             if (string.IsNullOrWhiteSpace(nationalId))
                 return Result<User>.Failure("National ID cannot be empty.");
 
-            var user = await Task.Run(() => _userRepository.LoadUserByNationalId(nationalId));
+            var user = await Task.Run(() => _userRepository.LoadUserByNationalIdAsync(nationalId));
             if (user == null)
                 return Result<User>.Failure("No user found with this National ID.");
 
@@ -64,7 +64,7 @@ namespace MentoringApp.Service
             if (userId == null) 
                 return Result.Failure("Invalid verification code.");
 
-            var user = _userRepository.LoadUserById(userId.Value);
+            var user = await _userRepository.LoadUserByIdAsync(userId.Value);
         
             // Check Expiry
             bool isExpired = (DateTime.Now - user.CurrentVerificationCode.CreationDate).TotalMinutes > 10;

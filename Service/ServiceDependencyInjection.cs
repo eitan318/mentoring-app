@@ -10,7 +10,13 @@ namespace MentoringApp.Service
         {
             // Note: Changed to AddScoped because AuthService uses the Database (Repository)
             services.AddScoped<AuthService>();
-            
+            services.AddScoped<PairService>();
+            services.AddScoped<IssueService>();
+            services.AddScoped<ReviewService>();
+            services.AddScoped<UserService>();
+            services.AddScoped<SubjectService>();
+            services.AddScoped<GradeService>();
+
             // Validator
             services.AddSingleton<UserValidator>();
 

@@ -9,27 +9,30 @@ namespace MentoringApp.Data.SQLEF
     {
         private readonly MentoringDbContext _context;
 
-        public EFUserRepo(MentoringDbContext context)
+        private readonly IGradeRepo _gradeRepo; 
+
+        public EFUserRepo(MentoringDbContext context, IGradeRepo gradeRepo)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _gradeRepo = gradeRepo;
         }
 
-        public User? LoadUserByNationalId(string nationalId)
+        public async Task<User?> LoadUserByNationalIdAsync(string nationalId)
         {
             var userData = _context.Users
                 .AsNoTracking()
                 .FirstOrDefault(u => u.NationalId == nationalId);
 
-            return userData == null ? null : MapToDomain(userData);
+            return userData == null ? null : await MapToDomain(userData);
         }
 
-        public User? LoadUserById(int userId)
+        public async Task<User?> LoadUserByIdAsync(int userId)
         {
             var userData = _context.Users
                 .AsNoTracking()
                 .FirstOrDefault(u => u.Id == userId);
 
-            return userData == null ? null : MapToDomain(userData);
+            return userData == null ? null : await MapToDomain(userData);
         }
 
         public bool UserExists(string nationalId)
@@ -37,13 +40,17 @@ namespace MentoringApp.Data.SQLEF
             return _context.Users.Any(u => u.NationalId == nationalId);
         }
 
-        public List<User> GetAllUsers()
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return _context.Users
+            var userDataList = await _context.Users
                 .AsNoTracking()
+                .ToListAsync();
+
+            return userDataList
                 .Select(u => MapToDomain(u))
-                .Where(u => u != null)
-                .ToList()!;
+                .Where(domainUser => domainUser != null)
+                .Cast<User>() 
+                .ToList();
         }
 
         public bool CreateUser(User user)
@@ -134,9 +141,32 @@ namespace MentoringApp.Data.SQLEF
             }
         }
 
+        public bool DeleteUser(int userId)
+        {
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+                if (user == null) return false;
+
+                _context.Users.Remove(user);
+
+                _context.SaveChanges();
+                transaction.Commit();
+
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                return false;
+            }
+        }
+
         // --- Mapping Logic ---
 
-        private User? MapToDomain(UserData userData)
+        private async Task<User?> MapToDomain(UserData userData)
         {
             User? user = null;
 
@@ -171,7 +201,7 @@ namespace MentoringApp.Data.SQLEF
                         UserName = userData.UserName,
                         Email = userData.Email,
                         NationalId = userData.NationalId,
-                        Grade = new Grade("1")
+                        Grade = await _gradeRepo.GetByIdAsync(studentData.GradeId)
                     };
 
                     var mentorData = _context.Mentors.FirstOrDefault(m => m.UserId == userData.Id);

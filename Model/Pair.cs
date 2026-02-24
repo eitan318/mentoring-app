@@ -9,14 +9,8 @@ namespace MentoringApp.Model
 {
     public class Pair
     {
-
-        [SetsRequiredMembers]
-        public Pair()
-        {
-            Mentee = new Student("Dummy1");
-            Mentor = new Student("Dummy2");
-        }
         public required Student Mentee { get; set; }
         public required Student Mentor { get; set; }
+        public required int Id { get; set; }
     }
 }

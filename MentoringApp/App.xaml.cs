@@ -64,7 +64,7 @@ namespace MentoringApp
                         Email = "eitanamir09@gmail.com",
                         NationalId = "2",
                         UserName = "Mentor username 1",
-                        Grade = new Grade("10th"),
+                        Grade = new Grade { Name = "10th", Num = 10, Id = -1 },
                         MentorProfile = new MentorProfile { SubjectToTeach = -1 }
                     });
                     userRepo.CreateUser(new Student
@@ -73,7 +73,7 @@ namespace MentoringApp
                         Email = "eitanamir09@gmail.com",
                         NationalId = "3",
                         UserName = "Mentee username 2",
-                        Grade = new Grade("10th"),
+                        Grade = new Grade { Name = "10th", Num = 10, Id = -1 },
                         MenteeProfile = new MenteeProfile { SubjectToLearn = -1 }
                     });
 
@@ -83,7 +83,7 @@ namespace MentoringApp
                         Email = "eitanamir09@gmail.com",
                         NationalId = "4",
                         UserName = "Mentee and mentro username 2",
-                        Grade = new Grade("10th"),
+                        Grade = new Grade { Name = "10th", Num = 10, Id = -1},
                         MenteeProfile = new MenteeProfile { SubjectToLearn = -1 },
                         MentorProfile = new MentorProfile { SubjectToTeach = -1 },
                     });

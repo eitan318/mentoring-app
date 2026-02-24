@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
+using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
 
@@ -11,18 +12,16 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
     {
         private readonly IWindowService _windowService;
         private readonly INavigationService _navigationService;
+        private readonly PairService _pairService;
 
         [ObservableProperty] private ObservableCollection<Pair> _pairList = new();
 
-        public ManagePairsViewModel(IWindowService windowService, INavigationService navigationService)
+        public ManagePairsViewModel(IWindowService windowService, INavigationService navigationService, PairService pairService)
         {
             _windowService = windowService;
             _navigationService = navigationService;
-
-            PairList.Add(new Pair());
-            PairList.Add(new Pair());
-            PairList.Add(new Pair());
-            PairList.Add(new Pair());
+            _pairService = pairService;
+            UpdatePairList();
         }
 
         [RelayCommand]
@@ -36,8 +35,22 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         {
             if (pair != null)
             {
-                PairList.Remove(pair);
+                _pairService.SeparatePair(pair.Id);
+                UpdatePairList();
             }
+        }
+
+        public async Task OnNavigatedToAsync()
+        {
+            UpdatePairList();
+        }
+
+        
+
+        private async Task UpdatePairList()
+        {
+            var res = await _pairService.GetAllPairsAsync();
+            PairList = new ObservableCollection<Pair>(res.Data);
         }
     }
 }
