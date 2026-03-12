@@ -1,4 +1,4 @@
-namespace MentoringApp.Data.SQLEF.DataObject
+namespace MentoringApp.Data.Access.SQLEF.DataObject
 {
     internal class IssueData
     {

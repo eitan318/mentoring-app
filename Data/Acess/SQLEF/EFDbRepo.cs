@@ -1,6 +1,6 @@
 ﻿using MentoringApp.Data.Interfaces;
 
-namespace MentoringApp.Data.SQLEF
+namespace MentoringApp.Data.Access.SQLEF
 {
     internal class EFDbRepo : IDbRepo
     {

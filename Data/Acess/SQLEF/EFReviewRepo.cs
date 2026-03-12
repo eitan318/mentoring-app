@@ -1,9 +1,9 @@
+using MentoringApp.Data.Access.SQLEF.DataObject;
 using MentoringApp.Data.Interfaces;
-using MentoringApp.Data.SQLEF.DataObject;
 using MentoringApp.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace MentoringApp.Data.SQLEF
+namespace MentoringApp.Data.Access.SQLEF
 {
     internal class EFReviewRepo : IReviewRepo
     {

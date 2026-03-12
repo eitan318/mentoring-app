@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MentoringApp.Data.SQLEF.DataObject;
+using MentoringApp.Data.Access.SQLEF.DataObject;
 
-namespace MentoringApp.Data.SQLEF
+namespace MentoringApp.Data.Access.SQLEF
 {
     internal class MentoringDbContext : DbContext
     {

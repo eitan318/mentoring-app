@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MentoringApp.Data.SQLEF.DataObject
+namespace MentoringApp.Data.Access.SQLEF.DataObject
 {
     class GradeData
     {

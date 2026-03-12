@@ -1,8 +1,8 @@
-﻿using MentoringApp.Data.SQLEF;
-using MentoringApp.Data.SQL.SQLite;
-using MentoringApp.Data.SQL.SQLite.ConnectionsService;
+﻿using MentoringApp.Data.Acess.SQLite;
+using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MentoringApp.Data.Access.SQLEF;
 
 namespace MentoringApp.Data.Interfaces
 {
