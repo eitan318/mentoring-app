@@ -8,6 +8,7 @@ using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using MentoringApp.Service;
+using System.Diagnostics;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
@@ -15,6 +16,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
     {
         private readonly INavigationService _navigationService;
         private readonly UserService _userService;
+
+        [ObservableProperty]
+        private bool _isBusy;
 
         public ObservableCollection<Model.Supervisor> SupervisorsListPreview { get; set; }
 
@@ -24,15 +28,41 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             _userService = userService;
 
             SupervisorsListPreview = new ObservableCollection<Model.Supervisor>();
-            LoadSupervisorsPreview();
+            _ = LoadSupervisorsPreviewAsync();
         }
 
-        private void LoadSupervisorsPreview()
+
+        private async Task LoadSupervisorsPreviewAsync()
         {
-            var supervisors = _userService.GetAllUsersAsync().Result.OfType<Model.Supervisor>().Take(4);
-            foreach (var supervisor in supervisors)
+            if (IsBusy) return;
+
+            try
             {
-                SupervisorsListPreview.Add(supervisor);
+                IsBusy = true;
+
+                // 1. Fetch users
+                var allUsers = await _userService.GetAllUsersAsync();
+
+                // 2. Filter safely (checking for null)
+                var supervisorMatches = allUsers?
+                    .OfType<Model.Supervisor>()
+                    .Take(4)
+                    .ToList() ?? new List<Model.Supervisor>();
+
+                // 3. Update the UI Collection
+                SupervisorsListPreview.Clear();
+                foreach (var supervisor in supervisorMatches)
+                {
+                    SupervisorsListPreview.Add(supervisor);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading supervisors: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 

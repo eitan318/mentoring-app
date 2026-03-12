@@ -53,7 +53,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         {
             _windowService = windowService;
             _navigationService = navigationService;
-            Counterpart = new Model.Student("Alex Smith " + counterpartId);
+            ///Counterpart = new Model.Student("Alex Smith " + counterpartId);
 
             RecentReviews.Add(new Review("Solid understanding of MVVM patterns demonstrated this session.", DateTime.Now.AddDays(-3)));
             RecentReviews.Add(new Review("Good progress on XAML data binding — work on converters next.", DateTime.Now.AddDays(-10)));
