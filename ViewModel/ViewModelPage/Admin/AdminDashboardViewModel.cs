@@ -17,9 +17,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         private readonly INavigationService _navigationService;
         private readonly UserService _userService;
 
-        [ObservableProperty]
-        private bool _isBusy;
-
         public ObservableCollection<Model.Supervisor> SupervisorsListPreview { get; set; }
 
         public AdminDashboardViewModel( INavigationService navigationService, UserService userService)
@@ -34,35 +31,17 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 
         private async Task LoadSupervisorsPreviewAsync()
         {
-            if (IsBusy) return;
+            var allUsers = await _userService.GetAllUsersAsync();
 
-            try
+            var supervisorMatches = allUsers?
+                .OfType<Model.Supervisor>()
+                .Take(4)
+                .ToList() ?? new List<Model.Supervisor>();
+
+            SupervisorsListPreview.Clear();
+            foreach (var supervisor in supervisorMatches)
             {
-                IsBusy = true;
-
-                // 1. Fetch users
-                var allUsers = await _userService.GetAllUsersAsync();
-
-                // 2. Filter safely (checking for null)
-                var supervisorMatches = allUsers?
-                    .OfType<Model.Supervisor>()
-                    .Take(4)
-                    .ToList() ?? new List<Model.Supervisor>();
-
-                // 3. Update the UI Collection
-                SupervisorsListPreview.Clear();
-                foreach (var supervisor in supervisorMatches)
-                {
-                    SupervisorsListPreview.Add(supervisor);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error loading supervisors: {ex.Message}");
-            }
-            finally
-            {
-                IsBusy = false;
+                SupervisorsListPreview.Add(supervisor);
             }
         }
 

@@ -47,7 +47,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
                 int pairsCount = _pairService.GetPairsBySupervisor(supervisor.Id).Data.Count();
                 int pendingIssuesCount =  _issueService.GetIssuesBySupervisor(supervisor.Id).Data.Count();
                 
-                // TODO: Fetch real PairsCount and PendingIssuesCount when available in DB/Repos
                 SupervisorsList.Add(new SupervisorSummary
                 {
                     Supervisor = supervisor,
