@@ -45,6 +45,14 @@ namespace MentoringApp.Data.Acess.SQLite
             return row == null ? null : await MapToDomainAsync(row);
         }
 
+        public async Task<Pair?> GetByMenteeIdAsync(int menteeId)
+        {
+            var row = _db.QuerySingle<PairRow>(
+                "SELECT Id, MentorId, MenteeId, SupervisorId, CreatedAt FROM Pairs WHERE MenteeId = @MenteeId",
+                new { MenteeId = menteeId });
+            return row == null ? null : await MapToDomainAsync(row);
+        }
+
         public IEnumerable<Pair> GetBySupervisorId(int supervisorId)
         {
             var rows = _db.Query<PairRow>(

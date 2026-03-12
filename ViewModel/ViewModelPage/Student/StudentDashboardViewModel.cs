@@ -3,35 +3,82 @@ using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.Service;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelPage.User;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Student
 {
     public partial class StudentDashboardViewModel : ObservableObject, INavigatable
     {
-        public ObservableCollection<PairMemberDashboardViewModel> Pairs { get; set; }
+        public ObservableCollection<PairMemberDashboardViewModel> Pairs { get; set; } = new();
 
         [ObservableProperty]
         private PairMemberDashboardViewModel? _selectedPair;
 
         private readonly INavigationService _navigationService;
         private readonly IWindowService _windowService;
+        private readonly UserStore _userStore;
+        private readonly PairService _pairService;
+        private readonly IssueService _issueService;
+        private readonly ReviewService _reviewService;
 
-        public StudentDashboardViewModel(INavigationService navigationService, IWindowService windowService)
+        public StudentDashboardViewModel(
+            INavigationService navigationService, 
+            IWindowService windowService,
+            UserStore userStore,
+            PairService pairService,
+            IssueService issueService,
+            ReviewService reviewService)
         {
             _windowService = windowService;
             _navigationService = navigationService;
-            Pairs = [];
-            LoadData();
-            SelectedPair = Pairs[0];
+            _userStore = userStore;
+            _pairService = pairService;
+            _issueService = issueService;
+            _reviewService = reviewService;
         }
 
-        private void LoadData()
+        public async Task OnNavigatedToAsync()
         {
-            Pairs.Add(new MentorDashboardViewModel(_windowService, _navigationService, 1, 72));
-            Pairs.Add(new MentorDashboardViewModel(_windowService, _navigationService, 2, 45));
-            Pairs.Add(new MenteeDashboardViewModel(1, _navigationService, _windowService));
+            await LoadDataAsync();
+        }
+
+        private async Task LoadDataAsync()
+        {
+            Pairs.Clear();
+            var currentUser = _userStore.User as Model.Student;
+            if (currentUser == null) return;
+
+            if (currentUser.IsMentor)
+            {
+                var result = _pairService.GetPairByMentor(currentUser.Id);
+                if (result.Success && result.Data != null)
+                {
+                    var pair = result.Data;
+                    var mentorVm = new MentorDashboardViewModel(_windowService, _navigationService, _issueService, _reviewService, _userStore, pair);
+                    await mentorVm.LoadDataAsync();
+                    Pairs.Add(mentorVm);
+                }
+            }
+            if (currentUser.IsMentee)
+            {
+                var result = _pairService.GetPairByMentee(currentUser.Id);
+                if (result.Success && result.Data != null)
+                {
+                    var pair = result.Data;
+                    var menteeVm = new MenteeDashboardViewModel(_windowService, _navigationService, _issueService, _reviewService, _userStore, pair);
+                    await menteeVm.LoadDataAsync();
+                    Pairs.Add(menteeVm);
+                }
+            }
+
+            if (Pairs.Count > 0)
+            {
+                SelectedPair = Pairs[0];
+            }
         }
     }
 
@@ -40,32 +87,72 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
     {
         public abstract string CounterpartRole { get; }
 
-        private readonly IWindowService _windowService;
-        private readonly INavigationService _navigationService;
+        protected readonly IWindowService _windowService;
+        protected readonly INavigationService _navigationService;
+        protected readonly IssueService _issueService;
+        protected readonly ReviewService _reviewService;
+        protected readonly UserStore _userStore;
 
         [ObservableProperty]
         private Model.Student _counterpart;
 
-        public ObservableCollection<Issue> MyIssues { get; } = new();
-        public ObservableCollection<Review> RecentReviews { get; } = new();
+        public Pair Pair { get; }
 
-        protected PairMemberDashboardViewModel(int counterpartId, INavigationService navigationService, IWindowService windowService)
+        public ObservableCollection<Issue> MyIssues { get; set; } = new();
+        public ObservableCollection<Review> RecentReviews { get; set; } = new();
+
+        protected PairMemberDashboardViewModel(
+            IWindowService windowService,
+            INavigationService navigationService,
+            IssueService issueService,
+            ReviewService reviewService,
+            UserStore userStore,
+            Pair pair,
+            Model.Student counterpart)
         {
             _windowService = windowService;
             _navigationService = navigationService;
-            ///Counterpart = new Model.Student("Alex Smith " + counterpartId);
+            _issueService = issueService;
+            _reviewService = reviewService;
+            _userStore = userStore;
+            Pair = pair;
+            Counterpart = counterpart;
+        }
 
-            RecentReviews.Add(new Review("Solid understanding of MVVM patterns demonstrated this session.", DateTime.Now.AddDays(-3)));
-            RecentReviews.Add(new Review("Good progress on XAML data binding — work on converters next.", DateTime.Now.AddDays(-10)));
-            RecentReviews.Add(new Review("Completed the async/await exercise ahead of schedule. Well done.", DateTime.Now.AddDays(-17)));
+        public virtual async Task LoadDataAsync()
+        {
+            var issuesResult = _issueService.GetIssuesByUser(_userStore.User!.Id);
+            if (issuesResult.Success && issuesResult.Data != null)
+            {
+                MyIssues = new ObservableCollection<Issue>(issuesResult.Data);
+            }
 
-            MyIssues.Add(new Issue("Difficulty with MVVM RelayCommand wiring", new IssueCategory("Tech", 1), false));
-            MyIssues.Add(new Issue("Unclear on DI container registration order", new IssueCategory("Tech", 1), false));
-            MyIssues.Add(new Issue("Scheduling conflict for next week's session", new IssueCategory("Admin", 2), true));
+            var reviewsResult = _reviewService.GetReviewsByPair(Pair.Id);
+            if (reviewsResult.Success && reviewsResult.Data != null)
+            {
+                var sortedReviews = reviewsResult.Data.OrderByDescending(r => r.Date).ToList();
+                RecentReviews = new ObservableCollection<Review>(sortedReviews);
+            }
+            
+            OnPropertyChanged(nameof(MyIssues));
+            OnPropertyChanged(nameof(RecentReviews));
+
+            await Task.CompletedTask;
         }
 
         [RelayCommand]
-        private async Task IssueToSupervisor() => await _navigationService.NavigateToAsync<AddIssueViewModel>();
+        private async Task IssueToSupervisor()
+        {
+            var categoriesResult = _issueService.GetCategories();
+            if (categoriesResult.Success && categoriesResult.Data != null)
+            {
+                await _navigationService.NavigateToAsync<AddIssueViewModel, IEnumerable<IssueCategory>>(categoriesResult.Data);
+            }
+            else
+            {
+                await _navigationService.NavigateToAsync<AddIssueViewModel>();
+            }
+        }
     }
 
     public partial class MenteeDashboardViewModel : PairMemberDashboardViewModel
@@ -75,10 +162,18 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [ObservableProperty]
         private string _mentorSubject;
 
-        public MenteeDashboardViewModel(int mentorId, INavigationService navigationService, IWindowService windowService)
-            : base(mentorId, navigationService, windowService)
+        public MenteeDashboardViewModel(
+            IWindowService windowService,
+            INavigationService navigationService,
+            IssueService issueService,
+            ReviewService reviewService,
+            UserStore userStore,
+            Pair pair)
+            : base(windowService, navigationService, issueService, reviewService, userStore, pair, pair.Mentor)
         {
-            MentorSubject = "Advanced C# and WPF";
+            // Note: Since MentorProfile uses SubjectToTeach (an int ID we didn't fetch the string for), 
+            // for now we set it based on whatever is available or default if complex
+            MentorSubject = "Assigned Mentor";
         }
     }
 
@@ -89,20 +184,26 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [ObservableProperty]
         private double _menteeProgress;
 
-        private readonly IWindowService _windowService;
-
-        public MentorDashboardViewModel(IWindowService windowService, INavigationService navigationService, int menteeId, double initialProgress)
-            : base(menteeId, navigationService, windowService)
+        public MentorDashboardViewModel(
+            IWindowService windowService,
+            INavigationService navigationService,
+            IssueService issueService,
+            ReviewService reviewService,
+            UserStore userStore,
+            Pair pair)
+            : base(windowService, navigationService, issueService, reviewService, userStore, pair, pair.Mentee)
         {
-            _windowService = windowService;
-            MenteeProgress = initialProgress;
+            MenteeProgress = 50.0;
         }
 
         [RelayCommand]
         private async Task CreateReview()
         {
-            RecentReviews.Insert(0, new Review($"Session review — {DateTime.Now:MMM d}: Good engagement, reviewed error handling patterns.", DateTime.Now));
-            await Task.CompletedTask;
+            var res = _reviewService.CreateReview($"Session review — {DateTime.Now:MMM d}: Reviewed progress.", Pair.Id, _userStore.User!.Id);
+            if (res.Success)
+            {
+                await LoadDataAsync();
+            }
         }
     }
 }

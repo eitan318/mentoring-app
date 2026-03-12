@@ -57,7 +57,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         public virtual async Task OnNavigatedToAsync(int supervisorId)
         {
             await LoadSupervisorDataAsync(supervisorId);
-            SelectedSupervisor = _userService.GetUserByIdAsync(supervisorId).Result.Data as Model.Supervisor;
+            Result<Model.User> res = await _userService.GetUserByIdAsync(supervisorId);
+            SelectedSupervisor = res.Data as Model.Supervisor;
         }
     }
 }

@@ -31,6 +31,7 @@ namespace MentoringApp.Data.Interfaces
         Task<IEnumerable<Pair>> GetAllAsync();
         Pair? GetById(int id);
         Task<Pair?> GetByMentorIdAsync(int mentorId);
+        Task<Pair?> GetByMenteeIdAsync(int menteeId);
         IEnumerable<Pair> GetBySupervisorId(int supervisorId);
         Task<bool> CreateAsync(Pair pair, int supervisorId, int mentorId, int menteeId);
         bool Delete(int pairId);

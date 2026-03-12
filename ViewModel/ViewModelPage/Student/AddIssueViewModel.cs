@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
+using MentoringApp.Service;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
@@ -22,11 +24,15 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [MinLength(5, ErrorMessage = "Description is too short.")]
         private string _issueDescription = string.Empty;
 
+        private readonly IssueService _issueService;
+        private readonly UserStore _userStore;
 
         public event Action? RequestClose;
 
-        public AddIssueViewModel()
+        public AddIssueViewModel(IssueService issueService, UserStore userStore)
         {
+            _issueService = issueService;
+            _userStore = userStore;
             _issueCategoryList = [];
         }
     
@@ -36,8 +42,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             return Task.CompletedTask;
         }
 
-        
-
         [RelayCommand]
         private void AddIssue()
         {
@@ -46,13 +50,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             if (HasErrors || SelectedIssueCategory == null)
                 return;
 
-            Issue issue = new Issue
+            if (_userStore.User != null)
             {
-                Description = IssueDescription,
-                Category = SelectedIssueCategory,
-                CreationDate = DateTime.Now,
-                Id = -1
-            };
+                _issueService.CreateIssue(IssueDescription, SelectedIssueCategory, _userStore.User.Id);
+            }
 
             RequestClose?.Invoke();
         }

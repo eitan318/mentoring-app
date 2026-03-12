@@ -36,6 +36,14 @@ namespace MentoringApp.Service
                 : Result<Pair>.Failure("No pair found for this mentor.");
         }
 
+        public Result<Pair> GetPairByMentee(int menteeId)
+        {
+            var pair = _pairRepo.GetByMenteeIdAsync(menteeId).Result;
+            return pair != null
+                ? Result<Pair>.Ok(pair)
+                : Result<Pair>.Failure("No pair found for this mentee.");
+        }
+
         public Result<IEnumerable<Pair>> GetPairsBySupervisor(int supervisorId)
         {
             var pairs = _pairRepo.GetBySupervisorId(supervisorId);

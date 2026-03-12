@@ -2,7 +2,6 @@
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MentoringApp.Data.Access.SQLEF;
 
 namespace MentoringApp.Data.Interfaces
 {
@@ -53,22 +52,5 @@ namespace MentoringApp.Data.Interfaces
             return services;
         }
 
-        /// <summary>
-        /// Entity Framework repositories (kept for reference / easy switching).
-        /// </summary>
-        public static IServiceCollection AddEFDataRepositories(this IServiceCollection services, string connectionString)
-        {
-            services.AddDbContext<MentoringDbContext>(options => options.UseSqlite(connectionString));
-
-            services.AddSingleton<IVerificationCodeRepo, EFVerificationCodeRepo>();
-            services.AddSingleton<IUserRepo, EFUserRepo>();
-            services.AddSingleton<IDbRepo, EFDbRepo>();
-            services.AddScoped<IPairRepo, EFPairRepo>();
-            services.AddScoped<IIssueRepo, EFIssueRepo>();
-            services.AddScoped<IReviewRepo, EFReviewRepo>();
-            services.AddScoped<ISubjectRepo, EFSubjectRepo>();
-            services.AddScoped<IGradeRepo, EFGradeRepo>();
-            return services;
-        }
     }
 }
