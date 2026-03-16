@@ -28,6 +28,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         private void CreatePair()
         {
             _navigationService.NavigateToAsync<CreatePairViewModel>();
+
         }
 
         [RelayCommand]

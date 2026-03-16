@@ -1,6 +1,7 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using MentoringApp.Model;
+using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -140,7 +141,7 @@ namespace MentoringApp.Data.Acess.SQLite
 
             if (studentRow == null) return null;
 
-            var grade = await _gradeRepo.GetByIdAsync(studentRow.GradeId) ?? new Grade { Id = 0, Name = "Unknown", Num = 0 };
+            var gradeDto = await _gradeRepo.GetByIdAsync(studentRow.GradeId) ?? new GradeDto();
 
             var student = new Student
             {
@@ -148,7 +149,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 UserName = userRow.UserName,
                 Email = userRow.Email,
                 NationalId = userRow.NationalId,
-                Grade = grade
+                Grade = new Grade { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num}
             };
 
             var mentorRow = _db.QuerySingle<MentorRow>(

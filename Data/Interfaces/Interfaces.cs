@@ -1,4 +1,5 @@
-﻿using MentoringApp.Model;
+﻿using MentoringApp.Data.DTO;
+using MentoringApp.Model;
 
 namespace MentoringApp.Data.Interfaces
 {
@@ -9,14 +10,18 @@ namespace MentoringApp.Data.Interfaces
 
     public interface IUserRepo
     {
-        Task<User?> LoadUserByNationalIdAsync(string nationalId);
-        Task<User?> LoadUserByIdAsync(int userId);
-        bool UserExists(string nationalId);
-        Task<IEnumerable<User>> GetAllUsersAsync();
-        bool CreateUser(User user);
-        Task<bool> UpdateAsync(User user);
+        Task<bool> CreateUserAsync(User user);
+        Task<IEnumerable<UserDto>> GetAllUserDtosAsync();
+        Task<UserDto?> GetUserDtoByNationalIdAsync(string nationalId);
+        Task<UserDto?> GetUserDtoByIdAsync(int userId);
 
-        bool DeleteUser(int userId);
+        Task<bool> DeleteUserAsync(int userId);
+
+        Task<bool> UpdateBaseInfoAsync(int id, string name, string email, string nationalId);
+
+        Task UpdateStudentGradeAsync(int userId, int gradeId);
+
+        Task UpsertMentorProfileAsync(int userId, int subjectId);
     }
 
     public interface IVerificationCodeRepo
@@ -62,8 +67,10 @@ namespace MentoringApp.Data.Interfaces
 
     public interface IGradeRepo
     {
-        Task<Grade?> GetByIdAsync(int id);
-        Task<IEnumerable<Grade>> GetAllGradesAsync();
+        Task<GradeDto?> GetByIdAsync(int id);
+
+        Task<IEnumerable<GradeDto>> GetAllGradesAsync();
+
     }
 }
 

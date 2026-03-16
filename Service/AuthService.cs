@@ -8,24 +8,31 @@ namespace MentoringApp.Service
 {
     public class AuthService
     {
-        IUserRepo _userRepository;
-        IVerificationCodeRepo _verificationCodeRepository;
-        EmailService _emailService;
-        UserValidator _userValidator;
-        public AuthService(IUserRepo repo, IVerificationCodeRepo verificationCodeRepository, UserValidator userValidator, EmailService emailService)
+        private readonly UserService _userService; // Changed from IUserRepo
+        private readonly IVerificationCodeRepo _verificationCodeRepository;
+        private readonly EmailService _emailService;
+        private readonly UserValidator _userValidator;
+
+        public AuthService(
+            UserService userService,
+            IVerificationCodeRepo verificationCodeRepository,
+            UserValidator userValidator,
+            EmailService emailService)
         {
-            _userValidator = userValidator;
+            _userService = userService;
             _verificationCodeRepository = verificationCodeRepository;
             _emailService = emailService;
-            _userRepository = repo;
+            _userValidator = userValidator;
         }
 
         public async Task<Result> SendVerificationCodeAsync(string nationalId)
         {
-            // Initial Checks
-            var user = await _userRepository.LoadUserByNationalIdAsync(nationalId);
-            if (user == null) 
+            var userResult = await _userService.GetUserByNationalIdAsync(nationalId);
+
+            if (!userResult.Success)
                 return Result.Failure("User does not exist.");
+
+            var user = userResult.Data;
 
             // Generate and Save Code
             string code = new Random().Next(100000, 999999).ToString();
@@ -47,9 +54,12 @@ namespace MentoringApp.Service
             if (string.IsNullOrWhiteSpace(nationalId))
                 return Result<User>.Failure("National ID cannot be empty.");
 
-            var user = await Task.Run(() => _userRepository.LoadUserByNationalIdAsync(nationalId));
-            if (user == null)
-                return Result<User>.Failure("No user found with this National ID.");
+            var userResult = await _userService.GetUserByNationalIdAsync(nationalId);
+
+            if (!userResult.Success)
+                return Result<User>.Failure("User does not exist.");
+
+            var user = userResult.Data;
 
             return Result<User>.Ok(user);
         }
@@ -61,42 +71,47 @@ namespace MentoringApp.Service
                 return Result.Failure("Please enter the code.");
 
             var userId = await _verificationCodeRepository.GetUserIdByCodeAsync(verificationCodeInput);
-            if (userId == null) 
+            if (userId == null)
                 return Result.Failure("Invalid verification code.");
 
-            var user = await _userRepository.LoadUserByIdAsync(userId.Value);
-        
-            // Check Expiry
-            bool isExpired = (DateTime.Now - user.CurrentVerificationCode.CreationDate).TotalMinutes > 10;
-            if (isExpired)
-                return Result<bool>.Failure("Verification code has expired. Please request a new one.");
+            var userResult = await _userService.GetUserByIdAsync(userId.Value);
+            if (!userResult.Success) return Result.Failure("User not found.");
 
-            // Clear code and update user
-            user.CurrentVerificationCode = null; 
-            bool updated = await _userRepository.UpdateAsync(user);
-        
-            return updated ? Result.Ok() : Result.Failure("Database error during verification.");
+            var user = userResult.Data;
+
+            bool isExpired = (DateTime.Now - user.CurrentVerificationCode.CreationDate).TotalMinutes > 10;
+            if (isExpired) return Result.Failure("Code expired.");
+
+            bool cleared = await _verificationCodeRepository.DeleteAsync(userId.Value);
+
+            return cleared ? Result.Ok() : Result.Failure("Database error.");
         }
 
         public async Task<Result<User>> Register(User user)
         {
+            // 1. Validation (Stay the same - keep this in AuthService)
             var validationResult = await _userValidator.ValidateAsync(user);
             if (!validationResult.IsValid)
             {
                 var errors = validationResult.Errors
                     .GroupBy(e => e.PropertyName)
-                    .ToDictionary(
-                        g => g.Key, 
-                        g => g.First().ErrorMessage
-                    );
+                    .ToDictionary(g => g.Key, g => g.First().ErrorMessage);
                 return Result<User>.ValidationFailure(errors);
             }
 
-            if (_userRepository.UserExists(user.NationalId))
+            // 2. Business Check (Use the UserService now)
+            var existingUser = await _userService.GetUserByNationalIdAsync(user.NationalId);
+            if (existingUser.Success)
+            {
                 return Result<User>.Failure("User already exists.");
+            }
 
-            bool created = _userRepository.CreateUser(user);
-            return created ? Result<User>.Ok(user) : Result<User>.Failure("Failed to create user account.");
+            // 3. Delegation (Let UserService handle the complex multi-table SQL)
+            var createdResult = await _userService.CreateUserAsync(user);
+
+            return createdResult.Success
+                ? Result<User>.Ok(user)
+                : Result<User>.Failure("Failed to create user account.");
         }
     }
 }

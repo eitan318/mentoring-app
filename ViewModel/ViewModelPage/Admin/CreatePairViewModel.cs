@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
@@ -39,15 +39,22 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         public CreatePairViewModel(UserService userService, PairService pairService)
         {
             _userService = userService;
+            _pairService = pairService;
             LoadAvailableUsers();
         }
 
         private void LoadAvailableUsers()
         {
             var allUsers = _userService.GetAllUsersAsync().Result;
+            var allPairsResult = _pairService.GetAllPairsAsync().Result;
+            var allPairs = allPairsResult.Success && allPairsResult.Data != null ? allPairsResult.Data : [];
+
+            var pairedMentorIds = allPairs.Select(p => p.Mentor.Id).ToHashSet();
+            var pairedMenteeIds = allPairs.Select(p => p.Mentee.Id).ToHashSet();
+
             var supervisors = allUsers.OfType<Model.Supervisor>().ToList();
-            var mentors = allUsers.OfType<Model.Student>().Where(s => s.IsMentor).ToList();
-            var mentees = allUsers.OfType<Model.Student>().Where(s => s.IsMentee).ToList();
+            var mentors = allUsers.OfType<Model.Student>().Where(s => s.IsMentor && !pairedMentorIds.Contains(s.Id)).ToList();
+            var mentees = allUsers.OfType<Model.Student>().Where(s => s.IsMentee && !pairedMenteeIds.Contains(s.Id)).ToList();
 
             AvailableSupervisors = new ObservableCollection<Model.Supervisor>(supervisors);
             AvailableMentors = new ObservableCollection<Model.Student>(mentors);
@@ -76,7 +83,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [RelayCommand(CanExecute = nameof(CanCreatePair))]
         private async Task CreatePair()
         {
-            await _pairService.CreatePairAsync(SelectedSupervisor.Id, SelectedMentor.Id, SelectedMentee.Id);
+            if (SelectedSupervisor is not null && SelectedMentee is not null && SelectedMentor  is not null) {
+                await _pairService.CreatePairAsync(SelectedSupervisor.Id, SelectedMentor.Id, SelectedMentee.Id);
+                LoadAvailableUsers();
+            }
         }
     }
 }

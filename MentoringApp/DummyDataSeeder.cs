@@ -1,6 +1,7 @@
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
+using MentoringApp.Service;
 
 namespace MentoringApp
 {
@@ -11,7 +12,7 @@ namespace MentoringApp
     /// </summary>
     public class DummyDataSeeder
     {
-        private readonly IUserRepo _userRepo;
+        private readonly UserService _userService;
         private readonly IPairRepo _pairRepo;
         private readonly IIssueRepo _issueRepo;
         private readonly IReviewRepo _reviewRepo;
@@ -19,14 +20,14 @@ namespace MentoringApp
         private readonly ISQLiteConnectionService _db;
 
         public DummyDataSeeder(
-            IUserRepo userRepo,
+            UserService userService,
             IPairRepo pairRepo,
             IIssueRepo issueRepo,
             IReviewRepo reviewRepo,
             IVerificationCodeRepo verificationCodeRepo,
             ISQLiteConnectionService db)
         {
-            _userRepo = userRepo;
+            _userService = userService;
             _pairRepo = pairRepo;
             _issueRepo = issueRepo;
             _reviewRepo = reviewRepo;
@@ -78,7 +79,7 @@ namespace MentoringApp
                 NationalId = "100000001",
                 UserName = "Admin User"
             };
-            _userRepo.CreateUser(admin);
+            await _userService.CreateUserAsync(admin);
             // admin.Id is now set
 
             // Supervisor
@@ -88,7 +89,7 @@ namespace MentoringApp
                 NationalId = "200000001",
                 UserName = "Jane Supervisor"
             };
-            _userRepo.CreateUser(supervisor);
+            await _userService.CreateUserAsync(supervisor);
 
             // Mentor 1: Alice — teaches Math, 11th grade
             var mentor1 = new Student
@@ -99,7 +100,7 @@ namespace MentoringApp
                 Grade = new Grade { Id = grade11, Name = "11th", Num = 11 },
                 MentorProfile = new MentorProfile { SubjectToTeach = subjectMath }
             };
-            _userRepo.CreateUser(mentor1);
+            await _userService.CreateUserAsync(mentor1);
 
             // Mentor 2: Bob — teaches Physics, 12th grade
             var mentor2 = new Student
@@ -110,7 +111,7 @@ namespace MentoringApp
                 Grade = new Grade { Id = grade12, Name = "12th", Num = 12 },
                 MentorProfile = new MentorProfile { SubjectToTeach = subjectPhysics }
             };
-            _userRepo.CreateUser(mentor2);
+            await _userService.CreateUserAsync(mentor2);
 
             // Mentee 1: Charlie — learns Math, 10th grade
             var mentee1 = new Student
@@ -121,7 +122,7 @@ namespace MentoringApp
                 Grade = new Grade { Id = grade10, Name = "10th", Num = 10 },
                 MenteeProfile = new MenteeProfile { SubjectToLearn = subjectMath }
             };
-            _userRepo.CreateUser(mentee1);
+            await _userService.CreateUserAsync(mentee1);
 
             // Mentee 2: Dave — learns Physics, 11th grade
             var mentee2 = new Student
@@ -132,7 +133,7 @@ namespace MentoringApp
                 Grade = new Grade { Id = grade11, Name = "11th", Num = 11 },
                 MenteeProfile = new MenteeProfile { SubjectToLearn = subjectPhysics }
             };
-            _userRepo.CreateUser(mentee2);
+            await _userService.CreateUserAsync(mentee2);
 
             // Dual-role: Eve — teaches CS, learns Math, 11th grade
             var eveDual = new Student
@@ -146,7 +147,7 @@ namespace MentoringApp
                 // Assign a verification code so the verification flow can be tested
                 CurrentVerificationCode = new VerificationCode("VERIFY-EVE-2024")
             };
-            _userRepo.CreateUser(eveDual);
+            await _userService.CreateUserAsync(eveDual);
 
             // ── Step 3: Pairs ────────────────────────────────────────────────────────
 

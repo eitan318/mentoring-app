@@ -1,4 +1,5 @@
-﻿using MentoringApp.Data.Interfaces;
+﻿using MentoringApp.Data.DTO;
+using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,18 +19,24 @@ namespace MentoringApp.Service
         {
             try
             {
-                var grades = await _gradeRepo.GetAllGradesAsync();
+                IEnumerable<GradeDto> dtos = await _gradeRepo.GetAllGradesAsync();
 
-                if (grades == null)
+                if (dtos == null || !dtos.Any())
                 {
                     return Result<IEnumerable<Grade>>.Failure("No grades found.");
                 }
+
+                var grades = dtos.Select(dto => new Grade
+                {
+                    Id = dto.Id,
+                    Name = dto.Name,
+                    Num = dto.Num
+                });
 
                 return Result<IEnumerable<Grade>>.Ok(grades);
             }
             catch (Exception ex)
             {
-                // You can log the error here if you have a logger
                 return Result<IEnumerable<Grade>>.Failure($"Failed to load grades: {ex.Message}");
             }
         }

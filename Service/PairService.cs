@@ -6,12 +6,12 @@ namespace MentoringApp.Service
     public class PairService
     {
         private readonly IPairRepo _pairRepo;
-        private readonly IUserRepo _userRepo;
+        private readonly UserService _userService;
 
-        public PairService(IPairRepo pairRepo, IUserRepo userRepo)
+        public PairService(IPairRepo pairRepo, UserService userService)
         {
             _pairRepo = pairRepo;
-            _userRepo = userRepo;
+            _userService = userService;
         }
 
         public async Task<Result<IEnumerable<Pair>>> GetAllPairsAsync()
@@ -53,23 +53,23 @@ namespace MentoringApp.Service
         public async Task<Result> CreatePairAsync(int supervisorId, int mentorId, int menteeId)
         {
             // Verify users exist and have correct roles
-            var supervisor = await _userRepo.LoadUserByIdAsync(supervisorId);
-            if (supervisor is not Supervisor)
+            var supervisor = await _userService.GetUserByIdAsync(supervisorId);
+            if (supervisor.Data is not Supervisor)
                 return Result.Failure("Selected supervisor is not valid.");
 
-            var mentor = await _userRepo.LoadUserByIdAsync(mentorId);
-            if (mentor is not Student { IsMentor: true })
+            var mentor = await _userService.GetUserByIdAsync(mentorId);
+            if (mentor.Data is not Student { IsMentor: true })
                 return Result.Failure("Selected mentor is not a valid mentor.");
 
-            var mentee = await _userRepo.LoadUserByIdAsync(menteeId);
-            if (mentee is not Student { IsMentee: true })
+            var mentee = await _userService.GetUserByIdAsync(menteeId);
+            if (mentee.Data is not Student { IsMentee: true })
                 return Result.Failure("Selected mentee is not a valid mentee.");
 
             var pair = new Pair
             {
                 Id = -1,
-                Mentor = (Student)mentor,
-                Mentee = (Student)mentee
+                Mentor = (Student)mentor.Data,
+                Mentee = (Student)mentee.Data
             };
 
             bool created = await _pairRepo.CreateAsync(pair, supervisorId, mentorId, menteeId);

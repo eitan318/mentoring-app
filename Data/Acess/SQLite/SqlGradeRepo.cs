@@ -1,6 +1,7 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using MentoringApp.Model;
+using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -12,28 +13,17 @@ namespace MentoringApp.Data.Acess.SQLite
         {
             _db = db;
         }
-
-        public Task<Grade?> GetByIdAsync(int id)
+        public async Task<GradeDto?> GetByIdAsync(int id)
         {
-            var row = _db.QuerySingle<GradeRow>(
+            return await _db.QuerySingleAsync<GradeDto>(
                 "SELECT Id, Name, Num FROM Grades WHERE Id = @Id",
                 new { Id = id });
-
-            return Task.FromResult(row == null ? null : MapToDomain(row));
         }
 
-        public Task<IEnumerable<Grade>> GetAllGradesAsync()
+        public async Task<IEnumerable<GradeDto>> GetAllGradesAsync()
         {
-            var rows = _db.Query<GradeRow>("SELECT Id, Name, Num FROM Grades");
-            return Task.FromResult<IEnumerable<Grade>>(rows.Select(MapToDomain).ToList());
+            return await _db.QueryAsync<GradeDto>("SELECT Id, Name, Num FROM Grades");
         }
-
-        private static Grade MapToDomain(GradeRow row) => new Grade
-        {
-            Id = row.Id,
-            Name = row.Name,
-            Num = int.TryParse(row.Num, out int n) ? n : 0
-        };
 
         private class GradeRow
         {

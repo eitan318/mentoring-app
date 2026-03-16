@@ -37,8 +37,7 @@ namespace MentoringApp.Data.Interfaces
             services.AddSingleton<IUserRepo>(sp =>
                 new SqlUserRepo(
                     sp.GetRequiredService<ISQLiteConnectionService>(),
-                    connectionString,
-                    sp.GetRequiredService<IGradeRepo>()));
+                    connectionString));
 
             services.AddScoped<IPairRepo>(sp =>
                 new SqlPairRepo(
