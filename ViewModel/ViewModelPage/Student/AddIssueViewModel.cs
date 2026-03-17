@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
+using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
@@ -25,14 +26,16 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         private string _issueDescription = string.Empty;
 
         private readonly IssueService _issueService;
+        private readonly INavigationService _navigationService;
         private readonly UserStore _userStore;
 
         public event Action? RequestClose;
 
-        public AddIssueViewModel(IssueService issueService, UserStore userStore)
+        public AddIssueViewModel(IssueService issueService, UserStore userStore, INavigationService navigationService)
         {
             _issueService = issueService;
             _userStore = userStore;
+            _navigationService = navigationService;
             _issueCategoryList = [];
         }
     
@@ -56,6 +59,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             }
 
             RequestClose?.Invoke();
+            _navigationService.GoBackAsync();
         }
     }
 }

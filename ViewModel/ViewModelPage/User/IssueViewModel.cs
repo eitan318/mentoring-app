@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
@@ -29,6 +29,19 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private async Task Back()
         {
             await _navigationService.GoBackAsync();
+        }
+
+        [RelayCommand]
+        private async Task ResolveIssue()
+        {
+            if (CurrentIssue != null && !CurrentIssue.IsResolved)
+            {
+                var result = _issueService.ResolveIssue(CurrentIssue.Id);
+                if (result.Success)
+                {
+                    await _navigationService.GoBackAsync();
+                }
+            }
         }
     }
 }

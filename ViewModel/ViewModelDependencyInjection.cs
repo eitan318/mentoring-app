@@ -1,4 +1,4 @@
-﻿using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelPage;
 using MentoringApp.ViewModel.ViewModelPage.Admin;
@@ -32,6 +32,7 @@ namespace MentoringApp.ViewModel
             services.AddTransient<SupervisorDashboardViewModel>();
             services.AddTransient<AllSupervisorsViewModel>();
             services.AddTransient<AddIssueViewModel>();
+            services.AddTransient<AddReviewViewModel>();
             services.AddTransient<MyProfileViewModel>();
 
             return services;

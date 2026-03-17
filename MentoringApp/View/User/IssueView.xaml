@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="MentoringApp.View.User.IssueView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -54,6 +54,7 @@
                     Background="DarkGreen"
                     Content="Mark as Resolved"
                     Foreground="White"
+                    Command="{Binding ResolveIssueCommand}"
                     Visibility="{Binding CurrentIssue.IsResolved, Converter={StaticResource InverseBoolToVis}}" />
             </StackPanel>
         </StackPanel>

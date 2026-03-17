@@ -199,11 +199,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [RelayCommand]
         private async Task CreateReview()
         {
-            var res = _reviewService.CreateReview($"Session review — {DateTime.Now:MMM d}: Reviewed progress.", Pair.Id, _userStore.User!.Id);
-            if (res.Success)
-            {
-                await LoadDataAsync();
-            }
+            await _navigationService.NavigateToAsync<AddReviewViewModel, Pair>(Pair);
+            // After returning, reload to show new reviews
+            await LoadDataAsync();
         }
     }
 }
