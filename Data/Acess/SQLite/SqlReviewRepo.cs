@@ -1,6 +1,6 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
-using MentoringApp.Model;
+using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -13,25 +13,23 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public IEnumerable<Review> GetByPair(int pairId)
+        public IEnumerable<ReviewDto> GetByPair(int pairId)
         {
             var rows = _db.Query<ReviewRow>(
                 "SELECT Id, PairId, AuthorUserId, Content, Date FROM Reviews WHERE PairId = @PairId",
                 new { PairId = pairId });
-
-            return rows.Select(MapToDomain).ToList();
+            return rows.Select(MapToDto).ToList();
         }
 
-        public IEnumerable<Review> GetByAuthor(int authorUserId)
+        public IEnumerable<ReviewDto> GetByAuthor(int authorUserId)
         {
             var rows = _db.Query<ReviewRow>(
                 "SELECT Id, PairId, AuthorUserId, Content, Date FROM Reviews WHERE AuthorUserId = @AuthorUserId",
                 new { AuthorUserId = authorUserId });
-
-            return rows.Select(MapToDomain).ToList();
+            return rows.Select(MapToDto).ToList();
         }
 
-        public bool Create(Review review, int pairId, int authorUserId)
+        public bool Create(string content, DateTime date, int pairId, int authorUserId)
         {
             try
             {
@@ -42,8 +40,8 @@ namespace MentoringApp.Data.Acess.SQLite
                     {
                         PairId = pairId,
                         AuthorUserId = authorUserId,
-                        Content = review.Content,
-                        Date = review.Date.ToString("o")
+                        Content = content,
+                        Date = date.ToString("o")
                     });
                 return true;
             }
@@ -53,10 +51,14 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
-        private static Review MapToDomain(ReviewRow row)
+        private static ReviewDto MapToDto(ReviewRow row) => new ReviewDto
         {
-            return new Review(row.Content, DateTime.Parse(row.Date));
-        }
+            Id = row.Id,
+            PairId = row.PairId,
+            AuthorUserId = row.AuthorUserId,
+            Content = row.Content,
+            Date = row.Date
+        };
 
         private class ReviewRow
         {

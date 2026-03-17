@@ -1,4 +1,4 @@
-﻿using MentoringApp.Data.Acess.SQLite;
+using MentoringApp.Data.Acess.SQLite;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,9 +40,7 @@ namespace MentoringApp.Data.Interfaces
                     connectionString));
 
             services.AddScoped<IPairRepo>(sp =>
-                new SqlPairRepo(
-                    sp.GetRequiredService<ISQLiteConnectionService>(),
-                    sp.GetRequiredService<IGradeRepo>()));
+                new SqlPairRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
             services.AddScoped<IIssueRepo>(sp =>
                 new SqlIssueRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
             services.AddScoped<IReviewRepo>(sp =>

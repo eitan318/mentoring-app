@@ -1,3 +1,4 @@
+using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 
@@ -16,37 +17,49 @@ namespace MentoringApp.Service
 
         public async Task<Result<IEnumerable<Pair>>> GetAllPairsAsync()
         {
-            var pairs = await _pairRepo.GetAllAsync();
+            var dtos = await _pairRepo.GetAllAsync();
+            var pairs = new List<Pair>();
+            foreach (var dto in dtos)
+            {
+                var pair = await MapDtoToPairAsync(dto);
+                if (pair != null) pairs.Add(pair);
+            }
             return Result<IEnumerable<Pair>>.Ok(pairs);
         }
 
         public async Task<Result<Pair>> GetPairById(int id)
         {
-            var pair = _pairRepo.GetById(id);
-            return pair != null
-                ? Result<Pair>.Ok(pair)
-                : Result<Pair>.Failure("Pair not found.");
+            var dto = await _pairRepo.GetByIdAsync(id);
+            if (dto == null) return Result<Pair>.Failure("Pair not found.");
+            var pair = await MapDtoToPairAsync(dto);
+            return pair != null ? Result<Pair>.Ok(pair) : Result<Pair>.Failure("Failed to build pair.");
         }
 
-        public Result<Pair> GetPairByMentor(int mentorId)
+        public async Task<Result<Pair>> GetPairByMentorAsync(int mentorId)
         {
-            var pair = _pairRepo.GetByMentorIdAsync(mentorId).Result;
-            return pair != null
-                ? Result<Pair>.Ok(pair)
-                : Result<Pair>.Failure("No pair found for this mentor.");
+            var dto = await _pairRepo.GetByMentorIdAsync(mentorId);
+            if (dto == null) return Result<Pair>.Failure("No pair found for this mentor.");
+            var pair = await MapDtoToPairAsync(dto);
+            return pair != null ? Result<Pair>.Ok(pair) : Result<Pair>.Failure("Failed to build pair.");
         }
 
-        public Result<Pair> GetPairByMentee(int menteeId)
+        public async Task<Result<Pair>> GetPairByMenteeAsync(int menteeId)
         {
-            var pair = _pairRepo.GetByMenteeIdAsync(menteeId).Result;
-            return pair != null
-                ? Result<Pair>.Ok(pair)
-                : Result<Pair>.Failure("No pair found for this mentee.");
+            var dto = await _pairRepo.GetByMenteeIdAsync(menteeId);
+            if (dto == null) return Result<Pair>.Failure("No pair found for this mentee.");
+            var pair = await MapDtoToPairAsync(dto);
+            return pair != null ? Result<Pair>.Ok(pair) : Result<Pair>.Failure("Failed to build pair.");
         }
 
-        public Result<IEnumerable<Pair>> GetPairsBySupervisor(int supervisorId)
+        public async Task<Result<IEnumerable<Pair>>> GetPairsBySupervisorAsync(int supervisorId)
         {
-            var pairs = _pairRepo.GetBySupervisorId(supervisorId);
+            var dtos = await _pairRepo.GetBySupervisorIdAsync(supervisorId);
+            var pairs = new List<Pair>();
+            foreach (var dto in dtos)
+            {
+                var pair = await MapDtoToPairAsync(dto);
+                if (pair != null) pairs.Add(pair);
+            }
             return Result<IEnumerable<Pair>>.Ok(pairs);
         }
 
@@ -65,14 +78,7 @@ namespace MentoringApp.Service
             if (mentee.Data is not Student { IsMentee: true })
                 return Result.Failure("Selected mentee is not a valid mentee.");
 
-            var pair = new Pair
-            {
-                Id = -1,
-                Mentor = (Student)mentor.Data,
-                Mentee = (Student)mentee.Data
-            };
-
-            bool created = await _pairRepo.CreateAsync(pair, supervisorId, mentorId, menteeId);
+            bool created = await _pairRepo.CreateAsync(supervisorId, mentorId, menteeId);
             return created ? Result.Ok() : Result.Failure("Failed to create pair.");
         }
 
@@ -80,6 +86,22 @@ namespace MentoringApp.Service
         {
             bool deleted = _pairRepo.Delete(pairId);
             return deleted ? Result.Ok() : Result.Failure("Pair not found or could not be deleted.");
+        }
+
+        private async Task<Pair?> MapDtoToPairAsync(PairDto dto)
+        {
+            var mentorResult = await _userService.GetUserByIdAsync(dto.MentorId);
+            var menteeResult = await _userService.GetUserByIdAsync(dto.MenteeId);
+
+            if (mentorResult.Data is not Student mentor) return null;
+            if (menteeResult.Data is not Student mentee) return null;
+
+            return new Pair
+            {
+                Id = dto.Id,
+                Mentor = mentor,
+                Mentee = mentee
+            };
         }
     }
 }

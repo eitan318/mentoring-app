@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
@@ -52,7 +52,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
 
             if (_userStore.User != null)
             {
-                _issueService.CreateIssue(IssueDescription, SelectedIssueCategory, _userStore.User.Id);
+                _issueService.CreateIssue(IssueDescription, SelectedIssueCategory.Id, _userStore.User.Id);
             }
 
             RequestClose?.Invoke();

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
@@ -44,7 +44,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             foreach (var supervisor in supervisors)
             {
 
-                int pairsCount = _pairService.GetPairsBySupervisor(supervisor.Id).Data.Count();
+                int pairsCount = (await _pairService.GetPairsBySupervisorAsync(supervisor.Id)).Data?.Count() ?? 0;
                 int pendingIssuesCount =  _issueService.GetIssuesBySupervisor(supervisor.Id).Data.Count();
                 
                 SupervisorsList.Add(new SupervisorSummary

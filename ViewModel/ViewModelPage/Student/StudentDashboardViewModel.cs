@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
@@ -54,7 +54,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
 
             if (currentUser.IsMentor)
             {
-                var result = _pairService.GetPairByMentor(currentUser.Id);
+                var result = await _pairService.GetPairByMentorAsync(currentUser.Id);
                 if (result.Success && result.Data != null)
                 {
                     var pair = result.Data;
@@ -65,7 +65,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             }
             if (currentUser.IsMentee)
             {
-                var result = _pairService.GetPairByMentee(currentUser.Id);
+                var result = await _pairService.GetPairByMenteeAsync(currentUser.Id);
                 if (result.Success && result.Data != null)
                 {
                     var pair = result.Data;

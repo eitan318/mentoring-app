@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
@@ -41,7 +41,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
         private async Task LoadSupervisorDataAsync(int supervisorId)
         {
-            var pairsResult = await Task.Run(() => _pairService.GetPairsBySupervisor(supervisorId));
+            var pairsResult = await _pairService.GetPairsBySupervisorAsync(supervisorId);
             var issuesResult = await Task.Run(() => _issueService.GetAllIssues());
 
             if (pairsResult.Success && pairsResult.Data != null)

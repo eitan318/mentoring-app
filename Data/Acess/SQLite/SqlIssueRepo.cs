@@ -1,6 +1,6 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
-using MentoringApp.Model;
+using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -13,30 +13,30 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public IEnumerable<Issue> GetAll()
+        public IEnumerable<IssueDto> GetAll()
         {
             var rows = _db.Query<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues");
-            return rows.Select(r => MapToDomain(r)).ToList();
+            return rows.Select(MapToDto).ToList();
         }
 
-        public Issue? GetById(int id)
+        public IssueDto? GetById(int id)
         {
             var row = _db.QuerySingle<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues WHERE Id = @Id",
                 new { Id = id });
-            return row == null ? null : MapToDomain(row);
+            return row == null ? null : MapToDto(row);
         }
 
-        public IEnumerable<Issue> GetByReporter(int userId)
+        public IEnumerable<IssueDto> GetByReporter(int userId)
         {
             var rows = _db.Query<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues WHERE ReportedByUserId = @UserId",
                 new { UserId = userId });
-            return rows.Select(r => MapToDomain(r)).ToList();
+            return rows.Select(MapToDto).ToList();
         }
 
-        public IEnumerable<Issue> GetBySupervisor(int supervisorId)
+        public IEnumerable<IssueDto> GetBySupervisor(int supervisorId)
         {
             // Get supervised student IDs from Pairs
             var studentRows = _db.Query<StudentIdRow>(
@@ -47,25 +47,32 @@ namespace MentoringApp.Data.Acess.SQLite
 
             var studentIds = studentRows.Select(r => r.UserId).Distinct().ToList();
             if (!studentIds.Any())
-                return Enumerable.Empty<Issue>();
+                return Enumerable.Empty<IssueDto>();
 
-            // Fetch all issues and filter by those student IDs in memory
             var allIssues = _db.Query<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues");
 
             return allIssues
                 .Where(i => studentIds.Contains(i.ReportedByUserId))
-                .Select(r => MapToDomain(r))
+                .Select(MapToDto)
                 .ToList();
         }
 
-        public IEnumerable<IssueCategory> GetCategories()
+        public IEnumerable<IssueCategoryDto> GetCategories()
         {
             var rows = _db.Query<CategoryRow>("SELECT Id, Name FROM IssueCategories");
-            return rows.Select(r => new IssueCategory { Id = r.Id, Name = r.Name }).ToList();
+            return rows.Select(r => new IssueCategoryDto { Id = r.Id, Name = r.Name }).ToList();
         }
 
-        public bool Create(Issue issue, int reportedByUserId)
+        public IssueCategoryDto? GetCategoryById(int categoryId)
+        {
+            var row = _db.QuerySingle<CategoryRow>(
+                "SELECT Id, Name FROM IssueCategories WHERE Id = @Id",
+                new { Id = categoryId });
+            return row == null ? null : new IssueCategoryDto { Id = row.Id, Name = row.Name };
+        }
+
+        public bool Create(string description, int categoryId, int reportedByUserId)
         {
             try
             {
@@ -74,8 +81,8 @@ namespace MentoringApp.Data.Acess.SQLite
                       VALUES (@Description, @CategoryId, @ReportedByUserId, 0, @CreationDate)",
                     new
                     {
-                        Description = issue.Description,
-                        CategoryId = issue.Category.Id,
+                        Description = description,
+                        CategoryId = categoryId,
                         ReportedByUserId = reportedByUserId,
                         CreationDate = DateTime.UtcNow.ToString("o")
                     });
@@ -102,23 +109,14 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
-        private IssueCategory LoadCategory(int categoryId)
-        {
-            var row = _db.QuerySingle<CategoryRow>(
-                "SELECT Id, Name FROM IssueCategories WHERE Id = @Id",
-                new { Id = categoryId });
-            return row != null
-                ? new IssueCategory { Id = row.Id, Name = row.Name }
-                : new IssueCategory { Id = categoryId, Name = "Unknown" };
-        }
-
-        private Issue MapToDomain(IssueRow row) => new Issue
+        private static IssueDto MapToDto(IssueRow row) => new IssueDto
         {
             Id = row.Id,
             Description = row.Description,
-            Category = LoadCategory(row.CategoryId),
-            IsResolved = row.IsResolved != 0,
-            CreationDate = DateTime.Parse(row.CreationDate)
+            CategoryId = row.CategoryId,
+            ReportedByUserId = row.ReportedByUserId,
+            IsResolved = row.IsResolved,
+            CreationDate = row.CreationDate
         };
 
         private class IssueRow

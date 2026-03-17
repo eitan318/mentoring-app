@@ -1,6 +1,6 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
-using MentoringApp.Model;
+using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -13,11 +13,10 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public Task<bool> SaveAsync(int userId, VerificationCode verificationCode)
+        public Task<bool> SaveAsync(int userId, string code, DateTime creationDate)
         {
             try
             {
-                // Upsert: insert or replace
                 _db.Execute(
                     @"INSERT INTO VerificationCodes (UserId, Code, CreationDate)
                       VALUES (@UserId, @Code, @CreationDate)
@@ -25,8 +24,8 @@ namespace MentoringApp.Data.Acess.SQLite
                     new
                     {
                         UserId = userId,
-                        Code = verificationCode.Code,
-                        CreationDate = verificationCode.CreationDate.ToString("o")
+                        Code = code,
+                        CreationDate = creationDate.ToString("o")
                     });
                 return Task.FromResult(true);
             }

@@ -1,10 +1,6 @@
-﻿using MentoringApp.Data.Interfaces;
+using MentoringApp.Data.DTO;
+using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MentoringApp.Service
 {
@@ -12,17 +8,19 @@ namespace MentoringApp.Service
     {
         private readonly ISubjectRepo _subjectRepo;
 
-        public SubjectService(ISubjectRepo reviewRepo)
+        public SubjectService(ISubjectRepo subjectRepo)
         {
-            _subjectRepo = reviewRepo;
+            _subjectRepo = subjectRepo;
         }
 
         public async Task<Result<IEnumerable<Subject>>> GetAllSubjectsAsync()
         {
-            var subjects = await _subjectRepo.GetAllSubjectsAsync();
+            var dtos = await _subjectRepo.GetAllSubjectsAsync();
+            var subjects = dtos.Select(MapDtoToSubject);
             return Result<IEnumerable<Subject>>.Ok(subjects);
         }
 
+        private static Subject MapDtoToSubject(SubjectDto dto) =>
+            new Subject { Id = dto.Id, Name = dto.Name };
     }
-
 }

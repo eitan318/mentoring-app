@@ -152,12 +152,10 @@ namespace MentoringApp
             // ── Step 3: Pairs ────────────────────────────────────────────────────────
 
             // Pair 1: Alice (mentor) + Charlie (mentee), supervised by Jane
-            var pair1 = new Pair { Id = -1, Mentor = mentor1, Mentee = mentee1 };
-            await _pairRepo.CreateAsync(pair1, supervisor.Id, mentor1.Id, mentee1.Id);
+            await _pairRepo.CreateAsync(supervisor.Id, mentor1.Id, mentee1.Id);
 
             // Pair 2: Bob (mentor) + Dave (mentee), supervised by Jane
-            var pair2 = new Pair { Id = -1, Mentor = mentor2, Mentee = mentee2 };
-            await _pairRepo.CreateAsync(pair2, supervisor.Id, mentor2.Id, mentee2.Id);
+            await _pairRepo.CreateAsync(supervisor.Id, mentor2.Id, mentee2.Id);
 
             // Read back actual pair IDs from DB
             int pairId1 = GetId("SELECT Id FROM Pairs WHERE MentorId = " + mentor1.Id + " AND MenteeId = " + mentee1.Id);
@@ -166,39 +164,34 @@ namespace MentoringApp
             // ── Step 4: Reviews ──────────────────────────────────────────────────────
 
             // Alice reviews Charlie's progress (Pair 1)
-            var review1 = new Review("Charlie is doing great progress in Math! Very consistent effort.", DateTime.UtcNow.AddDays(-7));
-            _reviewRepo.Create(review1, pairId1, mentor1.Id);
+            _reviewRepo.Create("Charlie is doing great progress in Math! Very consistent effort.", DateTime.UtcNow.AddDays(-7), pairId1, mentor1.Id);
 
             // Dave reviews Bob's teaching style (Pair 2)
-            var review2 = new Review("Bob explains Physics concepts very clearly. Loving the sessions!", DateTime.UtcNow.AddDays(-3));
-            _reviewRepo.Create(review2, pairId2, mentee2.Id);
+            _reviewRepo.Create("Bob explains Physics concepts very clearly. Loving the sessions!", DateTime.UtcNow.AddDays(-3), pairId2, mentee2.Id);
 
             // ── Step 5: Issues ───────────────────────────────────────────────────────
 
             // Issue 1: Charlie (mentee) reports a general help issue — unresolved
-            var issue1 = new Issue(
+            _issueRepo.Create(
                 "I can't access my learning materials for Math. The link seems broken.",
-                new IssueCategory("General Help", catGeneral),
-                false);
-            _issueRepo.Create(issue1, mentee1.Id);
+                catGeneral,
+                mentee1.Id);
 
             // Issue 2: Alice (mentor) reports a technical issue — resolved
-            var issue2 = new Issue(
+            _issueRepo.Create(
                 "The app crashed while I was submitting a review for my mentee.",
-                new IssueCategory("Technical Issue", catTechnical),
-                false);
-            _issueRepo.Create(issue2, mentor1.Id);
+                catTechnical,
+                mentor1.Id);
             // Resolve issue 2
             var createdIssue2 = _issueRepo.GetAll().OrderByDescending(i => i.Id).FirstOrDefault(i => i.Description.Contains("crashed"));
             if (createdIssue2 != null)
                 _issueRepo.Resolve(createdIssue2.Id);
 
             // Issue 3: Bob (mentor) reports a behavioral issue about a student — unresolved
-            var issue3 = new Issue(
+            _issueRepo.Create(
                 "My mentee missed two consecutive sessions without notice.",
-                new IssueCategory("Behavioral Issue", catBehavioral),
-                false);
-            _issueRepo.Create(issue3, mentor2.Id);
+                catBehavioral,
+                mentor2.Id);
 
             await Task.CompletedTask;
         }

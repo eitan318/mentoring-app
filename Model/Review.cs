@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -16,6 +16,7 @@ namespace MentoringApp.Model
             Content = content;
             Date = date;
         }
+        public int Id { get; set; }
         public required string Content { get; set; }
         public required DateTime Date { get; set; }
     }

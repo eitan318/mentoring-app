@@ -1,4 +1,4 @@
-﻿using MentoringApp.Model;
+using MentoringApp.Model;
 using MentoringApp.Data;
 using MentoringApp.Data.Interfaces;
 using System.Reflection.Emit;
@@ -36,9 +36,9 @@ namespace MentoringApp.Service
 
             // Generate and Save Code
             string code = new Random().Next(100000, 999999).ToString();
-            var verification = new VerificationCode { CreationDate = DateTime.Now, Code = code };
+            var creationDate = DateTime.Now;
         
-            bool saved = await _verificationCodeRepository.SaveAsync(user.Id, verification);
+            bool saved = await _verificationCodeRepository.SaveAsync(user.Id, code, creationDate);
             if (!saved) 
                 return Result.Failure("System error: Could not save verification code.");
 

@@ -1,6 +1,6 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
-using MentoringApp.Model;
+using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -13,11 +13,11 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public Task<IEnumerable<Subject>> GetAllSubjectsAsync()
+        public Task<IEnumerable<SubjectDto>> GetAllSubjectsAsync()
         {
             var rows = _db.Query<SubjectRow>("SELECT Id, Name FROM Subjects");
-            var result = rows.Select(r => new Subject { Id = r.Id, Name = r.Name });
-            return Task.FromResult<IEnumerable<Subject>>(result.ToList());
+            var result = rows.Select(r => new SubjectDto { Id = r.Id, Name = r.Name });
+            return Task.FromResult<IEnumerable<SubjectDto>>(result.ToList());
         }
 
         private class SubjectRow

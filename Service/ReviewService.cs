@@ -1,3 +1,4 @@
+using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 
@@ -14,13 +15,15 @@ namespace MentoringApp.Service
 
         public Result<IEnumerable<Review>> GetReviewsByPair(int pairId)
         {
-            var reviews = _reviewRepo.GetByPair(pairId);
+            var dtos = _reviewRepo.GetByPair(pairId);
+            var reviews = dtos.Select(MapDtoToReview);
             return Result<IEnumerable<Review>>.Ok(reviews);
         }
 
         public Result<IEnumerable<Review>> GetReviewsByAuthor(int authorUserId)
         {
-            var reviews = _reviewRepo.GetByAuthor(authorUserId);
+            var dtos = _reviewRepo.GetByAuthor(authorUserId);
+            var reviews = dtos.Select(MapDtoToReview);
             return Result<IEnumerable<Review>>.Ok(reviews);
         }
 
@@ -29,9 +32,14 @@ namespace MentoringApp.Service
             if (string.IsNullOrWhiteSpace(content))
                 return Result.Failure("Review content cannot be empty.");
 
-            var review = new Review(content, DateTime.UtcNow);
-            bool created = _reviewRepo.Create(review, pairId, authorUserId);
+            bool created = _reviewRepo.Create(content, DateTime.UtcNow, pairId, authorUserId);
             return created ? Result.Ok() : Result.Failure("Failed to save review.");
         }
+
+        private static Review MapDtoToReview(ReviewDto dto) =>
+            new Review(dto.Content, DateTime.Parse(dto.Date))
+            {
+                Id = dto.Id
+            };
     }
 }
