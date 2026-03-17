@@ -30,6 +30,7 @@ namespace MentoringApp.ViewModel
             services.AddTransient<ManagePairsViewModel>();
             services.AddTransient<CreatePairViewModel>();
             services.AddTransient<SupervisorDashboardViewModel>();
+            services.AddTransient<PairDetailsViewModel>();
             services.AddTransient<AllSupervisorsViewModel>();
             services.AddTransient<AddIssueViewModel>();
             services.AddTransient<AddReviewViewModel>();

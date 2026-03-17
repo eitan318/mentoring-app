@@ -70,6 +70,10 @@
         <supervisorv:SupervisorDashboardView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type supervisorvm:PairDetailsViewModel}">
+        <supervisorv:PairDetailsView />
+    </DataTemplate>
+
 
 
 </ResourceDictionary>

@@ -50,6 +50,15 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             }
         }
 
+        [RelayCommand]
+        private async Task SelectPair(Pair? pair)
+        {
+            if (pair != null)
+            {
+                await _navigationService.NavigateToAsync<PairDetailsViewModel, int>(pair.Id);
+            }
+        }
+
         private async Task LoadSupervisorDataAsync(int supervisorId)
         {
             var pairsResult = await _pairService.GetPairsBySupervisorAsync(supervisorId);
