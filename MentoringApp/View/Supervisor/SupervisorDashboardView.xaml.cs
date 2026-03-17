@@ -28,9 +28,7 @@ namespace MentoringApp.View.Supervisor
             }
         }
 
-        private void FilterPending(object sender, FilterEventArgs e) => e.Accepted = e.Item is Issue issue && !issue.IsResolved;
-
-        private void FilterResolved(object sender, FilterEventArgs e) => e.Accepted = e.Item is Issue issue && issue.IsResolved;
+       
 
     }
 

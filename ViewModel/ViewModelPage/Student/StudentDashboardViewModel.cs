@@ -15,6 +15,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
     {
         public ObservableCollection<PairMemberDashboardViewModel> Pairs { get; set; } = new();
 
+        public bool HasNoPairs => Pairs.Count == 0;
+
         [ObservableProperty]
         private PairMemberDashboardViewModel? _selectedPair;
 
@@ -79,6 +81,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             {
                 SelectedPair = Pairs[0];
             }
+
+            OnPropertyChanged(nameof(HasNoPairs));
         }
     }
 

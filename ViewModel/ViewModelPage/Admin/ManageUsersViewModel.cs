@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
@@ -73,11 +73,11 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         }
 
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
-        private void ViewUser()
+        private async Task ViewUser()
         {
             if (SelectedUser != null)
             {
-                _navigationService.NavigateToAsync<OtherProfileViewModel>();
+                await _navigationService.NavigateToAsync<OtherProfileViewModel, int>(SelectedUser.Id);
             }
         }
 

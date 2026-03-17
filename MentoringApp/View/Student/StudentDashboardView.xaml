@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="MentoringApp.View.Student.StudentHomeView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,8 +13,9 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Pair selector tabs -->
-        <ListBox Grid.Row="0" ItemsSource="{Binding Pairs}" SelectedItem="{Binding SelectedPair}">
+        <!-- Pair selector tabs (hidden when no pairs) -->
+        <ListBox Grid.Row="0" ItemsSource="{Binding Pairs}" SelectedItem="{Binding SelectedPair}"
+                 Visibility="{Binding HasNoPairs, Converter={StaticResource InverseBoolToVis}}">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal" />
@@ -37,8 +38,9 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <!-- Dashboard panel -->
-        <ContentControl Grid.Row="1" Content="{Binding SelectedPair}" Margin="10">
+        <!-- Dashboard panel (hidden when no pairs) -->
+        <ContentControl Grid.Row="1" Content="{Binding SelectedPair}" Margin="10"
+                        Visibility="{Binding HasNoPairs, Converter={StaticResource InverseBoolToVis}}">
             <ContentControl.Resources>
 
                 <!-- Mentor view: you are mentoring a mentee -->
@@ -146,5 +148,29 @@
 
             </ContentControl.Resources>
         </ContentControl>
+
+        <!-- Empty state: shown when the student has no mentor or mentee -->
+        <StackPanel Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding HasNoPairs, Converter={StaticResource BoolToVis}}">
+            <TextBlock
+                FontSize="48"
+                HorizontalAlignment="Center"
+                Foreground="#CCCCCC"
+                Text="👤" />
+            <TextBlock
+                FontSize="20"
+                FontWeight="SemiBold"
+                Foreground="#888"
+                HorizontalAlignment="Center"
+                Margin="0,12,0,6"
+                Text="No mentor or mentee assigned" />
+            <TextBlock
+                FontSize="14"
+                Foreground="#AAA"
+                HorizontalAlignment="Center"
+                Text="Contact your supervisor or administrator to get paired." />
+        </StackPanel>
     </Grid>
 </UserControl>

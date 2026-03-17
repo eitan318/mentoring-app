@@ -9,15 +9,6 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <CollectionViewSource
-            x:Key="PendingFilter"
-            Filter="FilterPending"
-            Source="{Binding AllIssues}" />
-
-        <CollectionViewSource
-            x:Key="ResolvedFilter"
-            Filter="FilterResolved"
-            Source="{Binding AllIssues}" />
 
         <DataTemplate x:Key="IssueItemTemplate">
             <StackPanel Margin="5">
@@ -98,7 +89,7 @@
                 <ListView
                     ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
                     ItemTemplate="{StaticResource IssueItemTemplate}"
-                    ItemsSource="{Binding Source={StaticResource PendingFilter}}" />
+                    ItemsSource="{Binding PendingIssues}" />
 
 
 
@@ -115,7 +106,7 @@
                 <ListView
                     ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
                     ItemTemplate="{StaticResource IssueItemTemplate}"
-                    ItemsSource="{Binding Source={StaticResource ResolvedFilter}}" />
+                    ItemsSource="{Binding ResolvedIssues}" />
             </DockPanel>
         </UniformGrid>
 

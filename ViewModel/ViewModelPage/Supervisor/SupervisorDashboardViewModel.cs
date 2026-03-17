@@ -17,10 +17,21 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         protected readonly IssueService _issueService;
         protected readonly UserService _userService;
 
+        // Cached so we can reload data after returning from sub-pages
+        private int _currentSupervisorId;
+
         [ObservableProperty] private Model.Supervisor? _selectedSupervisor;
 
-        public ObservableCollection<Pair> PairsSupervised { get; set; } = [];
-        public ObservableCollection<Issue> AllIssues { get; set; } = [];
+        
+        [ObservableProperty] private ObservableCollection<Pair> _pairsSupervised = [];
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(PendingIssues))]
+        [NotifyPropertyChangedFor(nameof(ResolvedIssues))]
+        private ObservableCollection<Issue> _allIssues = [];
+        public IEnumerable<Issue> PendingIssues => AllIssues.Where(i => !i.IsResolved);
+        public IEnumerable<Issue> ResolvedIssues => AllIssues.Where(i => i.IsResolved);
+
 
         public SupervisorDashboardViewModel(INavigationService navigationService, PairService pairService, IssueService issueService, UserService userService)
         {
@@ -44,18 +55,28 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             var pairsResult = await _pairService.GetPairsBySupervisorAsync(supervisorId);
             var issuesResult = await _issueService.GetAllIssuesAsync();
 
-            if (pairsResult.Success && pairsResult.Data != null)
+            // Swapping the instance now triggers the UI update
+            if (pairsResult.Success)
             {
-                PairsSupervised = new ObservableCollection<Pair>(pairsResult.Data);
-            }
-            if(issuesResult.Success && issuesResult.Data != null)
-            {
-                AllIssues = new ObservableCollection<Issue>(issuesResult.Data);
+                PairsSupervised = new ObservableCollection<Pair>(pairsResult.Data ?? []);
             }
 
+            if (issuesResult.Success)
+            {
+                AllIssues = new ObservableCollection<Issue>(issuesResult.Data ?? []);
+            }
         }
+
+
+        // Called by GoBackAsync when the user returns to this view
+        public new async Task OnNavigatedToAsync()
+        {
+            await LoadSupervisorDataAsync(_currentSupervisorId);
+        }
+
         public virtual async Task OnNavigatedToAsync(int supervisorId)
         {
+            _currentSupervisorId = supervisorId;
             await LoadSupervisorDataAsync(supervisorId);
             Result<Model.User> res = await _userService.GetUserByIdAsync(supervisorId);
             SelectedSupervisor = res.Data as Model.Supervisor;
