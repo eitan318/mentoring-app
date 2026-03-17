@@ -1,72 +1,69 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    
-                    xmlns:adminv="clr-namespace:MentoringApp.View.Admin"
-                    xmlns:userv="clr-namespace:MentoringApp.View.User"
-                    xmlns:supervisorv="clr-namespace:MentoringApp.View.Supervisor"
-                    xmlns:studentv="clr-namespace:MentoringApp.View.Student"
-
-                    xmlns:adminvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Admin;assembly=MentoringApp.ViewModel"
-                    xmlns:uservm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.User;assembly=MentoringApp.ViewModel"
-                    xmlns:supervisorvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Supervisor;assembly=MentoringApp.ViewModel"
-                    xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Student;assembly=MentoringApp.ViewModel"
-                    
-                    >
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:adminv="clr-namespace:MentoringApp.View.Admin"
+    xmlns:adminvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Admin;assembly=MentoringApp.ViewModel"
+    xmlns:studentv="clr-namespace:MentoringApp.View.Student"
+    xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Student;assembly=MentoringApp.ViewModel"
+    xmlns:supervisorv="clr-namespace:MentoringApp.View.Supervisor"
+    xmlns:supervisorvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Supervisor;assembly=MentoringApp.ViewModel"
+    xmlns:userv="clr-namespace:MentoringApp.View.User"
+    xmlns:uservm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.User;assembly=MentoringApp.ViewModel">
 
     <DataTemplate DataType="{x:Type uservm:LoginViewModel}">
-        <userv:LoginView/>
+        <userv:LoginView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type uservm:RegistrationViewModel}">
-        <userv:RegistrationView/>
+        <userv:RegistrationView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type uservm:MyProfileViewModel}">
-        <userv:MyProfileView/>
+        <userv:MyProfileView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type uservm:OtherProfileViewModel}">
-        <userv:OtherProfileView/>
+        <userv:OtherProfileView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type uservm:AuthenticatedDashboardViewModel}">
-        <userv:AuthenticatedDashboardView/>
+        <userv:AuthenticatedDashboardView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type uservm:IssueViewModel}">
-        <userv:IssueView/>
+        <userv:IssueView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type adminvm:AdminDashboardViewModel}">
-        <adminv:AdminDashboardView/>
+        <adminv:AdminDashboardView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type adminvm:ManageUsersViewModel}">
-        <adminv:ManageUsersView/>
+        <adminv:ManageUsersView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type adminvm:ManagePairsViewModel}">
-        <adminv:ManagePairViewModel/>
+        <adminv:ManagePairViewModel />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type adminvm:CreatePairViewModel}">
-        <adminv:CreatePairView/>
+        <adminv:CreatePairView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type adminvm:AllSupervisorsViewModel}">
-        <adminv:AllSupervisorsView/>
+        <adminv:AllSupervisorsView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type studentvm:StudentDashboardViewModel}">
-        <studentv:StudentHomeView/>
+        <studentv:StudentHomeView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type studentvm:AddIssueViewModel}">
-        <studentv:AddIssueView/>
+        <studentv:AddIssueView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type supervisorvm:SupervisorDashboardViewModel}">
-        <supervisorv:SupervisorDashboardView/>
+        <supervisorv:SupervisorDashboardView />
     </DataTemplate>
 
 

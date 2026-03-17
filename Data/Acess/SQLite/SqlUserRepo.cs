@@ -162,6 +162,7 @@ namespace MentoringApp.Data.Acess.SQLite
 
             var studentData = await _db.QuerySingleAsync<StudentRow>("SELECT * FROM UserStudents WHERE UserId = @Id", new { Id = userId });
             var mentorData = await _db.QuerySingleAsync<MentorRow>("SELECT * FROM UserMentors WHERE UserId = @Id", new { Id = userId });
+            var menteeData = await _db.QuerySingleAsync<MenteeRow>("SELECT * FROM UserMentees WHERE UserId = @Id", new { Id = userId });
             var codeData = await _db.QuerySingleAsync<CodeRow>("SELECT * FROM VerificationCodes WHERE UserId = @Id", new { Id = userId });
 
             UserRoleType roleType = await DetermineRoleAsync(userId);
@@ -175,6 +176,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 Role = roleType,
                 GradeId = studentData?.GradeId,
                 MentorSubjectId = mentorData?.SubjectToTeach,
+                MenteeSubjectId = menteeData?.SubjectToLearn,
                 VerificationCode = codeData?.Code,
                 VerificationCodeCreated = codeData != null ? DateTime.Parse(codeData.CreationDate) : null
             };
@@ -186,6 +188,7 @@ namespace MentoringApp.Data.Acess.SQLite
 
             var students = (await _db.QueryAsync<StudentRow>("SELECT * FROM UserStudents")).ToDictionary(s => s.UserId);
             var mentors = (await _db.QueryAsync<MentorRow>("SELECT * FROM UserMentors")).ToDictionary(m => m.UserId);
+            var mentees = (await _db.QueryAsync<MenteeRow>("SELECT * FROM UserMentees")).ToDictionary(m => m.UserId);
 
             var tasks = users.Select(async u =>
             {
@@ -197,7 +200,8 @@ namespace MentoringApp.Data.Acess.SQLite
                     NationalId = u.NationalId,
                     Role = await DetermineRoleAsync(u.Id),
                     GradeId = students.TryGetValue(u.Id, out var s) ? s.GradeId : null,
-                    MentorSubjectId = mentors.TryGetValue(u.Id, out var m) ? m.SubjectToTeach : null
+                    MentorSubjectId = mentors.TryGetValue(u.Id, out var m) ? m.SubjectToTeach : null,
+                    MenteeSubjectId = mentees.TryGetValue(u.Id, out var me) ? me.SubjectToLearn : null
                 };
             });
 

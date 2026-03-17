@@ -43,10 +43,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             LoadAvailableUsers();
         }
 
-        private void LoadAvailableUsers()
+        private async Task LoadAvailableUsers()
         {
-            var allUsers = _userService.GetAllUsersAsync().Result;
-            var allPairsResult = _pairService.GetAllPairsAsync().Result;
+            var allUsers = await _userService.GetAllUsersAsync();
+            var allPairsResult = await _pairService.GetAllPairsAsync();
             var allPairs = allPairsResult.Success && allPairsResult.Data != null ? allPairsResult.Data : [];
 
             var pairedMentorIds = allPairs.Select(p => p.Mentor.Id).ToHashSet();
@@ -59,6 +59,14 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             AvailableSupervisors = new ObservableCollection<Model.Supervisor>(supervisors);
             AvailableMentors = new ObservableCollection<Model.Student>(mentors);
             AvailableMentees = new ObservableCollection<Model.Student>(mentees);
+
+            OnPropertyChanged(nameof(FilteredSupervisors));
+            OnPropertyChanged(nameof(FilteredMentors));
+            OnPropertyChanged(nameof(FilteredMentees));
+
+            SelectedMentee = null;
+            SelectedMentor = null;
+            SelectedSupervisor = null;
         }
 
         // Filtered Properties

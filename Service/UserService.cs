@@ -65,10 +65,15 @@ namespace MentoringApp.Service
                     var student = new Student(dto.Id, dto.Email, dto.UserName, dto.NationalId, new Grade { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num });
 
                     if (dto.MentorSubjectId.HasValue)
+                    {
                         student.MentorProfile = new MentorProfile { SubjectToTeach = dto.MentorSubjectId.Value };
+                    }
+
 
                     if (dto.MenteeSubjectId.HasValue)
+                    {
                         student.MenteeProfile = new MenteeProfile { SubjectToLearn = dto.MenteeSubjectId.Value };
+                    }
 
                     user = student;
                     break;
