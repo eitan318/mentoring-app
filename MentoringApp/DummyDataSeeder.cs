@@ -164,31 +164,32 @@ namespace MentoringApp
             // ── Step 4: Reviews ──────────────────────────────────────────────────────
 
             // Alice reviews Charlie's progress (Pair 1)
-            _reviewRepo.Create("Charlie is doing great progress in Math! Very consistent effort.", DateTime.UtcNow.AddDays(-7), pairId1, mentor1.Id);
+            await _reviewRepo.CreateAsync("Charlie is doing great progress in Math! Very consistent effort.", DateTime.UtcNow.AddDays(-7), pairId1, mentor1.Id);
 
             // Dave reviews Bob's teaching style (Pair 2)
-            _reviewRepo.Create("Bob explains Physics concepts very clearly. Loving the sessions!", DateTime.UtcNow.AddDays(-3), pairId2, mentee2.Id);
+            await _reviewRepo.CreateAsync("Bob explains Physics concepts very clearly. Loving the sessions!", DateTime.UtcNow.AddDays(-3), pairId2, mentee2.Id);
 
             // ── Step 5: Issues ───────────────────────────────────────────────────────
 
             // Issue 1: Charlie (mentee) reports a general help issue — unresolved
-            _issueRepo.Create(
+            await _issueRepo.CreateAsync(
                 "I can't access my learning materials for Math. The link seems broken.",
                 catGeneral,
                 mentee1.Id);
 
             // Issue 2: Alice (mentor) reports a technical issue — resolved
-            _issueRepo.Create(
+            await _issueRepo.CreateAsync(
                 "The app crashed while I was submitting a review for my mentee.",
                 catTechnical,
                 mentor1.Id);
             // Resolve issue 2
-            var createdIssue2 = _issueRepo.GetAll().OrderByDescending(i => i.Id).FirstOrDefault(i => i.Description.Contains("crashed"));
+            var allIssues = await _issueRepo.GetAllAsync();
+            var createdIssue2 = allIssues.OrderByDescending(i => i.Id).FirstOrDefault(i => i.Description.Contains("crashed"));
             if (createdIssue2 != null)
-                _issueRepo.Resolve(createdIssue2.Id);
+                await _issueRepo.ResolveAsync(createdIssue2.Id);
 
             // Issue 3: Bob (mentor) reports a behavioral issue about a student — unresolved
-            _issueRepo.Create(
+            await _issueRepo.CreateAsync(
                 "My mentee missed two consecutive sessions without notice.",
                 catBehavioral,
                 mentor2.Id);

@@ -46,7 +46,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         }
 
         [RelayCommand]
-        private void AddIssue()
+        private async Task AddIssue()
         {
             ValidateAllProperties();
 
@@ -55,7 +55,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
 
             if (_userStore.User != null)
             {
-                _issueService.CreateIssue(IssueDescription, SelectedIssueCategory.Id, _userStore.User.Id);
+                await _issueService.CreateIssueAsync(IssueDescription, SelectedIssueCategory.Id, _userStore.User.Id);
             }
 
             RequestClose?.Invoke();

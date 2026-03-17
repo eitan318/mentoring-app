@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
@@ -32,12 +32,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         }
 
         [RelayCommand]
-        private void Separate(Pair? pair)
+        private async Task Separate(Pair? pair)
         {
             if (pair != null)
             {
-                _pairService.SeparatePair(pair.Id);
-                UpdatePairList();
+                await _pairService.SeparatePairAsync(pair.Id);
+                await UpdatePairList();
             }
         }
 

@@ -52,11 +52,11 @@ namespace MentoringApp.Data.Acess.SQLite
             return rows.Select(MapToDto).ToList();
         }
 
-        public Task<bool> CreateAsync(int supervisorId, int mentorId, int menteeId)
+        public async Task<bool> CreateAsync(int supervisorId, int mentorId, int menteeId)
         {
             try
             {
-                _db.Execute(
+                await _db.ExecuteAsync(
                     @"INSERT INTO Pairs (MentorId, MenteeId, SupervisorId, CreatedAt)
                       VALUES (@MentorId, @MenteeId, @SupervisorId, @CreatedAt)",
                     new
@@ -66,19 +66,19 @@ namespace MentoringApp.Data.Acess.SQLite
                         SupervisorId = supervisorId,
                         CreatedAt = DateTime.UtcNow.ToString("o")
                     });
-                return Task.FromResult(true);
+                return true;
             }
             catch
             {
-                return Task.FromResult(false);
+                return false;
             }
         }
 
-        public bool Delete(int pairId)
+        public async Task<bool> DeleteAsync(int pairId)
         {
             try
             {
-                int affected = _db.Execute(
+                int affected = await _db.ExecuteAsync(
                     "DELETE FROM Pairs WHERE Id = @Id",
                     new { Id = pairId });
                 return affected > 0;

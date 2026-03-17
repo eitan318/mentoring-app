@@ -47,7 +47,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             if (HasErrors || _currentPair == null || _userStore.User == null)
                 return;
 
-            var result = _reviewService.CreateReview(ReviewContent, _currentPair.Id, _userStore.User.Id);
+            var result = await _reviewService.CreateReviewAsync(ReviewContent, _currentPair.Id, _userStore.User.Id);
             
             if (result.Success)
             {

@@ -13,33 +13,32 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public IEnumerable<IssueDto> GetAll()
+        public async Task<IEnumerable<IssueDto>> GetAllAsync()
         {
-            var rows = _db.Query<IssueRow>(
+            var rows = await _db.QueryAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues");
             return rows.Select(MapToDto).ToList();
         }
 
-        public IssueDto? GetById(int id)
+        public async Task<IssueDto?> GetByIdAsync(int id)
         {
-            var row = _db.QuerySingle<IssueRow>(
+            var row = await _db.QuerySingleAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues WHERE Id = @Id",
                 new { Id = id });
             return row == null ? null : MapToDto(row);
         }
 
-        public IEnumerable<IssueDto> GetByReporter(int userId)
+        public async Task<IEnumerable<IssueDto>> GetByReporterAsync(int userId)
         {
-            var rows = _db.Query<IssueRow>(
+            var rows = await _db.QueryAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues WHERE ReportedByUserId = @UserId",
                 new { UserId = userId });
             return rows.Select(MapToDto).ToList();
         }
 
-        public IEnumerable<IssueDto> GetBySupervisor(int supervisorId)
+        public async Task<IEnumerable<IssueDto>> GetBySupervisorAsync(int supervisorId)
         {
-            // Get supervised student IDs from Pairs
-            var studentRows = _db.Query<StudentIdRow>(
+            var studentRows = await _db.QueryAsync<StudentIdRow>(
                 @"SELECT MentorId AS UserId FROM Pairs WHERE SupervisorId = @SupervisorId
                   UNION
                   SELECT MenteeId AS UserId FROM Pairs WHERE SupervisorId = @SupervisorId",
@@ -49,7 +48,7 @@ namespace MentoringApp.Data.Acess.SQLite
             if (!studentIds.Any())
                 return Enumerable.Empty<IssueDto>();
 
-            var allIssues = _db.Query<IssueRow>(
+            var allIssues = await _db.QueryAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues");
 
             return allIssues
@@ -58,25 +57,25 @@ namespace MentoringApp.Data.Acess.SQLite
                 .ToList();
         }
 
-        public IEnumerable<IssueCategoryDto> GetCategories()
+        public async Task<IEnumerable<IssueCategoryDto>> GetCategoriesAsync()
         {
-            var rows = _db.Query<CategoryRow>("SELECT Id, Name FROM IssueCategories");
+            var rows = await _db.QueryAsync<CategoryRow>("SELECT Id, Name FROM IssueCategories");
             return rows.Select(r => new IssueCategoryDto { Id = r.Id, Name = r.Name }).ToList();
         }
 
-        public IssueCategoryDto? GetCategoryById(int categoryId)
+        public async Task<IssueCategoryDto?> GetCategoryByIdAsync(int categoryId)
         {
-            var row = _db.QuerySingle<CategoryRow>(
+            var row = await _db.QuerySingleAsync<CategoryRow>(
                 "SELECT Id, Name FROM IssueCategories WHERE Id = @Id",
                 new { Id = categoryId });
             return row == null ? null : new IssueCategoryDto { Id = row.Id, Name = row.Name };
         }
 
-        public bool Create(string description, int categoryId, int reportedByUserId)
+        public async Task<bool> CreateAsync(string description, int categoryId, int reportedByUserId)
         {
             try
             {
-                _db.Execute(
+                await _db.ExecuteAsync(
                     @"INSERT INTO Issues (Description, CategoryId, ReportedByUserId, IsResolved, CreationDate)
                       VALUES (@Description, @CategoryId, @ReportedByUserId, 0, @CreationDate)",
                     new
@@ -94,11 +93,11 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
-        public bool Resolve(int issueId)
+        public async Task<bool> ResolveAsync(int issueId)
         {
             try
             {
-                int affected = _db.Execute(
+                int affected = await _db.ExecuteAsync(
                     "UPDATE Issues SET IsResolved = 1 WHERE Id = @Id",
                     new { Id = issueId });
                 return affected > 0;

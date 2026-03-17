@@ -82,9 +82,9 @@ namespace MentoringApp.Service
             return created ? Result.Ok() : Result.Failure("Failed to create pair.");
         }
 
-        public Result SeparatePair(int pairId)
+        public async Task<Result> SeparatePairAsync(int pairId)
         {
-            bool deleted = _pairRepo.Delete(pairId);
+            bool deleted = await _pairRepo.DeleteAsync(pairId);
             return deleted ? Result.Ok() : Result.Failure("Pair not found or could not be deleted.");
         }
 

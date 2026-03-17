@@ -22,7 +22,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
 
         public virtual async Task OnNavigatedToAsync(int issueId)
         {
-            CurrentIssue = _issueService.GetIssueById(issueId).Data;
+            CurrentIssue = (await _issueService.GetIssueByIdAsync(issueId)).Data;
         }
 
         [RelayCommand]
@@ -36,7 +36,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         {
             if (CurrentIssue != null && !CurrentIssue.IsResolved)
             {
-                var result = _issueService.ResolveIssue(CurrentIssue.Id);
+                var result = await _issueService.ResolveIssueAsync(CurrentIssue.Id);
                 if (result.Success)
                 {
                     await _navigationService.GoBackAsync();

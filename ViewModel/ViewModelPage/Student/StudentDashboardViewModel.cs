@@ -121,13 +121,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
 
         public virtual async Task LoadDataAsync()
         {
-            var issuesResult = _issueService.GetIssuesByUser(_userStore.User!.Id);
+            var issuesResult = await _issueService.GetIssuesByUserAsync(_userStore.User!.Id);
             if (issuesResult.Success && issuesResult.Data != null)
             {
                 MyIssues = new ObservableCollection<Issue>(issuesResult.Data);
             }
 
-            var reviewsResult = _reviewService.GetReviewsByPair(Pair.Id);
+            var reviewsResult = await _reviewService.GetReviewsByPairAsync(Pair.Id);
             if (reviewsResult.Success && reviewsResult.Data != null)
             {
                 var sortedReviews = reviewsResult.Data.OrderByDescending(r => r.Date).ToList();
@@ -143,7 +143,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [RelayCommand]
         private async Task IssueToSupervisor()
         {
-            var categoriesResult = _issueService.GetCategories();
+            var categoriesResult = await _issueService.GetCategoriesAsync();
             if (categoriesResult.Success && categoriesResult.Data != null)
             {
                 await _navigationService.NavigateToAsync<AddIssueViewModel, IEnumerable<IssueCategory>>(categoriesResult.Data);

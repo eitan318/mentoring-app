@@ -42,7 +42,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         private async Task LoadSupervisorDataAsync(int supervisorId)
         {
             var pairsResult = await _pairService.GetPairsBySupervisorAsync(supervisorId);
-            var issuesResult = await Task.Run(() => _issueService.GetAllIssues());
+            var issuesResult = await _issueService.GetAllIssuesAsync();
 
             if (pairsResult.Success && pairsResult.Data != null)
             {

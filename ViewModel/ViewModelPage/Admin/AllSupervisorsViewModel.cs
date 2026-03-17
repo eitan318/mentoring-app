@@ -45,7 +45,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             {
 
                 int pairsCount = (await _pairService.GetPairsBySupervisorAsync(supervisor.Id)).Data?.Count() ?? 0;
-                int pendingIssuesCount =  _issueService.GetIssuesBySupervisor(supervisor.Id).Data.Count();
+                int pendingIssuesCount = ((await _issueService.GetIssuesBySupervisorAsync(supervisor.Id)).Data?.Count()) ?? 0;
                 
                 SupervisorsList.Add(new SupervisorSummary
                 {

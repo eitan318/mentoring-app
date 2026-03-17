@@ -13,27 +13,27 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public IEnumerable<ReviewDto> GetByPair(int pairId)
+        public async Task<IEnumerable<ReviewDto>> GetByPairAsync(int pairId)
         {
-            var rows = _db.Query<ReviewRow>(
+            var rows = await _db.QueryAsync<ReviewRow>(
                 "SELECT Id, PairId, AuthorUserId, Content, Date FROM Reviews WHERE PairId = @PairId",
                 new { PairId = pairId });
             return rows.Select(MapToDto).ToList();
         }
 
-        public IEnumerable<ReviewDto> GetByAuthor(int authorUserId)
+        public async Task<IEnumerable<ReviewDto>> GetByAuthorAsync(int authorUserId)
         {
-            var rows = _db.Query<ReviewRow>(
+            var rows = await _db.QueryAsync<ReviewRow>(
                 "SELECT Id, PairId, AuthorUserId, Content, Date FROM Reviews WHERE AuthorUserId = @AuthorUserId",
                 new { AuthorUserId = authorUserId });
             return rows.Select(MapToDto).ToList();
         }
 
-        public bool Create(string content, DateTime date, int pairId, int authorUserId)
+        public async Task<bool> CreateAsync(string content, DateTime date, int pairId, int authorUserId)
         {
             try
             {
-                _db.Execute(
+                await _db.ExecuteAsync(
                     @"INSERT INTO Reviews (PairId, AuthorUserId, Content, Date)
                       VALUES (@PairId, @AuthorUserId, @Content, @Date)",
                     new

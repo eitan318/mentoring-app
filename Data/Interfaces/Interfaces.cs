@@ -39,26 +39,26 @@ namespace MentoringApp.Data.Interfaces
         Task<PairDto?> GetByMenteeIdAsync(int menteeId);
         Task<IEnumerable<PairDto>> GetBySupervisorIdAsync(int supervisorId);
         Task<bool> CreateAsync(int supervisorId, int mentorId, int menteeId);
-        bool Delete(int pairId);
+        Task<bool> DeleteAsync(int pairId);
     }
 
     public interface IIssueRepo
     {
-        IEnumerable<IssueDto> GetAll();
-        IssueDto? GetById(int id);
-        IEnumerable<IssueDto> GetByReporter(int userId);
-        IEnumerable<IssueDto> GetBySupervisor(int supervisorId);
-        IEnumerable<IssueCategoryDto> GetCategories();
-        IssueCategoryDto? GetCategoryById(int categoryId);
-        bool Create(string description, int categoryId, int reportedByUserId);
-        bool Resolve(int issueId);
+        Task<IEnumerable<IssueDto>> GetAllAsync();
+        Task<IssueDto?> GetByIdAsync(int id);
+        Task<IEnumerable<IssueDto>> GetByReporterAsync(int userId);
+        Task<IEnumerable<IssueDto>> GetBySupervisorAsync(int supervisorId);
+        Task<IEnumerable<IssueCategoryDto>> GetCategoriesAsync();
+        Task<IssueCategoryDto?> GetCategoryByIdAsync(int categoryId);
+        Task<bool> CreateAsync(string description, int categoryId, int reportedByUserId);
+        Task<bool> ResolveAsync(int issueId);
     }
 
     public interface IReviewRepo
     {
-        IEnumerable<ReviewDto> GetByPair(int pairId);
-        IEnumerable<ReviewDto> GetByAuthor(int authorUserId);
-        bool Create(string content, DateTime date, int pairId, int authorUserId);
+        Task<IEnumerable<ReviewDto>> GetByPairAsync(int pairId);
+        Task<IEnumerable<ReviewDto>> GetByAuthorAsync(int authorUserId);
+        Task<bool> CreateAsync(string content, DateTime date, int pairId, int authorUserId);
     }
 
     public interface ISubjectRepo

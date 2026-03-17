@@ -13,59 +13,59 @@ namespace MentoringApp.Service
             _issueRepo = issueRepo;
         }
 
-        public Result<IEnumerable<Issue>> GetAllIssues()
+        public async Task<Result<IEnumerable<Issue>>> GetAllIssuesAsync()
         {
-            var dtos = _issueRepo.GetAll();
-            var issues = dtos.Select(dto => MapDtoToIssue(dto)).Where(i => i != null).Cast<Issue>();
+            var dtos = await _issueRepo.GetAllAsync();
+            var issues = await MapDtosToIssuesAsync(dtos);
             return Result<IEnumerable<Issue>>.Ok(issues);
         }
 
-        public Result<Issue> GetIssueById(int id)
+        public async Task<Result<Issue>> GetIssueByIdAsync(int id)
         {
-            var dto = _issueRepo.GetById(id);
+            var dto = await _issueRepo.GetByIdAsync(id);
             if (dto == null) return Result<Issue>.Failure("Issue not found.");
-            var issue = MapDtoToIssue(dto);
+            var issue = await MapDtoToIssueAsync(dto);
             return issue != null ? Result<Issue>.Ok(issue) : Result<Issue>.Failure("Failed to build issue.");
         }
 
-        public Result<IEnumerable<Issue>> GetIssuesByUser(int userId)
+        public async Task<Result<IEnumerable<Issue>>> GetIssuesByUserAsync(int userId)
         {
-            var dtos = _issueRepo.GetByReporter(userId);
-            var issues = dtos.Select(dto => MapDtoToIssue(dto)).Where(i => i != null).Cast<Issue>();
+            var dtos = await _issueRepo.GetByReporterAsync(userId);
+            var issues = await MapDtosToIssuesAsync(dtos);
             return Result<IEnumerable<Issue>>.Ok(issues);
         }
 
-        public Result<IEnumerable<IssueCategory>> GetCategories()
+        public async Task<Result<IEnumerable<IssueCategory>>> GetCategoriesAsync()
         {
-            var categoryDtos = _issueRepo.GetCategories();
+            var categoryDtos = await _issueRepo.GetCategoriesAsync();
             var categories = categoryDtos.Select(c => new IssueCategory { Id = c.Id, Name = c.Name });
             return Result<IEnumerable<IssueCategory>>.Ok(categories);
         }
 
-        public Result CreateIssue(string description, int categoryId, int reportedByUserId)
+        public async Task<Result> CreateIssueAsync(string description, int categoryId, int reportedByUserId)
         {
             if (string.IsNullOrWhiteSpace(description))
                 return Result.Failure("Description cannot be empty.");
 
-            bool created = _issueRepo.Create(description, categoryId, reportedByUserId);
+            bool created = await _issueRepo.CreateAsync(description, categoryId, reportedByUserId);
             return created ? Result.Ok() : Result.Failure("Failed to create issue.");
         }
 
-        public Result ResolveIssue(int issueId)
+        public async Task<Result> ResolveIssueAsync(int issueId)
         {
-            bool resolved = _issueRepo.Resolve(issueId);
+            bool resolved = await _issueRepo.ResolveAsync(issueId);
             return resolved ? Result.Ok() : Result.Failure("Issue not found or could not be resolved.");
         }
 
-        public Result<IEnumerable<Issue>> GetIssuesBySupervisor(int supervisorId)
+        public async Task<Result<IEnumerable<Issue>>> GetIssuesBySupervisorAsync(int supervisorId)
         {
             try
             {
-                var dtos = _issueRepo.GetBySupervisor(supervisorId);
+                var dtos = await _issueRepo.GetBySupervisorAsync(supervisorId);
                 if (dtos == null)
                     return Result<IEnumerable<Issue>>.Ok(new List<Issue>());
 
-                var issues = dtos.Select(dto => MapDtoToIssue(dto)).Where(i => i != null).Cast<Issue>();
+                var issues = await MapDtosToIssuesAsync(dtos);
                 return Result<IEnumerable<Issue>>.Ok(issues);
             }
             catch (Exception ex)
@@ -74,9 +74,16 @@ namespace MentoringApp.Service
             }
         }
 
-        private Issue? MapDtoToIssue(IssueDto dto)
+        private async Task<IEnumerable<Issue>> MapDtosToIssuesAsync(IEnumerable<IssueDto> dtos)
         {
-            var categoryDto = _issueRepo.GetCategoryById(dto.CategoryId);
+            var tasks = dtos.Select(dto => MapDtoToIssueAsync(dto));
+            var results = await Task.WhenAll(tasks);
+            return results.Where(i => i != null).Cast<Issue>();
+        }
+
+        private async Task<Issue?> MapDtoToIssueAsync(IssueDto dto)
+        {
+            var categoryDto = await _issueRepo.GetCategoryByIdAsync(dto.CategoryId);
             var category = categoryDto != null
                 ? new IssueCategory { Id = categoryDto.Id, Name = categoryDto.Name }
                 : new IssueCategory { Id = dto.CategoryId, Name = "Unknown" };
