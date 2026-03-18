@@ -1,6 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
+using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
 
@@ -11,25 +12,36 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private Issue _currentIssue;
 
         private readonly INavigationService _navigationService;
+        private readonly IssueService _issueService;
 
-        public IssueViewModel(INavigationService navigationService)
+        public IssueViewModel(INavigationService navigationService, IssueService issueService)
         {
             _navigationService = navigationService;
+            _issueService = issueService;
         }
 
         public virtual async Task OnNavigatedToAsync(int issueId)
         {
-            CurrentIssue = new Issue("Issue #" + issueId, new IssueCategory("Technical Support"), false)
-            {
-                Id = issueId,
-                CreationDate = DateTime.Now
-            };
+            CurrentIssue = (await _issueService.GetIssueByIdAsync(issueId)).Data;
         }
 
         [RelayCommand]
         private async Task Back()
         {
             await _navigationService.GoBackAsync();
+        }
+
+        [RelayCommand]
+        private async Task ResolveIssue()
+        {
+            if (CurrentIssue != null && !CurrentIssue.IsResolved)
+            {
+                var result = await _issueService.ResolveIssueAsync(CurrentIssue.Id);
+                if (result.Success)
+                {
+                    await _navigationService.GoBackAsync();
+                }
+            }
         }
     }
 }

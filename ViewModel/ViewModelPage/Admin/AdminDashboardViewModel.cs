@@ -1,4 +1,3 @@
-﻿
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
@@ -8,23 +7,49 @@ using MentoringApp.ViewModel.ViewModelPage.User;
 using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using MentoringApp.Service;
+using System.Diagnostics;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
     public partial class AdminDashboardViewModel : ObservableObject, INavigatable
     {
         private readonly INavigationService _navigationService;
+        private readonly UserService _userService;
+        private readonly IFileService _fileService;
+        private readonly ExcelImportService _excelImportService;
+
+        [ObservableProperty]
+        private string _statusMessage = "";
+
         public ObservableCollection<Model.Supervisor> SupervisorsListPreview { get; set; }
 
-        public AdminDashboardViewModel( INavigationService navigationService)
+        public AdminDashboardViewModel( INavigationService navigationService, UserService userService, IFileService fileService, ExcelImportService excelImportService)
         {
             _navigationService = navigationService;
+            _userService = userService;
+            _fileService = fileService;
+            _excelImportService = excelImportService;
 
             SupervisorsListPreview = new ObservableCollection<Model.Supervisor>();
-            SupervisorsListPreview.Add(new Model.Supervisor("Name1"));
-            SupervisorsListPreview.Add(new Model.Supervisor("Name2"));
-            SupervisorsListPreview.Add(new Model.Supervisor("Name3"));
-            SupervisorsListPreview.Add(new Model.Supervisor("Name4"));
+            _ = LoadSupervisorsPreviewAsync();
+        }
+
+
+        private async Task LoadSupervisorsPreviewAsync()
+        {
+            var allUsers = await _userService.GetAllUsersAsync();
+
+            var supervisorMatches = allUsers?
+                .OfType<Model.Supervisor>()
+                .Take(4)
+                .ToList() ?? new List<Model.Supervisor>();
+
+            SupervisorsListPreview.Clear();
+            foreach (var supervisor in supervisorMatches)
+            {
+                SupervisorsListPreview.Add(supervisor);
+            }
         }
 
         [RelayCommand]
@@ -39,5 +64,29 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [RelayCommand] private async Task ManageUsers() => await _navigationService.NavigateToAsync<ManageUsersViewModel>();
         [RelayCommand] private async Task ViewAllSupervisors() => await _navigationService.NavigateToAsync<AllSupervisorsViewModel>();
         [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
+
+        [RelayCommand]
+        private async Task LoadFromExcel()
+        {
+            StatusMessage = "Loading...";
+            string? filePath = _fileService.OpenFile("Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*");
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                var result = await _excelImportService.ImportUsersFromExcelAsync(filePath);
+                if (result.Success)
+                {
+                    StatusMessage = $"Successfully imported {result.Data} users.";
+                    await LoadSupervisorsPreviewAsync();
+                }
+                else
+                {
+                    StatusMessage = result.ErrorMessage ?? "Import failed.";
+                }
+            }
+            else
+            {
+                StatusMessage = "File selection cancelled.";
+            }
+        }
     }
 }

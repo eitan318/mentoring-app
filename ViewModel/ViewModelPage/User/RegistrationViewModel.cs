@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
+using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,14 +13,18 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
     public partial class RegistrationViewModel : ObservableValidator, INavigatable<bool>, ICloseable
     {
         private readonly AuthService _authService;
+        private readonly SubjectService _subjectService;
+        private readonly GradeService _gradeService;
         public event Action? RequestClose;
+
+        private readonly INavigationService _navigationService;
 
         // Inside RegistrationViewModel
         [ObservableProperty] private ObservableCollection<Subject> _subjects = [];
         [ObservableProperty] private ObservableCollection<Grade> _grades = [];
 
         [ObservableProperty]
-        private Grade _selectedGrade = new Grade("hello");
+        private Grade? _selectedGrade = null;
 
         [ObservableProperty]
         private int _subjectToTeach = -1;
@@ -27,9 +32,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty]
         private int _subjectToLearn = -1;
 
-        public RegistrationViewModel(AuthService authService)
+
+        public RegistrationViewModel(AuthService authService, INavigationService navigationService, SubjectService subjectService, GradeService gradeService)
         {
             _authService = authService;
+            _navigationService = navigationService; // New
+            _subjectService = subjectService;
+            _gradeService = gradeService;
             Subjects = new ObservableCollection<Model.Subject>();
         }
 
@@ -49,6 +58,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [MinLength(3)]
         private string _userName = "";
 
+
+
         [RelayCommand]
         private async Task RegisterAsync()
         {
@@ -56,14 +67,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             if (HasErrors) return;
 
             ErrorMessage = "";
-            ClearErrors();
 
             var user = CreateUserFromState();
             var result = await _authService.Register(user);
 
             if (result.Success)
             {
-                RequestClose?.Invoke();
+                await _navigationService.GoBackAsync();
             }
             else
             {
@@ -93,12 +103,21 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
                 ErrorMessage = string.Join(Environment.NewLine,
                     result.ValidationErrors.Select(x => $"• {x.Value}"));
             }
+            else
+            {
+                ErrorMessage = result.ErrorMessage;
+            }
         }
 
-        public Task OnNavigatedToAsync(bool supervisorOrStudentIsSupervisor)
+        public async Task OnNavigatedToAsync(bool supervisorOrStudentIsSupervisor)
         {
             this.SupervisorOrStudentIsSupervisor = supervisorOrStudentIsSupervisor;
-            return Task.CompletedTask;
+
+            var subjects = await _subjectService.GetAllSubjectsAsync();
+            Subjects = new ObservableCollection<Subject>(subjects.Data);
+
+            var grades = await _gradeService.GetAllGradesAsync();
+            Grades = new ObservableCollection<Grade>(grades.Data);
         }
     }
 }

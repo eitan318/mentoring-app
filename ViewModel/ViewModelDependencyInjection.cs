@@ -1,4 +1,4 @@
-﻿using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelPage;
 using MentoringApp.ViewModel.ViewModelPage.Admin;
@@ -19,6 +19,7 @@ namespace MentoringApp.ViewModel
 
             // Services
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<MentoringApp.Service.ExcelImportService>();
 
 
             // ViewModels (Transient because you want a fresh one each time you navigate)
@@ -30,9 +31,13 @@ namespace MentoringApp.ViewModel
             services.AddTransient<ManagePairsViewModel>();
             services.AddTransient<CreatePairViewModel>();
             services.AddTransient<SupervisorDashboardViewModel>();
+            services.AddTransient<PairDetailsViewModel>();
             services.AddTransient<AllSupervisorsViewModel>();
             services.AddTransient<AddIssueViewModel>();
+            services.AddTransient<AddReviewViewModel>();
             services.AddTransient<MyProfileViewModel>();
+            services.AddTransient<OtherProfileViewModel>();
+            services.AddTransient<ManageUsersViewModel>();
 
             return services;
         }

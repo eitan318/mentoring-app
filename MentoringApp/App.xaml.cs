@@ -39,54 +39,27 @@ namespace MentoringApp
             services.AddViewModels();
             services.AddDataRepositories(connectionString);
             services.AddServices(_configuration);
+            services.AddTransient<DummyDataSeeder>();
 
             _serviceProvider = services.BuildServiceProvider();
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
-            bool recreateInitialDb = true;
+            bool recreateInitialDb = false;
             base.OnStartup(e);
 
             if (recreateInitialDb)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
+                    // Drop & recreate all tables
                     var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbRepo>();
                     dbInitializer.Recreate();
 
-                    var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepo>();
-                    userRepo.CreateUser(new Admin { Id = 0, Email = "eitanamir09@gmail.com", NationalId = "0", UserName = "Admin username" });
-                    userRepo.CreateUser(new Supervisor { Id = 1, Email = "eitanamir09@gmail.com", NationalId = "1", UserName = "Supervisor username" });
-                    userRepo.CreateUser(new Student
-                    {
-                        Id = 2,
-                        Email = "eitanamir09@gmail.com",
-                        NationalId = "2",
-                        UserName = "Mentor username 1",
-                        Grade = new Grade("10th"),
-                        MentorProfile = new MentorProfile { SubjectToTeach = -1 }
-                    });
-                    userRepo.CreateUser(new Student
-                    {
-                        Id = 3,
-                        Email = "eitanamir09@gmail.com",
-                        NationalId = "3",
-                        UserName = "Mentee username 2",
-                        Grade = new Grade("10th"),
-                        MenteeProfile = new MenteeProfile { SubjectToLearn = -1 }
-                    });
-
-                    userRepo.CreateUser(new Student
-                    {
-                        Id = 3,
-                        Email = "eitanamir09@gmail.com",
-                        NationalId = "4",
-                        UserName = "Mentee and mentro username 2",
-                        Grade = new Grade("10th"),
-                        MenteeProfile = new MenteeProfile { SubjectToLearn = -1 },
-                        MentorProfile = new MentorProfile { SubjectToTeach = -1 },
-                    });
+                    // Seed comprehensive dummy data for all app flows
+                    var seeder = scope.ServiceProvider.GetRequiredService<DummyDataSeeder>();
+                    await seeder.SeedAsync();
                 }
             }
 

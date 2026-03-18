@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MentoringApp.Model
@@ -17,36 +17,39 @@ namespace MentoringApp.Model
         public required string Email { get; set; }
         public required string UserName { get; set; }
         public required string NationalId { get; set; }
+        public string? ProfilePicturePath { get; set; }
         public VerificationCode? CurrentVerificationCode { get; set; }
 
+        // Empty constructor for serialization/tools
         protected User() { }
 
         [SetsRequiredMembers]
-        protected User(string dummyName)
+        protected User(int id, string email, string userName, string nationalId)
         {
-            UserName = dummyName;
-            Email = "dummy@example.com";
-            NationalId = "000000000";
+            Id = id;
+            Email = email;
+            UserName = userName;
+            NationalId = nationalId;
         }
     }
 
-
-    public class Admin : User 
+    public class Admin : User
     {
         public Admin() : base() { }
 
         [SetsRequiredMembers]
-        public Admin(string name) : base(name) { }
+        public Admin(int id, string email, string userName, string nationalId)
+            : base(id, email, userName, nationalId) { }
     }
 
-    public class Supervisor : User 
-    { 
+    public class Supervisor : User
+    {
         public Supervisor() : base() { }
 
         [SetsRequiredMembers]
-        public Supervisor(string name) : base(name) { }
+        public Supervisor(int id, string email, string userName, string nationalId)
+            : base(id, email, userName, nationalId) { }
     }
-
 
     public class Student : User
     {
@@ -57,13 +60,13 @@ namespace MentoringApp.Model
         public bool IsMentor => MentorProfile != null;
         public bool IsMentee => MenteeProfile != null;
 
-        public Student() : base() { 
-            Grade = new Grade("Grade Name");
-        }
+        public Student() : base() { }
 
         [SetsRequiredMembers]
-        public Student(string name) : base(name) { 
-            Grade = new Grade("Grade Name");
+        public Student(int id, string email, string userName, string nationalId, Grade grade)
+            : base(id, email, userName, nationalId)
+        {
+            Grade = grade;
         }
     }
 

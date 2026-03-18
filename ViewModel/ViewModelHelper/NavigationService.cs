@@ -62,7 +62,6 @@ public class NavigationService : INavigationService
         await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync(parameter));
     }
     public bool CanGoBack() => _storeStack.TryPeek(out var store) && store.CanGoBack();
-
     public async Task GoBackAsync()
     {
         if (_storeStack.TryPeek(out var store) && store.CanGoBack())
@@ -71,8 +70,11 @@ public class NavigationService : INavigationService
             {
                 await store.CurrentViewModel.OnNavigatedFromAsync();
             }
-
             store.GoBack();
+            if (store.CurrentViewModel != null)
+            {
+                await store.CurrentViewModel.OnNavigatedToAsync();
+            }
         }
     }
     private class ContextReliever : IDisposable

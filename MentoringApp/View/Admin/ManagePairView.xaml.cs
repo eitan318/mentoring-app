@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using MentoringApp.Model;
+using MentoringApp.ViewModel.ViewModelPage.Admin;
 
 namespace MentoringApp.View.Admin
 {
@@ -23,6 +14,17 @@ namespace MentoringApp.View.Admin
         public ManagePairViewModel()
         {
             InitializeComponent();
+        }
+
+        private void OnPairItemClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is ListViewItem item && item.Content is Pair selectedPair)
+            {
+                if (DataContext is ManagePairsViewModel vm)
+                {
+                    vm.SelectPairCommand.Execute(selectedPair);
+                }
+            }
         }
     }
 }

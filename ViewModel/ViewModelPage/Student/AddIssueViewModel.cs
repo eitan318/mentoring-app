@@ -1,6 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
+using MentoringApp.Service;
+using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
@@ -22,11 +25,17 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [MinLength(5, ErrorMessage = "Description is too short.")]
         private string _issueDescription = string.Empty;
 
+        private readonly IssueService _issueService;
+        private readonly INavigationService _navigationService;
+        private readonly UserStore _userStore;
 
         public event Action? RequestClose;
 
-        public AddIssueViewModel()
+        public AddIssueViewModel(IssueService issueService, UserStore userStore, INavigationService navigationService)
         {
+            _issueService = issueService;
+            _userStore = userStore;
+            _navigationService = navigationService;
             _issueCategoryList = [];
         }
     
@@ -36,25 +45,21 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             return Task.CompletedTask;
         }
 
-        
-
         [RelayCommand]
-        private void AddIssue()
+        private async Task AddIssue()
         {
             ValidateAllProperties();
 
             if (HasErrors || SelectedIssueCategory == null)
                 return;
 
-            Issue issue = new Issue
+            if (_userStore.User != null)
             {
-                Description = IssueDescription,
-                Category = SelectedIssueCategory,
-                CreationDate = DateTime.Now,
-                Id = -1
-            };
+                await _issueService.CreateIssueAsync(IssueDescription, SelectedIssueCategory.Id, _userStore.User.Id);
+            }
 
             RequestClose?.Invoke();
+            _navigationService.GoBackAsync();
         }
     }
 }

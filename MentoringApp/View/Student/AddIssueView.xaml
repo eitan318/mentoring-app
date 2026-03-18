@@ -10,12 +10,16 @@
     mc:Ignorable="d">
     <Grid>
         <StackPanel>
-            <TextBox Tag="Issue description" Text="{Binding IssueDescription}" />
-            <ComboBox
-                ItemsSource="{Binding IssueCategoryList}"
-                SelectedItem="{Binding SelectedIssueCategory, ValidatesOnDataErrors=True}"
-                Tag="Issue category" />
-            <Button Command="{Binding AddIssueCommand}" Content="Add" />
+            <TextBox Tag="Issue description" 
+                 Text="{Binding IssueDescription, UpdateSourceTrigger=PropertyChanged}" />
+
+            <ComboBox ItemsSource="{Binding IssueCategoryList}"
+                  SelectedItem="{Binding SelectedIssueCategory, ValidatesOnDataErrors=True}"
+                  DisplayMemberPath="Name" 
+                  Tag="Issue category" />
+
+            <Button Command="{Binding AddIssueCommand}" 
+                Content="Add" />
         </StackPanel>
     </Grid>
 </UserControl>

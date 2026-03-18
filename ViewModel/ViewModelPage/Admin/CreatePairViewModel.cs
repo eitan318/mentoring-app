@@ -1,8 +1,10 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.Data.Interfaces;
+using MentoringApp.Service;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
@@ -31,12 +33,40 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [ObservableProperty] private string _mentorSearchText = string.Empty;
         [ObservableProperty] private string _menteeSearchText = string.Empty;
 
-        public CreatePairViewModel()
+        private readonly UserService _userService;
+        private readonly PairService _pairService;
+
+        public CreatePairViewModel(UserService userService, PairService pairService)
         {
-            // Sample Data
-            AvailableSupervisors = [new Model.Supervisor("Dr. Smith"), new Model.Supervisor("Prof. Jones")];
-            AvailableMentors = [new Model.Student("Alice"), new Model.Student("Alex")];
-            AvailableMentees = [new Model.Student("Bob"), new Model.Student("Charlie")];
+            _userService = userService;
+            _pairService = pairService;
+            LoadAvailableUsers();
+        }
+
+        private async Task LoadAvailableUsers()
+        {
+            var allUsers = await _userService.GetAllUsersAsync();
+            var allPairsResult = await _pairService.GetAllPairsAsync();
+            var allPairs = allPairsResult.Success && allPairsResult.Data != null ? allPairsResult.Data : [];
+
+            var pairedMentorIds = allPairs.Select(p => p.Mentor.Id).ToHashSet();
+            var pairedMenteeIds = allPairs.Select(p => p.Mentee.Id).ToHashSet();
+
+            var supervisors = allUsers.OfType<Model.Supervisor>().ToList();
+            var mentors = allUsers.OfType<Model.Student>().Where(s => s.IsMentor && !pairedMentorIds.Contains(s.Id)).ToList();
+            var mentees = allUsers.OfType<Model.Student>().Where(s => s.IsMentee && !pairedMenteeIds.Contains(s.Id)).ToList();
+
+            AvailableSupervisors = new ObservableCollection<Model.Supervisor>(supervisors);
+            AvailableMentors = new ObservableCollection<Model.Student>(mentors);
+            AvailableMentees = new ObservableCollection<Model.Student>(mentees);
+
+            OnPropertyChanged(nameof(FilteredSupervisors));
+            OnPropertyChanged(nameof(FilteredMentors));
+            OnPropertyChanged(nameof(FilteredMentees));
+
+            SelectedMentee = null;
+            SelectedMentor = null;
+            SelectedSupervisor = null;
         }
 
         // Filtered Properties
@@ -61,10 +91,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [RelayCommand(CanExecute = nameof(CanCreatePair))]
         private async Task CreatePair()
         {
-            // Logic to save pair here
-            // e.g., await _dataService.SavePair(SelectedSupervisor, SelectedMentor, SelectedMentee);
-
-            await Task.CompletedTask;
+            if (SelectedSupervisor is not null && SelectedMentee is not null && SelectedMentor  is not null) {
+                await _pairService.CreatePairAsync(SelectedSupervisor.Id, SelectedMentor.Id, SelectedMentee.Id);
+                LoadAvailableUsers();
+            }
         }
     }
 }

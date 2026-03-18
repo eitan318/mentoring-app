@@ -1,9 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
+using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -13,9 +14,14 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
     {
         private readonly AuthService _authService;
         private readonly UserStore _userStore;
+        private readonly GradeService _gradeService;
+        private readonly SubjectService _subjectService;
+        private readonly UserService _userService;
 
         [ObservableProperty] private bool _isReadOnly = true;
         [ObservableProperty] private bool _isEditMode = false;
+
+        [ObservableProperty] private string? _profilePicturePath;
 
         [ObservableProperty] private ObservableCollection<Subject> _subjects = [];
         [ObservableProperty] private ObservableCollection<Grade> _grades = [];
@@ -44,10 +50,23 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private int _subjectToTeach = -1;
         [ObservableProperty] private int _subjectToLearn = -1;
 
-        public MyProfileViewModel(UserStore userStore, AuthService authService)
+        public MyProfileViewModel(UserStore userStore, AuthService authService, GradeService gradeService, SubjectService subjectService, UserService userService)
         {
             _userStore = userStore;
             _authService = authService;
+            _gradeService = gradeService;
+            _subjectService = subjectService;
+            _userService = userService;
+            _ = InitializeAsync();
+        }
+        private async Task InitializeAsync()
+        {
+            var grades = await _gradeService.GetAllGradesAsync();
+            var subjects = await _subjectService.GetAllSubjectsAsync();
+
+            Grades = new ObservableCollection<Grade>(grades.Data);
+            Subjects = new ObservableCollection<Subject>(subjects.Data);
+
             LoadUserData();
         }
 
@@ -59,6 +78,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             UserName = user.UserName;
             Email = user.Email;
             NationalId = user.NationalId;
+            ProfilePicturePath = user.ProfilePicturePath;
 
             if (user is Model.Student student)
             {
@@ -86,18 +106,58 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             ValidateAllProperties();
             if (HasErrors) return;
 
-            // Update Logic
-            if (_userStore.User is Model.Student student)
+            var user = _userStore.User;
+            if (user == null) return;
+
+            // Update base user info
+            user.UserName = UserName;
+            user.Email = Email;
+
+            if (user is Model.Student student)
             {
-                student.UserName = UserName;
-                student.Email = Email;
                 student.Grade = SelectedGrade;
-                if (HasMentorProfile) student.MentorProfile.SubjectToTeach = SubjectToTeach;
-                if (HasMenteeProfile) student.MenteeProfile.SubjectToLearn = SubjectToLearn;
+                if (HasMentorProfile && student.MentorProfile != null) student.MentorProfile.SubjectToTeach = SubjectToTeach;
+                if (HasMenteeProfile && student.MenteeProfile != null) student.MenteeProfile.SubjectToLearn = SubjectToLearn;
             }
+
+            var result = await _userService.UpdateUserAsync(user);
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage ?? "Failed to save changes.";
+                return;
+            }
+            ErrorMessage = string.Empty;
 
             IsReadOnly = true;
             IsEditMode = false;
+        }
+        [RelayCommand]
+        private async Task UploadProfilePictureAsync()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Select a Profile Picture",
+                Filter = "Image Files|*.jpg;*.jpeg;*.png",
+                Multiselect = false
+            };
+
+            if (dialog.ShowDialog() != true) return;
+
+            var user = _userStore.User;
+            if (user == null) return;
+
+            var result = await _userService.UploadProfilePictureAsync(user.Id, dialog.FileName);
+            if (result.Success)
+            {
+                // Update in-memory user so the path persists across navigations
+                user.ProfilePicturePath = _userService
+                    .GetUserByIdAsync(user.Id).Result.Data?.ProfilePicturePath;
+                ProfilePicturePath = user.ProfilePicturePath;
+            }
+            else
+            {
+                ErrorMessage = result.ErrorMessage ?? "Failed to upload picture.";
+            }
         }
     }
 }

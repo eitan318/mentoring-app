@@ -1,4 +1,4 @@
-﻿
+
 using MentoringApp.Model;
 using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using System.Windows.Controls;
@@ -28,10 +28,16 @@ namespace MentoringApp.View.Supervisor
             }
         }
 
-        private void FilterPending(object sender, FilterEventArgs e) => e.Accepted = e.Item is Issue issue && !issue.IsResolved;
-
-        private void FilterResolved(object sender, FilterEventArgs e) => e.Accepted = e.Item is Issue issue && issue.IsResolved;
-
+        private void OnPairItemClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is ListViewItem item && item.Content is Pair selectedPair)
+            {
+                if (DataContext is SupervisorDashboardViewModel vm)
+                {
+                    vm.SelectPairCommand.Execute(selectedPair);
+                }
+            }
+        }
     }
 
 }
