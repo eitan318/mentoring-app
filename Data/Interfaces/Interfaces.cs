@@ -22,6 +22,8 @@ namespace MentoringApp.Data.Interfaces
         Task UpdateStudentGradeAsync(int userId, int gradeId);
 
         Task UpsertMentorProfileAsync(int userId, int subjectId);
+
+        Task<bool> UpdateProfilePictureAsync(int userId, string? path);
     }
 
     public interface IVerificationCodeRepo

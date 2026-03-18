@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Student;assembly=MentoringApp.ViewModel"
+    xmlns:components="clr-namespace:MentoringApp.View.Components"
     mc:Ignorable="d">
 
     <Grid>
@@ -24,14 +25,7 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Margin="5" Orientation="Horizontal">
-                        <Grid Width="36" Height="36" Margin="0,0,8,0">
-                            <Ellipse Fill="#E0E0E0" Stroke="Gray" StrokeThickness="1" />
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontSize="14" FontWeight="Bold" Foreground="#757575"
-                                Text="{Binding CounterpartRole}" />
-                        </Grid>
+                        <components:ProfilePictureControl Width="36" Height="36" Margin="0,0,8,0" ImagePath="{Binding Counterpart.ProfilePicturePath}" />
                         <TextBlock VerticalAlignment="Center" FontSize="13" Text="{Binding Counterpart.Name}" />
                     </StackPanel>
                 </DataTemplate>
@@ -47,7 +41,11 @@
                 <DataTemplate DataType="{x:Type studentvm:MentorDashboardViewModel}">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding Counterpart.UserName}" />
+                            <TextBlock FontSize="18" FontWeight="Bold">
+                                <Hyperlink Command="{Binding NavigateToProfileCommand}" Foreground="#0066CC" TextDecorations="Underline">
+                                    <Run Text="{Binding Counterpart.UserName}" />
+                                </Hyperlink>
+                            </TextBlock>
                             <TextBlock Foreground="Gray" Text="Your Mentee" />
                             <TextBlock
                                 Margin="0,8,0,2"
@@ -89,7 +87,11 @@
                 <DataTemplate DataType="{x:Type studentvm:MenteeDashboardViewModel}">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding Counterpart.UserName}" />
+                            <TextBlock FontSize="18" FontWeight="Bold">
+                                <Hyperlink Command="{Binding NavigateToProfileCommand}" Foreground="#0066CC" TextDecorations="Underline">
+                                    <Run Text="{Binding Counterpart.UserName}" />
+                                </Hyperlink>
+                            </TextBlock>
                             <TextBlock Foreground="#2E7D32" FontWeight="SemiBold"
                                        Text="{Binding MentorSubject, StringFormat='Expert in: {0}'}" />
                         </StackPanel>

@@ -1,4 +1,4 @@
-﻿using MentoringApp.Model;
+using MentoringApp.Model;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -22,6 +22,7 @@ namespace MentoringApp.Data.DTO
         public string UserName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string NationalId { get; set; } = string.Empty;
+        public string? ProfilePicturePath { get; set; }
 
         // Discriminator/Role info
         public UserRoleType Role { get; set; }

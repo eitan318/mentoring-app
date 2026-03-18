@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Resources\Database\" />
-    <Folder Include="Resources\" />
   </ItemGroup>
 
   <ItemGroup>

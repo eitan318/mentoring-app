@@ -157,6 +157,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
                 await _navigationService.NavigateToAsync<AddIssueViewModel>();
             }
         }
+
+        [RelayCommand]
+        private async Task NavigateToProfile()
+        {
+            await _navigationService.NavigateToAsync<OtherProfileViewModel, int>(Counterpart.Id);
+        }
     }
 
     public partial class MenteeDashboardViewModel : PairMemberDashboardViewModel

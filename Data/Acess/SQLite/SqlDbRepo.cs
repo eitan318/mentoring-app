@@ -39,7 +39,8 @@ namespace MentoringApp.Data.Acess.SQLite
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     UserName TEXT NOT NULL,
                     Email TEXT NOT NULL,
-                    NationalId TEXT NOT NULL
+                    NationalId TEXT NOT NULL,
+                    ProfilePicturePath TEXT NULL
                 );
 
                 CREATE TABLE Grades (

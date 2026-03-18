@@ -10,7 +10,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 {
     public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
     {
-        private readonly INavigationService _navigationService;
         private readonly PairService _pairService;
         private readonly IssueService _issueService;
         private readonly ReviewService _reviewService;
@@ -19,9 +18,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [ObservableProperty] private ObservableCollection<Issue> _pairIssues = new();
         [ObservableProperty] private ObservableCollection<Review> _pairReviews = new();
 
-        public PairDetailsViewModel(INavigationService navigationService, PairService pairService, IssueService issueService, ReviewService reviewService)
+        public PairDetailsViewModel(PairService pairService, IssueService issueService, ReviewService reviewService)
         {
-            _navigationService = navigationService;
             _pairService = pairService;
             _issueService = issueService;
             _reviewService = reviewService;

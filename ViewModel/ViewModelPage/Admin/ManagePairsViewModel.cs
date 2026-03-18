@@ -5,6 +5,7 @@ using MentoringApp.Model;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
@@ -29,6 +30,15 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         {
             _navigationService.NavigateToAsync<CreatePairViewModel>();
 
+        }
+
+        [RelayCommand]
+        private async Task SelectPair(Pair? pair)
+        {
+            if (pair != null)
+            {
+                await _navigationService.NavigateToAsync<PairDetailsViewModel, int>(pair.Id);
+            }
         }
 
         [RelayCommand]

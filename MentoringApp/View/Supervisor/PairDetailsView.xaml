@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MentoringApp.View.Supervisor"
+             xmlns:components="clr-namespace:MentoringApp.View.Components"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid Margin="20">
@@ -14,12 +15,20 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock FontSize="24" FontWeight="Bold" VerticalAlignment="Center">
-                <Run Text="Pair: "/>
-                <Run Text="{Binding CurrentPair.Mentor.UserName}"/>
-                <Run Text=" &amp; "/>
-                <Run Text="{Binding CurrentPair.Mentee.UserName}"/>
-            </TextBlock>
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                <!--  Mentor avatar  -->
+                <components:ProfilePictureControl Width="40" Height="40" Margin="0,0,8,0" VerticalAlignment="Center" ImagePath="{Binding CurrentPair.Mentor.ProfilePicturePath}" />
+
+                <TextBlock FontSize="24" FontWeight="Bold" VerticalAlignment="Center">
+                    <Run Text="Pair: "/>
+                    <Run Text="{Binding CurrentPair.Mentor.UserName}"/>
+                    <Run Text=" &amp; "/>
+                    <Run Text="{Binding CurrentPair.Mentee.UserName}"/>
+                </TextBlock>
+
+                <!--  Mentee avatar  -->
+                <components:ProfilePictureControl Width="40" Height="40" Margin="8,0,0,0" VerticalAlignment="Center" ImagePath="{Binding CurrentPair.Mentee.ProfilePicturePath}" />
+            </StackPanel>
         </DockPanel>
 
         <UniformGrid Grid.Row="2" Columns="2">

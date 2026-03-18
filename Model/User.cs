@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MentoringApp.Model
@@ -17,6 +17,7 @@ namespace MentoringApp.Model
         public required string Email { get; set; }
         public required string UserName { get; set; }
         public required string NationalId { get; set; }
+        public string? ProfilePicturePath { get; set; }
         public VerificationCode? CurrentVerificationCode { get; set; }
 
         // Empty constructor for serialization/tools

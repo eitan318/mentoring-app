@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.Model;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.ViewModelHelper;
@@ -16,6 +16,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private string _gradeName = "";
         [ObservableProperty] private string _teachingSubject = "None";
         [ObservableProperty] private string _learningSubject = "None";
+        [ObservableProperty] private string? _profilePicturePath;
 
         private readonly UserService _userService;
 
@@ -35,6 +36,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
 
             UserName = user.UserName;
             Email = user.Email;
+            ProfilePicturePath = user.ProfilePicturePath;
 
             if (user is Model.Student student)
             {

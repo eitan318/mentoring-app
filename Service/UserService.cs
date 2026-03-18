@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
@@ -92,6 +92,9 @@ namespace MentoringApp.Service
                 };
             }
 
+            // Map profile picture
+            user.ProfilePicturePath = dto.ProfilePicturePath;
+
             return user;
         }
         public async Task<IEnumerable<User>> GetAllUsersAsync()
@@ -134,6 +137,30 @@ namespace MentoringApp.Service
             }
 
             return Result.Ok();
+        }
+
+        public async Task<Result> UploadProfilePictureAsync(int userId, string sourceFilePath)
+        {
+            if (!File.Exists(sourceFilePath))
+                return Result.Failure("Selected file does not exist.");
+
+            string ext = Path.GetExtension(sourceFilePath).ToLowerInvariant();
+            if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
+                return Result.Failure("Only .jpg and .png files are supported.");
+
+            // Store pictures in the app's local data folder
+            string folder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "MentoringApp", "ProfilePictures");
+            Directory.CreateDirectory(folder);
+
+            string destFileName = $"{userId}{ext}";
+            string destPath = Path.Combine(folder, destFileName);
+
+            File.Copy(sourceFilePath, destPath, overwrite: true);
+
+            bool saved = await _userRepo.UpdateProfilePictureAsync(userId, destPath);
+            return saved ? Result.Ok() : Result.Failure("Failed to save profile picture path.");
         }
     }
 }

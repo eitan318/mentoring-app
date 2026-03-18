@@ -49,8 +49,8 @@ namespace MentoringApp.Data.Acess.SQLite
 
             const string sql = @"
         /* 1. Create the base user */
-        INSERT INTO Users (UserName, Email, NationalId) 
-        VALUES (@UserName, @Email, @NationalId);
+        INSERT INTO Users (UserName, Email, NationalId, ProfilePicturePath) 
+        VALUES (@UserName, @Email, @NationalId, @ProfilePicturePath);
 
         /* 2. Get the generated ID and use it for role tables */
         /* We use the WHERE clause as an 'if' statement inside SQL */
@@ -83,6 +83,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 user.UserName,
                 user.Email,
                 user.NationalId,
+                ProfilePicturePath = user.ProfilePicturePath,
                 IsStudent = isStudent ? 1 : 0,
                 IsMentor = isMentor ? 1 : 0,
                 IsMentee = isMentee ? 1 : 0,
@@ -173,6 +174,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 UserName = userRow.UserName,
                 Email = userRow.Email,
                 NationalId = userRow.NationalId,
+                ProfilePicturePath = userRow.ProfilePicturePath,
                 Role = roleType,
                 GradeId = studentData?.GradeId,
                 MentorSubjectId = mentorData?.SubjectToTeach,
@@ -198,6 +200,7 @@ namespace MentoringApp.Data.Acess.SQLite
                     UserName = u.UserName,
                     Email = u.Email,
                     NationalId = u.NationalId,
+                    ProfilePicturePath = u.ProfilePicturePath,
                     Role = await DetermineRoleAsync(u.Id),
                     GradeId = students.TryGetValue(u.Id, out var s) ? s.GradeId : null,
                     MentorSubjectId = mentors.TryGetValue(u.Id, out var m) ? m.SubjectToTeach : null,
@@ -233,6 +236,7 @@ namespace MentoringApp.Data.Acess.SQLite
             public string UserName { get; set; } = string.Empty;
             public string Email { get; set; } = string.Empty;
             public string NationalId { get; set; } = string.Empty;
+            public string? ProfilePicturePath { get; set; }
         }
 
 
@@ -260,6 +264,12 @@ namespace MentoringApp.Data.Acess.SQLite
             public int UserId { get; set; }
             public string Code { get; set; } = string.Empty;
             public string CreationDate { get; set; } = string.Empty;
+        }
+
+        public async Task<bool> UpdateProfilePictureAsync(int userId, string? path)
+        {
+            const string sql = "UPDATE Users SET ProfilePicturePath = @path WHERE Id = @userId";
+            return await _db.ExecuteAsync(sql, new { userId, path }) > 0;
         }
 
     }
