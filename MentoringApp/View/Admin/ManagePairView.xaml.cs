@@ -18,6 +18,13 @@ namespace MentoringApp.View.Admin
 
         private void OnPairItemClick(object sender, MouseButtonEventArgs e)
         {
+            var element = e.OriginalSource as System.Windows.DependencyObject;
+            while (element != null)
+            {
+                if (element is Button) return;
+                element = System.Windows.Media.VisualTreeHelper.GetParent(element);
+            }
+
             if (sender is ListViewItem item && item.Content is Pair selectedPair)
             {
                 if (DataContext is ManagePairsViewModel vm)
