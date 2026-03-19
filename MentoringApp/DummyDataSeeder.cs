@@ -70,7 +70,7 @@ namespace MentoringApp
             // ── Step 2: Users ────────────────────
             Console.WriteLine("Generating Users...");
             
-            var admin = new AdminModel { Email = "admin@mentoringapp.com", NationalId = "100", UserName = "Admin User" };
+            var admin = new AdminModel { Email = "eitanamir09@gmail.com", NationalId = "100", UserName = "Admin User" };
             await _userService.CreateUserAsync(admin);
 
             List<SupervisorModel> supervisors = new();
