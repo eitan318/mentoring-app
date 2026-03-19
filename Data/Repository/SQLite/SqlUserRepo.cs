@@ -236,7 +236,26 @@ namespace MentoringApp.Data.Acess.SQLite
 
         public async Task<bool> DeleteUserAsync(int userId)
         {
-            int rows = await _db.ExecuteAsync("DELETE FROM Users WHERE Id = @Id", new { Id = userId });
+            const string sql = @"
+                DELETE FROM UserStudents WHERE UserId = @Id;
+                DELETE FROM UserMentors WHERE UserId = @Id;
+                DELETE FROM UserMentees WHERE UserId = @Id;
+                DELETE FROM UserSupervisors WHERE UserId = @Id;
+                DELETE FROM UserAdmins WHERE UserId = @Id;
+                DELETE FROM VerificationCodes WHERE UserId = @Id;
+                
+                DELETE FROM Reviews WHERE AuthorUserId = @Id;
+                DELETE FROM Issues WHERE ReportedByUserId = @Id;
+
+                DELETE FROM Reviews WHERE PairId IN (SELECT Id FROM Pairs WHERE MentorId = @Id OR MenteeId = @Id OR SupervisorId = @Id);
+                
+                /* Some schema versions might have PairId in Issues, so we try to delete them if they exist. We'll just ignore errors if column doesn't exist, but it's easier to just do simple cleans. However since SQLite allows multiple statements, we can delete the pairs and anything depending on them will cascade if PRAGMA is ON. But wait, if we delete pairs first, we must catch any potential PairId without ON DELETE CASCADE */
+                
+                DELETE FROM Pairs WHERE MentorId = @Id OR MenteeId = @Id OR SupervisorId = @Id;
+
+                DELETE FROM Users WHERE Id = @Id;";
+
+            int rows = await _db.ExecuteAsync(sql, new { Id = userId });
             return rows > 0;
         }
 

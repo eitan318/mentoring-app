@@ -50,10 +50,6 @@
         <adminv:CreatePairView />
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type adminvm:AllSupervisorsViewModel}">
-        <adminv:AllSupervisorsView />
-    </DataTemplate>
-
     <DataTemplate DataType="{x:Type studentvm:StudentDashboardViewModel}">
         <studentv:StudentHomeView />
     </DataTemplate>
