@@ -1,8 +1,10 @@
 ﻿
+using MentoringApp.Model.User;
+
 namespace MentoringApp.ViewModel.Store
 {
     public class UserStore
     {
-        public Model.User? User { get; set; }
+        public UserModel? User { get; set; }
     }
 }

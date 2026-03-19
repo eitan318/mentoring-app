@@ -1,45 +1,51 @@
+using DocumentFormat.OpenXml.Bibliography;
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
+using MentoringApp.Service.Mapping;
 
 namespace MentoringApp.Service
 {
     public class IssueService
     {
         private readonly IIssueRepo _issueRepo;
+        private readonly IIssueCategoryRepo _issueCategoryRepo;
 
-        public IssueService(IIssueRepo issueRepo)
+        public IssueService(IIssueRepo issueRepo, IIssueCategoryRepo issueCategoryRepo)
         {
             _issueRepo = issueRepo;
+            _issueCategoryRepo = issueCategoryRepo;
         }
 
-        public async Task<Result<IEnumerable<Issue>>> GetAllIssuesAsync()
+        public async Task<Result<IEnumerable<IssueModel>>> GetAllIssuesAsync()
         {
             var dtos = await _issueRepo.GetAllAsync();
             var issues = await MapDtosToIssuesAsync(dtos);
-            return Result<IEnumerable<Issue>>.Ok(issues);
+            return Result<IEnumerable<IssueModel>>.Ok(issues);
         }
 
-        public async Task<Result<Issue>> GetIssueByIdAsync(int id)
+        public async Task<Result<IssueModel>> GetIssueByIdAsync(int id)
         {
             var dto = await _issueRepo.GetByIdAsync(id);
-            if (dto == null) return Result<Issue>.Failure("Issue not found.");
+            if (dto == null) return Result<IssueModel>.Failure("Issue not found.");
             var issue = await MapDtoToIssueAsync(dto);
-            return issue != null ? Result<Issue>.Ok(issue) : Result<Issue>.Failure("Failed to build issue.");
+            return issue != null ? Result<IssueModel>.Ok(issue) : Result<IssueModel>.Failure("Failed to build issue.");
         }
 
-        public async Task<Result<IEnumerable<Issue>>> GetIssuesByUserAsync(int userId)
+        public async Task<Result<IEnumerable<IssueModel>>> GetIssuesByUserAsync(int userId)
         {
             var dtos = await _issueRepo.GetByReporterAsync(userId);
-            var issues = await MapDtosToIssuesAsync(dtos);
-            return Result<IEnumerable<Issue>>.Ok(issues);
+            var categories = await _issueCategoryRepo.GetAllAsync();
+            var models = IssueMapper.ToModels(dtos, IssueCategoryMapper.ToModels(categories));
+
+            return Result<IEnumerable<IssueModel>>.Ok(models);
         }
 
-        public async Task<Result<IEnumerable<IssueCategory>>> GetCategoriesAsync()
+        public async Task<Result<IEnumerable<IssueCategoryModel>>> GetCategoriesAsync()
         {
-            var categoryDtos = await _issueRepo.GetCategoriesAsync();
-            var categories = categoryDtos.Select(c => new IssueCategory { Id = c.Id, Name = c.Name });
-            return Result<IEnumerable<IssueCategory>>.Ok(categories);
+            var categoryDtos = await _issueCategoryRepo.GetAllAsync();
+            var categories = categoryDtos.Select(c => new IssueCategoryModel { Id = c.Id, Name = c.Name });
+            return Result<IEnumerable<IssueCategoryModel>>.Ok(categories);
         }
 
         public async Task<Result> CreateIssueAsync(string description, int categoryId, int reportedByUserId)
@@ -57,42 +63,36 @@ namespace MentoringApp.Service
             return resolved ? Result.Ok() : Result.Failure("Issue not found or could not be resolved.");
         }
 
-        public async Task<Result<IEnumerable<Issue>>> GetIssuesBySupervisorAsync(int supervisorId)
+        public async Task<Result<IEnumerable<IssueModel>>> GetIssuesBySupervisorAsync(int supervisorId)
         {
             try
             {
                 var dtos = await _issueRepo.GetBySupervisorAsync(supervisorId);
                 if (dtos == null)
-                    return Result<IEnumerable<Issue>>.Ok(new List<Issue>());
+                    return Result<IEnumerable<IssueModel>>.Ok(new List<IssueModel>());
 
                 var issues = await MapDtosToIssuesAsync(dtos);
-                return Result<IEnumerable<Issue>>.Ok(issues);
+                return Result<IEnumerable<IssueModel>>.Ok(issues);
             }
             catch (Exception ex)
             {
-                return Result<IEnumerable<Issue>>.Failure($"Error retrieving supervised issues: {ex.Message}");
+                return Result<IEnumerable<IssueModel>>.Failure($"Error retrieving supervised issues: {ex.Message}");
             }
         }
-
-        private async Task<IEnumerable<Issue>> MapDtosToIssuesAsync(IEnumerable<IssueDto> dtos)
+        private async Task<IEnumerable<IssueModel>> MapDtosToIssuesAsync(IEnumerable<IssueDto> dtos)
         {
-            var tasks = dtos.Select(dto => MapDtoToIssueAsync(dto));
-            var results = await Task.WhenAll(tasks);
-            return results.Where(i => i != null).Cast<Issue>();
+            var categoryDtos = await _issueCategoryRepo.GetAllAsync();
+            var categorys = IssueCategoryMapper.ToModels(categoryDtos);
+            return IssueMapper.ToModels(dtos, categorys);
         }
 
-        private async Task<Issue?> MapDtoToIssueAsync(IssueDto dto)
+        private async Task<IssueModel?> MapDtoToIssueAsync(IssueDto dto)
         {
-            var categoryDto = await _issueRepo.GetCategoryByIdAsync(dto.CategoryId);
-            var category = categoryDto != null
-                ? new IssueCategory { Id = categoryDto.Id, Name = categoryDto.Name }
-                : new IssueCategory { Id = dto.CategoryId, Name = "Unknown" };
-
-            return new Issue(dto.Description, category, dto.IsResolved != 0)
-            {
-                Id = dto.Id,
-                CreationDate = DateTime.Parse(dto.CreationDate)
-            };
+            var categoryDto = await _issueCategoryRepo.GetByIdAsync(dto.CategoryId);
+            var category = IssueCategoryMapper.ToModel(categoryDto);
+            return IssueMapper.ToModel(dto, category);
         }
+
+
     }
 }

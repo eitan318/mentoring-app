@@ -1,5 +1,6 @@
 using ClosedXML.Excel;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace MentoringApp.Service
                     if (string.IsNullOrWhiteSpace(nationalId) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(userName))
                         continue;
 
-                    var student = new Student(
+                    var student = new StudentModel(
                         id: 0, 
                         email: email, 
                         userName: userName, 

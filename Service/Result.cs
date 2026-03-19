@@ -1,5 +1,4 @@
-﻿
-namespace MentoringApp.Service
+﻿namespace MentoringApp.Service
 {
     public class Result
     {

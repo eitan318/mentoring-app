@@ -52,9 +52,9 @@
                     Width="120"
                     Margin="5"
                     Background="DarkGreen"
+                    Command="{Binding ResolveIssueCommand}"
                     Content="Mark as Resolved"
                     Foreground="White"
-                    Command="{Binding ResolveIssueCommand}"
                     Visibility="{Binding CurrentIssue.IsResolved, Converter={StaticResource InverseBoolToVis}}" />
             </StackPanel>
         </StackPanel>

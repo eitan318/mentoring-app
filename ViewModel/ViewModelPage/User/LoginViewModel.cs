@@ -1,14 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
-using MentoringApp.Service;
-using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.Admin;
 using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using MentoringApp.ViewModel.ViewModelPage.Student;
 using System.ComponentModel.DataAnnotations;
+using MentoringApp.ViewModel.Navigation;
+using MentoringApp.Service;
 
 namespace MentoringApp.ViewModel.ViewModelPage.User
 {

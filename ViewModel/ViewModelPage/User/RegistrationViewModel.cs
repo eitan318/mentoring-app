@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
+using MentoringApp.Model.User.StudentProfiles;
 using MentoringApp.Service;
-using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -82,21 +84,21 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         }
         partial void OnIsMentorChanged(bool value) => ValidateProperty(SubjectToTeach, nameof(SubjectToTeach));
 
-        private Model.User CreateUserFromState()
+        private UserModel CreateUserFromState()
         {
             if (SupervisorOrStudentIsSupervisor)
             {
-                return new Model.Supervisor { UserName = UserName, Email = Email, NationalId = NationalId };
+                return new SupervisorModel { UserName = UserName, Email = Email, NationalId = NationalId };
             }
 
-            var student = new Model.Student { UserName = UserName, Email = Email, NationalId = NationalId, Grade = SelectedGrade };
+            var student = new StudentModel { UserName = UserName, Email = Email, NationalId = NationalId, Grade = SelectedGrade };
             if (IsMentee) student.MenteeProfile = new MenteeProfile { SubjectToLearn = SubjectToLearn };
             if (IsMentor) student.MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach };
 
             return student;
         }
 
-        private void HandleServerResult(Result<Model.User> result)
+        private void HandleServerResult(Result<UserModel> result)
         {
             if (result.ValidationErrors != null && result.ValidationErrors.Any())
             {

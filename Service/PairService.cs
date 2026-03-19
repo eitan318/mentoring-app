@@ -1,6 +1,7 @@
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.Service
 {
@@ -67,15 +68,15 @@ namespace MentoringApp.Service
         {
             // Verify users exist and have correct roles
             var supervisor = await _userService.GetUserByIdAsync(supervisorId);
-            if (supervisor.Data is not Supervisor)
+            if (supervisor.Data is not SupervisorModel)
                 return Result.Failure("Selected supervisor is not valid.");
 
             var mentor = await _userService.GetUserByIdAsync(mentorId);
-            if (mentor.Data is not Student { IsMentor: true })
+            if (mentor.Data is not StudentModel { IsMentor: true })
                 return Result.Failure("Selected mentor is not a valid mentor.");
 
             var mentee = await _userService.GetUserByIdAsync(menteeId);
-            if (mentee.Data is not Student { IsMentee: true })
+            if (mentee.Data is not StudentModel { IsMentee: true })
                 return Result.Failure("Selected mentee is not a valid mentee.");
 
             bool created = await _pairRepo.CreateAsync(supervisorId, mentorId, menteeId);
@@ -93,8 +94,8 @@ namespace MentoringApp.Service
             var mentorResult = await _userService.GetUserByIdAsync(dto.MentorId);
             var menteeResult = await _userService.GetUserByIdAsync(dto.MenteeId);
 
-            if (mentorResult.Data is not Student mentor) return null;
-            if (menteeResult.Data is not Student mentee) return null;
+            if (mentorResult.Data is not StudentModel mentor) return null;
+            if (menteeResult.Data is not StudentModel mentee) return null;
 
             return new Pair
             {

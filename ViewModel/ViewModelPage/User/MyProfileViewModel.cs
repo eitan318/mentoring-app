@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
@@ -80,7 +81,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             NationalId = user.NationalId;
             ProfilePicturePath = user.ProfilePicturePath;
 
-            if (user is Model.Student student)
+            if (user is StudentModel student)
             {
                 IsSupervisor = false;
                 SelectedGrade = student.Grade;
@@ -113,7 +114,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             user.UserName = UserName;
             user.Email = Email;
 
-            if (user is Model.Student student)
+            if (user is StudentModel student)
             {
                 student.Grade = SelectedGrade;
                 if (HasMentorProfile && student.MentorProfile != null) student.MentorProfile.SubjectToTeach = SubjectToTeach;

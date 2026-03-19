@@ -18,7 +18,7 @@ namespace MentoringApp.View.Supervisor
 
         private void OnIssueItemClick(object sender, MouseButtonEventArgs e)
         {
-            if (sender is ListViewItem item && item.Content is Issue selectedIssue)
+            if (sender is ListViewItem item && item.Content is IssueModel selectedIssue)
             {
                 if (DataContext is SupervisorDashboardViewModel vm)
                 {

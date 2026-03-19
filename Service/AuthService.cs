@@ -3,6 +3,7 @@ using MentoringApp.Data;
 using MentoringApp.Data.Interfaces;
 using System.Reflection.Emit;
 using MentoringApp.Service.Validation;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.Service
 {
@@ -49,19 +50,19 @@ namespace MentoringApp.Service
             return sent ? Result.Ok() : Result.Failure("Failed to send email. Please check your connection.");
         }
 
-        public async Task<Result<User>> LoginAsync(string nationalId)
+        public async Task<Result<UserModel>> LoginAsync(string nationalId)
         { 
             if (string.IsNullOrWhiteSpace(nationalId))
-                return Result<User>.Failure("National ID cannot be empty.");
+                return Result<UserModel>.Failure("National ID cannot be empty.");
 
             var userResult = await _userService.GetUserByNationalIdAsync(nationalId);
 
             if (!userResult.Success)
-                return Result<User>.Failure("User does not exist.");
+                return Result<UserModel>.Failure("User does not exist.");
 
             var user = userResult.Data;
 
-            return Result<User>.Ok(user);
+            return Result<UserModel>.Ok(user);
         }
 
 
@@ -87,7 +88,7 @@ namespace MentoringApp.Service
             return cleared ? Result.Ok() : Result.Failure("Database error.");
         }
 
-        public async Task<Result<User>> Register(User user)
+        public async Task<Result<UserModel>> Register(UserModel user)
         {
             // 1. Validation (Stay the same - keep this in AuthService)
             var validationResult = await _userValidator.ValidateAsync(user);
@@ -96,22 +97,22 @@ namespace MentoringApp.Service
                 var errors = validationResult.Errors
                     .GroupBy(e => e.PropertyName)
                     .ToDictionary(g => g.Key, g => g.First().ErrorMessage);
-                return Result<User>.ValidationFailure(errors);
+                return Result<UserModel>.ValidationFailure(errors);
             }
 
             // 2. Business Check (Use the UserService now)
             var existingUser = await _userService.GetUserByNationalIdAsync(user.NationalId);
             if (existingUser.Success)
             {
-                return Result<User>.Failure("User already exists.");
+                return Result<UserModel>.Failure("User already exists.");
             }
 
             // 3. Delegation (Let UserService handle the complex multi-table SQL)
             var createdResult = await _userService.CreateUserAsync(user);
 
             return createdResult.Success
-                ? Result<User>.Ok(user)
-                : Result<User>.Failure("Failed to create user account.");
+                ? Result<UserModel>.Ok(user)
+                : Result<UserModel>.Failure("Failed to create user account.");
         }
     }
 }

@@ -3,6 +3,8 @@ using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using MentoringApp.Model;
 using Microsoft.Data.Sqlite;
 using MentoringApp.Data.DTO;
+using System.Text.RegularExpressions;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -15,6 +17,27 @@ namespace MentoringApp.Data.Acess.SQLite
         {
             _db = db;
         }
+
+        public async Task<IEnumerable<SupervisorStatsDto>> GetSupervisorStatisticsAsync()
+        {
+            const string sql = @"
+                SELECT 
+                    u.Id, 
+                    u.Name AS UserName,
+                    (SELECT COUNT(*) 
+                        FROM Issues i 
+                        JOIN Pairs p ON i.PairId = p.Id 
+                        WHERE p.SupervisorId = u.Id AND i.Status = 'Pending') AS PendingIssuesCount,
+                    (SELECT COUNT(*) 
+                        FROM Pairs p 
+                        WHERE p.SupervisorId = u.Id) AS PairsCount
+                FROM Users u
+                INNER JOIN UserSupervisors us ON u.Id = us.UserId";
+
+            return await _db.QueryAsync<SupervisorStatsDto>(sql);
+        }
+
+
 
         private async Task<bool> IsAdmin(int userId)
         {
@@ -38,14 +61,14 @@ namespace MentoringApp.Data.Acess.SQLite
             public int Count { get; set; }
         }
 
-        public async Task<bool> CreateUserAsync(User user)
+        public async Task<bool> CreateUserAsync(UserModel user)
         {
             // 1. Determine which role flags to set for the SQL logic
-            bool isStudent = user is Student;
-            bool isMentor = (user as Student)?.IsMentor ?? false;
-            bool isMentee = (user as Student)?.IsMentee ?? false;
-            bool isSupervisor = user is Supervisor;
-            bool isAdmin = user is Admin;
+            bool isStudent = user is StudentModel;
+            bool isMentor = (user as StudentModel)?.IsMentor ?? false;
+            bool isMentee = (user as StudentModel)?.IsMentee ?? false;
+            bool isSupervisor = user is SupervisorModel;
+            bool isAdmin = user is AdminModel;
 
             const string sql = @"
         /* 1. Create the base user */
@@ -89,9 +112,9 @@ namespace MentoringApp.Data.Acess.SQLite
                 IsMentee = isMentee ? 1 : 0,
                 IsSupervisor = isSupervisor ? 1 : 0,
                 IsAdmin = isAdmin ? 1 : 0,
-                GradeId = (user as Student)?.Grade.Id ?? 0,
-                MentorSubId = (user as Student)?.MentorProfile?.SubjectToTeach ?? 0,
-                MenteeSubId = (user as Student)?.MenteeProfile?.SubjectToLearn ?? 0,
+                GradeId = (user as StudentModel)?.Grade.Id ?? 0,
+                MentorSubId = (user as StudentModel)?.MentorProfile?.SubjectToTeach ?? 0,
+                MenteeSubId = (user as StudentModel)?.MenteeProfile?.SubjectToLearn ?? 0,
                 HasCode = user.CurrentVerificationCode != null ? 1 : 0,
                 Code = user.CurrentVerificationCode?.Code,
                 Date = user.CurrentVerificationCode?.CreationDate.ToString("o")

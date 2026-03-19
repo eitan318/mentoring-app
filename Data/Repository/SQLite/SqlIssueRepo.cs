@@ -57,19 +57,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 .ToList();
         }
 
-        public async Task<IEnumerable<IssueCategoryDto>> GetCategoriesAsync()
-        {
-            var rows = await _db.QueryAsync<CategoryRow>("SELECT Id, Name FROM IssueCategories");
-            return rows.Select(r => new IssueCategoryDto { Id = r.Id, Name = r.Name }).ToList();
-        }
 
-        public async Task<IssueCategoryDto?> GetCategoryByIdAsync(int categoryId)
-        {
-            var row = await _db.QuerySingleAsync<CategoryRow>(
-                "SELECT Id, Name FROM IssueCategories WHERE Id = @Id",
-                new { Id = categoryId });
-            return row == null ? null : new IssueCategoryDto { Id = row.Id, Name = row.Name };
-        }
 
         public async Task<bool> CreateAsync(string description, int categoryId, int reportedByUserId)
         {
@@ -128,11 +116,7 @@ namespace MentoringApp.Data.Acess.SQLite
             public string CreationDate { get; set; } = string.Empty;
         }
 
-        private class CategoryRow
-        {
-            public int Id { get; set; }
-            public string Name { get; set; } = string.Empty;
-        }
+
 
         private class StudentIdRow
         {

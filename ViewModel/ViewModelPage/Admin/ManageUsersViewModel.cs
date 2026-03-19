@@ -11,7 +11,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MentoringApp.Data.Interfaces;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.Service;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
@@ -30,12 +32,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             await _navigationService.NavigateToAsync<RegistrationViewModel, bool>(true);
 
         
-        public ObservableCollection<Model.User> AllUsers { get; set; } = [];
+        public ObservableCollection<UserModel> AllUsers { get; set; } = [];
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(DeleteUserCommand))]
         [NotifyCanExecuteChangedFor(nameof(ViewUserCommand))]
-        private Model.User? _selectedUser;
+        private UserModel? _selectedUser;
 
 
         [ObservableProperty]
@@ -81,7 +83,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             }
         }
 
-        public IEnumerable<Model.User> FilteredUsers => string.IsNullOrWhiteSpace(SearchText)
+        public IEnumerable<UserModel> FilteredUsers => string.IsNullOrWhiteSpace(SearchText)
             ? AllUsers
             : AllUsers.Where(u => u.UserName.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                                   u.Email.Contains(SearchText, StringComparison.OrdinalIgnoreCase));

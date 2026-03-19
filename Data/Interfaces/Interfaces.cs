@@ -1,5 +1,6 @@
 using MentoringApp.Data.DTO;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.Data.Interfaces
 {
@@ -10,10 +11,12 @@ namespace MentoringApp.Data.Interfaces
 
     public interface IUserRepo
     {
-        Task<bool> CreateUserAsync(User user);
+        Task<bool> CreateUserAsync(UserModel user);
         Task<IEnumerable<UserDto>> GetAllUserDtosAsync();
         Task<UserDto?> GetUserDtoByNationalIdAsync(string nationalId);
         Task<UserDto?> GetUserDtoByIdAsync(int userId);
+        Task<IEnumerable<SupervisorStatsDto>> GetSupervisorStatisticsAsync();
+        
 
         Task<bool> DeleteUserAsync(int userId);
 
@@ -50,10 +53,14 @@ namespace MentoringApp.Data.Interfaces
         Task<IssueDto?> GetByIdAsync(int id);
         Task<IEnumerable<IssueDto>> GetByReporterAsync(int userId);
         Task<IEnumerable<IssueDto>> GetBySupervisorAsync(int supervisorId);
-        Task<IEnumerable<IssueCategoryDto>> GetCategoriesAsync();
-        Task<IssueCategoryDto?> GetCategoryByIdAsync(int categoryId);
         Task<bool> CreateAsync(string description, int categoryId, int reportedByUserId);
         Task<bool> ResolveAsync(int issueId);
+    }
+
+    public interface IIssueCategoryRepo
+    {
+        Task<IEnumerable<IssueCategoryDto>> GetAllAsync();
+        Task<IssueCategoryDto?> GetByIdAsync(int categoryId);
     }
 
     public interface IReviewRepo

@@ -3,11 +3,13 @@ using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.Service;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelPage.User;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using MentoringApp.ViewModel.Navigation;
+using MentoringApp.Service;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Student
 {
@@ -51,7 +53,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         private async Task LoadDataAsync()
         {
             Pairs.Clear();
-            var currentUser = _userStore.User as Model.Student;
+            var currentUser = _userStore.User as StudentModel;
             if (currentUser == null) return;
 
             if (currentUser.IsMentor)
@@ -98,11 +100,11 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         protected readonly UserStore _userStore;
 
         [ObservableProperty]
-        private Model.Student _counterpart;
+        private StudentModel _counterpart;
 
         public Pair Pair { get; }
 
-        public ObservableCollection<Issue> MyIssues { get; set; } = new();
+        public ObservableCollection<IssueModel> MyIssues { get; set; } = new();
         public ObservableCollection<Review> RecentReviews { get; set; } = new();
 
         protected PairMemberDashboardViewModel(
@@ -112,7 +114,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             ReviewService reviewService,
             UserStore userStore,
             Pair pair,
-            Model.Student counterpart)
+            StudentModel counterpart)
         {
             _windowService = windowService;
             _navigationService = navigationService;
@@ -128,7 +130,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             var issuesResult = await _issueService.GetIssuesByUserAsync(_userStore.User!.Id);
             if (issuesResult.Success && issuesResult.Data != null)
             {
-                MyIssues = new ObservableCollection<Issue>(issuesResult.Data);
+                MyIssues = new ObservableCollection<IssueModel>(issuesResult.Data);
             }
 
             var reviewsResult = await _reviewService.GetReviewsByPairAsync(Pair.Id);
@@ -150,7 +152,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             var categoriesResult = await _issueService.GetCategoriesAsync();
             if (categoriesResult.Success && categoriesResult.Data != null)
             {
-                await _navigationService.NavigateToAsync<AddIssueViewModel, IEnumerable<IssueCategory>>(categoriesResult.Data);
+                await _navigationService.NavigateToAsync<AddIssueViewModel, IEnumerable<IssueCategoryModel>>(categoriesResult.Data);
             }
             else
             {

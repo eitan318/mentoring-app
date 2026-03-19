@@ -1,4 +1,3 @@
-using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelPage;
 using MentoringApp.ViewModel.ViewModelPage.Admin;
@@ -6,9 +5,11 @@ using MentoringApp.ViewModel.ViewModelPage.User;
 using MentoringApp.ViewModel.ViewModelPage.Student;
 using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using Microsoft.Extensions.DependencyInjection;
+using MentoringApp.ViewModel.Navigation;
+using MentoringApp.Service;
 
 
-namespace MentoringApp.ViewModel
+namespace MentoringApp.ViewModel.DI
 {
     public static class ViewModelDependencyInjection
     {
@@ -19,7 +20,7 @@ namespace MentoringApp.ViewModel
 
             // Services
             services.AddSingleton<INavigationService, NavigationService>();
-            services.AddSingleton<MentoringApp.Service.ExcelImportService>();
+            services.AddSingleton<ExcelImportService>();
 
 
             // ViewModels (Transient because you want a fresh one each time you navigate)

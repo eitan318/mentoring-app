@@ -1,19 +1,20 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
-using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using System.Collections.ObjectModel;
 using MentoringApp.Data.Interfaces;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.Service;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
 
     public class SupervisorSummary
     {
-        public required Model.Supervisor Supervisor { get; set; }
+        public required SupervisorModel Supervisor { get; set; }
         public int PairsCount { get; set; }
         public int PendingIssuesCount { get; set; }
     }
@@ -40,7 +41,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 
         private async Task LoadSupervisors()
         {
-            var supervisors = _userService.GetAllUsersAsync().Result.OfType<Model.Supervisor>();
+            var supervisors = _userService.GetAllUsersAsync().Result.OfType<SupervisorModel>();
             foreach (var supervisor in supervisors)
             {
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MentoringApp.Model.User;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace MentoringApp.Model
 {
     public class Pair
     {
-        public required Student Mentee { get; set; }
-        public required Student Mentor { get; set; }
+        public required StudentModel Mentee { get; set; }
+        public required StudentModel Mentor { get; set; }
         public required int Id { get; set; }
     }
 }

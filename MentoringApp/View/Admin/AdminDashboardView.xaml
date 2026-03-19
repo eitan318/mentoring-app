@@ -27,7 +27,7 @@
                             <TextBlock Margin="0,0,10,0" Text="{Binding UserName}" />
 
                             <TextBlock Text="Pairs supervised: " />
-                            <TextBlock Margin="0,0,10,0" Text="{Binding PairsSupervised}" />
+                            <TextBlock Margin="0,0,10,0" Text="{Binding SupervisedPairsCount}" />
 
                             <TextBlock Foreground="Red" Text="Pending: " />
                             <TextBlock Margin="0,0,10,0" Text="{Binding PendingIssues.Count}" />

@@ -15,7 +15,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         private readonly ReviewService _reviewService;
 
         [ObservableProperty] private Pair? _currentPair;
-        [ObservableProperty] private ObservableCollection<Issue> _pairIssues = new();
+        [ObservableProperty] private ObservableCollection<IssueModel> _pairIssues = new();
         [ObservableProperty] private ObservableCollection<Review> _pairReviews = new();
 
         public PairDetailsViewModel(PairService pairService, IssueService issueService, ReviewService reviewService)
@@ -41,7 +41,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
             if (CurrentPair != null)
             {
-                var allIssues = new List<Issue>();
+                var allIssues = new List<IssueModel>();
                 
                 var mentorIssues = await _issueService.GetIssuesByUserAsync(CurrentPair.Mentor.Id);
                 if (mentorIssues.Success && mentorIssues.Data != null)
@@ -51,7 +51,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
                 if (menteeIssues.Success && menteeIssues.Data != null)
                     allIssues.AddRange(menteeIssues.Data);
                 
-                PairIssues = new ObservableCollection<Issue>(allIssues.OrderByDescending(i => i.CreationDate));
+                PairIssues = new ObservableCollection<IssueModel>(allIssues.OrderByDescending(i => i.CreationDate));
             }
         }
 

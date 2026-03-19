@@ -2,14 +2,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
-using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 
 namespace MentoringApp.ViewModel.ViewModelPage.User
 {
     public partial class IssueViewModel : ObservableObject, INavigatable<int>
     {
-        [ObservableProperty] private Issue _currentIssue;
+        [ObservableProperty] private IssueModel _currentIssue;
 
         private readonly INavigationService _navigationService;
         private readonly IssueService _issueService;

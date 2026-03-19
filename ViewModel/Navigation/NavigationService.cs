@@ -1,4 +1,4 @@
-﻿using MentoringApp.ViewModel.IService;
+﻿using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Extensions.DependencyInjection;

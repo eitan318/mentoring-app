@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.Service.Validation
 {
-    public class UserValidator : AbstractValidator<User>
+    public class UserValidator : AbstractValidator<UserModel>
     {
         public UserValidator()
         {
@@ -21,16 +22,13 @@ namespace MentoringApp.Service.Validation
                 .Length(9).WithMessage("National ID must be exactly 9 digits.")
                 .Matches("^[0-9]*$").WithMessage("National ID must contain only numbers.");
 
-            // --- Conditional Rules for Students ---
-            // This only runs if the object being validated is a Student
-            RuleFor(user => (user as Student).Grade.Num)
+            RuleFor(user => (user as StudentModel).Grade.Num)
                 .InclusiveBetween(1, 12).WithMessage("Grade must be between 1 and 12.")
-                .When(user => user is Student);
+                .When(user => user is StudentModel);
 
-            // --- Rules for Mentor Profiles ---
-            RuleFor(user => (user as Student).MentorProfile.SubjectToTeach)
+            RuleFor(user => (user as StudentModel).MentorProfile.SubjectToTeach)
                 .NotEmpty().WithMessage("Please select a subject to teach.")
-                .When(user => user is Student s && s.IsMentor);
+                .When(user => user is StudentModel s && s.IsMentor);
         }
     }
 }

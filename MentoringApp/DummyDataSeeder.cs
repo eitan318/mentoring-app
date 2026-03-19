@@ -1,6 +1,8 @@
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
+using MentoringApp.Model.User.StudentProfiles;
 using MentoringApp.Service;
 using System;
 using System.Collections.Generic;
@@ -68,21 +70,21 @@ namespace MentoringApp
             // ── Step 2: Users ────────────────────
             Console.WriteLine("Generating Users...");
             
-            var admin = new Admin { Email = "admin@mentoringapp.com", NationalId = "100", UserName = "Admin User" };
+            var admin = new AdminModel { Email = "admin@mentoringapp.com", NationalId = "100", UserName = "Admin User" };
             await _userService.CreateUserAsync(admin);
 
-            List<Supervisor> supervisors = new();
+            List<SupervisorModel> supervisors = new();
             for (int i = 1; i <= 5; i++)
             {
-                var s = new Supervisor { Email = $"supervisor{i}@mentoringapp.com", NationalId = $"200{i}", UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}" };
+                var s = new SupervisorModel { Email = $"supervisor{i}@mentoringapp.com", NationalId = $"200{i}", UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}" };
                 await _userService.CreateUserAsync(s);
                 supervisors.Add(s);
             }
 
-            List<Student> mentors = new();
+            List<StudentModel> mentors = new();
             for (int i = 1; i <= 40; i++)
             {
-                var mentor = new Student
+                var mentor = new StudentModel
                 {
                     Email = $"mentor{i}@mentoringapp.com",
                     NationalId = $"3000{i}",
@@ -95,10 +97,10 @@ namespace MentoringApp
                 mentors.Add(mentor);
             }
 
-            List<Student> mentees = new();
+            List<StudentModel> mentees = new();
             for (int i = 1; i <= 60; i++)
             {
-                var mentee = new Student
+                var mentee = new StudentModel
                 {
                     Email = $"mentee{i}@mentoringapp.com",
                     NationalId = $"4000{i}",
@@ -112,7 +114,7 @@ namespace MentoringApp
             }
 
             // Dual Role
-            var dualStudent = new Student
+            var dualStudent = new StudentModel
             {
                 Email = "dual.test@mentoringapp.com",
                 NationalId = "50001",

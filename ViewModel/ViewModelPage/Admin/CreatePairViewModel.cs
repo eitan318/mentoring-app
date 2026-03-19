@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Model;
+using MentoringApp.Model.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
@@ -13,20 +13,20 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         // Add NotifyCanExecuteChangedFor to refresh the button state automatically
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(CreatePairCommand))]
-        private Model.Supervisor? _selectedSupervisor;
+        private SupervisorModel? _selectedSupervisor;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(CreatePairCommand))]
-        private Model.Student? _selectedMentor;
+        private StudentModel? _selectedMentor;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(CreatePairCommand))]
-        private Model.Student? _selectedMentee;
+        private StudentModel? _selectedMentee;
 
         // Raw Data
-        [ObservableProperty] private ObservableCollection<Model.Supervisor> _availableSupervisors = [];
-        [ObservableProperty] private ObservableCollection<Model.Student> _availableMentors = [];
-        [ObservableProperty] private ObservableCollection<Model.Student> _availableMentees = [];
+        [ObservableProperty] private ObservableCollection<SupervisorModel> _availableSupervisors = [];
+        [ObservableProperty] private ObservableCollection<StudentModel> _availableMentors = [];
+        [ObservableProperty] private ObservableCollection<StudentModel> _availableMentees = [];
 
         // Search Strings
         [ObservableProperty] private string _supervisorSearchText = string.Empty;
@@ -52,13 +52,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             var pairedMentorIds = allPairs.Select(p => p.Mentor.Id).ToHashSet();
             var pairedMenteeIds = allPairs.Select(p => p.Mentee.Id).ToHashSet();
 
-            var supervisors = allUsers.OfType<Model.Supervisor>().ToList();
-            var mentors = allUsers.OfType<Model.Student>().Where(s => s.IsMentor && !pairedMentorIds.Contains(s.Id)).ToList();
-            var mentees = allUsers.OfType<Model.Student>().Where(s => s.IsMentee && !pairedMenteeIds.Contains(s.Id)).ToList();
+            var supervisors = allUsers.OfType<SupervisorModel>().ToList();
+            var mentors = allUsers.OfType<StudentModel>().Where(s => s.IsMentor && !pairedMentorIds.Contains(s.Id)).ToList();
+            var mentees = allUsers.OfType<StudentModel>().Where(s => s.IsMentee && !pairedMenteeIds.Contains(s.Id)).ToList();
 
-            AvailableSupervisors = new ObservableCollection<Model.Supervisor>(supervisors);
-            AvailableMentors = new ObservableCollection<Model.Student>(mentors);
-            AvailableMentees = new ObservableCollection<Model.Student>(mentees);
+            AvailableSupervisors = new ObservableCollection<SupervisorModel>(supervisors);
+            AvailableMentors = new ObservableCollection<StudentModel>(mentors);
+            AvailableMentees = new ObservableCollection<StudentModel>(mentees);
 
             OnPropertyChanged(nameof(FilteredSupervisors));
             OnPropertyChanged(nameof(FilteredMentors));
@@ -70,13 +70,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         }
 
         // Filtered Properties
-        public IEnumerable<Model.Supervisor> FilteredSupervisors =>
+        public IEnumerable<SupervisorModel> FilteredSupervisors =>
             AvailableSupervisors.Where(x => x.UserName?.Contains(SupervisorSearchText, StringComparison.OrdinalIgnoreCase) ?? true);
 
-        public IEnumerable<Model.Student> FilteredMentors =>
+        public IEnumerable<StudentModel> FilteredMentors =>
             AvailableMentors.Where(x => x.UserName?.Contains(MentorSearchText, StringComparison.OrdinalIgnoreCase) ?? true);
 
-        public IEnumerable<Model.Student> FilteredMentees =>
+        public IEnumerable<StudentModel> FilteredMentees =>
             AvailableMentees.Where(x => x.UserName?.Contains(MenteeSearchText, StringComparison.OrdinalIgnoreCase) ?? true);
 
         partial void OnSupervisorSearchTextChanged(string value) => OnPropertyChanged(nameof(FilteredSupervisors));

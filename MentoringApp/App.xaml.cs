@@ -1,13 +1,13 @@
 using MentoringApp.Data.Interfaces;
-using MentoringApp.Model;
-using MentoringApp.Service;
-using MentoringApp.ViewModel;
-using MentoringApp.ViewModel.IService;
-using MentoringApp.ViewModel.ViewModelPage;
+using MentoringApp.ViewModel.Navigation;
+using MentoringApp.DI;
 using MentoringApp.ViewModel.ViewModelPage.User;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
+using MentoringApp.Data.DI;
+using MentoringApp.ViewModel.DI;
+using MentoringApp.Service.DI;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -33,13 +33,11 @@ namespace MentoringApp
                 throw new Exception("No connection string provided in config");
             }
 
-            services.AddSingleton<IWindowService, WindowService>();
-            services.AddSingleton<IFileService, FileService>();
-            services.AddSingleton<MainWindow>();
+
             services.AddViewModels();
             services.AddDataRepositories(connectionString);
             services.AddServices(_configuration);
-            services.AddTransient<DummyDataSeeder>();
+            services.AddView();
 
             _serviceProvider = services.BuildServiceProvider();
         }

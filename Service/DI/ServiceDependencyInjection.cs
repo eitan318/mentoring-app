@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MentoringApp.Service
+namespace MentoringApp.Service.DI
 {
     public static class ServiceDependencyInjection
     {
@@ -23,7 +23,7 @@ namespace MentoringApp.Service
             // Pull settings from the "EmailSettings" section of appsettings.json
             var emailSection = configuration.GetSection("EmailSettings");
 
-            services.AddSingleton<EmailService>(sp =>
+            services.AddSingleton(sp =>
                 new EmailService(
                     smtpHost: emailSection["SmtpHost"],
                     smtpPort: int.Parse(emailSection["SmtpPort"] ?? "587"),

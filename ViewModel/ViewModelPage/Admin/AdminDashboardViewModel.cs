@@ -7,8 +7,10 @@ using MentoringApp.ViewModel.ViewModelPage.User;
 using MentoringApp.ViewModel.ViewModelPage.Supervisor;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using MentoringApp.Service;
 using System.Diagnostics;
+using MentoringApp.ViewModel.Navigation;
+using MentoringApp.Service;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
@@ -22,7 +24,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [ObservableProperty]
         private string _statusMessage = "";
 
-        public ObservableCollection<Model.Supervisor> SupervisorsListPreview { get; set; }
+        public ObservableCollection<SupervisorModel> SupervisorsListPreview { get; set; }
 
         public AdminDashboardViewModel( INavigationService navigationService, UserService userService, IFileService fileService, ExcelImportService excelImportService)
         {
@@ -31,7 +33,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             _fileService = fileService;
             _excelImportService = excelImportService;
 
-            SupervisorsListPreview = new ObservableCollection<Model.Supervisor>();
+            SupervisorsListPreview = new ObservableCollection<SupervisorModel>();
             _ = LoadSupervisorsPreviewAsync();
         }
 
@@ -41,9 +43,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             var allUsers = await _userService.GetAllUsersAsync();
 
             var supervisorMatches = allUsers?
-                .OfType<Model.Supervisor>()
+                .OfType<SupervisorModel>()
                 .Take(4)
-                .ToList() ?? new List<Model.Supervisor>();
+                .ToList() ?? new List<SupervisorModel>();
 
             SupervisorsListPreview.Clear();
             foreach (var supervisor in supervisorMatches)
@@ -53,7 +55,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         }
 
         [RelayCommand]
-        private async Task InspectSupervisor(Model.Supervisor chosen)
+        private async Task InspectSupervisor(SupervisorModel chosen)
         {
             if (chosen != null)
             {

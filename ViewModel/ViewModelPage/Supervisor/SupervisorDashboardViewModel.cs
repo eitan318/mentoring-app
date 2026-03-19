@@ -1,8 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
 using MentoringApp.Service;
-using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.User;
 using System.Collections.ObjectModel;
@@ -20,7 +21,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         // Cached so we can reload data after returning from sub-pages
         private int _currentSupervisorId;
 
-        [ObservableProperty] private Model.Supervisor? _selectedSupervisor;
+        [ObservableProperty] private SupervisorModel? _selectedSupervisor;
 
         
         [ObservableProperty] private ObservableCollection<Pair> _pairsSupervised = [];
@@ -28,9 +29,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(PendingIssues))]
         [NotifyPropertyChangedFor(nameof(ResolvedIssues))]
-        private ObservableCollection<Issue> _allIssues = [];
-        public IEnumerable<Issue> PendingIssues => AllIssues.Where(i => !i.IsResolved);
-        public IEnumerable<Issue> ResolvedIssues => AllIssues.Where(i => i.IsResolved);
+        private ObservableCollection<IssueModel> _allIssues = [];
+        public IEnumerable<IssueModel> PendingIssues => AllIssues.Where(i => !i.IsResolved);
+        public IEnumerable<IssueModel> ResolvedIssues => AllIssues.Where(i => i.IsResolved);
 
 
         public SupervisorDashboardViewModel(INavigationService navigationService, PairService pairService, IssueService issueService, UserService userService)
@@ -42,7 +43,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         }
 
         [RelayCommand]
-        private async Task SelectIssue(Issue? issue)
+        private async Task SelectIssue(IssueModel? issue)
         {
             if (issue != null)
             {
@@ -72,7 +73,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
             if (issuesResult.Success)
             {
-                AllIssues = new ObservableCollection<Issue>(issuesResult.Data ?? []);
+                AllIssues = new ObservableCollection<IssueModel>(issuesResult.Data ?? []);
             }
         }
 
@@ -87,8 +88,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         {
             _currentSupervisorId = supervisorId;
             await LoadSupervisorDataAsync(supervisorId);
-            Result<Model.User> res = await _userService.GetUserByIdAsync(supervisorId);
-            SelectedSupervisor = res.Data as Model.Supervisor;
+            Result<UserModel> res = await _userService.GetUserByIdAsync(supervisorId);
+            SelectedSupervisor = res.Data as SupervisorModel;
         }
     }
 }

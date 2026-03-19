@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
-using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
@@ -10,14 +10,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Student
 {
-    public partial class AddIssueViewModel : ObservableValidator, INavigatable<IEnumerable<IssueCategory>>, ICloseable 
+    public partial class AddIssueViewModel : ObservableValidator, INavigatable<IEnumerable<IssueCategoryModel>>, ICloseable 
     {
         // Data for the View
-        [ObservableProperty] private ObservableCollection<IssueCategory> _issueCategoryList;
+        [ObservableProperty] private ObservableCollection<IssueCategoryModel> _issueCategoryList;
 
         [ObservableProperty] 
         [Required(ErrorMessage = "You must select a category")]
-        private IssueCategory? _selectedIssueCategory;
+        private IssueCategoryModel? _selectedIssueCategory;
         
         [ObservableProperty] 
         [NotifyDataErrorInfo]
@@ -39,7 +39,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             _issueCategoryList = [];
         }
     
-        public Task OnNavigatedToAsync(IEnumerable<IssueCategory> categories)
+        public Task OnNavigatedToAsync(IEnumerable<IssueCategoryModel> categories)
         {
             IssueCategoryList = [.. categories];
             return Task.CompletedTask;

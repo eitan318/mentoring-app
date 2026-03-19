@@ -1,9 +1,10 @@
 using MentoringApp.Data.Acess.SQLite;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
+using MentoringApp.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MentoringApp.Data.Interfaces
+namespace MentoringApp.Data.DI
 {
     public static class DataDependencyInjection
     {
@@ -12,7 +13,7 @@ namespace MentoringApp.Data.Interfaces
         /// </summary>
         public static IServiceCollection AddDataRepositories(this IServiceCollection services, string connectionString)
         {
-            return AddSqlDataRepositories(services, connectionString);
+            return services.AddSqlDataRepositories(connectionString);
         }
 
         /// <summary>
@@ -43,8 +44,11 @@ namespace MentoringApp.Data.Interfaces
                 new SqlPairRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
             services.AddScoped<IIssueRepo>(sp =>
                 new SqlIssueRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
+            services.AddScoped<IIssueCategoryRepo>(sp =>
+                new SqlIssueCategoryRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
             services.AddScoped<IReviewRepo>(sp =>
                 new SqlReviewRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
+
 
             return services;
         }

@@ -3,7 +3,7 @@ using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace MentoringApp.ViewModel.IService
+namespace MentoringApp.ViewModel.Navigation
 {
     public interface INavigationService
     {

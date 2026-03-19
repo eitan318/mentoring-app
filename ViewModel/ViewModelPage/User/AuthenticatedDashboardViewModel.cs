@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.ViewModel.IService;
+using MentoringApp.Model.User;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.Admin;
@@ -31,7 +32,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         public bool IsProfileButtonVisible => ActiveSubPage is not MyProfileViewModel;
         public bool IsBackVisible => _navigationService.CanGoBack();
 
-        [ObservableProperty] private Model.User? _currentUser;
+        [ObservableProperty] private UserModel? _currentUser;
 
         [RelayCommand]
         public async Task Back()
@@ -46,9 +47,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
             await (CurrentUser switch
             {
-                Model.Admin => _navigationService.NavigateToAsync<AdminDashboardViewModel>(),
-                Model.Supervisor => _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id),
-                Model.Student => _navigationService.NavigateToAsync<StudentDashboardViewModel>(),
+                AdminModel => _navigationService.NavigateToAsync<AdminDashboardViewModel>(),
+                SupervisorModel => _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id),
+                StudentModel => _navigationService.NavigateToAsync<StudentDashboardViewModel>(),
                 _ => Task.CompletedTask
             });
 

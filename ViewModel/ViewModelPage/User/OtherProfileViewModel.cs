@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.ViewModelHelper;
 
@@ -26,11 +27,11 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
 
         public async Task OnNavigatedToAsync(int userId)
         {
-            Model.User user = _userService.GetUserByIdAsync(userId).Result.Data;
+            UserModel user = _userService.GetUserByIdAsync(userId).Result.Data;
             await LoadUserData(user);
         }
 
-        private async Task LoadUserData(Model.User user)
+        private async Task LoadUserData(UserModel user)
         {
             if (user == null) return;
 
@@ -38,7 +39,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             Email = user.Email;
             ProfilePicturePath = user.ProfilePicturePath;
 
-            if (user is Model.Student student)
+            if (user is StudentModel student)
             {
                 IsStudent = true;
                 RoleName = "Student";
@@ -51,7 +52,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
                 if (student.MenteeProfile != null)
                     LearningSubject = $"Learning: {student.MenteeProfile.SubjectToLearn}";
             }
-            else if (user is Model.Supervisor)
+            else if (user is SupervisorModel)
             {
                 IsStudent = false;
                 RoleName = "Supervisor";

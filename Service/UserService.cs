@@ -1,7 +1,11 @@
 using System;
+using System.IO.IsolatedStorage;
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
+using MentoringApp.Model.User;
+using MentoringApp.Model.User.StudentProfiles;
+using MentoringApp.Service.Mapping;
 
 namespace MentoringApp.Service
 {
@@ -9,31 +13,37 @@ namespace MentoringApp.Service
     {
         private readonly IUserRepo _userRepo;
         private readonly IGradeRepo _gradeRepo;
+        private readonly IIssueRepo _issueRepo;       
+        private readonly IIssueCategoryRepo _issueCategoryRepo;
+        private readonly IPairRepo _pairRepo;
 
-        public UserService(IUserRepo userRepository, IGradeRepo gradeRepository)
+        public UserService(IUserRepo userRepository, IGradeRepo gradeRepository, IIssueRepo issueRepo, IIssueCategoryRepo issueCategoryRepo, IPairRepo pairRepo)
         {
             _userRepo = userRepository;
             _gradeRepo = gradeRepository;
+            _issueRepo = issueRepo;
+            _issueCategoryRepo = issueCategoryRepo;
+            _pairRepo = pairRepo;
         }
 
-        public async Task<Result<User>> GetUserByIdAsync(int userId)
+        public async Task<Result<UserModel>> GetUserByIdAsync(int userId)
         {
             var dto = await _userRepo.GetUserDtoByIdAsync(userId);
-            if (dto == null) return Result<User>.Failure("User not found.");
+            if (dto == null) return Result<UserModel>.Failure("User not found.");
 
             var user = await MapDtoToUserAsync(dto);
-            return Result<User>.Ok(user);
+            return Result<UserModel>.Ok(user);
         }
 
-        public async Task<Result<User>> GetUserByNationalIdAsync(string nationalId)
+        public async Task<Result<UserModel>> GetUserByNationalIdAsync(string nationalId)
         {
             var dto = await _userRepo.GetUserDtoByNationalIdAsync(nationalId);
-            if (dto == null) return Result<User>.Failure("User not found.");
+            if (dto == null) return Result<UserModel>.Failure("User not found.");
 
             var user = await MapDtoToUserAsync(dto);
-            return Result<User>.Ok(user);
+            return Result<UserModel>.Ok(user);
         }
-        public async Task<Result> CreateUserAsync(User user)
+        public async Task<Result> CreateUserAsync(UserModel user)
         {
             bool res = await _userRepo.CreateUserAsync(user);
             if (!res)
@@ -44,25 +54,54 @@ namespace MentoringApp.Service
 
         }
 
-        private async Task<User> MapDtoToUserAsync(UserDto dto)
+        public async Task<IEnumerable<UserModel>> GetProblematicSupervisorsAsync(int count)
         {
-            User user;
+            var stats = await _userRepo.GetSupervisorStatisticsAsync();
+
+            var problematicStats = stats
+                .OrderByDescending(s => s.PendingIssuesCount)
+                .Take(count);
+
+            var results = new List<UserModel>();
+
+            foreach (var stat in problematicStats)
+            {
+                var dto = await _userRepo.GetUserDtoByIdAsync(stat.Id);
+                var user = await MapDtoToUserAsync(dto);
+                results.Add(user);
+            }
+
+            return results;
+        }
+
+        private async Task<UserModel> MapDtoToUserAsync(UserDto dto)
+        {
+            UserModel user;
 
             switch (dto.Role)
             {
                 case UserRoleType.Admin:
-                    user = new Admin(dto.Id, dto.Email, dto.UserName, dto.NationalId);
+                    user = new AdminModel(dto.Id, dto.Email, dto.UserName, dto.NationalId);
                     break;
 
                 case UserRoleType.Supervisor:
-                    user = new Supervisor(dto.Id, dto.Email, dto.UserName, dto.NationalId);
+                    var supervisor = new SupervisorModel(dto.Id, dto.Email, dto.UserName, dto.NationalId);
+
+                    var issueDtos = await _issueRepo.GetAllAsync();
+                    var categoryDto = await _issueCategoryRepo.GetAllAsync();
+                    var categorys = IssueCategoryMapper.ToModels(categoryDto);
+                    supervisor.Issues = IssueMapper.ToModels(issueDtos, categorys);
+
+                    supervisor.SupervisedPairsCount = (await _pairRepo.GetBySupervisorIdAsync(supervisor.Id)).Count();
+
+                    user = supervisor;
                     break;
 
                 case UserRoleType.Student:
                     var gradeDto = await _gradeRepo.GetByIdAsync(dto.GradeId ?? 0)
                                 ?? new GradeDto { Id = 0, Name = "Unknown", Num = 0 };
 
-                    var student = new Student(dto.Id, dto.Email, dto.UserName, dto.NationalId, new Grade { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num });
+                    var student = new StudentModel(dto.Id, dto.Email, dto.UserName, dto.NationalId, new Grade { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num });
 
                     if (dto.MentorSubjectId.HasValue)
                     {
@@ -97,7 +136,10 @@ namespace MentoringApp.Service
 
             return user;
         }
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+
+
+
+        public async Task<IEnumerable<UserModel>> GetAllUsersAsync()
         {
             var dtos = await _userRepo.GetAllUserDtosAsync();
             var tasks = dtos.Select(dto => MapDtoToUserAsync(dto));
@@ -114,7 +156,7 @@ namespace MentoringApp.Service
                 : Result.Failure("Failed to delete the user from the database.");
         }
 
-        public async Task<Result> UpdateUserAsync(User user)
+        public async Task<Result> UpdateUserAsync(UserModel user)
         {
             if (user == null) return Result.Failure("User data is null.");
 
@@ -123,7 +165,7 @@ namespace MentoringApp.Service
 
             if (!baseUpdated) return Result.Failure("User not found or base update failed.");
 
-            if (user is Student student)
+            if (user is StudentModel student)
             {
                 await _userRepo.UpdateStudentGradeAsync(student.Id, student.Grade.Id);
 
@@ -132,7 +174,7 @@ namespace MentoringApp.Service
                     await _userRepo.UpsertMentorProfileAsync(student.Id, student.MentorProfile.SubjectToTeach);
                 }
             }
-            else if (user is Admin)
+            else if (user is AdminModel)
             {
             }
 
@@ -141,17 +183,28 @@ namespace MentoringApp.Service
 
         public async Task<Result> UploadProfilePictureAsync(int userId, string sourceFilePath)
         {
-            if (!File.Exists(sourceFilePath))
-                return Result.Failure("Selected file does not exist.");
+            Result<UserModel> result = await GetUserByIdAsync(userId);
+            if (!result.Success) return Result.Failure(result.ErrorMessage);
+            UserModel user = result.Data;
 
+            if (!user.IsValidProfilePicture(sourceFilePath))
+                return Result.Failure("Invalid format");
+
+            MoveFileToLocalStorage(user.Id, sourceFilePath);
+            string destPath = MoveFileToLocalStorage(userId, sourceFilePath);
+
+            await _userRepo.UpdateProfilePictureAsync(userId, destPath);
+            return Result.Ok();
+        }
+
+        private string MoveFileToLocalStorage(int userId, string sourceFilePath)
+        {
             string ext = Path.GetExtension(sourceFilePath).ToLowerInvariant();
-            if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
-                return Result.Failure("Only .jpg and .png files are supported.");
 
-            // Store pictures in the app's local data folder
             string folder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "MentoringApp", "ProfilePictures");
+
             Directory.CreateDirectory(folder);
 
             string destFileName = $"{userId}{ext}";
@@ -159,8 +212,7 @@ namespace MentoringApp.Service
 
             File.Copy(sourceFilePath, destPath, overwrite: true);
 
-            bool saved = await _userRepo.UpdateProfilePictureAsync(userId, destPath);
-            return saved ? Result.Ok() : Result.Failure("Failed to save profile picture path.");
+            return destPath;
         }
     }
 }
