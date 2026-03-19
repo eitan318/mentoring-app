@@ -18,7 +18,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private readonly INavigationService _navigationService;
         private readonly UserStore _userStore;
 
-        private static readonly bool _debugWithoutVerification = true;
+        private static readonly bool _debugWithoutVerification = false;
 
         public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService authService)
         {
