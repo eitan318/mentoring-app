@@ -1,4 +1,4 @@
-﻿using MentoringApp.Service.Validation;
+using MentoringApp.Service.Validation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +16,8 @@ namespace MentoringApp.Service.DI
             services.AddScoped<UserService>();
             services.AddScoped<SubjectService>();
             services.AddScoped<GradeService>();
+            services.AddScoped<ExcelImportService>();
+            services.AddScoped<SettingsService>();
 
             // Validator
             services.AddSingleton<UserValidator>();

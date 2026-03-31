@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
@@ -15,54 +16,111 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         private readonly IWindowService _windowService;
         private readonly INavigationService _navigationService;
         private readonly PairService _pairService;
+        private readonly ReviewService _reviewService;
+        private readonly IssueService _issueService;
 
-        [ObservableProperty] private ObservableCollection<Pair> _pairList = new();
+        // ── All pairs (source of truth) ─────────────────────────────────────
+        public ObservableCollection<Pair> AllPairs { get; set; } = [];
 
-        public ManagePairsViewModel(IWindowService windowService, INavigationService navigationService, PairService pairService)
+        // ── Selected pair (drives the sidebar) ─────────────────────────────
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SeparateCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SelectPairCommand))]
+        private Pair? _selectedPair;
+
+        [ObservableProperty] private int _selectedPairReviewCount;
+        [ObservableProperty] private int _selectedPairActiveIssueCount;
+        [ObservableProperty] private bool _isLoadingDetails;
+
+        private bool HasSelectedPair => SelectedPair != null;
+
+        // ── Search ──────────────────────────────────────────────────────────
+        [ObservableProperty] private string _searchText = string.Empty;
+
+        public System.Collections.Generic.IEnumerable<Pair> FilteredPairs
         {
-            _windowService = windowService;
+            get
+            {
+                if (string.IsNullOrWhiteSpace(SearchText))
+                    return AllPairs;
+
+                return AllPairs.Where(p =>
+                    p.Mentor.UserName.Contains(SearchText, System.StringComparison.OrdinalIgnoreCase) ||
+                    p.Mentee.UserName.Contains(SearchText, System.StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        partial void OnSearchTextChanged(string v) => OnPropertyChanged(nameof(FilteredPairs));
+
+        // ── Constructor ─────────────────────────────────────────────────────
+        public ManagePairsViewModel(
+            IWindowService windowService,
+            INavigationService navigationService,
+            PairService pairService,
+            ReviewService reviewService,
+            IssueService issueService)
+        {
+            _windowService     = windowService;
             _navigationService = navigationService;
-            _pairService = pairService;
-            UpdatePairList();
+            _pairService       = pairService;
+            _reviewService     = reviewService;
+            _issueService      = issueService;
         }
 
-        [RelayCommand]
-        private void CreatePair()
-        {
-            _navigationService.NavigateToAsync<CreatePairViewModel>();
+        public async Task OnNavigatedToAsync() => await RefreshPairs();
 
-        }
-
-        [RelayCommand]
-        private async Task SelectPair(Pair? pair)
-        {
-            if (pair != null)
-            {
-                await _navigationService.NavigateToAsync<PairDetailsViewModel, int>(pair.Id);
-            }
-        }
-
-        [RelayCommand]
-        private async Task Separate(Pair? pair)
-        {
-            if (pair != null)
-            {
-                await _pairService.SeparatePairAsync(pair.Id);
-                await UpdatePairList();
-            }
-        }
-
-        public async Task OnNavigatedToAsync()
-        {
-            UpdatePairList();
-        }
-
-        
-
-        private async Task UpdatePairList()
+        private async Task RefreshPairs()
         {
             var res = await _pairService.GetAllPairsAsync();
-            PairList = new ObservableCollection<Pair>(res.Data);
+            AllPairs = new ObservableCollection<Pair>(res.Data ?? []);
+            SelectedPair = null;
+            OnPropertyChanged(nameof(FilteredPairs));
+        }
+
+        async partial void OnSelectedPairChanged(Pair? value)
+        {
+            if (value == null) return;
+
+            IsLoadingDetails = true;
+            SelectedPairReviewCount = 0;
+            SelectedPairActiveIssueCount = 0;
+
+            // Load reviews
+            var revRes = await _reviewService.GetReviewsByPairAsync(value.Id);
+            if (revRes.Success && revRes.Data != null)
+                SelectedPairReviewCount = revRes.Data.Count();
+
+            // Load active issues (unresolved) for mentor and mentee
+            int issueCount = 0;
+            var mentorIssues = await _issueService.GetIssuesByUserAsync(value.Mentor.Id);
+            if (mentorIssues.Success && mentorIssues.Data != null)
+                issueCount += mentorIssues.Data.Count(i => !i.IsResolved);
+
+            var menteeIssues = await _issueService.GetIssuesByUserAsync(value.Mentee.Id);
+            if (menteeIssues.Success && menteeIssues.Data != null)
+                issueCount += menteeIssues.Data.Count(i => !i.IsResolved);
+
+            SelectedPairActiveIssueCount = issueCount;
+            IsLoadingDetails = false;
+        }
+
+        // ── Commands ────────────────────────────────────────────────────────
+        [RelayCommand]
+        private void CreatePair() => _navigationService.NavigateToAsync<CreatePairViewModel>();
+
+        [RelayCommand(CanExecute = nameof(HasSelectedPair))]
+        private async Task SelectPair()
+        {
+            if (SelectedPair != null)
+                await _navigationService.NavigateToAsync<PairDetailsViewModel, int>(SelectedPair.Id);
+        }
+
+        [RelayCommand(CanExecute = nameof(HasSelectedPair))]
+        private async Task Separate()
+        {
+            if (SelectedPair is null) return;
+            await _pairService.SeparatePairAsync(SelectedPair.Id);
+            await RefreshPairs();
         }
     }
 }

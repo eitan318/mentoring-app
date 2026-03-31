@@ -28,6 +28,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         private readonly PairService _pairService;
         private readonly IssueService _issueService;
         private readonly ReviewService _reviewService;
+        private readonly SettingsService _settingsService;
 
         public StudentDashboardViewModel(
             INavigationService navigationService, 
@@ -35,7 +36,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             UserStore userStore,
             PairService pairService,
             IssueService issueService,
-            ReviewService reviewService)
+            ReviewService reviewService,
+            SettingsService settingsService)
         {
             _windowService = windowService;
             _navigationService = navigationService;
@@ -43,6 +45,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             _pairService = pairService;
             _issueService = issueService;
             _reviewService = reviewService;
+            _settingsService = settingsService;
         }
 
         public async Task OnNavigatedToAsync()
@@ -62,7 +65,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
                 if (result.Success && result.Data != null)
                 {
                     var pair = result.Data;
-                    var mentorVm = new MentorDashboardViewModel(_windowService, _navigationService, _issueService, _reviewService, _userStore, pair);
+                    var mentorVm = new MentorDashboardViewModel(_windowService, _navigationService, _issueService, _reviewService, _userStore, _settingsService, pair);
                     await mentorVm.LoadDataAsync();
                     Pairs.Add(mentorVm);
                 }
@@ -73,7 +76,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
                 if (result.Success && result.Data != null)
                 {
                     var pair = result.Data;
-                    var menteeVm = new MenteeDashboardViewModel(_windowService, _navigationService, _issueService, _reviewService, _userStore, pair);
+                    var menteeVm = new MenteeDashboardViewModel(_windowService, _navigationService, _issueService, _reviewService, _userStore, _settingsService, pair);
                     await menteeVm.LoadDataAsync();
                     Pairs.Add(menteeVm);
                 }
@@ -98,6 +101,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         protected readonly IssueService _issueService;
         protected readonly ReviewService _reviewService;
         protected readonly UserStore _userStore;
+        protected readonly SettingsService _settingsService;
 
         [ObservableProperty]
         private StudentModel _counterpart;
@@ -107,12 +111,17 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         public ObservableCollection<IssueModel> MyIssues { get; set; } = new();
         public ObservableCollection<Review> RecentReviews { get; set; } = new();
 
+        [ObservableProperty] private double _totalMeetingHours;
+        [ObservableProperty] private double _requiredMeetingHours = 10;
+        [ObservableProperty] private double _hoursProgress;  // 0-100
+
         protected PairMemberDashboardViewModel(
             IWindowService windowService,
             INavigationService navigationService,
             IssueService issueService,
             ReviewService reviewService,
             UserStore userStore,
+            SettingsService settingsService,
             Pair pair,
             StudentModel counterpart)
         {
@@ -121,6 +130,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             _issueService = issueService;
             _reviewService = reviewService;
             _userStore = userStore;
+            _settingsService = settingsService;
             Pair = pair;
             Counterpart = counterpart;
         }
@@ -139,7 +149,14 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
                 var sortedReviews = reviewsResult.Data.OrderByDescending(r => r.Date).ToList();
                 RecentReviews = new ObservableCollection<Review>(sortedReviews);
             }
-            
+
+            // Calculate meeting hours progress
+            RequiredMeetingHours = await _settingsService.GetMeetingHoursBarrierAsync();
+            TotalMeetingHours = RecentReviews.Sum(r => r.AmountOfHours);
+            HoursProgress = RequiredMeetingHours > 0
+                ? Math.Min(100, (TotalMeetingHours / RequiredMeetingHours) * 100)
+                : 0;
+
             OnPropertyChanged(nameof(MyIssues));
             OnPropertyChanged(nameof(RecentReviews));
 
@@ -180,11 +197,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             IssueService issueService,
             ReviewService reviewService,
             UserStore userStore,
+            SettingsService settingsService,
             Pair pair)
-            : base(windowService, navigationService, issueService, reviewService, userStore, pair, pair.Mentor)
+            : base(windowService, navigationService, issueService, reviewService, userStore, settingsService, pair, pair.Mentor)
         {
-            // Note: Since MentorProfile uses SubjectToTeach (an int ID we didn't fetch the string for), 
-            // for now we set it based on whatever is available or default if complex
             MentorSubject = "Assigned Mentor";
         }
     }
@@ -202,8 +218,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             IssueService issueService,
             ReviewService reviewService,
             UserStore userStore,
+            SettingsService settingsService,
             Pair pair)
-            : base(windowService, navigationService, issueService, reviewService, userStore, pair, pair.Mentee)
+            : base(windowService, navigationService, issueService, reviewService, userStore, settingsService, pair, pair.Mentee)
         {
             MenteeProgress = 50.0;
         }

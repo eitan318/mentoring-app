@@ -17,6 +17,11 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [MinLength(10, ErrorMessage = "Review is too short.")]
         private string _reviewContent = string.Empty;
 
+        [ObservableProperty]
+        [NotifyDataErrorInfo]
+        [Range(0.1, 24, ErrorMessage = "Please enter between 0.1 and 24 hours.")]
+        private double _amountOfHours = 1.0;
+
         private Pair? _currentPair;
         
         private readonly ReviewService _reviewService;
@@ -36,6 +41,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         {
             _currentPair = pair;
             ReviewContent = string.Empty;
+            AmountOfHours = 1.0;
             return Task.CompletedTask;
         }
 
@@ -47,7 +53,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             if (HasErrors || _currentPair == null || _userStore.User == null)
                 return;
 
-            var result = await _reviewService.CreateReviewAsync(ReviewContent, _currentPair.Id, _userStore.User.Id);
+            var result = await _reviewService.CreateReviewAsync(ReviewContent, _currentPair.Id, _userStore.User.Id, AmountOfHours);
             
             if (result.Success)
             {

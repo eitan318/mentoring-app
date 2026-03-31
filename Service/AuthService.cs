@@ -90,7 +90,6 @@ namespace MentoringApp.Service
 
         public async Task<Result<UserModel>> Register(UserModel user)
         {
-            // 1. Validation (Stay the same - keep this in AuthService)
             var validationResult = await _userValidator.ValidateAsync(user);
             if (!validationResult.IsValid)
             {
@@ -100,14 +99,12 @@ namespace MentoringApp.Service
                 return Result<UserModel>.ValidationFailure(errors);
             }
 
-            // 2. Business Check (Use the UserService now)
             var existingUser = await _userService.GetUserByNationalIdAsync(user.NationalId);
             if (existingUser.Success)
             {
                 return Result<UserModel>.Failure("User already exists.");
             }
 
-            // 3. Delegation (Let UserService handle the complex multi-table SQL)
             var createdResult = await _userService.CreateUserAsync(user);
 
             return createdResult.Success

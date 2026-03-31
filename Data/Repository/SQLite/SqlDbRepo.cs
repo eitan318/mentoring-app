@@ -122,9 +122,16 @@ namespace MentoringApp.Data.Acess.SQLite
                     AuthorUserId INTEGER NOT NULL,
                     Content TEXT NOT NULL,
                     Date TEXT NOT NULL,
+                    AmountOfHours REAL NOT NULL DEFAULT 0,
                     FOREIGN KEY (PairId) REFERENCES Pairs(Id) ON DELETE CASCADE,
                     FOREIGN KEY (AuthorUserId) REFERENCES Users(Id)
                 );
+
+                CREATE TABLE IF NOT EXISTS Settings (
+                    Key TEXT PRIMARY KEY,
+                    Value TEXT NOT NULL
+                );
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('MeetingHoursBarrier', '10');
             ";
 
             using var cmd = new SqliteCommand(dropSql, conn);

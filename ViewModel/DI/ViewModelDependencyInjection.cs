@@ -20,7 +20,6 @@ namespace MentoringApp.ViewModel.DI
 
             // Services
             services.AddSingleton<INavigationService, NavigationService>();
-            services.AddSingleton<ExcelImportService>();
 
 
             // ViewModels (Transient because you want a fresh one each time you navigate)

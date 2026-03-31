@@ -9,7 +9,6 @@ public class NavigationService : INavigationService
     private readonly Stack<Action<INavigatable>> _contextStack = new();
     private readonly Stack<NavigationStore> _storeStack = new();
 
-
     public NavigationService(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;

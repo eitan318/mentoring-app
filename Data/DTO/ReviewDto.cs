@@ -7,5 +7,6 @@ namespace MentoringApp.Data.DTO
         public int AuthorUserId { get; set; }
         public string Content { get; set; } = string.Empty;
         public string Date { get; set; } = string.Empty;
+        public double AmountOfHours { get; set; }
     }
 }

@@ -13,16 +13,21 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         private readonly PairService _pairService;
         private readonly IssueService _issueService;
         private readonly ReviewService _reviewService;
+        private readonly SettingsService _settingsService;
 
         [ObservableProperty] private Pair? _currentPair;
         [ObservableProperty] private ObservableCollection<IssueModel> _pairIssues = new();
         [ObservableProperty] private ObservableCollection<Review> _pairReviews = new();
+        [ObservableProperty] private double _totalMeetingHours;
+        [ObservableProperty] private double _requiredMeetingHours = 10;
+        [ObservableProperty] private double _hoursProgress;  // 0-100 for ProgressBar
 
-        public PairDetailsViewModel(PairService pairService, IssueService issueService, ReviewService reviewService)
+        public PairDetailsViewModel(PairService pairService, IssueService issueService, ReviewService reviewService, SettingsService settingsService)
         {
             _pairService = pairService;
             _issueService = issueService;
             _reviewService = reviewService;
+            _settingsService = settingsService;
         }
 
         public async Task OnNavigatedToAsync(int pairId)
@@ -38,6 +43,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             {
                 PairReviews = new ObservableCollection<Review>(reviewsResult.Data);
             }
+
+            // Calculate meeting hours progress
+            RequiredMeetingHours = await _settingsService.GetMeetingHoursBarrierAsync();
+            TotalMeetingHours = PairReviews.Sum(r => r.AmountOfHours);
+            HoursProgress = RequiredMeetingHours > 0
+                ? Math.Min(100, (TotalMeetingHours / RequiredMeetingHours) * 100)
+                : 0;
 
             if (CurrentPair != null)
             {

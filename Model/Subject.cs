@@ -1,6 +1,4 @@
-﻿
-
-namespace MentoringApp.Model
+﻿namespace MentoringApp.Model
 {
     public class Subject
     {
