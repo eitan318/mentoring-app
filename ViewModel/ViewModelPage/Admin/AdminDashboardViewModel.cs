@@ -26,16 +26,21 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 
         public ObservableCollection<SupervisorModel> SupervisorsListPreview { get; set; }
 
-        public AdminDashboardViewModel( INavigationService navigationService, UserService userService, IFileService fileService, ExcelImportService excelImportService)
+        public AdminDashboardViewModel(INavigationService navigationService, UserService userService, IFileService fileService, ExcelImportService excelImportService)
         {
             _navigationService = navigationService;
             _userService = userService;
             _fileService = fileService;
             _excelImportService = excelImportService;
 
+
+        }
+        public async Task OnNavigatedToAsync()
+        {
             SupervisorsListPreview = new ObservableCollection<SupervisorModel>();
             _ = LoadSupervisorsPreviewAsync();
         }
+
 
 
         private async Task LoadSupervisorsPreviewAsync()
@@ -65,28 +70,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [RelayCommand] private async Task ManageUsers() => await _navigationService.NavigateToAsync<ManageUsersViewModel>();
         [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
 
-        [RelayCommand]
-        private async Task LoadFromExcel()
-        {
-            StatusMessage = "Loading...";
-            string? filePath = _fileService.OpenFile("Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*");
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                var result = await _excelImportService.ImportUsersFromExcelAsync(filePath);
-                if (result.Success)
-                {
-                    StatusMessage = $"Successfully imported {result.Data} users.";
-                    await LoadSupervisorsPreviewAsync();
-                }
-                else
-                {
-                    StatusMessage = result.ErrorMessage ?? "Import failed.";
-                }
-            }
-            else
-            {
-                StatusMessage = "File selection cancelled.";
-            }
-        }
+        
     }
 }

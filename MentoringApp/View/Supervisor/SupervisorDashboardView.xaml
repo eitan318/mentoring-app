@@ -10,7 +10,7 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <DataTemplate x:Key="IssueItemTemplate">
             <StackPanel Margin="5">
                 <TextBlock
@@ -114,17 +114,29 @@
             </DockPanel>
 
             <DockPanel Margin="5,0,0,0">
-                <TextBlock
-                    Margin="0,0,0,5"
-                    DockPanel.Dock="Top"
-                    FontWeight="Bold"
-                    Foreground="DarkGreen"
-                    Text="Resolved Issues" />
+                <TextBlock Margin="0,0,0,5" DockPanel.Dock="Top" FontWeight="Bold" Foreground="DarkGreen" Text="Resolved Issues" />
+                
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBlock FontSize="14" Text="Total Resolved: " VerticalAlignment="Center"/>
+                    <TextBlock FontSize="14" FontWeight="Bold" Text="{Binding ResolvedIssuesCount}" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                    <Button Command="{Binding ToggleResolvedIssuesCommand}" Padding="8,4" VerticalAlignment="Center">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Content" Value="View Resolved Issues"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowResolvedIssues}" Value="True">
+                                        <Setter Property="Content" Value="Hide Resolved Issues"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
 
-                <ListView
-                    ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
-                    ItemTemplate="{StaticResource IssueItemTemplate}"
-                    ItemsSource="{Binding ResolvedIssues}" />
+                <ListView ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
+                          ItemTemplate="{StaticResource IssueItemTemplate}"
+                          ItemsSource="{Binding ResolvedIssues}"
+                          Visibility="{Binding ShowResolvedIssues, Converter={StaticResource BoolToVis}}" />
             </DockPanel>
         </UniformGrid>
 

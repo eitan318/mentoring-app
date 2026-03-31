@@ -74,7 +74,7 @@ namespace MentoringApp
             await _userService.CreateUserAsync(admin);
 
             List<SupervisorModel> supervisors = new();
-            for (int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 3; i++)
             {
                 var s = new SupervisorModel { Email = $"supervisor{i}@mentoringapp.com", NationalId = $"200{i}", UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}" };
                 await _userService.CreateUserAsync(s);
@@ -82,7 +82,7 @@ namespace MentoringApp
             }
 
             List<StudentModel> mentors = new();
-            for (int i = 1; i <= 40; i++)
+            for (int i = 1; i <= 10; i++)
             {
                 var mentor = new StudentModel
                 {
@@ -98,7 +98,7 @@ namespace MentoringApp
             }
 
             List<StudentModel> mentees = new();
-            for (int i = 1; i <= 60; i++)
+            for (int i = 1; i <= 10; i++)
             {
                 var mentee = new StudentModel
                 {
@@ -135,7 +135,7 @@ namespace MentoringApp
             List<int> pairIds = new();
             
             // Generate ~50 pairs
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 5; i++)
             {
                 var sup = Pick(supervisors);
                 var men = Pick(mentors);
@@ -163,7 +163,8 @@ namespace MentoringApp
                 {
                     int writerId = _rand.NextDouble() > 0.5 ? mentorId : menteeId;
                     DateTime reviewDate = DateTime.UtcNow.AddDays(-_rand.Next(1, 180));
-                    await _reviewRepo.CreateAsync(Pick(_reviewTexts), reviewDate, pid, writerId);
+                    double hours = Math.Round(0.5 + _rand.NextDouble() * 2, 1); // 0.5 – 2.5 hrs
+                    await _reviewRepo.CreateAsync(Pick(_reviewTexts), reviewDate, pid, writerId, hours);
                 }
 
                 // Issues (each pair guarantees having unresolved and resolved issues)

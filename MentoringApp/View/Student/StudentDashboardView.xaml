@@ -47,11 +47,16 @@
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock Foreground="Gray" Text="Your Mentee" />
-                            <TextBlock
-                                Margin="0,8,0,2"
-                                Foreground="#555"
-                                Text="{Binding MenteeProgress, StringFormat='Progress: {0:0}%'}" />
-                            <ProgressBar Height="12" Maximum="100" Value="{Binding MenteeProgress}" />
+                            <!-- Meeting Hours Progress -->
+                            <DockPanel Margin="0,8,0,2">
+                                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#555" Text="Meeting Hours"/>
+                                <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right">
+                                    <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}"/>
+                                    <Run Text=" / "/>
+                                    <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}"/>
+                                </TextBlock>
+                            </DockPanel>
+                            <ProgressBar Height="10" Minimum="0" Maximum="100" Value="{Binding HoursProgress}" Margin="0,0,0,4"/>
                         </StackPanel>
 
                         <UniformGrid DockPanel.Dock="Bottom" Columns="2" Margin="0,8,0,0">
@@ -67,7 +72,11 @@
                                         <DataTemplate>
                                             <Border BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="4,6">
                                                 <StackPanel>
-                                                    <TextBlock Text="{Binding Content}" TextWrapping="Wrap" />
+                                                    <DockPanel>
+                                                        <TextBlock DockPanel.Dock="Left" Text="{Binding Content}" TextWrapping="Wrap"/>
+                                                        <TextBlock DockPanel.Dock="Right" FontSize="11" Foreground="#2E7D32" HorizontalAlignment="Right"
+                                                                   Text="{Binding AmountOfHours, StringFormat='{}{0:0.#} hrs'}"/>
+                                                    </DockPanel>
                                                     <TextBlock
                                                         Margin="0,2,0,0"
                                                         FontSize="11"
@@ -94,6 +103,16 @@
                             </TextBlock>
                             <TextBlock Foreground="#2E7D32" FontWeight="SemiBold"
                                        Text="{Binding MentorSubject, StringFormat='Expert in: {0}'}" />
+                            <!-- Meeting Hours Progress -->
+                            <DockPanel Margin="0,8,0,2">
+                                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#555" Text="Meeting Hours"/>
+                                <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right">
+                                    <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}"/>
+                                    <Run Text=" / "/>
+                                    <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}"/>
+                                </TextBlock>
+                            </DockPanel>
+                            <ProgressBar Height="10" Minimum="0" Maximum="100" Value="{Binding HoursProgress}" Margin="0,0,0,4"/>
                         </StackPanel>
 
                         <Button DockPanel.Dock="Bottom" Margin="0,8,0,0"

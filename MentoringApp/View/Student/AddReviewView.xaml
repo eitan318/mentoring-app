@@ -24,11 +24,23 @@
 
             <TextBox
                 Height="150"
-                Margin="0,0,0,20"
+                Margin="0,0,0,15"
                 AcceptsReturn="True"
                 Tag="Review content"
                 Text="{Binding ReviewContent, UpdateSourceTrigger=PropertyChanged}"
                 TextWrapping="Wrap" />
+
+            <TextBlock
+                Margin="0,0,0,5"
+                FontSize="14"
+                Foreground="Gray"
+                Text="Meeting duration (hours):" />
+
+            <TextBox
+                Width="100"
+                Margin="0,0,0,20"
+                HorizontalAlignment="Left"
+                Text="{Binding AmountOfHours, UpdateSourceTrigger=PropertyChanged}" />
 
             <Button
                 Width="120"

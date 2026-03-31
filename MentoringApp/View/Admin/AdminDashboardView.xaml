@@ -17,22 +17,32 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Action buttons -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
-            <Button Command="{Binding ManagePairsCommand}" Content="Manage Pairs" Padding="10,5" Margin="0,0,8,0" />
-            <Button Command="{Binding ManageUsersCommand}" Content="Manage Users" Padding="10,5" Margin="0,0,8,0" />
-            <Button Command="{Binding LoadFromExcelCommand}" Content="Load from Excel" Padding="10,5" Background="#E0F0E0" />
+        <!--  Action buttons  -->
+        <StackPanel
+            Grid.Row="0"
+            Margin="0,0,0,8"
+            Orientation="Horizontal">
+            <Button
+                Margin="0,0,8,0"
+                Padding="10,5"
+                Command="{Binding ManagePairsCommand}"
+                Content="Manage Pairs" />
+            <Button
+                Margin="0,0,8,0"
+                Padding="10,5"
+                Command="{Binding ManageUsersCommand}"
+                Content="Manage Users" />
         </StackPanel>
 
-        <!-- Status message -->
+        <!--  Status message  -->
         <TextBlock
             Grid.Row="1"
-            Text="{Binding StatusMessage}"
-            Foreground="Green"
+            Margin="0,0,0,12"
             FontWeight="Bold"
-            Margin="0,0,0,12" />
+            Foreground="Green"
+            Text="{Binding StatusMessage}" />
 
-        <!-- Supervisors header row -->
+        <!--  Supervisors header row  -->
         <Grid Grid.Row="2" Margin="0,0,0,4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
@@ -41,14 +51,37 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="Name" FontWeight="Bold" FontSize="12" Foreground="Gray" />
-            <TextBlock Grid.Column="1" Text="Pairs" FontWeight="Bold" FontSize="12" Foreground="Gray" />
-            <TextBlock Grid.Column="2" Text="Pending" FontWeight="Bold" FontSize="12" Foreground="Gray" />
-            <TextBlock Grid.Column="3" Text="Resolved" FontWeight="Bold" FontSize="12" Foreground="Gray" />
+            <TextBlock
+                Grid.Column="0"
+                FontSize="12"
+                FontWeight="Bold"
+                Foreground="Gray"
+                Text="Name" />
+            <TextBlock
+                Grid.Column="1"
+                FontSize="12"
+                FontWeight="Bold"
+                Foreground="Gray"
+                Text="Pairs" />
+            <TextBlock
+                Grid.Column="2"
+                FontSize="12"
+                FontWeight="Bold"
+                Foreground="Gray"
+                Text="Pending" />
+            <TextBlock
+                Grid.Column="3"
+                FontSize="12"
+                FontWeight="Bold"
+                Foreground="Gray"
+                Text="Resolved" />
         </Grid>
 
-        <!-- Supervisors list -->
-        <ListView Grid.Row="3" ItemsSource="{Binding SupervisorsListPreview}" BorderThickness="0,1,0,0">
+        <!--  Supervisors list  -->
+        <ListView
+            Grid.Row="3"
+            BorderThickness="0,1,0,0"
+            ItemsSource="{Binding SupervisorsListPreview}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -66,16 +99,30 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="{Binding UserName}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1" Text="{Binding SupervisedPairsCount}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="2" Text="{Binding PendingIssues.Count}" Foreground="#CC3300" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="3" Text="{Binding ResolvedIssues.Count}" Foreground="#227722" VerticalAlignment="Center" />
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Text="{Binding UserName}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Text="{Binding SupervisedPairsCount}" />
+                        <TextBlock
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Foreground="#CC3300"
+                            Text="{Binding PendingIssues.Count}" />
+                        <TextBlock
+                            Grid.Column="3"
+                            VerticalAlignment="Center"
+                            Foreground="#227722"
+                            Text="{Binding ResolvedIssues.Count}" />
                         <Button
                             Grid.Column="4"
+                            Padding="8,3"
                             Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                             CommandParameter="{Binding}"
                             Content="Inspect"
-                            Padding="8,3"
                             FontSize="11" />
                     </Grid>
                 </DataTemplate>

@@ -48,6 +48,8 @@ namespace MentoringApp.Data.DI
                 new SqlIssueCategoryRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
             services.AddScoped<IReviewRepo>(sp =>
                 new SqlReviewRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
+            services.AddScoped<ISettingsRepo>(sp =>
+                new SqlSettingsRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
 
 
             return services;

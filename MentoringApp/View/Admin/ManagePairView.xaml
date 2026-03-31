@@ -3,71 +3,164 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:MentoringApp.View.Admin"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignHeight="600" d:DesignWidth="800"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <Style x:Key="PairListViewItemStyle" TargetType="ListViewItem">
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Cursor" Value="Hand" />
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Action bar (Create Pair) -->
+            <RowDefinition Height="*"/>    <!-- Main split content -->
+        </Grid.RowDefinitions>
 
-            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="OnPairItemClick" />
-
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F0F0F0" />
-                </Trigger>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#E0E0E0" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </UserControl.Resources>
-
-    <Grid>
-        <StackPanel>
-            <Button
-                Margin="5"
-                Command="{Binding CreatePairCommand}"
-                Content="Create new pair" />
-
-            <ListView
-                Grid.Row="1"
-                Margin="5"
-                ItemsSource="{Binding PairList}"
-                ItemContainerStyle="{StaticResource PairListViewItemStyle}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel Margin="5" LastChildFill="True">
-                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                <!--  Mentor mini avatar  -->
-                                <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentor.ProfilePicturePath}" />
-                                <TextBlock FontWeight="Bold" Text="Mentor: " />
-                                <TextBlock Margin="0,0,12,0" Text="{Binding Mentor.UserName}" />
-
-                                <!--  Mentee mini avatar  -->
-                                <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}" />
-                                <TextBlock FontWeight="Bold" Text="Mentee: " />
-                                <TextBlock Margin="0,0,10,0" Text="{Binding Mentee.UserName}" />
-
-                                <Button
-                                    Padding="10,2"
-                                    Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                    CommandParameter="{Binding}"
-                                    Content="Separate" />
-
-                            </StackPanel>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-
+        <!-- ── TOP BAR ──────────────────────────────────────────────────── -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+            <Button Command="{Binding CreatePairCommand}" Content="+ Create New Pair" Padding="8,4"/>
         </StackPanel>
 
+        <!-- ── MAIN SPLIT ─────────────────────────────────────────────── -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>  <!-- Pairs List -->
+                <ColumnDefinition Width="2*"/>  <!-- Details Sidebar -->
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: Search + Pairs List -->
+            <Grid Grid.Column="0" Margin="0,0,15,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Search bar -->
+                <TextBox Grid.Row="0" Margin="0,0,0,8" Padding="4,3"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Tag="Search by Mentor or Mentee name"/>
+
+                <!-- Pairs ListBox -->
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding FilteredPairs}"
+                         SelectedItem="{Binding SelectedPair}"
+                         HorizontalContentAlignment="Stretch">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type model:Pair}">
+                            <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10">
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- Mentor -->
+                                    <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0"
+                                                                      VerticalAlignment="Center"
+                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"/>
+                                    <TextBlock VerticalAlignment="Center" FontWeight="Bold" Text="{Binding Mentor.UserName}" Margin="0,0,6,0"/>
+
+                                    <TextBlock VerticalAlignment="Center" Text="→" Foreground="Gray" Margin="0,0,6,0"/>
+
+                                    <!-- Mentee -->
+                                    <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0"
+                                                                      VerticalAlignment="Center"
+                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"/>
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding Mentee.UserName}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+
+            <!-- RIGHT: Details Sidebar -->
+            <GroupBox Header="Selected Pair Details" Grid.Column="1" Padding="10">
+                <Grid>
+                    <!-- Placeholder when nothing selected -->
+                    <TextBlock Text="Select a pair from the list to view details."
+                               Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               TextWrapping="Wrap" TextAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!-- Detail pane -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer.Style>
+                            <Style TargetType="ScrollViewer">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ScrollViewer.Style>
+
+                        <StackPanel DataContext="{Binding SelectedPair}">
+                            <!-- Mentor Card -->
+                            <TextBlock Text="Mentor" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,15">
+                                <StackPanel Orientation="Horizontal">
+                                    <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
+                                                                      VerticalAlignment="Center"
+                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Mentor.UserName}" FontWeight="Bold" FontSize="15"/>
+                                        <TextBlock Text="{Binding Mentor.Email}" Foreground="Gray" FontSize="12"/>
+                                        <TextBlock Text="{Binding Mentor.Grade.Name, StringFormat='Grade: {0}'}" FontSize="12" Foreground="DarkGray"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Mentee Card -->
+                            <TextBlock Text="Mentee" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,20">
+                                <StackPanel Orientation="Horizontal">
+                                    <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
+                                                                      VerticalAlignment="Center"
+                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Mentee.UserName}" FontWeight="Bold" FontSize="15"/>
+                                        <TextBlock Text="{Binding Mentee.Email}" Foreground="Gray" FontSize="12"/>
+                                        <TextBlock Text="{Binding Mentee.Grade.Name, StringFormat='Grade: {0}'}" FontSize="12" Foreground="DarkGray"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Separator Margin="0,0,0,10"/>
+
+                            <!-- Summary Section -->
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="Recent Activity" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBlock Foreground="#555" Margin="0,0,0,2">
+                                    <Run Text="Total Reviews: "/>
+                                    <Run Text="{Binding DataContext.SelectedPairReviewCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold"/>
+                                </TextBlock>
+                                <TextBlock Foreground="#555">
+                                    <Run Text="Active Issues: "/>
+                                    <Run Text="{Binding DataContext.SelectedPairActiveIssueCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <Separator Margin="0,0,0,10"/>
+
+                            <!-- Actions  -->
+                            <TextBlock Text="Actions" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <Button Content="View Pair Details"
+                                    Command="{Binding DataContext.SelectPairCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    Margin="0,0,0,10" Padding="5,8"/>
+                            <Button Content="Separate Pair"
+                                    Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
+                                    Padding="5,8"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </GroupBox>
+        </Grid>
     </Grid>
 </UserControl>

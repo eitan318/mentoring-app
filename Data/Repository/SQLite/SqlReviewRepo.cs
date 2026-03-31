@@ -16,7 +16,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<ReviewDto>> GetByPairAsync(int pairId)
         {
             var rows = await _db.QueryAsync<ReviewRow>(
-                "SELECT Id, PairId, AuthorUserId, Content, Date FROM Reviews WHERE PairId = @PairId",
+                "SELECT Id, PairId, AuthorUserId, Content, Date, AmountOfHours FROM Reviews WHERE PairId = @PairId",
                 new { PairId = pairId });
             return rows.Select(MapToDto).ToList();
         }
@@ -24,24 +24,25 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<ReviewDto>> GetByAuthorAsync(int authorUserId)
         {
             var rows = await _db.QueryAsync<ReviewRow>(
-                "SELECT Id, PairId, AuthorUserId, Content, Date FROM Reviews WHERE AuthorUserId = @AuthorUserId",
+                "SELECT Id, PairId, AuthorUserId, Content, Date, AmountOfHours FROM Reviews WHERE AuthorUserId = @AuthorUserId",
                 new { AuthorUserId = authorUserId });
             return rows.Select(MapToDto).ToList();
         }
 
-        public async Task<bool> CreateAsync(string content, DateTime date, int pairId, int authorUserId)
+        public async Task<bool> CreateAsync(string content, DateTime date, int pairId, int authorUserId, double amountOfHours)
         {
             try
             {
                 await _db.ExecuteAsync(
-                    @"INSERT INTO Reviews (PairId, AuthorUserId, Content, Date)
-                      VALUES (@PairId, @AuthorUserId, @Content, @Date)",
+                    @"INSERT INTO Reviews (PairId, AuthorUserId, Content, Date, AmountOfHours)
+                      VALUES (@PairId, @AuthorUserId, @Content, @Date, @AmountOfHours)",
                     new
                     {
                         PairId = pairId,
                         AuthorUserId = authorUserId,
                         Content = content,
-                        Date = date.ToString("o")
+                        Date = date.ToString("o"),
+                        AmountOfHours = amountOfHours
                     });
                 return true;
             }
@@ -57,7 +58,8 @@ namespace MentoringApp.Data.Acess.SQLite
             PairId = row.PairId,
             AuthorUserId = row.AuthorUserId,
             Content = row.Content,
-            Date = row.Date
+            Date = row.Date,
+            AmountOfHours = row.AmountOfHours
         };
 
         private class ReviewRow
@@ -67,6 +69,7 @@ namespace MentoringApp.Data.Acess.SQLite
             public int AuthorUserId { get; set; }
             public string Content { get; set; } = string.Empty;
             public string Date { get; set; } = string.Empty;
+            public double AmountOfHours { get; set; }
         }
     }
 }

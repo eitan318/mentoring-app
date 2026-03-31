@@ -1,11 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Model;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.Admin;
-using MentoringApp.ViewModel.ViewModelPage.Supervisor;
-using MentoringApp.ViewModel.ViewModelPage.Student;
 using System.ComponentModel.DataAnnotations;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.Service;
@@ -18,7 +14,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private readonly INavigationService _navigationService;
         private readonly UserStore _userStore;
 
-        private static readonly bool _debugWithoutVerification = false;
+        private static readonly bool _debugWithoutVerification = true;
 
         public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService authService)
         {

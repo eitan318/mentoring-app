@@ -44,18 +44,16 @@ namespace MentoringApp
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            bool recreateInitialDb = false;
+            bool recreateInitialDb = true;
             base.OnStartup(e);
 
             if (recreateInitialDb)
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    // Drop & recreate all tables
                     var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbRepo>();
                     dbInitializer.Recreate();
 
-                    // Seed comprehensive dummy data for all app flows
                     var seeder = scope.ServiceProvider.GetRequiredService<DummyDataSeeder>();
                     await seeder.SeedAsync();
                 }

@@ -29,10 +29,16 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(PendingIssues))]
         [NotifyPropertyChangedFor(nameof(ResolvedIssues))]
+        [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
         private ObservableCollection<IssueModel> _allIssues = [];
         public IEnumerable<IssueModel> PendingIssues => AllIssues.Where(i => !i.IsResolved);
         public IEnumerable<IssueModel> ResolvedIssues => AllIssues.Where(i => i.IsResolved);
+        public int ResolvedIssuesCount => ResolvedIssues.Count();
 
+        [ObservableProperty] private bool _showResolvedIssues;
+
+        [RelayCommand]
+        private void ToggleResolvedIssues() => ShowResolvedIssues = !ShowResolvedIssues;
 
         public SupervisorDashboardViewModel(INavigationService navigationService, PairService pairService, IssueService issueService, UserService userService)
         {

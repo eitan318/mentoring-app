@@ -67,7 +67,13 @@ namespace MentoringApp.Data.Interfaces
     {
         Task<IEnumerable<ReviewDto>> GetByPairAsync(int pairId);
         Task<IEnumerable<ReviewDto>> GetByAuthorAsync(int authorUserId);
-        Task<bool> CreateAsync(string content, DateTime date, int pairId, int authorUserId);
+        Task<bool> CreateAsync(string content, DateTime date, int pairId, int authorUserId, double amountOfHours);
+    }
+
+    public interface ISettingsRepo
+    {
+        Task<double> GetDoubleAsync(string key, double defaultValue = 0);
+        Task SetDoubleAsync(string key, double value);
     }
 
     public interface ISubjectRepo
