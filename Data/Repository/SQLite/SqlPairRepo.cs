@@ -13,17 +13,19 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
+        private const string SelectCols = "Id, MentorId, MenteeId, SupervisorId, CreatedAt, MatchTier, IsProfileIncomplete";
+
         public async Task<IEnumerable<PairDto>> GetAllAsync()
         {
             var rows = await _db.QueryAsync<PairRow>(
-                "SELECT Id, MentorId, MenteeId, SupervisorId, CreatedAt FROM Pairs");
+                $"SELECT {SelectCols} FROM Pairs");
             return rows.Select(MapToDto).ToList();
         }
 
         public async Task<PairDto?> GetByIdAsync(int id)
         {
             var row = await _db.QuerySingleAsync<PairRow>(
-                "SELECT Id, MentorId, MenteeId, SupervisorId, CreatedAt FROM Pairs WHERE Id = @Id",
+                $"SELECT {SelectCols} FROM Pairs WHERE Id = @Id",
                 new { Id = id });
             return row == null ? null : MapToDto(row);
         }
@@ -31,7 +33,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<PairDto?> GetByMentorIdAsync(int mentorId)
         {
             var row = await _db.QuerySingleAsync<PairRow>(
-                "SELECT Id, MentorId, MenteeId, SupervisorId, CreatedAt FROM Pairs WHERE MentorId = @MentorId",
+                $"SELECT {SelectCols} FROM Pairs WHERE MentorId = @MentorId",
                 new { MentorId = mentorId });
             return row == null ? null : MapToDto(row);
         }
@@ -39,7 +41,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<PairDto?> GetByMenteeIdAsync(int menteeId)
         {
             var row = await _db.QuerySingleAsync<PairRow>(
-                "SELECT Id, MentorId, MenteeId, SupervisorId, CreatedAt FROM Pairs WHERE MenteeId = @MenteeId",
+                $"SELECT {SelectCols} FROM Pairs WHERE MenteeId = @MenteeId",
                 new { MenteeId = menteeId });
             return row == null ? null : MapToDto(row);
         }
@@ -47,24 +49,29 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<PairDto>> GetBySupervisorIdAsync(int supervisorId)
         {
             var rows = await _db.QueryAsync<PairRow>(
-                "SELECT Id, MentorId, MenteeId, SupervisorId, CreatedAt FROM Pairs WHERE SupervisorId = @SupervisorId",
+                $"SELECT {SelectCols} FROM Pairs WHERE SupervisorId = @SupervisorId",
                 new { SupervisorId = supervisorId });
             return rows.Select(MapToDto).ToList();
         }
 
         public async Task<bool> CreateAsync(int supervisorId, int mentorId, int menteeId)
+            => await CreateWithTierAsync(supervisorId, mentorId, menteeId, matchTier: 0, isProfileIncomplete: false);
+
+        public async Task<bool> CreateWithTierAsync(int supervisorId, int mentorId, int menteeId, int matchTier, bool isProfileIncomplete)
         {
             try
             {
                 await _db.ExecuteAsync(
-                    @"INSERT INTO Pairs (MentorId, MenteeId, SupervisorId, CreatedAt)
-                      VALUES (@MentorId, @MenteeId, @SupervisorId, @CreatedAt)",
+                    @"INSERT INTO Pairs (MentorId, MenteeId, SupervisorId, CreatedAt, MatchTier, IsProfileIncomplete)
+                      VALUES (@MentorId, @MenteeId, @SupervisorId, @CreatedAt, @MatchTier, @IsProfileIncomplete)",
                     new
                     {
                         MentorId = mentorId,
                         MenteeId = menteeId,
                         SupervisorId = supervisorId,
-                        CreatedAt = DateTime.UtcNow.ToString("o")
+                        CreatedAt = DateTime.UtcNow.ToString("o"),
+                        MatchTier = matchTier,
+                        IsProfileIncomplete = isProfileIncomplete ? 1 : 0
                     });
                 return true;
             }
@@ -89,13 +96,36 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
+        public async Task<IEnumerable<int>> GetMatchedMentorIdsAsync()
+        {
+            var rows = await _db.QueryAsync<IdRow>("SELECT MentorId AS Id FROM Pairs");
+            return rows.Select(r => r.Id).ToList();
+        }
+
+        public async Task<IEnumerable<int>> GetMatchedMenteeIdsAsync()
+        {
+            var rows = await _db.QueryAsync<IdRow>("SELECT MenteeId AS Id FROM Pairs");
+            return rows.Select(r => r.Id).ToList();
+        }
+
+        public async Task<IEnumerable<PairDto>> GetProfileIncompleteAsync()
+        {
+            var rows = await _db.QueryAsync<PairRow>(
+                $"SELECT {SelectCols} FROM Pairs WHERE IsProfileIncomplete = 1");
+            return rows.Select(MapToDto).ToList();
+        }
+
+        // ── Mapping helpers ───────────────────────────────────────────────────
+
         private static PairDto MapToDto(PairRow row) => new PairDto
         {
             Id = row.Id,
             MentorId = row.MentorId,
             MenteeId = row.MenteeId,
             SupervisorId = row.SupervisorId,
-            CreatedAt = row.CreatedAt
+            CreatedAt = row.CreatedAt,
+            MatchTier = row.MatchTier,
+            IsProfileIncomplete = row.IsProfileIncomplete == 1
         };
 
         private class PairRow
@@ -105,6 +135,10 @@ namespace MentoringApp.Data.Acess.SQLite
             public int MenteeId { get; set; }
             public int SupervisorId { get; set; }
             public string CreatedAt { get; set; } = string.Empty;
+            public int MatchTier { get; set; }
+            public int IsProfileIncomplete { get; set; }
         }
+
+        private class IdRow { public int Id { get; set; } }
     }
 }

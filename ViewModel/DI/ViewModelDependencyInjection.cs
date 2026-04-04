@@ -38,6 +38,9 @@ namespace MentoringApp.ViewModel.DI
             services.AddTransient<MyProfileViewModel>();
             services.AddTransient<OtherProfileViewModel>();
             services.AddTransient<ManageUsersViewModel>();
+            services.AddTransient<BrowseMentorsViewModel>();
+            services.AddTransient<SelectionGalleryViewModel>();
+            services.AddTransient<MentorRequestsViewModel>();
 
             return services;
         }

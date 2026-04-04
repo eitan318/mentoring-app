@@ -20,6 +20,8 @@ namespace MentoringApp.Data.Acess.SQLite
 
             var dropSql = @"
                 PRAGMA foreign_keys = OFF;
+                DROP TABLE IF EXISTS MatchScores;
+                DROP TABLE IF EXISTS PairRequests;
                 DROP TABLE IF EXISTS Reviews;
                 DROP TABLE IF EXISTS Issues;
                 DROP TABLE IF EXISTS IssueCategories;
@@ -96,6 +98,8 @@ namespace MentoringApp.Data.Acess.SQLite
                     MenteeId INTEGER NOT NULL,
                     SupervisorId INTEGER NOT NULL,
                     CreatedAt TEXT NOT NULL,
+                    MatchTier INTEGER NOT NULL DEFAULT 0,
+                    IsProfileIncomplete INTEGER NOT NULL DEFAULT 0,
                     FOREIGN KEY (MentorId) REFERENCES Users(Id),
                     FOREIGN KEY (MenteeId) REFERENCES Users(Id),
                     FOREIGN KEY (SupervisorId) REFERENCES Users(Id)
@@ -128,11 +132,33 @@ namespace MentoringApp.Data.Acess.SQLite
                     FOREIGN KEY (AuthorUserId) REFERENCES Users(Id)
                 );
 
+                CREATE TABLE PairRequests (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    MenteeId INTEGER NOT NULL,
+                    MentorId INTEGER NOT NULL,
+                    Status TEXT NOT NULL DEFAULT 'Pending',
+                    Tier INTEGER NOT NULL DEFAULT 1,
+                    CreatedAt TEXT NOT NULL,
+                    FOREIGN KEY (MenteeId) REFERENCES Users(Id) ON DELETE CASCADE,
+                    FOREIGN KEY (MentorId) REFERENCES Users(Id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE MatchScores (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    MenteeId INTEGER NOT NULL,
+                    MentorId INTEGER NOT NULL,
+                    ScorePercent REAL NOT NULL DEFAULT 0,
+                    FOREIGN KEY (MenteeId) REFERENCES Users(Id) ON DELETE CASCADE,
+                    FOREIGN KEY (MentorId) REFERENCES Users(Id) ON DELETE CASCADE
+                );
+
                 CREATE TABLE IF NOT EXISTS Settings (
                     Key TEXT PRIMARY KEY,
                     Value TEXT NOT NULL
                 );
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('MeetingHoursBarrier', '10');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Tier1Deadline', '');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Tier3Deadline', '');
             ";
 
             using var cmd = new SqliteCommand(dropSql, conn);

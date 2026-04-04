@@ -96,6 +96,7 @@
         <Grid Grid.Column="0" Margin="0,0,15,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="1.5*" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -114,8 +115,83 @@
                 </TextBlock>
             </StackPanel>
 
+            <!-- ── Matching Control Panel ── -->
+            <Expander Grid.Row="1" Header="⚙ Matching Flow Controls" Margin="0,0,0,12"
+                      BorderBrush="#E0E0E0" BorderThickness="1">
+                <Border Background="#FAFAFA" Padding="12">
+                    <StackPanel>
+                        <!-- Current Phase label -->
+                        <Border Background="#E3F2FD" CornerRadius="4" Padding="8,6" Margin="0,0,0,10">
+                            <TextBlock FontWeight="SemiBold" Foreground="#1976D2" Text="{Binding MatchingStatusLabel}" TextWrapping="Wrap"/>
+                        </Border>
+
+                        <!-- Operation result -->
+                        <Border Visibility="{Binding HasMatchingResult, Converter={StaticResource BoolToVis}}"
+                                Background="#E8F5E9" BorderBrush="#4CAF50" BorderThickness="1"
+                                CornerRadius="4" Padding="8,6" Margin="0,0,0,10">
+                            <TextBlock Text="{Binding MatchingOperationResult}" Foreground="#1B5E20" TextWrapping="Wrap"/>
+                        </Border>
+
+                        <!-- Tier 1 Deadline -->
+                        <TextBlock Text="Tier 1 Deadline:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <DatePicker Grid.Column="0" SelectedDate="{Binding Tier1Deadline, Mode=TwoWay}" Margin="0,0,6,0"/>
+                            <Button Grid.Column="1" Content="Save" Padding="10,5"
+                                    Command="{Binding SaveTier1DeadlineCommand}"/>
+                        </Grid>
+
+                        <!-- Tier 3 Deadline -->
+                        <TextBlock Text="Tier 3 Deadline:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <DatePicker Grid.Column="0" SelectedDate="{Binding Tier3Deadline, Mode=TwoWay}" Margin="0,0,6,0"/>
+                            <Button Grid.Column="1" Content="Save" Padding="10,5"
+                                    Command="{Binding SaveTier3DeadlineCommand}"/>
+                        </Grid>
+
+                        <!-- Tier trigger buttons -->
+                        <Separator Margin="0,0,0,10"/>
+                        <Button Content="▶ Run Tier 2 – Generate Score Matrix" Padding="10,7" Margin="0,0,0,6"
+                                Command="{Binding RunTier2MatrixCommand}" Background="#1565C0" Foreground="White" BorderThickness="0"/>
+                        <Button Content="▶ Run Tier 4 – Algorithmic Auto-Match" Padding="10,7" Margin="0,0,0,6"
+                                Command="{Binding RunTier4AutoMatchCommand}" Background="#6A1B9A" Foreground="White" BorderThickness="0"/>
+                        <Button Content="▶ Run Tier 5 – Fallback Random Assignment" Padding="10,7"
+                                Command="{Binding RunTier5FallbackCommand}" Background="#BF360C" Foreground="White" BorderThickness="0"/>
+
+                        <!-- Tier 5 Warnings -->
+                        <Border Visibility="{Binding HasIncompleteProfileWarnings, Converter={StaticResource BoolToVis}}"
+                                Background="#FFF3E0" BorderBrush="#E65100" BorderThickness="1"
+                                CornerRadius="4" Padding="10" Margin="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" Foreground="#BF360C" Margin="0,0,0,6"
+                                           Text="{Binding IncompleteProfileCount, StringFormat='⚠ {0} Randomly Matched – Profile Incomplete'}"/>
+                                <ItemsControl ItemsSource="{Binding IncompleteProfilePairs}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontSize="11" Foreground="#7F3B08" Margin="0,2,0,0">
+                                                <Run Text="• "/>
+                                                <Run Text="{Binding Mentor.UserName}"/>
+                                                <Run Text=" ↔ "/>
+                                                <Run Text="{Binding Mentee.UserName}"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Expander>
+
             <!-- Managed Pairs -->
-            <DockPanel Grid.Row="1" Margin="0,0,0,15">
+            <DockPanel Grid.Row="2" Margin="0,0,0,15">
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,5">
                     <TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding [Supervisor_ManagedPairs_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                     <Button HorizontalAlignment="Right" Content="Clear Selection" Background="Transparent" BorderThickness="0" Foreground="Blue" Cursor="Hand" Command="{Binding SelectPairCommand}" CommandParameter="{x:Null}">
@@ -143,6 +219,11 @@
                                     <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}" />
                                     <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MenteePrefix], Source={x:Static loc:TranslationSource.Instance}}" />
                                     <TextBlock Text="{Binding Mentee.UserName}" />
+
+                                    <!-- Tier badge -->
+                                    <Border Margin="10,0,0,0" CornerRadius="3" Padding="5,2" Background="#E3F2FD">
+                                        <TextBlock FontSize="10" Foreground="#1565C0" Text="{Binding MatchTier}"/>
+                                    </Border>
                                 </StackPanel>
                             </DockPanel>
                         </DataTemplate>
@@ -151,7 +232,7 @@
             </DockPanel>
 
             <!-- Pending / Resolved Issues -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,5">
+            <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,5">
                 <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="DarkRed" Text="{Binding [Supervisor_PendingIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,15,0" />
                 <Button Command="{Binding ToggleResolvedIssuesCommand}" Padding="8,4" VerticalAlignment="Center">
                     <Button.Style>
@@ -167,7 +248,7 @@
                 </Button>
             </StackPanel>
             
-            <Grid Grid.Row="3">
+            <Grid Grid.Row="4">
                 <ListView ItemsSource="{Binding FilteredPendingIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}">
                     <ListView.Style>
                         <Style TargetType="ListView">

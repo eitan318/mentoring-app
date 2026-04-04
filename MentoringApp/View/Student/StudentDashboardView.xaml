@@ -181,6 +181,7 @@
         <StackPanel Grid.Row="1"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
+                    MaxWidth="380"
                     Visibility="{Binding HasNoPairs, Converter={StaticResource BoolToVis}}">
             <TextBlock
                 FontSize="48"
@@ -198,7 +199,57 @@
                 FontSize="14"
                 Foreground="#AAA"
                 HorizontalAlignment="Center"
+                TextWrapping="Wrap"
+                TextAlignment="Center"
+                Margin="0,0,0,20"
                 Text="{Binding [Student_NoAssignment_Hint], Source={x:Static loc:TranslationSource.Instance}}" />
+
+            <!-- Pairing flow buttons -->
+            <Button Margin="0,0,0,10" Padding="16,10" FontSize="14" FontWeight="SemiBold"
+                    Background="#1976D2" Foreground="White" BorderThickness="0" Cursor="Hand"
+                    Command="{Binding BrowseMentorsCommand}"
+                    x:Name="BrowseMentorsButton">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="🔍  Browse Mentors" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <Button Margin="0,0,0,10" Padding="16,10" FontSize="14" FontWeight="SemiBold"
+                    Background="#7B1FA2" Foreground="White" BorderThickness="0" Cursor="Hand"
+                    Command="{Binding ViewGalleryCommand}">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="⭐  My Top Matches" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <Button Padding="16,10" FontSize="14" FontWeight="SemiBold"
+                    Background="#388E3C" Foreground="White" BorderThickness="0" Cursor="Hand"
+                    Command="{Binding ViewRequestsCommand}">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="📬  Mentoring Requests" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
     </Grid>
 </UserControl>

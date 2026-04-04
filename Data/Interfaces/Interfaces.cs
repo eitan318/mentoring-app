@@ -44,8 +44,23 @@ namespace MentoringApp.Data.Interfaces
         Task<PairDto?> GetByMentorIdAsync(int mentorId);
         Task<PairDto?> GetByMenteeIdAsync(int menteeId);
         Task<IEnumerable<PairDto>> GetBySupervisorIdAsync(int supervisorId);
+
+        /// <summary>Admin/legacy create – no tier tracking.</summary>
         Task<bool> CreateAsync(int supervisorId, int mentorId, int menteeId);
+
+        /// <summary>Tier-aware create used by the matching flow.</summary>
+        Task<bool> CreateWithTierAsync(int supervisorId, int mentorId, int menteeId, int matchTier, bool isProfileIncomplete);
+
         Task<bool> DeleteAsync(int pairId);
+
+        /// <summary>Returns IDs of mentors that already have a pair.</summary>
+        Task<IEnumerable<int>> GetMatchedMentorIdsAsync();
+
+        /// <summary>Returns IDs of mentees that already have a pair.</summary>
+        Task<IEnumerable<int>> GetMatchedMenteeIdsAsync();
+
+        /// <summary>Returns all pairs flagged as profile-incomplete (Tier 5).</summary>
+        Task<IEnumerable<PairDto>> GetProfileIncompleteAsync();
     }
 
     public interface IIssueRepo
@@ -91,5 +106,27 @@ namespace MentoringApp.Data.Interfaces
         Task<IEnumerable<GradeDto>> GetAllGradesAsync();
 
     }
+
+    // ── NEW: pair request repo ────────────────────────────────────────────────
+    public interface IPairRequestRepo
+    {
+        Task<bool> CreateAsync(int menteeId, int mentorId, int tier);
+        Task<IEnumerable<PairRequestDto>> GetByMentorAsync(int mentorId);
+        Task<IEnumerable<PairRequestDto>> GetByMenteeAsync(int menteeId);
+        Task<bool> UpdateStatusAsync(int requestId, string status);
+        /// <summary>Cancels any pending requests that involve either user (after a pair is formed).</summary>
+        Task CancelPendingForUsersAsync(int menteeId, int mentorId);
+        Task<bool> ExistsAsync(int menteeId, int mentorId);
+    }
+
+    // ── NEW: match score repo ─────────────────────────────────────────────────
+    public interface IMatchScoreRepo
+    {
+        Task BulkInsertAsync(IEnumerable<MatchScoreDto> scores);
+        Task<IEnumerable<MatchScoreDto>> GetTopForMenteeAsync(int menteeId, int limit = 3);
+        Task<IEnumerable<MatchScoreDto>> GetAllAsync();
+        Task ClearAllAsync();
+    }
 }
+
 
