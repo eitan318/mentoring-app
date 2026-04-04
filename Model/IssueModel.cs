@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -12,17 +12,19 @@ namespace MentoringApp.Model
         public required int Id { get; set; }
         public required string Description { get; set; }
         public required IssueCategoryModel Category { get; set; } 
+        public int ReportedByUserId { get; set; }
         public DateTime CreationDate { get; set; }
         public bool IsResolved { get; set; }
 
         public IssueModel() { }
 
         [SetsRequiredMembers]
-        public IssueModel(string desc, IssueCategoryModel category, bool isResulved)
+        public IssueModel(string desc, IssueCategoryModel category, bool isResulved, int reportedByUserId)
         {
             Description = desc;
             Category = category;
             IsResolved = isResulved;
+            ReportedByUserId = reportedByUserId;
             Id = -1;
         }
     }

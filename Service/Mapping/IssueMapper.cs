@@ -1,4 +1,4 @@
-﻿using MentoringApp.Data.DTO;
+using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 using System;
@@ -13,7 +13,7 @@ namespace MentoringApp.Service.Mapping
     {
         public static IssueModel ToModel(IssueDto dto, IssueCategoryModel category)
         {
-            return new IssueModel(dto.Description, category, dto.IsResolved != 0)
+            return new IssueModel(dto.Description, category, dto.IsResolved != 0, dto.ReportedByUserId)
             {
                 Id = dto.Id,
                 CreationDate = DateTime.Parse(dto.CreationDate)

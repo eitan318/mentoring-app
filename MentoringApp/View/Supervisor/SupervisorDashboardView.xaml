@@ -87,95 +87,123 @@
     </UserControl.Resources>
 
     <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.5*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
 
-        <StackPanel Margin="0,0,0,15">
-            <TextBlock
-                FontSize="28"
-                FontWeight="Bold"
-                Text="{Binding SelectedSupervisor.UserName}" />
-            <TextBlock FontWeight="Medium">
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="{}{1}{0}">
-                        <Binding Path="PairsSupervised.Count"/>
-                        <Binding Path="[Supervisor_TotalPairs_Label]" Source="{x:Static loc:TranslationSource.Instance}"/>
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
-        </StackPanel>
+        <!-- ── MASTER PANE (LEFT) ── -->
+        <Grid Grid.Column="0" Margin="0,0,15,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1.5*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <UniformGrid Grid.Row="1" Columns="2">
-            <DockPanel Margin="0,0,5,0">
-                <TextBlock
-                    Margin="0,0,0,5"
-                    DockPanel.Dock="Top"
-                    FontWeight="Bold"
-                    Foreground="DarkRed"
-                    Text="{Binding [Supervisor_PendingIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                <ListView
-                    ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
-                    ItemTemplate="{StaticResource IssueItemTemplate}"
-                    ItemsSource="{Binding PendingIssues}" />
-            </DockPanel>
+            <!-- Supervisor MetaData -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                <TextBlock FontSize="28" FontWeight="Bold" Text="{Binding SelectedSupervisor.UserName}" />
+                <TextBlock FontWeight="Medium" Foreground="Gray">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{1} {0}">
+                            <Binding Path="PairsSupervised.Count"/>
+                            <Binding Path="[Supervisor_TotalPairs_Label]" Source="{x:Static loc:TranslationSource.Instance}"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </StackPanel>
 
-            <DockPanel Margin="5,0,0,0">
-                <TextBlock Margin="0,0,0,5" DockPanel.Dock="Top" FontWeight="Bold" Foreground="DarkGreen"
-                           Text="{Binding [Supervisor_ResolvedIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock FontSize="14" Text="{Binding [Supervisor_TotalResolved_Label], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
-                    <TextBlock FontSize="14" FontWeight="Bold" Text="{Binding ResolvedIssuesCount}" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                    <Button Command="{Binding ToggleResolvedIssuesCommand}" Padding="8,4" VerticalAlignment="Center">
+            <!-- Managed Pairs -->
+            <DockPanel Grid.Row="1" Margin="0,0,0,15">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,5">
+                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding [Supervisor_ManagedPairs_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                    <Button HorizontalAlignment="Right" Content="Clear Selection" Background="Transparent" BorderThickness="0" Foreground="Blue" Cursor="Hand" Command="{Binding SelectPairCommand}" CommandParameter="{x:Null}">
                         <Button.Style>
                             <Style TargetType="Button">
-                                <Setter Property="Content" Value="{Binding [Supervisor_ViewResolved_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                <Setter Property="Visibility" Value="Visible" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ShowResolvedIssues}" Value="True">
-                                        <Setter Property="Content" Value="{Binding [Supervisor_HideResolved_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                    <DataTrigger Binding="{Binding IssueFilterPair}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
                     </Button>
-                </StackPanel>
+                </DockPanel>
+                <ListView ItemsSource="{Binding PairsSupervised}" ItemContainerStyle="{StaticResource PairListViewItemStyle}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel Margin="5" LastChildFill="True">
+                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                    <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentor.ProfilePicturePath}" />
+                                    <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MentorPrefix], Source={x:Static loc:TranslationSource.Instance}}" />
+                                    <TextBlock Margin="0,0,12,0" Text="{Binding Mentor.UserName}" />
 
-                <ListView ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
-                          ItemTemplate="{StaticResource IssueItemTemplate}"
-                          ItemsSource="{Binding ResolvedIssues}"
-                          Visibility="{Binding ShowResolvedIssues, Converter={StaticResource BoolToVis}}" />
+                                    <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}" />
+                                    <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MenteePrefix], Source={x:Static loc:TranslationSource.Instance}}" />
+                                    <TextBlock Text="{Binding Mentee.UserName}" />
+                                </StackPanel>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </DockPanel>
-        </UniformGrid>
 
-        <TextBlock
-            Grid.Row="2"
-            Margin="0,15,0,5"
-            FontSize="18"
-            FontWeight="SemiBold"
-            Text="{Binding [Supervisor_ManagedPairs_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+            <!-- Pending / Resolved Issues -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="DarkRed" Text="{Binding [Supervisor_PendingIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,15,0" />
+                <Button Command="{Binding ToggleResolvedIssuesCommand}" Padding="8,4" VerticalAlignment="Center">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Content" Value="{Binding [Supervisor_ViewResolved_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowResolvedIssues}" Value="True">
+                                    <Setter Property="Content" Value="{Binding [Supervisor_HideResolved_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+            
+            <Grid Grid.Row="3">
+                <ListView ItemsSource="{Binding FilteredPendingIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}">
+                    <ListView.Style>
+                        <Style TargetType="ListView">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowResolvedIssues}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.Style>
+                </ListView>
+                <ListView ItemsSource="{Binding FilteredResolvedIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}" Visibility="{Binding ShowResolvedIssues, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+        </Grid>
 
-        <ListView Grid.Row="3" ItemsSource="{Binding PairsSupervised}" ItemContainerStyle="{StaticResource PairListViewItemStyle}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <DockPanel Margin="5" LastChildFill="True">
-                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                            <!--  Mentor mini avatar  -->
-                            <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentor.ProfilePicturePath}" />
-                            <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MentorPrefix], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <TextBlock Margin="0,0,12,0" Text="{Binding Mentor.UserName}" />
-
-                            <!--  Mentee mini avatar  -->
-                            <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}" />
-                            <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MenteePrefix], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <TextBlock Text="{Binding Mentee.UserName}" />
-                        </StackPanel>
-                    </DockPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <!-- ── DETAIL PANE (RIGHT) ── -->
+        <Border Grid.Column="1" BorderBrush="#DDD" BorderThickness="1" Background="#FAFAFA" CornerRadius="4" Padding="0">
+            <Grid>
+                <!-- Placeholder text when no detail is selected -->
+                <TextBlock Text="Select a pair or an issue from the lists to view its details." Foreground="#AAA" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Medium">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedPaneContent}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                
+                <!-- Injected Child ViewModel View -->
+                <ContentControl Content="{Binding SelectedPaneContent}" Margin="10" />
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

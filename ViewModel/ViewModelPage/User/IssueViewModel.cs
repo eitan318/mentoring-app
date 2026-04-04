@@ -10,9 +10,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
     public partial class IssueViewModel : ObservableObject, INavigatable<int>
     {
         [ObservableProperty] private IssueModel _currentIssue;
+        [ObservableProperty] private string? _relatedPairName;
 
         private readonly INavigationService _navigationService;
         private readonly IssueService _issueService;
+
+        public Action? OnCloseRequested { get; set; }
+        public Action? OnIssueResolved { get; set; }
 
         public IssueViewModel(INavigationService navigationService, IssueService issueService)
         {
@@ -28,7 +32,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [RelayCommand]
         private async Task Back()
         {
-            await _navigationService.GoBackAsync();
+            if (OnCloseRequested != null)
+                OnCloseRequested.Invoke();
+            else
+                await _navigationService.GoBackAsync();
         }
 
         [RelayCommand]
@@ -39,7 +46,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
                 var result = await _issueService.ResolveIssueAsync(CurrentIssue.Id);
                 if (result.Success)
                 {
-                    await _navigationService.GoBackAsync();
+                    if (OnIssueResolved != null)
+                        OnIssueResolved.Invoke();
+                    else
+                        await _navigationService.GoBackAsync();
                 }
             }
         }
