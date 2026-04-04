@@ -4,29 +4,25 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:MentoringApp.View.Student"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
     <Grid Margin="30">
         <StackPanel>
             <TextBlock
                 Margin="0,0,0,10"
                 FontSize="22"
                 FontWeight="Bold"
-                Text="Write Meeting Review" />
-
-            <TextBlock
-                Margin="0,0,0,5"
-                FontSize="14"
-                Foreground="Gray"
-                Text="Enter your meeting review below:" />
+                Text="{Binding [Review_Content_Label], Source={x:Static loc:TranslationSource.Instance}}" />
 
             <TextBox
                 Height="150"
                 Margin="0,0,0,15"
                 AcceptsReturn="True"
-                Tag="Review content"
+                Tag="{Binding [Review_Content_Label], Source={x:Static loc:TranslationSource.Instance}}"
                 Text="{Binding ReviewContent, UpdateSourceTrigger=PropertyChanged}"
                 TextWrapping="Wrap" />
 
@@ -34,7 +30,7 @@
                 Margin="0,0,0,5"
                 FontSize="14"
                 Foreground="Gray"
-                Text="Meeting duration (hours):" />
+                Text="{Binding [Review_Hours_Label], Source={x:Static loc:TranslationSource.Instance}}" />
 
             <TextBox
                 Width="100"
@@ -47,7 +43,7 @@
                 HorizontalAlignment="Right"
                 Background="Teal"
                 Command="{Binding AddReviewCommand}"
-                Content="Submit Review"
+                Content="{Binding [Review_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}"
                 Foreground="White" />
         </StackPanel>
     </Grid>

@@ -2,61 +2,102 @@
     x:Class="MentoringApp.View.User.RegistrationView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model">
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
+    xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <Grid Margin="20">
         <StackPanel>
-            <TextBox Tag="Username" Text="{Binding UserName}" />
-            <TextBox Tag="Email Address" Text="{Binding Email}" />
-            <TextBox Tag="National ID" Text="{Binding NationalId}" />
+            <TextBox Tag="{Binding [Register_Username_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                     Text="{Binding UserName}" />
+            <TextBox Tag="{Binding [Register_Email_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                     Text="{Binding Email}" />
+            <TextBox Tag="{Binding [Register_NationalId_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                     Text="{Binding NationalId}" />
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource BoolToVis}}">
                 <TextBlock
                     Margin="0,5"
                     Foreground="Gray"
-                    Text="Supervisor data: no data" />
+                    Text="{Binding [Register_SupervisorNoData], Source={x:Static loc:TranslationSource.Instance}}" />
             </StackPanel>
 
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
-            
+
                     <ComboBox
-                        DisplayMemberPath="Name"
                         ItemsSource="{Binding Grades}"
                         SelectedItem="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                        Tag="Grade (e.g. 10)" />
+                        Tag="{Binding [Register_Grade_Tag], Source={x:Static loc:TranslationSource.Instance}}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                            <Binding Path="Name" />
+                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                     <CheckBox
                     Margin="0,5"
-                    Content="Is Mentor"
+                    Content="{Binding [Register_IsMentor_Check], Source={x:Static loc:TranslationSource.Instance}}"
                     IsChecked="{Binding IsMentor}" />
                 <CheckBox
                     Margin="0,5"
-                    Content="Is Mentee"
+                    Content="{Binding [Register_IsMentee_Check], Source={x:Static loc:TranslationSource.Instance}}"
                     IsChecked="{Binding IsMentee}" />
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
                 <ComboBox
-                    DisplayMemberPath="Name"
                     ItemsSource="{Binding Subjects}"
                     SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                     SelectedValuePath="Id"
-                    Tag="Subject to Teach" />
+                    Tag="{Binding [Register_SubjectToTeach_Tag], Source={x:Static loc:TranslationSource.Instance}}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                        <Binding Path="Name" />
+                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
             <StackPanel Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
                 <ComboBox
-                    DisplayMemberPath="Name"
                     ItemsSource="{Binding Subjects}"
                     SelectedValue="{Binding SubjectToLearn, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                     SelectedValuePath="Id"
-                    Tag="Subject to Learn" />
+                    Tag="{Binding [Register_SubjectToLearn_Tag], Source={x:Static loc:TranslationSource.Instance}}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                        <Binding Path="Name" />
+                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
             <Button
                 Height="35"
                 Margin="0,10,0,0"
                 Command="{Binding RegisterCommand}"
-                Content="Submit Registration" />
+                Content="{Binding [Register_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}" />
 
             <TextBlock
                 Margin="0,5"

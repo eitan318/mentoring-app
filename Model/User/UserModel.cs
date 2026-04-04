@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -20,6 +20,9 @@ namespace MentoringApp.Model.User
 
         [ObservableProperty]
         private string _profilePicturePath = string.Empty;
+
+        [ObservableProperty]
+        private string _language = "en";
 
         public VerificationCode? CurrentVerificationCode { get; set; }
 

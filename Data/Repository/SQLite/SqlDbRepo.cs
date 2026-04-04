@@ -40,7 +40,8 @@ namespace MentoringApp.Data.Acess.SQLite
                     UserName TEXT NOT NULL,
                     Email TEXT NOT NULL,
                     NationalId TEXT NOT NULL,
-                    ProfilePicturePath TEXT NULL
+                    ProfilePicturePath TEXT NULL,
+                    Language TEXT NOT NULL DEFAULT 'en'
                 );
 
                 CREATE TABLE Grades (

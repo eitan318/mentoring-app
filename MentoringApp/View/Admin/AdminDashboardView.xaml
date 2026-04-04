@@ -4,10 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:MentoringApp.View.Admin"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -26,12 +28,12 @@
                 Margin="0,0,8,0"
                 Padding="10,5"
                 Command="{Binding ManagePairsCommand}"
-                Content="Manage Pairs" />
+                Content="{Binding [Admin_ManagePairs_Button], Source={x:Static loc:TranslationSource.Instance}}" />
             <Button
                 Margin="0,0,8,0"
                 Padding="10,5"
                 Command="{Binding ManageUsersCommand}"
-                Content="Manage Users" />
+                Content="{Binding [Admin_ManageUsers_Button], Source={x:Static loc:TranslationSource.Instance}}" />
         </StackPanel>
 
         <!--  Status message  -->
@@ -56,25 +58,25 @@
                 FontSize="12"
                 FontWeight="Bold"
                 Foreground="Gray"
-                Text="Name" />
+                Text="{Binding [Admin_SupervisorHeader_Name], Source={x:Static loc:TranslationSource.Instance}}" />
             <TextBlock
                 Grid.Column="1"
                 FontSize="12"
                 FontWeight="Bold"
                 Foreground="Gray"
-                Text="Pairs" />
+                Text="{Binding [Admin_SupervisorHeader_Pairs], Source={x:Static loc:TranslationSource.Instance}}" />
             <TextBlock
                 Grid.Column="2"
                 FontSize="12"
                 FontWeight="Bold"
                 Foreground="Gray"
-                Text="Pending" />
+                Text="{Binding [Admin_SupervisorHeader_Pending], Source={x:Static loc:TranslationSource.Instance}}" />
             <TextBlock
                 Grid.Column="3"
                 FontSize="12"
                 FontWeight="Bold"
                 Foreground="Gray"
-                Text="Resolved" />
+                Text="{Binding [Admin_SupervisorHeader_Resolved], Source={x:Static loc:TranslationSource.Instance}}" />
         </Grid>
 
         <!--  Supervisors list  -->
@@ -122,7 +124,7 @@
                             Padding="8,3"
                             Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                             CommandParameter="{Binding}"
-                            Content="Inspect"
+                            Content="{Binding [Admin_Inspect_Button], Source={x:Static loc:TranslationSource.Instance}}"
                             FontSize="11" />
                     </Grid>
                 </DataTemplate>

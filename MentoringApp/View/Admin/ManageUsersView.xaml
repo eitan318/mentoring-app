@@ -5,7 +5,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:model="clr-namespace:MentoringApp.Model.User;assembly=MentoringApp.Model"
              xmlns:components="clr-namespace:MentoringApp.View.Components"
-             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="700">
+             xmlns:loc="clr-namespace:MentoringApp.Localization"
+             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="700"
+             FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <!-- Root grid for layout and popups -->
     <Grid Margin="20">
@@ -17,21 +19,21 @@
         </Grid.RowDefinitions>
 
         <!-- ── SECTION 1: ADD & IMPORT USERS ─────────────────────────────── -->
-        <GroupBox Header="Add &amp; Import Users" Grid.Row="0" Margin="0,0,0,15" Padding="10">
+        <GroupBox Header="{Binding [Admin_ManageUsers_AddImportHeader], Source={x:Static loc:TranslationSource.Instance}}" Grid.Row="0" Margin="0,0,0,15" Padding="10">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                    <Button Command="{Binding RegisterSupervisorCommand}" Content="Add Supervisor" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding RegisterStudentCommand}" Content="Add Student" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding RegisterSupervisorCommand}" Content="{Binding [Admin_ManageUsers_AddSupervisor], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding RegisterStudentCommand}" Content="{Binding [Admin_ManageUsers_AddStudent], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Bulk Import:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="{Binding [Admin_ManageUsers_BulkImport], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
-                    <Button Command="{Binding ImportStudentsCommand}" Content="Import Students Excel" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding ToggleStudentInfoCommand}" Content="?" Margin="0,0,15,0" Padding="5,2" ToolTip="Import instructions for students"/>
+                    <Button Command="{Binding ImportStudentsCommand}" Content="{Binding [Admin_ManageUsers_ImportStudents], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding ToggleStudentInfoCommand}" Content="{Binding [Admin_ManageUsers_Help], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,15,0" Padding="5,2" ToolTip="{Binding [Admin_ManageUsers_ImportStudentsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
 
-                    <Button Command="{Binding ImportSupervisorsCommand}" Content="Import Supervisors Excel" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding ToggleSupervisorInfoCommand}" Content="?" Margin="0,0,5,0" Padding="5,2" ToolTip="Import instructions for supervisors"/>
+                    <Button Command="{Binding ImportSupervisorsCommand}" Content="{Binding [Admin_ManageUsers_ImportSupervisors], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding ToggleSupervisorInfoCommand}" Content="{Binding [Admin_ManageUsers_Help], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2" ToolTip="{Binding [Admin_ManageUsers_ImportSupervisorsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
@@ -60,11 +62,18 @@
                     <TextBox Grid.Column="0"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Padding="4,3" Margin="0,0,8,0"
-                             Tag="Search by Name / Email"/>
+                             Tag="{Binding [Admin_ManageUsers_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
                     <ComboBox Grid.Column="1"
                               ItemsSource="{Binding RoleOptions}"
                               SelectedItem="{Binding SelectedRole}"
-                              Width="110" Padding="4,2"/>
+                              Width="110" Padding="4,2">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <!-- Map role options to static keys if you wish, or keep as is if RoleOptions are correctly localized strings -->
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </Grid>
 
                 <!-- Row 2: Student-specific filters — visibility driven by SelectedRole -->
@@ -84,22 +93,48 @@
                     <StackPanel>
                         <!-- Profile checkboxes -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <TextBlock Text="Profile:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
-                            <CheckBox Content="Mentor"  IsChecked="{Binding FilterIsMentor}"  VerticalAlignment="Center" Margin="0,0,12,0"/>
-                            <CheckBox Content="Mentee"  IsChecked="{Binding FilterIsMentee}"  VerticalAlignment="Center" Margin="0,0,12,0"/>
-                            <CheckBox Content="Unpaired Only" IsChecked="{Binding FilterUnpairedOnly}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_ManageUsers_Profile], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
+                            <CheckBox Content="{Binding [Admin_ManageUsers_Mentor], Source={x:Static loc:TranslationSource.Instance}}"  IsChecked="{Binding FilterIsMentor}"  VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <CheckBox Content="{Binding [Admin_ManageUsers_Mentee], Source={x:Static loc:TranslationSource.Instance}}"  IsChecked="{Binding FilterIsMentee}"  VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <CheckBox Content="{Binding [Admin_ManageUsers_UnpairedOnly], Source={x:Static loc:TranslationSource.Instance}}" IsChecked="{Binding FilterUnpairedOnly}" VerticalAlignment="Center"/>
                         </StackPanel>
 
                         <!-- Grade range -->
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Grade:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding [Admin_ManageUsers_Grade], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
                             <ComboBox ItemsSource="{Binding AvailableGrades}"
                                       SelectedItem="{Binding FilterMinGrade}"
-                                      Width="70" Padding="4,2" Margin="0,0,4,0"/>
-                            <TextBlock Text="to" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                      Width="70" Padding="4,2" Margin="0,0,4,0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                    <Binding Path="." />
+                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Text="{Binding [Admin_ManageUsers_To], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                             <ComboBox ItemsSource="{Binding AvailableGrades}"
                                       SelectedItem="{Binding FilterMaxGrade}"
-                                      Width="70" Padding="4,2"/>
+                                      Width="70" Padding="4,2">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                    <Binding Path="." />
+                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -132,10 +167,10 @@
             </Grid>
 
             <!-- RIGHT SIDE: Details Sidebar -->
-            <GroupBox Header="Selected User Details" Grid.Column="1" Padding="10">
+            <GroupBox Header="{Binding [Admin_ManageUsers_DetailsHeader], Source={x:Static loc:TranslationSource.Instance}}" Grid.Column="1" Padding="10">
                 <Grid>
                     <!-- Null State Placeholder -->
-                    <TextBlock Text="Select a user from the list to view details."
+                    <TextBlock Text="{Binding [Admin_ManageUsers_SelectHint], Source={x:Static loc:TranslationSource.Instance}}"
                                Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"
                                TextWrapping="Wrap" TextAlignment="Center">
                         <TextBlock.Style>
@@ -170,7 +205,7 @@
                             <TextBlock Text="{Binding UserName}" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding Email}" FontSize="14" Foreground="DarkGray" HorizontalAlignment="Center" Margin="0,0,0,20"/>
                             
-                            <TextBlock Text="Account Information" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#333"/>
+                            <TextBlock Text="{Binding [Admin_ManageUsers_AccountInfo], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#333"/>
                             <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,15">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -182,7 +217,7 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     
-                                    <TextBlock Text="National ID:" FontWeight="Bold" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
+                                    <TextBlock Text="{Binding [Admin_ManageUsers_NationalId], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
                                     <TextBlock Text="{Binding NationalId}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
 
                                 </Grid>
@@ -190,13 +225,13 @@
 
                             <Separator Margin="0,10"/>
 
-                            <TextBlock Text="Actions" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBlock Text="{Binding [Admin_ManageUsers_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,10"/>
                             <!-- Commands are in ManageUsersViewModel, so we need RelativeSource bonding -->
-                            <Button Content="Go to Full Profile" 
+                            <Button Content="{Binding [Admin_ManageUsers_FullProfile], Source={x:Static loc:TranslationSource.Instance}}" 
                                     Command="{Binding DataContext.ViewUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                     Margin="0,0,0,10" Padding="5,8"/>
                                     
-                            <Button Content="Delete User" 
+                            <Button Content="{Binding [Admin_ManageUsers_DeleteUser], Source={x:Static loc:TranslationSource.Instance}}" 
                                     Command="{Binding DataContext.DeleteUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                     Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515" 
                                     Margin="0,0,0,5" Padding="5,8"/>
@@ -212,15 +247,15 @@
                 Visibility="{Binding IsStudentInfoVisible, Converter={StaticResource BoolToVis}}"
                 HorizontalAlignment="Center" VerticalAlignment="Center" Padding="20">
             <StackPanel>
-                <TextBlock Text="Import Students Instructions" FontWeight="Bold" Margin="0,0,0,10"/>
-                <TextBlock Text="Excel Format: Row 1 is header (skipped)." Margin="0,0,0,5"/>
-                <TextBlock Text="Column A: NationalId" />
-                <TextBlock Text="Column B: Email" />
-                <TextBlock Text="Column C: UserName" Margin="0,0,0,15"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_StudentInstructions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,10"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ExcelFormat], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,0,5"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColANationalId], Source={x:Static loc:TranslationSource.Instance}}" />
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColBEmail], Source={x:Static loc:TranslationSource.Instance}}" />
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColCUserName], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,0,15"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Command="{Binding DownloadStudentTemplateCommand}" Content="Download Template" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding CloseStudentInfoCommand}" Content="Close" Padding="5,2"/>
+                    <Button Command="{Binding DownloadStudentTemplateCommand}" Content="{Binding [Admin_ManageUsers_DownloadTemplate], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding CloseStudentInfoCommand}" Content="{Binding [Admin_ManageUsers_Close], Source={x:Static loc:TranslationSource.Instance}}" Padding="5,2"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -231,15 +266,15 @@
                 Visibility="{Binding IsSupervisorInfoVisible, Converter={StaticResource BoolToVis}}"
                 HorizontalAlignment="Center" VerticalAlignment="Center" Padding="20">
             <StackPanel>
-                <TextBlock Text="Import Supervisors Instructions" FontWeight="Bold" Margin="0,0,0,10"/>
-                <TextBlock Text="Excel Format: Row 1 is header (skipped)." Margin="0,0,0,5"/>
-                <TextBlock Text="Column A: NationalId" />
-                <TextBlock Text="Column B: Email" />
-                <TextBlock Text="Column C: UserName" Margin="0,0,0,15"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_SupervisorInstructions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,10"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ExcelFormat], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,0,5"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColANationalId], Source={x:Static loc:TranslationSource.Instance}}" />
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColBEmail], Source={x:Static loc:TranslationSource.Instance}}" />
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColCUserName], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,0,15"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Command="{Binding DownloadSupervisorTemplateCommand}" Content="Download Template" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding CloseSupervisorInfoCommand}" Content="Close" Padding="5,2"/>
+                    <Button Command="{Binding DownloadSupervisorTemplateCommand}" Content="{Binding [Admin_ManageUsers_DownloadTemplate], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding CloseSupervisorInfoCommand}" Content="{Binding [Admin_ManageUsers_Close], Source={x:Static loc:TranslationSource.Instance}}" Padding="5,2"/>
                 </StackPanel>
             </StackPanel>
         </Border>

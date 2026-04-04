@@ -134,6 +134,9 @@ namespace MentoringApp.Service
             // Map profile picture
             user.ProfilePicturePath = dto.ProfilePicturePath;
 
+            // Map language preference
+            user.Language = dto.Language ?? "en";
+
             return user;
         }
 
@@ -195,6 +198,12 @@ namespace MentoringApp.Service
 
             await _userRepo.UpdateProfilePictureAsync(userId, destPath);
             return Result.Ok();
+        }
+
+        public async Task<Result> UpdateLanguageAsync(int userId, string language)
+        {
+            bool updated = await _userRepo.UpdateLanguageAsync(userId, language);
+            return updated ? Result.Ok() : Result.Failure("Failed to update language.");
         }
 
         private string MoveFileToLocalStorage(int userId, string sourceFilePath)

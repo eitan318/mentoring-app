@@ -23,6 +23,7 @@ namespace MentoringApp.Data.DTO
         public string Email { get; set; } = string.Empty;
         public string NationalId { get; set; } = string.Empty;
         public string? ProfilePicturePath { get; set; }
+        public string Language { get; set; } = "en";
 
         // Discriminator/Role info
         public UserRoleType Role { get; set; }
