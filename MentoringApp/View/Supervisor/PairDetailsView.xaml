@@ -9,24 +9,82 @@
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800"
              FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header: Breadcrumb + Meeting Hours Progress -->
-        <Border Grid.Row="0" Margin="0,0,0,20" Padding="10,8" Background="#F8F8F8" BorderBrush="#EAEAEA" BorderThickness="1" CornerRadius="4">
+        <!-- Header: Full Card Presentation + Meeting Hours Progress -->
+        <Border Grid.Row="0" Margin="0,0,0,20" Padding="15" Background="#FFFFFF" BorderBrush="#EAEAEA" BorderThickness="1" CornerRadius="8">
             <StackPanel>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,8">
-                    <TextBlock Text="{Binding [PairDetails_Title], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#555" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="»" Foreground="#AAA" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                    <TextBlock FontWeight="Bold" FontSize="16" VerticalAlignment="Center">
-                        <Run Text="{Binding CurrentPair.Mentor.UserName}"/>
-                        <Run Text=" &amp; " Foreground="Gray"/>
-                        <Run Text="{Binding CurrentPair.Mentee.UserName}"/>
-                    </TextBlock>
-                </StackPanel>
+                <TextBlock Text="{Binding [PairDetails_Title], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#555" FontSize="18" Margin="0,0,0,15"/>
+
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Mentor Card -->
+                    <Border Grid.Column="0" BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#F9F9F9" CornerRadius="6">
+                        <StackPanel Orientation="Horizontal">
+                            <components:ProfilePictureControl Width="60" Height="60" Margin="0,0,12,0"
+                                                              VerticalAlignment="Center"
+                                                              ImagePath="{Binding CurrentPair.Mentor.ProfilePicturePath}"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [Admin_ManagePair_Mentor], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" Foreground="#888" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                <TextBlock Text="{Binding CurrentPair.Mentor.UserName}" FontWeight="Bold" FontSize="16"/>
+                                <TextBlock Text="{Binding CurrentPair.Mentor.Email}" Foreground="Gray" FontSize="12" Margin="0,2,0,0"/>
+                                <TextBlock FontSize="12" Foreground="DarkGray" Margin="0,2,0,0">
+                                    <Run Text="{Binding [Admin_ManagePair_Grade], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
+                                    <Run Text=" " />
+                                    <Run>
+                                        <Run.Text>
+                                            <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                <Binding Path="CurrentPair.Mentor.Grade.Name" />
+                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                            </MultiBinding>
+                                        </Run.Text>
+                                    </Run>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Column="1" Text="&amp;" FontSize="24" FontWeight="Bold" Foreground="#CCC" VerticalAlignment="Center" Margin="15,0,15,0"/>
+                    
+                    <!-- Mentee Card -->
+                    <Border Grid.Column="2" BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#F9F9F9" CornerRadius="6">
+                        <StackPanel Orientation="Horizontal">
+                            <components:ProfilePictureControl Width="60" Height="60" Margin="0,0,12,0"
+                                                              VerticalAlignment="Center"
+                                                              ImagePath="{Binding CurrentPair.Mentee.ProfilePicturePath}"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [Admin_ManagePair_Mentee], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" Foreground="#888" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                <TextBlock Text="{Binding CurrentPair.Mentee.UserName}" FontWeight="Bold" FontSize="16"/>
+                                <TextBlock Text="{Binding CurrentPair.Mentee.Email}" Foreground="Gray" FontSize="12" Margin="0,2,0,0"/>
+                                <TextBlock FontSize="12" Foreground="DarkGray" Margin="0,2,0,0">
+                                    <Run Text="{Binding [Admin_ManagePair_Grade], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
+                                    <Run Text=" " />
+                                    <Run>
+                                        <Run.Text>
+                                            <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                <Binding Path="CurrentPair.Mentee.Grade.Name" />
+                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                            </MultiBinding>
+                                        </Run.Text>
+                                    </Run>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
                 <!-- Meeting Hours Progress -->
                 <StackPanel>
                     <DockPanel Margin="0,0,0,4">
@@ -50,7 +108,19 @@
             </Grid.ColumnDefinitions>
 
             <!-- Left Column: Reviews (Smaller) -->
-            <DockPanel Grid.Column="0" Margin="0,0,15,0">
+            <DockPanel Grid.Column="0">
+                <DockPanel.Style>
+                    <Style TargetType="DockPanel">
+                        <Setter Property="Grid.ColumnSpan" Value="1"/>
+                        <Setter Property="Margin" Value="0,0,15,0"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowIssues}" Value="False">
+                                <Setter Property="Grid.ColumnSpan" Value="2"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DockPanel.Style>
                 <TextBlock DockPanel.Dock="Top" FontSize="16" FontWeight="SemiBold"
                            Text="{Binding [PairDetails_RecentReviews_Label], Source={x:Static loc:TranslationSource.Instance}}"
                            Margin="0,0,0,10"/>
@@ -73,7 +143,7 @@
             </DockPanel>
 
             <!-- Right Column: Issues (Larger) -->
-            <DockPanel Grid.Column="1">
+            <DockPanel Grid.Column="1" Visibility="{Binding ShowIssues, Converter={StaticResource BoolToVis}}">
                 <TextBlock DockPanel.Dock="Top" FontSize="16" FontWeight="SemiBold"
                            Text="{Binding [PairDetails_ActiveIssues_Label], Source={x:Static loc:TranslationSource.Instance}}"
                            Margin="0,0,0,10"/>

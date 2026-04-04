@@ -21,6 +21,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [ObservableProperty] private double _totalMeetingHours;
         [ObservableProperty] private double _requiredMeetingHours = 10;
         [ObservableProperty] private double _hoursProgress;  // 0-100 for ProgressBar
+        [ObservableProperty] private bool _showIssues = true;
 
         public PairDetailsViewModel(PairService pairService, IssueService issueService, ReviewService reviewService, SettingsService settingsService)
         {
@@ -63,7 +64,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
                 if (menteeIssues.Success && menteeIssues.Data != null)
                     allIssues.AddRange(menteeIssues.Data);
                 
-                PairIssues = new ObservableCollection<IssueModel>(allIssues.OrderByDescending(i => i.CreationDate));
+                var distinctIssues = allIssues.GroupBy(i => i.Id).Select(g => g.First());
+                PairIssues = new ObservableCollection<IssueModel>(distinctIssues.OrderByDescending(i => i.CreationDate));
             }
         }
 

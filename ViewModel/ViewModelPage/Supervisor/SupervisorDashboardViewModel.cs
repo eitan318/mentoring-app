@@ -17,6 +17,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         protected readonly PairService _pairService;
         protected readonly IssueService _issueService;
         protected readonly UserService _userService;
+        protected readonly ReviewService _reviewService;
+        protected readonly SettingsService _settingsService;
 
         // Cached so we can reload data after returning from sub-pages
         private int _currentSupervisorId;
@@ -27,25 +29,48 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [ObservableProperty] private ObservableCollection<Pair> _pairsSupervised = [];
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(PendingIssues))]
-        [NotifyPropertyChangedFor(nameof(ResolvedIssues))]
+        [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
+        [NotifyPropertyChangedFor(nameof(FilteredResolvedIssues))]
         [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
         private ObservableCollection<IssueModel> _allIssues = [];
-        public IEnumerable<IssueModel> PendingIssues => AllIssues.Where(i => !i.IsResolved);
-        public IEnumerable<IssueModel> ResolvedIssues => AllIssues.Where(i => i.IsResolved);
-        public int ResolvedIssuesCount => ResolvedIssues.Count();
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
+        [NotifyPropertyChangedFor(nameof(FilteredResolvedIssues))]
+        [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
+        private Pair? _issueFilterPair;
+
+        public IEnumerable<IssueModel> FilteredPendingIssues => AllIssues
+            .Where(i => !i.IsResolved)
+            .Where(i => IssueFilterPair == null || i.ReportedByUserId == IssueFilterPair.Mentor.Id || i.ReportedByUserId == IssueFilterPair.Mentee.Id);
+
+        public IEnumerable<IssueModel> FilteredResolvedIssues => AllIssues
+            .Where(i => i.IsResolved)
+            .Where(i => IssueFilterPair == null || i.ReportedByUserId == IssueFilterPair.Mentor.Id || i.ReportedByUserId == IssueFilterPair.Mentee.Id);
+            
+        public int ResolvedIssuesCount => FilteredResolvedIssues.Count();
+
+        [ObservableProperty] private object? _selectedPaneContent;
 
         [ObservableProperty] private bool _showResolvedIssues;
 
         [RelayCommand]
         private void ToggleResolvedIssues() => ShowResolvedIssues = !ShowResolvedIssues;
 
-        public SupervisorDashboardViewModel(INavigationService navigationService, PairService pairService, IssueService issueService, UserService userService)
+        public SupervisorDashboardViewModel(
+            INavigationService navigationService, 
+            PairService pairService, 
+            IssueService issueService, 
+            UserService userService,
+            ReviewService reviewService,
+            SettingsService settingsService)
         {
             _navigationService = navigationService;
             _pairService = pairService;
             _issueService = issueService;
             _userService = userService;
+            _reviewService = reviewService;
+            _settingsService = settingsService;
         }
 
         [RelayCommand]
@@ -53,23 +78,49 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         {
             if (issue != null)
             {
-                await _navigationService.NavigateToAsync<IssueViewModel, int>(issue.Id);
+                var vm = new IssueViewModel(_navigationService, _issueService);
+
+                var pair = PairsSupervised.FirstOrDefault(p => p.Mentor.Id == issue.ReportedByUserId || p.Mentee.Id == issue.ReportedByUserId);
+                if (pair != null)
+                {
+                    vm.RelatedPairName = $"Originating from Pair: {pair.Mentor.UserName} & {pair.Mentee.UserName}";
+                }
+
+                vm.OnCloseRequested = () => SelectedPaneContent = null;
+                vm.OnIssueResolved = () => 
+                {
+                    SelectedPaneContent = null;
+                    _ = LoadSupervisorDataAsync(_currentSupervisorId); // Refresh issues!
+                };
+                await vm.OnNavigatedToAsync(issue.Id);
+                SelectedPaneContent = vm;
             }
         }
 
         [RelayCommand]
         private async Task SelectPair(Pair? pair)
         {
+            IssueFilterPair = pair; // Apply filtering
+
             if (pair != null)
             {
-                await _navigationService.NavigateToAsync<PairDetailsViewModel, int>(pair.Id);
+                var vm = new PairDetailsViewModel(_pairService, _issueService, _reviewService, _settingsService)
+                {
+                    ShowIssues = false
+                };
+                await vm.OnNavigatedToAsync(pair.Id);
+                SelectedPaneContent = vm;
+            }
+            else 
+            {
+                 SelectedPaneContent = null;
             }
         }
 
         private async Task LoadSupervisorDataAsync(int supervisorId)
         {
             var pairsResult = await _pairService.GetPairsBySupervisorAsync(supervisorId);
-            var issuesResult = await _issueService.GetAllIssuesAsync();
+            var issuesResult = await _issueService.GetIssuesBySupervisorAsync(supervisorId);
 
             // Swapping the instance now triggers the UI update
             if (pairsResult.Success)
