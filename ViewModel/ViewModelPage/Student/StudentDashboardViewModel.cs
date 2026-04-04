@@ -89,6 +89,24 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
 
             OnPropertyChanged(nameof(HasNoPairs));
         }
+
+        [RelayCommand]
+        private async Task BrowseMentors()
+        {
+            await _navigationService.NavigateToAsync<BrowseMentorsViewModel>();
+        }
+
+        [RelayCommand]
+        private async Task ViewGallery()
+        {
+            await _navigationService.NavigateToAsync<SelectionGalleryViewModel>();
+        }
+
+        [RelayCommand]
+        private async Task ViewRequests()
+        {
+            await _navigationService.NavigateToAsync<MentorRequestsViewModel>();
+        }
     }
 
 

@@ -70,6 +70,18 @@
         <supervisorv:PairDetailsView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type studentvm:BrowseMentorsViewModel}">
+        <studentv:BrowseMentorsView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type studentvm:SelectionGalleryViewModel}">
+        <studentv:SelectionGalleryView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type studentvm:MentorRequestsViewModel}">
+        <studentv:MentorRequestsView />
+    </DataTemplate>
+
 
 
 </ResourceDictionary>

@@ -101,7 +101,9 @@ namespace MentoringApp.Service
             {
                 Id = dto.Id,
                 Mentor = mentor,
-                Mentee = mentee
+                Mentee = mentee,
+                MatchTier = (MatchTier)dto.MatchTier,
+                IsProfileIncomplete = dto.IsProfileIncomplete
             };
         }
     }
