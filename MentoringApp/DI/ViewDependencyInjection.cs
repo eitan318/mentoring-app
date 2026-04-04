@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 
@@ -11,6 +11,7 @@ namespace MentoringApp.DI
         {
             services.AddSingleton<IWindowService, WindowService>();
             services.AddSingleton<IFileService, FileService>();
+            services.AddSingleton<ILanguageService, LanguageService>();
             services.AddTransient<DummyDataSeeder>();
             services.AddSingleton<MainWindow>();
 

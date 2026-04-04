@@ -18,5 +18,13 @@ namespace MentoringApp.Service
 
         public Task SetMeetingHoursBarrierAsync(double hours)
             => _settingsRepo.SetDoubleAsync(MeetingHoursBarrierKey, hours);
+
+        private const string GlobalLanguageKey = "GlobalLoginLanguage";
+
+        public Task<string> GetGlobalLanguageAsync()
+            => _settingsRepo.GetStringAsync(GlobalLanguageKey, "en");
+
+        public Task SetGlobalLanguageAsync(string lang)
+            => _settingsRepo.SetStringAsync(GlobalLanguageKey, lang);
     }
 }

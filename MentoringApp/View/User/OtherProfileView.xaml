@@ -4,7 +4,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:components="clr-namespace:MentoringApp.View.Components"
-             mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="400">
+             xmlns:loc="clr-namespace:MentoringApp.Localization"
+             mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="400"
+             FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <Grid Margin="30">
         <StackPanel>
@@ -16,14 +18,14 @@
 
             <Separator Margin="0,10"/>
 
-            <Label Content="Email Address" Foreground="Gray" FontSize="11"/>
+            <Label Content="{Binding [OtherProfile_Email_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
             <TextBlock Text="{Binding Email}" FontSize="16" Margin="5,0,0,15"/>
 
             <StackPanel Visibility="{Binding IsStudent, Converter={StaticResource BoolToVis}}">
-                <Label Content="Current Grade" Foreground="Gray" FontSize="11"/>
+                <Label Content="{Binding [OtherProfile_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
                 <TextBlock Text="{Binding GradeName}" FontSize="16" Margin="5,0,0,15"/>
 
-                <Label Content="Mentoring Details" Foreground="Gray" FontSize="11"/>
+                <Label Content="{Binding [OtherProfile_MentoringDetails_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
                 <Border Background="#F9F9F9" Padding="10" CornerRadius="5">
                     <StackPanel>
                         <TextBlock Text="{Binding TeachingSubject}" Margin="0,2"/>

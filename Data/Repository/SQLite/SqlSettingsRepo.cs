@@ -29,6 +29,23 @@ namespace MentoringApp.Data.Acess.SQLite
                 new { Key = key, Value = value.ToString() });
         }
 
+        public async Task<string> GetStringAsync(string key, string defaultValue = "")
+        {
+            var rows = await _db.QueryAsync<SettingRow>(
+                "SELECT Value FROM Settings WHERE Key = @Key",
+                new { Key = key });
+            var row = rows.FirstOrDefault();
+            if (row == null) return defaultValue;
+            return row.Value ?? defaultValue;
+        }
+
+        public async Task SetStringAsync(string key, string value)
+        {
+            await _db.ExecuteAsync(
+                "INSERT INTO Settings (Key, Value) VALUES (@Key, @Value) ON CONFLICT(Key) DO UPDATE SET Value = @Value",
+                new { Key = key, Value = value });
+        }
+
         private class SettingRow
         {
             public string Value { get; set; } = string.Empty;

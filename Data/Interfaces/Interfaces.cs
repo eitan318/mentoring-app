@@ -27,6 +27,7 @@ namespace MentoringApp.Data.Interfaces
         Task UpsertMentorProfileAsync(int userId, int subjectId);
 
         Task<bool> UpdateProfilePictureAsync(int userId, string? path);
+        Task<bool> UpdateLanguageAsync(int userId, string language);
     }
 
     public interface IVerificationCodeRepo
@@ -74,6 +75,8 @@ namespace MentoringApp.Data.Interfaces
     {
         Task<double> GetDoubleAsync(string key, double defaultValue = 0);
         Task SetDoubleAsync(string key, double value);
+        Task<string> GetStringAsync(string key, string defaultValue = "");
+        Task SetStringAsync(string key, string value);
     }
 
     public interface ISubjectRepo

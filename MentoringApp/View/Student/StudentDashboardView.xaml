@@ -6,7 +6,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Student;assembly=MentoringApp.ViewModel"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
-    mc:Ignorable="d">
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
+    mc:Ignorable="d"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -46,10 +48,10 @@
                                     <Run Text="{Binding Counterpart.UserName}" />
                                 </Hyperlink>
                             </TextBlock>
-                            <TextBlock Foreground="Gray" Text="Your Mentee" />
+                            <TextBlock Foreground="Gray" Text="{Binding [Student_YourMentee_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                             <!-- Meeting Hours Progress -->
                             <DockPanel Margin="0,8,0,2">
-                                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#555" Text="Meeting Hours"/>
+                                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#555" Text="{Binding [Student_MeetingHours_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
                                 <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right">
                                     <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}"/>
                                     <Run Text=" / "/>
@@ -60,13 +62,13 @@
                         </StackPanel>
 
                         <UniformGrid DockPanel.Dock="Bottom" Columns="2" Margin="0,8,0,0">
-                            <Button Command="{Binding CreateReviewCommand}" Content="Write Meeting Review" Margin="0,0,4,0" Background="LightBlue" />
-                            <Button Command="{Binding IssueToSupervisorCommand}" Content="Report Issue" Margin="4,0,0,0" />
+                            <Button Command="{Binding CreateReviewCommand}" Content="{Binding [Student_WriteReview_Button], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,4,0" Background="LightBlue" />
+                            <Button Command="{Binding IssueToSupervisorCommand}" Content="{Binding [Student_ReportIssue_Button], Source={x:Static loc:TranslationSource.Instance}}" Margin="4,0,0,0" />
                         </UniformGrid>
 
                         <ScrollViewer>
                             <StackPanel>
-                                <TextBlock Margin="0,10,0,4" FontWeight="Bold" Foreground="#333" Text="Recent Meeting Reviews" />
+                                <TextBlock Margin="0,10,0,4" FontWeight="Bold" Foreground="#333" Text="{Binding [Student_RecentReviews_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                                 <ItemsControl ItemsSource="{Binding RecentReviews}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -105,7 +107,7 @@
                                        Text="{Binding MentorSubject, StringFormat='Expert in: {0}'}" />
                             <!-- Meeting Hours Progress -->
                             <DockPanel Margin="0,8,0,2">
-                                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#555" Text="Meeting Hours"/>
+                                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#555" Text="{Binding [Student_MeetingHours_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
                                 <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right">
                                     <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}"/>
                                     <Run Text=" / "/>
@@ -117,11 +119,11 @@
 
                         <Button DockPanel.Dock="Bottom" Margin="0,8,0,0"
                                 Command="{Binding IssueToSupervisorCommand}"
-                                Content="Raise Issue to Supervisor" />
+                                Content="{Binding [Student_RaiseIssue_Button], Source={x:Static loc:TranslationSource.Instance}}" />
 
                         <ScrollViewer>
                             <StackPanel>
-                                <TextBlock Margin="0,10,0,4" FontWeight="Bold" Foreground="#333" Text="Mentor's Meeting Feedback" />
+                                <TextBlock Margin="0,10,0,4" FontWeight="Bold" Foreground="#333" Text="{Binding [Student_MentorFeedback_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                                 <ItemsControl ItemsSource="{Binding RecentReviews}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -139,7 +141,7 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
 
-                                <TextBlock Margin="0,14,0,4" FontWeight="Bold" Foreground="#333" Text="My Active Issues" />
+                                <TextBlock Margin="0,14,0,4" FontWeight="Bold" Foreground="#333" Text="{Binding [Student_MyIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                                 <ItemsControl ItemsSource="{Binding MyIssues}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -153,9 +155,14 @@
                                                         Text="●" />
                                                     <StackPanel>
                                                         <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
-                                                        <TextBlock
-                                                            FontSize="11" Foreground="#999"
-                                                            Text="{Binding Category.Name}" />
+                                                        <TextBlock FontSize="11" Foreground="#999">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Category_">
+                                                                    <Binding Path="Category.Name" />
+                                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
                                                     </StackPanel>
                                                 </StackPanel>
                                             </Border>
@@ -186,12 +193,12 @@
                 Foreground="#888"
                 HorizontalAlignment="Center"
                 Margin="0,12,0,6"
-                Text="No mentor or mentee assigned" />
+                Text="{Binding [Student_NoAssignment_Title], Source={x:Static loc:TranslationSource.Instance}}" />
             <TextBlock
                 FontSize="14"
                 Foreground="#AAA"
                 HorizontalAlignment="Center"
-                Text="Contact your supervisor or administrator to get paired." />
+                Text="{Binding [Student_NoAssignment_Hint], Source={x:Static loc:TranslationSource.Instance}}" />
         </StackPanel>
     </Grid>
 </UserControl>

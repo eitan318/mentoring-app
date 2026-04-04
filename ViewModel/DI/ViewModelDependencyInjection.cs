@@ -25,6 +25,7 @@ namespace MentoringApp.ViewModel.DI
             // ViewModels (Transient because you want a fresh one each time you navigate)
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<LoginViewModel>();
+            services.AddTransient<AuthenticatedDashboardViewModel>();
             services.AddTransient<RegistrationViewModel>();
             services.AddTransient<AdminDashboardViewModel>();
             services.AddTransient<StudentDashboardViewModel>();

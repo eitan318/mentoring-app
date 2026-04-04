@@ -5,9 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
     d:DesignHeight="600"
     d:DesignWidth="800"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -20,15 +22,19 @@
                     Text="{Binding Description}"
                     TextWrapping="Wrap" />
                 <StackPanel Opacity="0.7" Orientation="Horizontal">
-                    <TextBlock
-                        Margin="0,0,10,0"
-                        FontStyle="Italic"
-                        Text="{Binding Category.Name}" />
+                    <TextBlock Margin="0,0,10,0" FontStyle="Italic">
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Category_">
+                                <Binding Path="Category.Name" />
+                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
                     <TextBlock
                         x:Name="Stat"
                         VerticalAlignment="Center"
                         FontSize="10"
-                        Text="Pending" />
+                        Text="{Binding [Supervisor_IssuePending], Source={x:Static loc:TranslationSource.Instance}}" />
                     <TextBlock
                         VerticalAlignment="Center"
                         FontSize="10"
@@ -39,7 +45,7 @@
                 <DataTrigger Binding="{Binding IsResolved}" Value="True">
                     <Setter TargetName="Desc" Property="TextDecorations" Value="Strikethrough" />
                     <Setter TargetName="Desc" Property="Foreground" Value="Gray" />
-                    <Setter TargetName="Stat" Property="Text" Value="Resolved" />
+                    <Setter TargetName="Stat" Property="Tag" Value="resolved" />
                     <Setter TargetName="Stat" Property="Foreground" Value="DarkGreen" />
                 </DataTrigger>
             </DataTemplate.Triggers>
@@ -93,7 +99,14 @@
                 FontSize="28"
                 FontWeight="Bold"
                 Text="{Binding SelectedSupervisor.UserName}" />
-            <TextBlock FontWeight="Medium" Text="{Binding PairsSupervised.Count, StringFormat='Total Pairs Supervised: {0}'}" />
+            <TextBlock FontWeight="Medium">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{1}{0}">
+                        <Binding Path="PairsSupervised.Count"/>
+                        <Binding Path="[Supervisor_TotalPairs_Label]" Source="{x:Static loc:TranslationSource.Instance}"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
         </StackPanel>
 
         <UniformGrid Grid.Row="1" Columns="2">
@@ -103,29 +116,27 @@
                     DockPanel.Dock="Top"
                     FontWeight="Bold"
                     Foreground="DarkRed"
-                    Text="Pending Issues" />
+                    Text="{Binding [Supervisor_PendingIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                 <ListView
                     ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
                     ItemTemplate="{StaticResource IssueItemTemplate}"
                     ItemsSource="{Binding PendingIssues}" />
-
-
-
             </DockPanel>
 
             <DockPanel Margin="5,0,0,0">
-                <TextBlock Margin="0,0,0,5" DockPanel.Dock="Top" FontWeight="Bold" Foreground="DarkGreen" Text="Resolved Issues" />
-                
+                <TextBlock Margin="0,0,0,5" DockPanel.Dock="Top" FontWeight="Bold" Foreground="DarkGreen"
+                           Text="{Binding [Supervisor_ResolvedIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock FontSize="14" Text="Total Resolved: " VerticalAlignment="Center"/>
+                    <TextBlock FontSize="14" Text="{Binding [Supervisor_TotalResolved_Label], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
                     <TextBlock FontSize="14" FontWeight="Bold" Text="{Binding ResolvedIssuesCount}" VerticalAlignment="Center" Margin="0,0,15,0"/>
                     <Button Command="{Binding ToggleResolvedIssuesCommand}" Padding="8,4" VerticalAlignment="Center">
                         <Button.Style>
                             <Style TargetType="Button">
-                                <Setter Property="Content" Value="View Resolved Issues"/>
+                                <Setter Property="Content" Value="{Binding [Supervisor_ViewResolved_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ShowResolvedIssues}" Value="True">
-                                        <Setter Property="Content" Value="Hide Resolved Issues"/>
+                                        <Setter Property="Content" Value="{Binding [Supervisor_HideResolved_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -145,7 +156,7 @@
             Margin="0,15,0,5"
             FontSize="18"
             FontWeight="SemiBold"
-            Text="Managed Mentoring Pairs" />
+            Text="{Binding [Supervisor_ManagedPairs_Label], Source={x:Static loc:TranslationSource.Instance}}" />
 
         <ListView Grid.Row="3" ItemsSource="{Binding PairsSupervised}" ItemContainerStyle="{StaticResource PairListViewItemStyle}">
             <ListView.ItemTemplate>
@@ -154,12 +165,12 @@
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <!--  Mentor mini avatar  -->
                             <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentor.ProfilePicturePath}" />
-                            <TextBlock FontWeight="Bold" Text="Mentor: " />
+                            <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MentorPrefix], Source={x:Static loc:TranslationSource.Instance}}" />
                             <TextBlock Margin="0,0,12,0" Text="{Binding Mentor.UserName}" />
 
                             <!--  Mentee mini avatar  -->
                             <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}" />
-                            <TextBlock FontWeight="Bold" Text="Mentee: " />
+                            <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MenteePrefix], Source={x:Static loc:TranslationSource.Instance}}" />
                             <TextBlock Text="{Binding Mentee.UserName}" />
                         </StackPanel>
                     </DockPanel>

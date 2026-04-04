@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- App / Header -->
+  <data name="App_Title" xml:space="preserve"><value>MENTOR APP</value></data>
+  <data name="Nav_Back" xml:space="preserve"><value>← Back</value></data>
+  <data name="Nav_Logout" xml:space="preserve"><value>Logout</value></data>
+  <data name="Language_Label" xml:space="preserve"><value>Language</value></data>
+
+  <!-- Login -->
+  <data name="Login_NationalId_Label" xml:space="preserve"><value>National Id:</value></data>
+  <data name="Login_SendCode_Button" xml:space="preserve"><value>Send Verification Code</value></data>
+  <data name="Login_VerificationCode_Label" xml:space="preserve"><value>Verification code:</value></data>
+  <data name="Login_Login_Button" xml:space="preserve"><value>Login</value></data>
+
+  <!-- Registration -->
+  <data name="Register_Username_Tag" xml:space="preserve"><value>Username</value></data>
+  <data name="Register_Email_Tag" xml:space="preserve"><value>Email Address</value></data>
+  <data name="Register_NationalId_Tag" xml:space="preserve"><value>National ID</value></data>
+  <data name="Register_SupervisorNoData" xml:space="preserve"><value>Supervisor data: no data</value></data>
+  <data name="Register_Grade_Tag" xml:space="preserve"><value>Grade (e.g. 10)</value></data>
+  <data name="Register_IsMentor_Check" xml:space="preserve"><value>Is Mentor</value></data>
+  <data name="Register_IsMentee_Check" xml:space="preserve"><value>Is Mentee</value></data>
+  <data name="Register_SubjectToTeach_Tag" xml:space="preserve"><value>Subject to Teach</value></data>
+  <data name="Register_SubjectToLearn_Tag" xml:space="preserve"><value>Subject to Learn</value></data>
+  <data name="Register_Submit_Button" xml:space="preserve"><value>Submit Registration</value></data>
+
+  <!-- My Profile -->
+  <data name="Profile_ChangePhoto_Tooltip" xml:space="preserve"><value>Upload / Change Profile Picture</value></data>
+  <data name="Profile_ChangePhoto_Hint" xml:space="preserve"><value>Click 📷 to change photo</value></data>
+  <data name="Profile_Username_Label" xml:space="preserve"><value>Username</value></data>
+  <data name="Profile_Email_Label" xml:space="preserve"><value>Email Address</value></data>
+  <data name="Profile_NationalId_Label" xml:space="preserve"><value>National ID (Locked)</value></data>
+  <data name="Profile_Grade_Label" xml:space="preserve"><value>Grade</value></data>
+  <data name="Profile_SubjectToTeach_Label" xml:space="preserve"><value>Subject to Teach</value></data>
+  <data name="Profile_SubjectToLearn_Label" xml:space="preserve"><value>Subject to Learn</value></data>
+  <data name="Profile_Language_Label" xml:space="preserve"><value>Preferred Language</value></data>
+  <data name="Profile_EditProfile_Button" xml:space="preserve"><value>Edit Profile</value></data>
+  <data name="Profile_SaveChanges_Button" xml:space="preserve"><value>Save Changes</value></data>
+
+  <!-- Admin Dashboard -->
+  <data name="Admin_ManagePairs_Button" xml:space="preserve"><value>Manage Pairs</value></data>
+  <data name="Admin_ManageUsers_Button" xml:space="preserve"><value>Manage Users</value></data>
+  <data name="Admin_SupervisorHeader_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Admin_SupervisorHeader_Pairs" xml:space="preserve"><value>Pairs</value></data>
+  <data name="Admin_SupervisorHeader_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="Admin_SupervisorHeader_Resolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="Admin_Inspect_Button" xml:space="preserve"><value>Inspect</value></data>
+
+  <!-- Student Dashboard -->
+  <data name="Student_YourMentee_Label" xml:space="preserve"><value>Your Mentee</value></data>
+  <data name="Student_MeetingHours_Label" xml:space="preserve"><value>Meeting Hours</value></data>
+  <data name="Student_RecentReviews_Label" xml:space="preserve"><value>Recent Meeting Reviews</value></data>
+  <data name="Student_WriteReview_Button" xml:space="preserve"><value>Write Meeting Review</value></data>
+  <data name="Student_ReportIssue_Button" xml:space="preserve"><value>Report Issue</value></data>
+  <data name="Student_RaiseIssue_Button" xml:space="preserve"><value>Raise Issue to Supervisor</value></data>
+  <data name="Student_MentorFeedback_Label" xml:space="preserve"><value>Mentor's Meeting Feedback</value></data>
+  <data name="Student_MyIssues_Label" xml:space="preserve"><value>My Active Issues</value></data>
+  <data name="Student_NoAssignment_Title" xml:space="preserve"><value>No mentor or mentee assigned</value></data>
+  <data name="Student_NoAssignment_Hint" xml:space="preserve"><value>Contact your supervisor or administrator to get paired.</value></data>
+
+  <!-- Add Review -->
+  <data name="Review_Content_Label" xml:space="preserve"><value>Review Content</value></data>
+  <data name="Review_Hours_Label" xml:space="preserve"><value>Hours Spent</value></data>
+  <data name="Review_Submit_Button" xml:space="preserve"><value>Submit Review</value></data>
+
+  <!-- Issue -->
+  <data name="Issue_Category_Label" xml:space="preserve"><value>Category</value></data>
+  <data name="Issue_Description_Label" xml:space="preserve"><value>Description</value></data>
+  <data name="Issue_Submit_Button" xml:space="preserve"><value>Submit Issue</value></data>
+  <data name="Issue_Resolve_Button" xml:space="preserve"><value>Mark Resolved</value></data>
+
+  <!-- Other Profile -->
+  <data name="OtherProfile_Username_Label" xml:space="preserve"><value>Username</value></data>
+  <data name="OtherProfile_Email_Label" xml:space="preserve"><value>Email Address</value></data>
+  <data name="OtherProfile_Grade_Label" xml:space="preserve"><value>Current Grade</value></data>
+  <data name="OtherProfile_MentoringDetails_Label" xml:space="preserve"><value>Mentoring Details</value></data>
+
+  <!-- Add Issue -->
+  <data name="Issue_Title" xml:space="preserve"><value>Issue Details</value></data>
+
+  <!-- Supervisor Dashboard -->
+  <data name="Supervisor_PendingIssues_Label" xml:space="preserve"><value>Pending Issues</value></data>
+  <data name="Supervisor_ResolvedIssues_Label" xml:space="preserve"><value>Resolved Issues</value></data>
+  <data name="Supervisor_TotalPairs_Label" xml:space="preserve"><value>Total Pairs Supervised: </value></data>
+  <data name="Supervisor_IssuePending" xml:space="preserve"><value>Pending</value></data>
+  <data name="Supervisor_IssueResolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="Supervisor_TotalResolved_Label" xml:space="preserve"><value>Total Resolved: </value></data>
+  <data name="Supervisor_ViewResolved_Button" xml:space="preserve"><value>View Resolved Issues</value></data>
+  <data name="Supervisor_HideResolved_Button" xml:space="preserve"><value>Hide Resolved Issues</value></data>
+  <data name="Supervisor_ManagedPairs_Label" xml:space="preserve"><value>Managed Mentoring Pairs</value></data>
+  <data name="Supervisor_MentorPrefix" xml:space="preserve"><value>Mentor: </value></data>
+  <data name="Supervisor_MenteePrefix" xml:space="preserve"><value>Mentee: </value></data>
+
+  <!-- Pair Details -->
+  <data name="PairDetails_Title" xml:space="preserve"><value>Pair Details</value></data>
+  <data name="PairDetails_MeetingProgress_Label" xml:space="preserve"><value>Meeting Hours Progress</value></data>
+  <data name="PairDetails_RecentReviews_Label" xml:space="preserve"><value>Recent Reviews</value></data>
+  <data name="PairDetails_ActiveIssues_Label" xml:space="preserve"><value>Active &amp; Past Issues</value></data>
+
+  <!-- Admin Pages -->
+  <data name="Admin_CreatePair_SearchSupervisor" xml:space="preserve"><value>Search Supervisor:</value></data>
+  <data name="Admin_CreatePair_SearchMentor" xml:space="preserve"><value>Search Mentor:</value></data>
+  <data name="Admin_CreatePair_SearchMentee" xml:space="preserve"><value>Search Mentee:</value></data>
+  <data name="Admin_CreatePair_Button" xml:space="preserve"><value>Create Pair</value></data>
+
+  <data name="Admin_ManagePair_Create" xml:space="preserve"><value>+ Create New Pair</value></data>
+  <data name="Admin_ManagePair_SearchHint" xml:space="preserve"><value>Search by Mentor or Mentee name</value></data>
+  <data name="Admin_ManagePair_SelectHint" xml:space="preserve"><value>Select a pair from the list to view details.</value></data>
+  <data name="Admin_ManagePair_Mentor" xml:space="preserve"><value>Mentor</value></data>
+  <data name="Admin_ManagePair_Grade" xml:space="preserve"><value>Grade: {0}</value></data>
+  <data name="Admin_ManagePair_Mentee" xml:space="preserve"><value>Mentee</value></data>
+  <data name="Admin_ManagePair_RecentActivity" xml:space="preserve"><value>Recent Activity</value></data>
+  <data name="Admin_ManagePair_TotalReviews" xml:space="preserve"><value>Total Reviews: </value></data>
+  <data name="Admin_ManagePair_ActiveIssues" xml:space="preserve"><value>Active Issues: </value></data>
+  <data name="Admin_ManagePair_Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Admin_ManagePair_ViewDetails" xml:space="preserve"><value>View Pair Details</value></data>
+  <data name="Admin_ManagePair_Separate" xml:space="preserve"><value>Separate Pair</value></data>
+  <data name="Admin_ManagePair_DetailsHeader" xml:space="preserve"><value>Selected Pair Details</value></data>
+
+  <data name="Admin_ManageUsers_AddImportHeader" xml:space="preserve"><value>Add &amp; Import Users</value></data>
+  <data name="Admin_ManageUsers_AddSupervisor" xml:space="preserve"><value>Add Supervisor</value></data>
+  <data name="Admin_ManageUsers_AddStudent" xml:space="preserve"><value>Add Student</value></data>
+  <data name="Admin_ManageUsers_BulkImport" xml:space="preserve"><value>Bulk Import:</value></data>
+  <data name="Admin_ManageUsers_ImportStudents" xml:space="preserve"><value>Import Students Excel</value></data>
+  <data name="Admin_ManageUsers_Help" xml:space="preserve"><value>?</value></data>
+  <data name="Admin_ManageUsers_ImportStudentsHelp" xml:space="preserve"><value>Import instructions for students</value></data>
+  <data name="Admin_ManageUsers_ImportSupervisors" xml:space="preserve"><value>Import Supervisors Excel</value></data>
+  <data name="Admin_ManageUsers_ImportSupervisorsHelp" xml:space="preserve"><value>Import instructions for supervisors</value></data>
+  <data name="Admin_ManageUsers_SearchHint" xml:space="preserve"><value>Search by Name / Email</value></data>
+  <data name="Admin_ManageUsers_Profile" xml:space="preserve"><value>Profile:</value></data>
+  <data name="Admin_ManageUsers_Mentor" xml:space="preserve"><value>Mentor</value></data>
+  <data name="Admin_ManageUsers_Mentee" xml:space="preserve"><value>Mentee</value></data>
+  <data name="Admin_ManageUsers_UnpairedOnly" xml:space="preserve"><value>Unpaired Only</value></data>
+  <data name="Admin_ManageUsers_Grade" xml:space="preserve"><value>Grade:</value></data>
+  <data name="Admin_ManageUsers_To" xml:space="preserve"><value>to</value></data>
+  <data name="Admin_ManageUsers_DetailsHeader" xml:space="preserve"><value>Selected User Details</value></data>
+  <data name="Admin_ManageUsers_SelectHint" xml:space="preserve"><value>Select a user from the list to view details.</value></data>
+  <data name="Admin_ManageUsers_AccountInfo" xml:space="preserve"><value>Account Information</value></data>
+  <data name="Admin_ManageUsers_NationalId" xml:space="preserve"><value>National ID:</value></data>
+  <data name="Admin_ManageUsers_Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Admin_ManageUsers_FullProfile" xml:space="preserve"><value>Go to Full Profile</value></data>
+  <data name="Admin_ManageUsers_DeleteUser" xml:space="preserve"><value>Delete User</value></data>
+  <data name="Admin_ManageUsers_StudentInstructions" xml:space="preserve"><value>Import Students Instructions</value></data>
+  <data name="Admin_ManageUsers_ExcelFormat" xml:space="preserve"><value>Excel Format: Row 1 is header (skipped).</value></data>
+  <data name="Admin_ManageUsers_ColANationalId" xml:space="preserve"><value>Column A: NationalId</value></data>
+  <data name="Admin_ManageUsers_ColBEmail" xml:space="preserve"><value>Column B: Email</value></data>
+  <data name="Admin_ManageUsers_ColCUserName" xml:space="preserve"><value>Column C: UserName</value></data>
+  <data name="Admin_ManageUsers_DownloadTemplate" xml:space="preserve"><value>Download Template</value></data>
+  <data name="Admin_ManageUsers_Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Admin_ManageUsers_SupervisorInstructions" xml:space="preserve"><value>Import Supervisors Instructions</value></data>
+
+  <!-- Database Dynamic Values -->
+  <data name="DB_Grade_9th" xml:space="preserve"><value>9th Grade</value></data>
+  <data name="DB_Grade_10th" xml:space="preserve"><value>10th Grade</value></data>
+  <data name="DB_Grade_11th" xml:space="preserve"><value>11th Grade</value></data>
+  <data name="DB_Grade_12th" xml:space="preserve"><value>12th Grade</value></data>
+
+  <data name="DB_Subject_Math" xml:space="preserve"><value>Math</value></data>
+  <data name="DB_Subject_Physics" xml:space="preserve"><value>Physics</value></data>
+  <data name="DB_Subject_ComputerScience" xml:space="preserve"><value>Computer Science</value></data>
+  <data name="DB_Subject_English" xml:space="preserve"><value>English</value></data>
+  <data name="DB_Subject_Chemistry" xml:space="preserve"><value>Chemistry</value></data>
+  <data name="DB_Subject_Biology" xml:space="preserve"><value>Biology</value></data>
+
+  <data name="DB_Category_TechnicalIssue" xml:space="preserve"><value>Technical Issue</value></data>
+  <data name="DB_Category_BehavioralIssue" xml:space="preserve"><value>Behavioral Issue</value></data>
+  <data name="DB_Category_GeneralHelp" xml:space="preserve"><value>General Help</value></data>
+
+</root>

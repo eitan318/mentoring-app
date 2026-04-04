@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- App / Header -->
+  <data name="App_Title" xml:space="preserve"><value>אפליקציית מנטורינג</value></data>
+  <data name="Nav_Back" xml:space="preserve"><value>← חזרה</value></data>
+  <data name="Nav_Logout" xml:space="preserve"><value>יציאה</value></data>
+  <data name="Language_Label" xml:space="preserve"><value>שפה</value></data>
+
+  <!-- Login -->
+  <data name="Login_NationalId_Label" xml:space="preserve"><value>תעודת זהות:</value></data>
+  <data name="Login_SendCode_Button" xml:space="preserve"><value>שלח קוד אימות</value></data>
+  <data name="Login_VerificationCode_Label" xml:space="preserve"><value>קוד אימות:</value></data>
+  <data name="Login_Login_Button" xml:space="preserve"><value>כניסה</value></data>
+
+  <!-- Registration -->
+  <data name="Register_Username_Tag" xml:space="preserve"><value>שם משתמש</value></data>
+  <data name="Register_Email_Tag" xml:space="preserve"><value>כתובת אימייל</value></data>
+  <data name="Register_NationalId_Tag" xml:space="preserve"><value>תעודת זהות</value></data>
+  <data name="Register_SupervisorNoData" xml:space="preserve"><value>נתוני מדריך: אין נתונים</value></data>
+  <data name="Register_Grade_Tag" xml:space="preserve"><value>כיתה (לדוגמה: י׳)</value></data>
+  <data name="Register_IsMentor_Check" xml:space="preserve"><value>מנטור</value></data>
+  <data name="Register_IsMentee_Check" xml:space="preserve"><value>מתאמן</value></data>
+  <data name="Register_SubjectToTeach_Tag" xml:space="preserve"><value>מקצוע ללמד</value></data>
+  <data name="Register_SubjectToLearn_Tag" xml:space="preserve"><value>מקצוע ללמוד</value></data>
+  <data name="Register_Submit_Button" xml:space="preserve"><value>שלח הרשמה</value></data>
+
+  <!-- My Profile -->
+  <data name="Profile_ChangePhoto_Tooltip" xml:space="preserve"><value>העלה / שנה תמונת פרופיל</value></data>
+  <data name="Profile_ChangePhoto_Hint" xml:space="preserve"><value>לחץ 📷 לשינוי תמונה</value></data>
+  <data name="Profile_Username_Label" xml:space="preserve"><value>שם משתמש</value></data>
+  <data name="Profile_Email_Label" xml:space="preserve"><value>כתובת אימייל</value></data>
+  <data name="Profile_NationalId_Label" xml:space="preserve"><value>תעודת זהות (נעולה)</value></data>
+  <data name="Profile_Grade_Label" xml:space="preserve"><value>כיתה</value></data>
+  <data name="Profile_SubjectToTeach_Label" xml:space="preserve"><value>מקצוע ללמד</value></data>
+  <data name="Profile_SubjectToLearn_Label" xml:space="preserve"><value>מקצוע ללמוד</value></data>
+  <data name="Profile_Language_Label" xml:space="preserve"><value>שפה מועדפת</value></data>
+  <data name="Profile_EditProfile_Button" xml:space="preserve"><value>עריכת פרופיל</value></data>
+  <data name="Profile_SaveChanges_Button" xml:space="preserve"><value>שמור שינויים</value></data>
+
+  <!-- Admin Dashboard -->
+  <data name="Admin_ManagePairs_Button" xml:space="preserve"><value>ניהול זוגות</value></data>
+  <data name="Admin_ManageUsers_Button" xml:space="preserve"><value>ניהול משתמשים</value></data>
+  <data name="Admin_SupervisorHeader_Name" xml:space="preserve"><value>שם</value></data>
+  <data name="Admin_SupervisorHeader_Pairs" xml:space="preserve"><value>זוגות</value></data>
+  <data name="Admin_SupervisorHeader_Pending" xml:space="preserve"><value>ממתינות</value></data>
+  <data name="Admin_SupervisorHeader_Resolved" xml:space="preserve"><value>טופלו</value></data>
+  <data name="Admin_Inspect_Button" xml:space="preserve"><value>בדיקה</value></data>
+
+  <!-- Student Dashboard -->
+  <data name="Student_YourMentee_Label" xml:space="preserve"><value>המתאמן שלך</value></data>
+  <data name="Student_MeetingHours_Label" xml:space="preserve"><value>שעות פגישות</value></data>
+  <data name="Student_RecentReviews_Label" xml:space="preserve"><value>סקירות פגישות אחרונות</value></data>
+  <data name="Student_WriteReview_Button" xml:space="preserve"><value>כתוב סקירת פגישה</value></data>
+  <data name="Student_ReportIssue_Button" xml:space="preserve"><value>דווח על בעיה</value></data>
+  <data name="Student_RaiseIssue_Button" xml:space="preserve"><value>הגש בעיה למדריך</value></data>
+  <data name="Student_MentorFeedback_Label" xml:space="preserve"><value>משוב פגישות מהמנטור</value></data>
+  <data name="Student_MyIssues_Label" xml:space="preserve"><value>הבעיות הפעילות שלי</value></data>
+  <data name="Student_NoAssignment_Title" xml:space="preserve"><value>לא שובצת עם מנטור או מתאמן</value></data>
+  <data name="Student_NoAssignment_Hint" xml:space="preserve"><value>פנה אל המדריך או מנהל המערכת לשיבוץ.</value></data>
+
+  <!-- Add Review -->
+  <data name="Review_Content_Label" xml:space="preserve"><value>תוכן הסקירה</value></data>
+  <data name="Review_Hours_Label" xml:space="preserve"><value>שעות שהושקעו</value></data>
+  <data name="Review_Submit_Button" xml:space="preserve"><value>שלח סקירה</value></data>
+
+  <!-- Issue -->
+  <data name="Issue_Category_Label" xml:space="preserve"><value>קטגוריה</value></data>
+  <data name="Issue_Description_Label" xml:space="preserve"><value>תיאור</value></data>
+  <data name="Issue_Submit_Button" xml:space="preserve"><value>שלח בעיה</value></data>
+  <data name="Issue_Resolve_Button" xml:space="preserve"><value>סמן כטופל</value></data>
+
+  <!-- Other Profile -->
+  <data name="OtherProfile_Username_Label" xml:space="preserve"><value>שם משתמש</value></data>
+  <data name="OtherProfile_Email_Label" xml:space="preserve"><value>כתובת אימייל</value></data>
+  <data name="OtherProfile_Grade_Label" xml:space="preserve"><value>כיתה נוכחית</value></data>
+  <data name="OtherProfile_MentoringDetails_Label" xml:space="preserve"><value>פרטי מנטורינג</value></data>
+
+  <!-- Add Issue -->
+  <data name="Issue_Title" xml:space="preserve"><value>פרטי הבעיה</value></data>
+
+  <!-- Supervisor Dashboard -->
+  <data name="Supervisor_PendingIssues_Label" xml:space="preserve"><value>בעיות ממתינות</value></data>
+  <data name="Supervisor_ResolvedIssues_Label" xml:space="preserve"><value>בעיות שטופלו</value></data>
+  <data name="Supervisor_TotalPairs_Label" xml:space="preserve"><value>סה"כ זוגות מנוהלים: </value></data>
+  <data name="Supervisor_IssuePending" xml:space="preserve"><value>ממתין</value></data>
+  <data name="Supervisor_IssueResolved" xml:space="preserve"><value>טופל</value></data>
+  <data name="Supervisor_TotalResolved_Label" xml:space="preserve"><value>סה"כ טופלו: </value></data>
+  <data name="Supervisor_ViewResolved_Button" xml:space="preserve"><value>הצג בעיות שטופלו</value></data>
+  <data name="Supervisor_HideResolved_Button" xml:space="preserve"><value>הסתר בעיות שטופלו</value></data>
+  <data name="Supervisor_ManagedPairs_Label" xml:space="preserve"><value>זוגות מנטורינג מנוהלים</value></data>
+  <data name="Supervisor_MentorPrefix" xml:space="preserve"><value>מנטור: </value></data>
+  <data name="Supervisor_MenteePrefix" xml:space="preserve"><value>מתאמן: </value></data>
+
+  <!-- Pair Details -->
+  <data name="PairDetails_Title" xml:space="preserve"><value>פרטי זוג</value></data>
+  <data name="PairDetails_MeetingProgress_Label" xml:space="preserve"><value>התקדמות שעות פגישה</value></data>
+  <data name="PairDetails_RecentReviews_Label" xml:space="preserve"><value>סקירות אחרונות</value></data>
+  <data name="PairDetails_ActiveIssues_Label" xml:space="preserve"><value>בעיות פעילות ועבר</value></data>
+
+  <!-- Admin Pages -->
+  <data name="Admin_CreatePair_SearchSupervisor" xml:space="preserve"><value>חיפוש מפקח:</value></data>
+  <data name="Admin_CreatePair_SearchMentor" xml:space="preserve"><value>חיפוש חונך:</value></data>
+  <data name="Admin_CreatePair_SearchMentee" xml:space="preserve"><value>חיפוש חניך:</value></data>
+  <data name="Admin_CreatePair_Button" xml:space="preserve"><value>צור זוג</value></data>
+
+  <data name="Admin_ManagePair_Create" xml:space="preserve"><value>+ צור זוג חדש</value></data>
+  <data name="Admin_ManagePair_SearchHint" xml:space="preserve"><value>חיפוש לפי שם חונך או חניך</value></data>
+  <data name="Admin_ManagePair_SelectHint" xml:space="preserve"><value>בחר זוג מהרשימה כדי לראות פרטים.</value></data>
+  <data name="Admin_ManagePair_Mentor" xml:space="preserve"><value>חונך</value></data>
+  <data name="Admin_ManagePair_Grade" xml:space="preserve"><value>כיתה: {0}</value></data>
+  <data name="Admin_ManagePair_Mentee" xml:space="preserve"><value>חניך</value></data>
+  <data name="Admin_ManagePair_RecentActivity" xml:space="preserve"><value>פעילות אחרונה</value></data>
+  <data name="Admin_ManagePair_TotalReviews" xml:space="preserve"><value>סך סקירות: </value></data>
+  <data name="Admin_ManagePair_ActiveIssues" xml:space="preserve"><value>בעיות פעילות: </value></data>
+  <data name="Admin_ManagePair_Actions" xml:space="preserve"><value>פעולות</value></data>
+  <data name="Admin_ManagePair_ViewDetails" xml:space="preserve"><value>הצג פרטי חונכות</value></data>
+  <data name="Admin_ManagePair_Separate" xml:space="preserve"><value>הפרד זוג</value></data>
+  <data name="Admin_ManagePair_DetailsHeader" xml:space="preserve"><value>פרטי הזוג הנבחר</value></data>
+
+  <data name="Admin_ManageUsers_AddImportHeader" xml:space="preserve"><value>הוספה וייבוא משתמשים</value></data>
+  <data name="Admin_ManageUsers_AddSupervisor" xml:space="preserve"><value>הוסף מפקח</value></data>
+  <data name="Admin_ManageUsers_AddStudent" xml:space="preserve"><value>הוסף תלמיד</value></data>
+  <data name="Admin_ManageUsers_BulkImport" xml:space="preserve"><value>ייבוא המוני:</value></data>
+  <data name="Admin_ManageUsers_ImportStudents" xml:space="preserve"><value>ייבוא תלמידים מ-Excel</value></data>
+  <data name="Admin_ManageUsers_Help" xml:space="preserve"><value>?</value></data>
+  <data name="Admin_ManageUsers_ImportStudentsHelp" xml:space="preserve"><value>הוראות ייבוא תלמידים</value></data>
+  <data name="Admin_ManageUsers_ImportSupervisors" xml:space="preserve"><value>ייבוא מפקחים מ-Excel</value></data>
+  <data name="Admin_ManageUsers_ImportSupervisorsHelp" xml:space="preserve"><value>הוראות ייבוא מפקחים</value></data>
+  <data name="Admin_ManageUsers_SearchHint" xml:space="preserve"><value>חיפוש לפי שם / דוא"ל</value></data>
+  <data name="Admin_ManageUsers_Profile" xml:space="preserve"><value>פרופיל:</value></data>
+  <data name="Admin_ManageUsers_Mentor" xml:space="preserve"><value>חונך</value></data>
+  <data name="Admin_ManageUsers_Mentee" xml:space="preserve"><value>חניך</value></data>
+  <data name="Admin_ManageUsers_UnpairedOnly" xml:space="preserve"><value>ללא זוג בלבד</value></data>
+  <data name="Admin_ManageUsers_Grade" xml:space="preserve"><value>כיתה:</value></data>
+  <data name="Admin_ManageUsers_To" xml:space="preserve"><value>עד</value></data>
+  <data name="Admin_ManageUsers_DetailsHeader" xml:space="preserve"><value>פרטי המשתמש הנבחר</value></data>
+  <data name="Admin_ManageUsers_SelectHint" xml:space="preserve"><value>בחר משתמש מהרשימה כדי לראות פרטים.</value></data>
+  <data name="Admin_ManageUsers_AccountInfo" xml:space="preserve"><value>מידע חשבון</value></data>
+  <data name="Admin_ManageUsers_NationalId" xml:space="preserve"><value>תעודת זהות:</value></data>
+  <data name="Admin_ManageUsers_Actions" xml:space="preserve"><value>פעולות</value></data>
+  <data name="Admin_ManageUsers_FullProfile" xml:space="preserve"><value>עבור לפרופיל המלא</value></data>
+  <data name="Admin_ManageUsers_DeleteUser" xml:space="preserve"><value>מחק משתמש</value></data>
+  <data name="Admin_ManageUsers_StudentInstructions" xml:space="preserve"><value>הוראות ייבוא תלמידים</value></data>
+  <data name="Admin_ManageUsers_ExcelFormat" xml:space="preserve"><value>פורמט Excel: שורה 1 היא כותרת (מדלגים).</value></data>
+  <data name="Admin_ManageUsers_ColANationalId" xml:space="preserve"><value>עמודה A: ת.ז.</value></data>
+  <data name="Admin_ManageUsers_ColBEmail" xml:space="preserve"><value>עמודה B: דואר אלקטרוני</value></data>
+  <data name="Admin_ManageUsers_ColCUserName" xml:space="preserve"><value>עמודה C: שם משתמש</value></data>
+  <data name="Admin_ManageUsers_DownloadTemplate" xml:space="preserve"><value>הורד תבנית</value></data>
+  <data name="Admin_ManageUsers_Close" xml:space="preserve"><value>סגור</value></data>
+  <data name="Admin_ManageUsers_SupervisorInstructions" xml:space="preserve"><value>הוראות ייבוא מפקחים</value></data>
+
+  <!-- Database Dynamic Values -->
+  <data name="DB_Grade_9th" xml:space="preserve"><value>כיתה ט'</value></data>
+  <data name="DB_Grade_10th" xml:space="preserve"><value>כיתה י'</value></data>
+  <data name="DB_Grade_11th" xml:space="preserve"><value>כיתה י"א</value></data>
+  <data name="DB_Grade_12th" xml:space="preserve"><value>כיתה י"ב</value></data>
+
+  <data name="DB_Subject_Math" xml:space="preserve"><value>מתמטיקה</value></data>
+  <data name="DB_Subject_Physics" xml:space="preserve"><value>פיזיקה</value></data>
+  <data name="DB_Subject_ComputerScience" xml:space="preserve"><value>מדעי המחשב</value></data>
+  <data name="DB_Subject_English" xml:space="preserve"><value>אנגלית</value></data>
+  <data name="DB_Subject_Chemistry" xml:space="preserve"><value>כימיה</value></data>
+  <data name="DB_Subject_Biology" xml:space="preserve"><value>ביולוגיה</value></data>
+
+  <data name="DB_Category_TechnicalIssue" xml:space="preserve"><value>בעיה טכנית</value></data>
+  <data name="DB_Category_BehavioralIssue" xml:space="preserve"><value>בעיית התנהגות</value></data>
+  <data name="DB_Category_GeneralHelp" xml:space="preserve"><value>עזרה כללית</value></data>
+
+</root>

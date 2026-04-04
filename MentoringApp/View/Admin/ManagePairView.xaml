@@ -6,8 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
     d:DesignHeight="600" d:DesignWidth="800"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -17,7 +19,7 @@
 
         <!-- ── TOP BAR ──────────────────────────────────────────────────── -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-            <Button Command="{Binding CreatePairCommand}" Content="+ Create New Pair" Padding="8,4"/>
+            <Button Command="{Binding CreatePairCommand}" Content="{Binding [Admin_ManagePair_Create], Source={x:Static loc:TranslationSource.Instance}}" Padding="8,4"/>
         </StackPanel>
 
         <!-- ── MAIN SPLIT ─────────────────────────────────────────────── -->
@@ -37,7 +39,7 @@
                 <!-- Search bar -->
                 <TextBox Grid.Row="0" Margin="0,0,0,8" Padding="4,3"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Tag="Search by Mentor or Mentee name"/>
+                         Tag="{Binding [Admin_ManagePair_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
 
                 <!-- Pairs ListBox -->
                 <ListBox Grid.Row="1"
@@ -69,10 +71,10 @@
             </Grid>
 
             <!-- RIGHT: Details Sidebar -->
-            <GroupBox Header="Selected Pair Details" Grid.Column="1" Padding="10">
+            <GroupBox Header="{Binding [Admin_ManagePair_DetailsHeader], Source={x:Static loc:TranslationSource.Instance}}" Grid.Column="1" Padding="10">
                 <Grid>
                     <!-- Placeholder when nothing selected -->
-                    <TextBlock Text="Select a pair from the list to view details."
+                    <TextBlock Text="{Binding [Admin_ManagePair_SelectHint], Source={x:Static loc:TranslationSource.Instance}}"
                                Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"
                                TextWrapping="Wrap" TextAlignment="Center">
                         <TextBlock.Style>
@@ -102,7 +104,7 @@
 
                         <StackPanel DataContext="{Binding SelectedPair}">
                             <!-- Mentor Card -->
-                            <TextBlock Text="Mentor" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding [Admin_ManagePair_Mentor], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,5"/>
                             <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,15">
                                 <StackPanel Orientation="Horizontal">
                                     <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
@@ -111,13 +113,25 @@
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Mentor.UserName}" FontWeight="Bold" FontSize="15"/>
                                         <TextBlock Text="{Binding Mentor.Email}" Foreground="Gray" FontSize="12"/>
-                                        <TextBlock Text="{Binding Mentor.Grade.Name, StringFormat='Grade: {0}'}" FontSize="12" Foreground="DarkGray"/>
+                                        <!-- Because string.Format string is localized ("Grade: {0}"), we use a run or mult-binding. Using a Run is cleaner. -->
+                                        <TextBlock FontSize="12" Foreground="DarkGray">
+                                            <Run Text="{Binding [Admin_ManagePair_Grade], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
+                                            <Run Text=" " />
+                                            <Run>
+                                                <Run.Text>
+                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                        <Binding Path="Mentor.Grade.Name" />
+                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                    </MultiBinding>
+                                                </Run.Text>
+                                            </Run>
+                                        </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
 
                             <!-- Mentee Card -->
-                            <TextBlock Text="Mentee" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding [Admin_ManagePair_Mentee], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,5"/>
                             <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,20">
                                 <StackPanel Orientation="Horizontal">
                                     <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
@@ -126,7 +140,18 @@
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Mentee.UserName}" FontWeight="Bold" FontSize="15"/>
                                         <TextBlock Text="{Binding Mentee.Email}" Foreground="Gray" FontSize="12"/>
-                                        <TextBlock Text="{Binding Mentee.Grade.Name, StringFormat='Grade: {0}'}" FontSize="12" Foreground="DarkGray"/>
+                                        <TextBlock FontSize="12" Foreground="DarkGray">
+                                            <Run Text="{Binding [Admin_ManagePair_Grade], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
+                                            <Run Text=" " />
+                                            <Run>
+                                                <Run.Text>
+                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                        <Binding Path="Mentee.Grade.Name" />
+                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                    </MultiBinding>
+                                                </Run.Text>
+                                            </Run>
+                                        </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -135,13 +160,13 @@
 
                             <!-- Summary Section -->
                             <StackPanel Margin="0,0,0,15">
-                                <TextBlock Text="Recent Activity" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBlock Text="{Binding [Admin_ManagePair_RecentActivity], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,5"/>
                                 <TextBlock Foreground="#555" Margin="0,0,0,2">
-                                    <Run Text="Total Reviews: "/>
+                                    <Run Text="{Binding [Admin_ManagePair_TotalReviews], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
                                     <Run Text="{Binding DataContext.SelectedPairReviewCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold"/>
                                 </TextBlock>
                                 <TextBlock Foreground="#555">
-                                    <Run Text="Active Issues: "/>
+                                    <Run Text="{Binding [Admin_ManagePair_ActiveIssues], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
                                     <Run Text="{Binding DataContext.SelectedPairActiveIssueCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold"/>
                                 </TextBlock>
                             </StackPanel>
@@ -149,11 +174,11 @@
                             <Separator Margin="0,0,0,10"/>
 
                             <!-- Actions  -->
-                            <TextBlock Text="Actions" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                            <Button Content="View Pair Details"
+                            <TextBlock Text="{Binding [Admin_ManagePair_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <Button Content="{Binding [Admin_ManagePair_ViewDetails], Source={x:Static loc:TranslationSource.Instance}}"
                                     Command="{Binding DataContext.SelectPairCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     Margin="0,0,0,10" Padding="5,8"/>
-                            <Button Content="Separate Pair"
+                            <Button Content="{Binding [Admin_ManagePair_Separate], Source={x:Static loc:TranslationSource.Instance}}"
                                     Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
                                     Padding="5,8"/>
