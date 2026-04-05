@@ -44,7 +44,7 @@ namespace MentoringApp
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            bool recreateInitialDb = false;
+            bool recreateInitialDb = true;
             base.OnStartup(e);
 
             if (recreateInitialDb)
