@@ -15,33 +15,35 @@
             <TextBox Tag="{Binding [Register_NationalId_Tag], Source={x:Static loc:TranslationSource.Instance}}"
                      Text="{Binding NationalId}" />
 
-            <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource BoolToVis}}">
-                <TextBlock
-                    Margin="0,5"
-                    Foreground="Gray"
-                    Text="{Binding [Register_SupervisorNoData], Source={x:Static loc:TranslationSource.Instance}}" />
+            <!-- Grade and Class Num (for Student only, Admin assigns classes to Supervisor later) -->
+            <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
+                <ComboBox
+                    ItemsSource="{Binding Grades}"
+                    SelectedItem="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                    Tag="{Binding [Register_Grade_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                    Margin="0,5">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                        <Binding Path="Name" />
+                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBox Tag="Class Num"
+                         Text="{Binding ClassNum}"
+                         Margin="0,5" />
             </StackPanel>
 
+            <!-- Student only roles -->
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
-
-                    <ComboBox
-                        ItemsSource="{Binding Grades}"
-                        SelectedItem="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                        Tag="{Binding [Register_Grade_Tag], Source={x:Static loc:TranslationSource.Instance}}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock>
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
-                                            <Binding Path="Name" />
-                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <CheckBox
+                <CheckBox
                     Margin="0,5"
                     Content="{Binding [Register_IsMentor_Check], Source={x:Static loc:TranslationSource.Instance}}"
                     IsChecked="{Binding IsMentor}" />

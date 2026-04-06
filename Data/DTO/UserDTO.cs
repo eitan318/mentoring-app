@@ -15,6 +15,13 @@ namespace MentoringApp.Data.DTO
         public string Name { get; set; } = string.Empty;
         public int Num { get; set; }
     }
+
+    public class SchoolClassDto
+    {
+        public int Id { get; set; }
+        public int GradeId { get; set; }
+        public int ClassNum { get; set; }
+    }
     public class UserDto
     {
         // Core Identity
@@ -30,8 +37,12 @@ namespace MentoringApp.Data.DTO
 
         // Role-Specific Data (Now including Grade details)
         public int? GradeId { get; set; }
+        public int? ClassNum { get; set; }
+
 
         public int? MentorSubjectId { get; set; }
+        public int? MaxMentees { get; set; }
+
         public int? MenteeSubjectId { get; set; }
 
         // Auth Data

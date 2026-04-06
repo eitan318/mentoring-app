@@ -66,6 +66,9 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
 
+                    <Label Margin="0,10,0,0" Content="Class Num" />
+                    <TextBox IsReadOnly="{Binding IsReadOnly}" Text="{Binding ClassNum, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+
                     <StackPanel Visibility="{Binding HasMentorProfile, Converter={StaticResource BoolToVis}}">
                         <Label Margin="0,10,0,0" Content="{Binding [Profile_SubjectToTeach_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                         <ComboBox
@@ -87,6 +90,9 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
+                        
+                        <Label Margin="0,10,0,0" Content="Max Mentees" />
+                        <TextBox IsReadOnly="{Binding IsReadOnly}" Text="{Binding MaxMentees, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                     </StackPanel>
 
                     <StackPanel Visibility="{Binding HasMenteeProfile, Converter={StaticResource BoolToVis}}">

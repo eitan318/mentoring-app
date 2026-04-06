@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MentoringApp.Model;
 using MentoringApp.Model.User;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
@@ -14,6 +15,18 @@ using System.Windows;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Admin
 {
+    /// <summary>A checkable wrapper around a SchoolClass for the supervisor assignment UI.</summary>
+    public class SelectableSchoolClass : ObservableObject
+    {
+        private bool _isSelected;
+        public SchoolClass Class { get; }
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
+        }
+        public SelectableSchoolClass(SchoolClass c, bool selected = false) { Class = c; IsSelected = selected; }
+    }
     public partial class ManageUsersViewModel : ObservableObject, INavigatable
     {
         private readonly IFileService _fileService;
@@ -22,6 +35,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         private readonly UserService _userService;
         private readonly PairService _pairService;
         private readonly ExcelImportService _excelImportService;
+        private readonly GradeService _gradeService;
+        private readonly SchoolClassService _schoolClassService;
 
         // ── Navigation commands ─────────────────────────────────────────────
         [RelayCommand] private async Task RegisterStudent()
@@ -36,6 +51,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(DeleteUserCommand))]
         [NotifyCanExecuteChangedFor(nameof(ViewUserCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SaveSupervisorClassCommand))]
         private UserModel? _selectedUser;
 
         private bool HasSelectedUser => SelectedUser != null;
@@ -50,6 +66,52 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 
         // True when the student-specific panel should be visible
         public bool IsStudentFilterVisible => SelectedRole == "Student";
+
+        // ── Edit Supervisor — Checkable class list ──────────────────────────
+        /// <summary>All system-defined school classes with selection state for the current supervisor.</summary>
+        public ObservableCollection<SelectableSchoolClass> SelectableClasses { get; set; } = [];
+        public ObservableCollection<Grade> AllGrades { get; set; } = [];
+
+        [RelayCommand(CanExecute = nameof(HasSelectedUser))]
+        private async Task SaveSupervisorClass()
+        {
+            if (SelectedUser is not SupervisorModel supervisor) return;
+            var selected = SelectableClasses.Where(c => c.IsSelected).Select(c => c.Class.Id).ToList();
+            var res = await _schoolClassService.SetSupervisorClassesAsync(supervisor.Id, selected);
+            if (res.Success)
+            {
+                // Refresh in-memory model
+                var refreshed = await _userService.GetUserByIdAsync(supervisor.Id);
+                if (refreshed.Success && refreshed.Data is SupervisorModel updated)
+                {
+                    var idx = AllUsers.IndexOf(SelectedUser);
+                    if (idx >= 0) AllUsers[idx] = updated;
+                    SelectedUser = updated;
+                }
+                OnPropertyChanged(nameof(FilteredUsers));
+                MessageBox.Show("Supervisor classes saved.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show($"Failed: {res.ErrorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        partial void OnSelectedUserChanged(UserModel? value)
+        {
+            SelectableClasses.Clear();
+            if (value is SupervisorModel supervisor)
+            {
+                var assignedIds = supervisor.AssignedClasses.Select(c => c.Id).ToHashSet();
+                // Populate from the full list loaded in OnNavigatedToAsync
+                foreach (var sc in _allSchoolClasses)
+                {
+                    SelectableClasses.Add(new SelectableSchoolClass(sc, assignedIds.Contains(sc.Id)));
+                }
+            }
+        }
+
+        private List<SchoolClass> _allSchoolClasses = new();
 
         // ── Filter Bar — Row 2 (Student-specific) ───────────────────────────
         [ObservableProperty] private bool _filterIsMentor;
@@ -142,7 +204,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             INavigationService navigationService,
             UserService userService,
             PairService pairService,
-            ExcelImportService excelImportService)
+            ExcelImportService excelImportService,
+            GradeService gradeService,
+            SchoolClassService schoolClassService)
         {
             _fileService        = fileService;
             _windowService      = windowService;
@@ -150,10 +214,16 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             _userService        = userService;
             _pairService        = pairService;
             _excelImportService = excelImportService;
+            _gradeService       = gradeService;
+            _schoolClassService = schoolClassService;
         }
 
         public async Task OnNavigatedToAsync()
         {
+            // Load school classes first
+            var classRes = await _schoolClassService.GetAllAsync();
+            _allSchoolClasses = classRes.Success && classRes.Data != null ? classRes.Data.ToList() : new();
+
             // Load users
             var users = await _userService.GetAllUsersAsync();
             AllUsers = new(users);
@@ -174,6 +244,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
                                  .OrderBy(g => g.Num)
                                  .Select(g => g.Num.ToString())
                                  .ToList();
+
+            var gradeRes = await _gradeService.GetAllGradesAsync();
+            if (gradeRes.Success && gradeRes.Data != null)
+            {
+                AllGrades.Clear();
+                foreach (var g in gradeRes.Data) AllGrades.Add(g);
+            }
 
             AvailableGrades.Clear();
             foreach (var g in grades)

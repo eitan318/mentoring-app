@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Model.User;
@@ -33,6 +33,9 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
 
         [ObservableProperty]
         private int _subjectToLearn = -1;
+
+        [ObservableProperty]
+        private int _classNum = 1;
 
 
         public RegistrationViewModel(AuthService authService, INavigationService navigationService, SubjectService subjectService, GradeService gradeService)
@@ -88,10 +91,11 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         {
             if (SupervisorOrStudentIsSupervisor)
             {
-                return new SupervisorModel { UserName = UserName, Email = Email, NationalId = NationalId };
+                var supervisor = new SupervisorModel { UserName = UserName, Email = Email, NationalId = NationalId };
+                return supervisor;
             }
 
-            var student = new StudentModel { UserName = UserName, Email = Email, NationalId = NationalId, Grade = SelectedGrade };
+            var student = new StudentModel { UserName = UserName, Email = Email, NationalId = NationalId, Grade = SelectedGrade!, ClassNum = ClassNum };
             if (IsMentee) student.MenteeProfile = new MenteeProfile { SubjectToLearn = SubjectToLearn };
             if (IsMentor) student.MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach };
 

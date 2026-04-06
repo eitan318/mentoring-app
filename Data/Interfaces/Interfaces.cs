@@ -22,7 +22,8 @@ namespace MentoringApp.Data.Interfaces
 
         Task<bool> UpdateBaseInfoAsync(int id, string name, string email, string nationalId);
 
-        Task UpdateStudentGradeAsync(int userId, int gradeId);
+        Task UpdateStudentGradeAndClassAsync(int userId, int gradeId, int classNum);
+        Task UpdateSupervisorClassesAsync(int supervisorId, IEnumerable<int> schoolClassIds);
 
         Task UpsertMentorProfileAsync(int userId, int subjectId);
 
@@ -127,6 +128,14 @@ namespace MentoringApp.Data.Interfaces
         Task<IEnumerable<MatchScoreDto>> GetAllAsync();
         Task ClearAllAsync();
     }
+    // ── School Class repo ─────────────────────────────────────────────────
+    public interface ISchoolClassRepo
+    {
+        Task<IEnumerable<SchoolClassDto>> GetAllAsync();
+        Task<IEnumerable<SchoolClassDto>> GetBySupervisorAsync(int supervisorId);
+        Task<bool> AddAsync(int gradeId, int classNum);
+        Task<bool> DeleteAsync(int schoolClassId);
+        /// <summary>Replaces all class assignments for a supervisor atomically.</summary>
+        Task SetSupervisorClassesAsync(int supervisorId, IEnumerable<int> schoolClassIds);
+    }
 }
-
-

@@ -78,11 +78,11 @@ namespace MentoringApp.Data.Acess.SQLite
         /* 2. Get the generated ID and use it for role tables */
         /* We use the WHERE clause as an 'if' statement inside SQL */
 
-        INSERT INTO UserStudents (UserId, GradeId)
-        SELECT last_insert_rowid(), @GradeId WHERE @IsStudent = 1;
+        INSERT INTO UserStudents (UserId, GradeId, ClassNum)
+        SELECT last_insert_rowid(), @GradeId, @StudentClassNum WHERE @IsStudent = 1;
 
-        INSERT INTO UserMentors (UserId, SubjectToTeach)
-        SELECT last_insert_rowid(), @MentorSubId WHERE @IsMentor = 1;
+        INSERT INTO UserMentors (UserId, SubjectToTeach, MaxMentees)
+        SELECT last_insert_rowid(), @MentorSubId, @MaxMentees WHERE @IsMentor = 1;
 
         INSERT INTO UserMentees (UserId, SubjectToLearn)
         SELECT last_insert_rowid(), @MenteeSubId WHERE @IsMentee = 1;
@@ -114,8 +114,12 @@ namespace MentoringApp.Data.Acess.SQLite
                 IsSupervisor = isSupervisor ? 1 : 0,
                 IsAdmin = isAdmin ? 1 : 0,
                 GradeId = (user as StudentModel)?.Grade.Id ?? 0,
+                StudentClassNum = (user as StudentModel)?.ClassNum ?? 0,
                 MentorSubId = (user as StudentModel)?.MentorProfile?.SubjectToTeach ?? 0,
+                MaxMentees = (user as StudentModel)?.MentorProfile?.MaxMentees ?? 1,
                 MenteeSubId = (user as StudentModel)?.MenteeProfile?.SubjectToLearn ?? 0,
+                SupGradeId = 0,
+                SupClassNum = 0,
                 HasCode = user.CurrentVerificationCode != null ? 1 : 0,
                 Code = user.CurrentVerificationCode?.Code,
                 Date = user.CurrentVerificationCode?.CreationDate.ToString("o")
@@ -188,6 +192,7 @@ namespace MentoringApp.Data.Acess.SQLite
             var studentData = await _db.QuerySingleAsync<StudentRow>("SELECT * FROM UserStudents WHERE UserId = @Id", new { Id = userId });
             var mentorData = await _db.QuerySingleAsync<MentorRow>("SELECT * FROM UserMentors WHERE UserId = @Id", new { Id = userId });
             var menteeData = await _db.QuerySingleAsync<MenteeRow>("SELECT * FROM UserMentees WHERE UserId = @Id", new { Id = userId });
+            var supervisorData = await _db.QuerySingleAsync<SupervisorRow>("SELECT * FROM UserSupervisors WHERE UserId = @Id", new { Id = userId });
             var codeData = await _db.QuerySingleAsync<CodeRow>("SELECT * FROM VerificationCodes WHERE UserId = @Id", new { Id = userId });
 
             UserRoleType roleType = await DetermineRoleAsync(userId);
@@ -201,8 +206,10 @@ namespace MentoringApp.Data.Acess.SQLite
                 ProfilePicturePath = userRow.ProfilePicturePath,
                 Language = userRow.Language ?? "en",
                 Role = roleType,
-                GradeId = studentData?.GradeId,
+                GradeId = roleType == UserRoleType.Supervisor ? null : studentData?.GradeId,
+                ClassNum = roleType == UserRoleType.Supervisor ? null : studentData?.ClassNum,
                 MentorSubjectId = mentorData?.SubjectToTeach,
+                MaxMentees = mentorData?.MaxMentees,
                 MenteeSubjectId = menteeData?.SubjectToLearn,
                 VerificationCode = codeData?.Code,
                 VerificationCodeCreated = codeData != null ? DateTime.Parse(codeData.CreationDate) : null
@@ -216,6 +223,7 @@ namespace MentoringApp.Data.Acess.SQLite
             var students = (await _db.QueryAsync<StudentRow>("SELECT * FROM UserStudents")).ToDictionary(s => s.UserId);
             var mentors = (await _db.QueryAsync<MentorRow>("SELECT * FROM UserMentors")).ToDictionary(m => m.UserId);
             var mentees = (await _db.QueryAsync<MenteeRow>("SELECT * FROM UserMentees")).ToDictionary(m => m.UserId);
+            var supervisors = (await _db.QueryAsync<SupervisorRow>("SELECT * FROM UserSupervisors")).ToDictionary(s => s.UserId);
 
             var tasks = users.Select(async u =>
             {
@@ -227,8 +235,14 @@ namespace MentoringApp.Data.Acess.SQLite
                     NationalId = u.NationalId,
                     ProfilePicturePath = u.ProfilePicturePath,
                     Role = await DetermineRoleAsync(u.Id),
-                    GradeId = students.TryGetValue(u.Id, out var s) ? s.GradeId : null,
+                    GradeId = supervisors.TryGetValue(u.Id, out var _) && await DetermineRoleAsync(u.Id) == UserRoleType.Supervisor
+                                ? null
+                                : (students.TryGetValue(u.Id, out var s) ? s.GradeId : null),
+                    ClassNum = supervisors.TryGetValue(u.Id, out var __) && await DetermineRoleAsync(u.Id) == UserRoleType.Supervisor
+                                ? null
+                                : (students.TryGetValue(u.Id, out var sClass) ? sClass.ClassNum : null),
                     MentorSubjectId = mentors.TryGetValue(u.Id, out var m) ? m.SubjectToTeach : null,
+                    MaxMentees = mentors.TryGetValue(u.Id, out var mMax) ? mMax.MaxMentees : null,
                     MenteeSubjectId = mentees.TryGetValue(u.Id, out var me) ? me.SubjectToLearn : null
                 };
             });
@@ -267,10 +281,21 @@ namespace MentoringApp.Data.Acess.SQLite
             return await _db.ExecuteAsync(sql, new { id, name, email, nationalId }) > 0;
         }
 
-        public async Task UpdateStudentGradeAsync(int userId, int gradeId)
+        public async Task UpdateStudentGradeAndClassAsync(int userId, int gradeId, int classNum)
         {
-            const string sql = "UPDATE UserStudents SET GradeId = @gradeId WHERE UserId = @userId";
-            await _db.ExecuteAsync(sql, new { userId, gradeId });
+            const string sql = "UPDATE UserStudents SET GradeId = @gradeId, ClassNum = @classNum WHERE UserId = @userId";
+            await _db.ExecuteAsync(sql, new { userId, gradeId, classNum });
+        }
+
+        public async Task UpdateSupervisorClassesAsync(int supervisorId, IEnumerable<int> schoolClassIds)
+        {
+            const string deleteSQL = "DELETE FROM SupervisorClasses WHERE SupervisorId = @supervisorId";
+            await _db.ExecuteAsync(deleteSQL, new { supervisorId });
+            foreach (var id in schoolClassIds)
+            {
+                const string insertSQL = "INSERT OR IGNORE INTO SupervisorClasses (SupervisorId, SchoolClassId) VALUES (@supervisorId, @schoolClassId)";
+                await _db.ExecuteAsync(insertSQL, new { supervisorId, schoolClassId = id });
+            }
         }
 
 
@@ -290,12 +315,21 @@ namespace MentoringApp.Data.Acess.SQLite
         {
             public int UserId { get; set; }
             public int GradeId { get; set; }
+            public int ClassNum { get; set; }
         }
 
         private class MentorRow
         {
             public int UserId { get; set; }
             public int SubjectToTeach { get; set; }
+            public int MaxMentees { get; set; }
+        }
+
+        private class SupervisorRow
+        {
+            public int UserId { get; set; }
+            public int GradeId { get; set; }
+            public int ClassNum { get; set; }
         }
 
         private class MenteeRow

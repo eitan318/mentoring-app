@@ -20,16 +20,16 @@ namespace MentoringApp
         private readonly IReviewRepo _reviewRepo;
         private readonly IVerificationCodeRepo _verificationCodeRepo;
         private readonly ISQLiteConnectionService _db;
+        private readonly SettingsService _settingsService;
         private readonly Random _rand;
 
-        // Base64 1x1 pixels for profile pics
         private readonly Dictionary<string, string> _placeholderImages = new()
         {
-            { "red.png", "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" },
-            { "green.png", "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGCA2TzHgAAAABJRU5ErkJggg==" },
-            { "blue.png", "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" },
+            { "red.png",    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" },
+            { "green.png",  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGCA2TzHgAAAABJRU5ErkJggg==" },
+            { "blue.png",   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" },
             { "yellow.png", "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchxAQAAAABJRU5ErkJggg==" },
-            { "gray.png", "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkaPkPAAILAYzofg2wAAAAAElFTkSuQmCC" }
+            { "gray.png",   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkaPkPAAILAYzofg2wAAAAAElFTkSuQmCC" }
         };
 
         private readonly string[] _firstNames = { "James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Daniel", "Lisa", "Matthew", "Betty", "Anthony", "Margaret" };
@@ -43,7 +43,8 @@ namespace MentoringApp
             IIssueRepo issueRepo,
             IReviewRepo reviewRepo,
             IVerificationCodeRepo verificationCodeRepo,
-            ISQLiteConnectionService db)
+            ISQLiteConnectionService db,
+            SettingsService settingsService)
         {
             _userService = userService;
             _pairRepo = pairRepo;
@@ -51,12 +52,13 @@ namespace MentoringApp
             _reviewRepo = reviewRepo;
             _verificationCodeRepo = verificationCodeRepo;
             _db = db;
+            _settingsService = settingsService;
             _rand = new Random((int)DateTime.Now.Ticks);
         }
 
         public async Task SeedAsync()
         {
-            // ── Step 1: Lookup tables ───────────
+            // ── Step 1: Lookup tables ─────────────────────────────────────────
             _db.Execute("INSERT INTO Grades (Name, Num) VALUES ('9th', 9), ('10th', 10), ('11th', 11), ('12th', 12)");
             _db.Execute("INSERT INTO Subjects (Name) VALUES ('Math'), ('Physics'), ('Computer Science'), ('English'), ('Chemistry'), ('Biology')");
             _db.Execute("INSERT INTO IssueCategories (Name) VALUES ('Technical Issue'), ('Behavioral Issue'), ('General Help')");
@@ -67,16 +69,33 @@ namespace MentoringApp
 
             string[] profilePics = SetupProfilePictures();
 
-            // ── Step 2: Users ────────────────────
+            // ── Step 2: Settings ──────────────────────────────────────────────
+            Console.WriteLine("Seeding Settings...");
+            await _settingsService.SetMeetingHoursBarrierAsync(10);
+            await _settingsService.SetGlobalLanguageAsync("en");
+            // Deadlines left empty (no deadline scheduled by default)
+            await _settingsService.ClearPhase1DeadlineAsync();
+            await _settingsService.ClearPhase2DeadlineAsync();
+            await _settingsService.SetIsPhase1CompleteAsync(false);
+            await _settingsService.SetIsProcessCompleteAsync(false);
+
+            // ── Step 3: Users ─────────────────────────────────────────────────
             Console.WriteLine("Generating Users...");
-            
+
             var admin = new AdminModel { Email = "eitanamir09@gmail.com", NationalId = "100", UserName = "Admin User" };
             await _userService.CreateUserAsync(admin);
 
             List<SupervisorModel> supervisors = new();
             for (int i = 1; i <= 3; i++)
             {
-                var s = new SupervisorModel { Email = $"supervisor{i}@mentoringapp.com", NationalId = $"200{i}", UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}" };
+                var s = new SupervisorModel
+                {
+                    Email = $"supervisor{i}@mentoringapp.com",
+                    NationalId = $"200{i}",
+                    UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
+                    Grade = new Grade { Id = Pick(gradeIds), Name = "", Num = 0 },
+                    ClassNum = _rand.Next(1, 4)
+                };
                 await _userService.CreateUserAsync(s);
                 supervisors.Add(s);
             }
@@ -89,8 +108,9 @@ namespace MentoringApp
                     Email = $"mentor{i}@mentoringapp.com",
                     NationalId = $"3000{i}",
                     UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
-                    Grade = new Grade { Id = Pick(gradeIds), Name = "", Num = 0 }, // repo only uses Id
-                    MentorProfile = new MentorProfile { SubjectToTeach = Pick(subjectIds) },
+                    Grade = new Grade { Id = Pick(gradeIds), Name = "", Num = 0 },
+                    ClassNum = _rand.Next(1, 4),
+                    MentorProfile = new MentorProfile { SubjectToTeach = Pick(subjectIds), MaxMentees = _rand.Next(1, 4) },
                     ProfilePicturePath = EnableProfilePic() ? Pick(profilePics) : null
                 };
                 await _userService.CreateUserAsync(mentor);
@@ -106,6 +126,7 @@ namespace MentoringApp
                     NationalId = $"4000{i}",
                     UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
                     Grade = new Grade { Id = Pick(gradeIds), Name = "", Num = 0 },
+                    ClassNum = _rand.Next(1, 4),
                     MenteeProfile = new MenteeProfile { SubjectToLearn = Pick(subjectIds) },
                     ProfilePicturePath = EnableProfilePic() ? Pick(profilePics) : null
                 };
@@ -113,14 +134,15 @@ namespace MentoringApp
                 mentees.Add(mentee);
             }
 
-            // Dual Role
+            // Dual role student
             var dualStudent = new StudentModel
             {
                 Email = "dual.test@mentoringapp.com",
                 NationalId = "50001",
                 UserName = "Dual Role Test",
                 Grade = new Grade { Id = Pick(gradeIds), Name = "", Num = 0 },
-                MentorProfile = new MentorProfile { SubjectToTeach = Pick(subjectIds) },
+                ClassNum = _rand.Next(1, 4),
+                MentorProfile = new MentorProfile { SubjectToTeach = Pick(subjectIds), MaxMentees = 2 },
                 MenteeProfile = new MenteeProfile { SubjectToLearn = Pick(subjectIds) },
                 ProfilePicturePath = Pick(profilePics),
                 CurrentVerificationCode = new VerificationCode("VERIFY-DUAL-2024")
@@ -129,57 +151,43 @@ namespace MentoringApp
             mentors.Add(dualStudent);
             mentees.Add(dualStudent);
 
-
-            // ── Step 3: Pairs ────────────────────
+            // ── Step 4: Pairs ─────────────────────────────────────────────────
             Console.WriteLine("Generating Pairs...");
             List<int> pairIds = new();
-            
-            // Generate ~50 pairs
+
             for (int i = 0; i < 5; i++)
             {
                 var sup = Pick(supervisors);
                 var men = Pick(mentors);
                 var mte = Pick(mentees);
 
-                // crude uniqueness logic check (avoids self-pairing if dual student picked)
                 if (men.Id == mte.Id) continue;
-                
+
                 await _pairRepo.CreateAsync(sup.Id, men.Id, mte.Id);
                 int pid = GetId($"SELECT Id FROM Pairs WHERE MentorId = {men.Id} AND MenteeId = {mte.Id} ORDER BY Id DESC LIMIT 1");
                 pairIds.Add(pid);
             }
 
-            // ── Step 4 & 5: Reviews and Issues ──────────────────
+            // ── Step 5: Reviews and Issues ────────────────────────────────────
             Console.WriteLine("Generating Reviews and Issues per Pair...");
             foreach (var pid in pairIds)
             {
-                // Assign variables
                 int mentorId = GetId($"SELECT MentorId AS Id FROM Pairs WHERE Id = {pid}");
                 int menteeId = GetId($"SELECT MenteeId AS Id FROM Pairs WHERE Id = {pid}");
 
-                // Reviews (meeting feedbacks / recent reviews)
-                int reviewCount = _rand.Next(2, 6); // 2 to 5 reviews per pair
+                int reviewCount = _rand.Next(2, 6);
                 for (int i = 0; i < reviewCount; i++)
                 {
                     int writerId = _rand.NextDouble() > 0.5 ? mentorId : menteeId;
-                    DateTime reviewDate = DateTime.UtcNow.AddDays(-_rand.Next(1, 180));
-                    double hours = Math.Round(0.5 + _rand.NextDouble() * 2, 1); // 0.5 – 2.5 hrs
-                    await _reviewRepo.CreateAsync(Pick(_reviewTexts), reviewDate, pid, writerId, hours);
+                    DateTime date = DateTime.UtcNow.AddDays(-_rand.Next(1, 180));
+                    double hours = Math.Round(0.5 + _rand.NextDouble() * 2, 1);
+                    await _reviewRepo.CreateAsync(Pick(_reviewTexts), date, pid, writerId, hours);
                 }
 
-                // Issues (each pair guarantees having unresolved and resolved issues)
-                int issueCat1 = Pick(categoryIds);
-                int issueCat2 = Pick(categoryIds);
-                int issueCat3 = Pick(categoryIds);
+                await _issueRepo.CreateAsync(Pick(_issueTexts), Pick(categoryIds), mentorId);
+                await _issueRepo.CreateAsync(Pick(_issueTexts), Pick(categoryIds), menteeId);
+                await _issueRepo.CreateAsync(Pick(_issueTexts), Pick(categoryIds), mentorId);
 
-                // Mentor reports a pending issue
-                await _issueRepo.CreateAsync(Pick(_issueTexts), issueCat1, mentorId);
-
-                // Mentee reports a pending issue
-                await _issueRepo.CreateAsync(Pick(_issueTexts), issueCat2, menteeId);
-
-                // Mentor reports an issue that gets resolved
-                await _issueRepo.CreateAsync(Pick(_issueTexts), issueCat3, mentorId);
                 int resolvedIssueId = GetId($"SELECT Id FROM Issues WHERE ReportedByUserId = {mentorId} ORDER BY Id DESC LIMIT 1");
                 await _issueRepo.ResolveAsync(resolvedIssueId);
             }
@@ -212,7 +220,7 @@ namespace MentoringApp
         }
 
         private T Pick<T>(IList<T> list) => list[_rand.Next(list.Count)];
-        private bool EnableProfilePic() => _rand.NextDouble() > 0.3; // 70% chance of having a pic
+        private bool EnableProfilePic() => _rand.NextDouble() > 0.3;
 
         private class IdRow { public int Id { get; set; } }
     }

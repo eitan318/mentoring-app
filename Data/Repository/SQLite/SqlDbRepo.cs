@@ -14,7 +14,6 @@ namespace MentoringApp.Data.Acess.SQLite
 
         public void Recreate()
         {
-            // Drop all tables and recreate schema using raw SQL
             using var conn = new SqliteConnection(_connectionString);
             conn.Open();
 
@@ -29,12 +28,15 @@ namespace MentoringApp.Data.Acess.SQLite
                 DROP TABLE IF EXISTS VerificationCodes;
                 DROP TABLE IF EXISTS UserMentors;
                 DROP TABLE IF EXISTS UserMentees;
+                DROP TABLE IF EXISTS SupervisorClasses;
                 DROP TABLE IF EXISTS UserSupervisors;
                 DROP TABLE IF EXISTS UserAdmins;
                 DROP TABLE IF EXISTS UserStudents;
+                DROP TABLE IF EXISTS SchoolClasses;
                 DROP TABLE IF EXISTS Grades;
                 DROP TABLE IF EXISTS Subjects;
                 DROP TABLE IF EXISTS Users;
+                DROP TABLE IF EXISTS Settings;
                 PRAGMA foreign_keys = ON;
 
                 CREATE TABLE Users (
@@ -60,12 +62,14 @@ namespace MentoringApp.Data.Acess.SQLite
                 CREATE TABLE UserStudents (
                     UserId INTEGER PRIMARY KEY,
                     GradeId INTEGER NOT NULL,
+                    ClassNum INTEGER NOT NULL DEFAULT 0,
                     FOREIGN KEY (UserId) REFERENCES Users(Id)
                 );
 
                 CREATE TABLE UserMentors (
                     UserId INTEGER PRIMARY KEY,
                     SubjectToTeach INTEGER NOT NULL,
+                    MaxMentees INTEGER NOT NULL DEFAULT 1,
                     FOREIGN KEY (UserId) REFERENCES Users(Id)
                 );
 
@@ -78,6 +82,22 @@ namespace MentoringApp.Data.Acess.SQLite
                 CREATE TABLE UserSupervisors (
                     UserId INTEGER PRIMARY KEY,
                     FOREIGN KEY (UserId) REFERENCES Users(Id)
+                );
+
+                CREATE TABLE SchoolClasses (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    GradeId INTEGER NOT NULL,
+                    ClassNum INTEGER NOT NULL,
+                    UNIQUE (GradeId, ClassNum),
+                    FOREIGN KEY (GradeId) REFERENCES Grades(Id)
+                );
+
+                CREATE TABLE SupervisorClasses (
+                    SupervisorId INTEGER NOT NULL,
+                    SchoolClassId INTEGER NOT NULL,
+                    PRIMARY KEY (SupervisorId, SchoolClassId),
+                    FOREIGN KEY (SupervisorId) REFERENCES Users(Id) ON DELETE CASCADE,
+                    FOREIGN KEY (SchoolClassId) REFERENCES SchoolClasses(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE UserAdmins (
@@ -152,17 +172,17 @@ namespace MentoringApp.Data.Acess.SQLite
                     FOREIGN KEY (MentorId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
-                CREATE TABLE IF NOT EXISTS Settings (
+                CREATE TABLE Settings (
                     Key TEXT PRIMARY KEY,
                     Value TEXT NOT NULL
                 );
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('MeetingHoursBarrier', '10');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Tier1Deadline', '');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Tier3Deadline', '');
             ";
 
             using var cmd = new SqliteCommand(dropSql, conn);
             cmd.ExecuteNonQuery();
+
         }
+
+        
     }
 }

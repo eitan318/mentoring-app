@@ -1,0 +1,118 @@
+<UserControl
+    x:Class="MentoringApp.View.Admin.SystemSettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
+    xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="⚙ System Settings" FontSize="24" FontWeight="Bold"/>
+            <TextBlock Text="Define the participating grades and class numbers for this academic year." 
+                       Foreground="Gray" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: Add new class -->
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Add Participating Class" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                <Border BorderBrush="#DDD" BorderThickness="1" Padding="16" CornerRadius="6" Background="#FAFAFA">
+                    <StackPanel>
+                        <TextBlock Text="Grade" FontWeight="Bold" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding AvailableGrades}"
+                                  SelectedItem="{Binding SelectedGrade}"
+                                  Margin="0,0,0,12">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                <Binding Path="Name"/>
+                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Text="Class Number" FontWeight="Bold" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding ClassNumInput, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,0,12"
+                                 Tag="e.g. 1, 2, 3 …"/>
+
+                        <Button Content="➕ Add Class"
+                                Command="{Binding AddClassCommand}"
+                                Padding="12,8" HorizontalAlignment="Left"
+                                Background="#1976D2" Foreground="White" BorderThickness="0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- RIGHT: Current classes list -->
+            <StackPanel Grid.Column="2">
+                <DockPanel Margin="0,0,0,12">
+                    <TextBlock Text="Participating Classes" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button DockPanel.Dock="Right" Content="🗑 Remove Selected"
+                            Command="{Binding DeleteClassCommand}"
+                            HorizontalAlignment="Right"
+                            Padding="8,4" Background="#D32F2F" Foreground="White" BorderThickness="0">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </DockPanel>
+
+                <ListBox ItemsSource="{Binding AllClasses}"
+                         SelectedItem="{Binding SelectedClass}"
+                         BorderBrush="#DDD" BorderThickness="1"
+                         MinHeight="200" MaxHeight="400">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type model:SchoolClass}">
+                            <StackPanel Orientation="Horizontal" Margin="4">
+                                <TextBlock FontWeight="SemiBold" Margin="0,0,8,0">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                            <Binding Path="Grade.Name"/>
+                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <TextBlock Text="– Class " Foreground="Gray"/>
+                                <TextBlock Text="{Binding ClassNum}" FontWeight="Bold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <TextBlock Margin="0,8,0,0" Foreground="#AAA" FontSize="11"
+                           Text="Tip: These classes are available for supervisor assignment in 'Manage Users'."/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
