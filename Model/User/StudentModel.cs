@@ -1,4 +1,4 @@
-﻿using MentoringApp.Model.User.StudentProfiles;
+using MentoringApp.Model.User.StudentProfiles;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -11,6 +11,7 @@ namespace MentoringApp.Model.User
     public class StudentModel : UserModel
     {
         public required Grade Grade { get; set; }
+        public int ClassNum { get; set; }
         public MentorProfile? MentorProfile { get; set; }
         public MenteeProfile? MenteeProfile { get; set; }
 

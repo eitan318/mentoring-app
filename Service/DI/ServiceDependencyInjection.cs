@@ -18,7 +18,10 @@ namespace MentoringApp.Service.DI
             services.AddScoped<GradeService>();
             services.AddScoped<ExcelImportService>();
             services.AddScoped<SettingsService>();
+            services.AddScoped<SchoolClassService>();
             services.AddScoped<MatchingFlowService>();
+            services.AddScoped<CompatibilityScorer>();
+            services.AddScoped<SupervisorAssignmentService>();
 
             // Validator
             services.AddSingleton<UserValidator>();

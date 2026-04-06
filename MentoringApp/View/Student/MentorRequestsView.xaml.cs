@@ -14,5 +14,5 @@ namespace MentoringApp.View.Student
                     await vm.LoadAsync();
             };
         }
-    }
+    } 
 }

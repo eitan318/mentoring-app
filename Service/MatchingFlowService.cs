@@ -2,7 +2,6 @@ using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 using MentoringApp.Model.User;
-using MentoringApp.Model.User.StudentProfiles;
 
 namespace MentoringApp.Service
 {
@@ -19,6 +18,8 @@ namespace MentoringApp.Service
         private readonly IGradeRepo _gradeRepo;
         private readonly ISubjectRepo _subjectRepo;
         private readonly UserService _userService;
+        private readonly CompatibilityScorer _scorer;
+        private readonly SupervisorAssignmentService _supervisorAssignment;
 
         public MatchingFlowService(
             IPairRepo pairRepo,
@@ -27,7 +28,9 @@ namespace MentoringApp.Service
             IUserRepo userRepo,
             IGradeRepo gradeRepo,
             ISubjectRepo subjectRepo,
-            UserService userService)
+            UserService userService,
+            CompatibilityScorer scorer,
+            SupervisorAssignmentService supervisorAssignment)
         {
             _pairRepo = pairRepo;
             _pairRequestRepo = pairRequestRepo;
@@ -36,24 +39,29 @@ namespace MentoringApp.Service
             _gradeRepo = gradeRepo;
             _subjectRepo = subjectRepo;
             _userService = userService;
+            _scorer = scorer;
+            _supervisorAssignment = supervisorAssignment;
         }
 
         // ════════════════════════════════════════════════════════════════════
         // TIER 1 – Direct Request Window
         // ════════════════════════════════════════════════════════════════════
 
-        /// <summary>Returns active (unmatched) mentors visible to a mentee during Tier 1.</summary>
         public async Task<IEnumerable<StudentModel>> GetAvailableMentorsAsync()
         {
             var allUsers = await _userService.GetAllUsersAsync();
-            var matchedMentorIds = (await _pairRepo.GetMatchedMentorIdsAsync()).ToHashSet();
+            var allPairs = await _pairRepo.GetAllAsync();
+
+            var mentorPairCounts = allPairs
+                .GroupBy(p => p.MentorId)
+                .ToDictionary(g => g.Key, g => g.Count());
 
             return allUsers
                 .OfType<StudentModel>()
-                .Where(s => s.IsMentor && !matchedMentorIds.Contains(s.Id));
+                .Where(s => s.IsMentor &&
+                       mentorPairCounts.GetValueOrDefault(s.Id, 0) < (s.MentorProfile?.MaxMentees ?? 1));
         }
 
-        /// <summary>Returns active (unmatched) mentees – visible to admin and for algorithmic tiers.</summary>
         public async Task<IEnumerable<StudentModel>> GetAvailableMenteesAsync()
         {
             var allUsers = await _userService.GetAllUsersAsync();
@@ -64,19 +72,18 @@ namespace MentoringApp.Service
                 .Where(s => s.IsMentee && !matchedMenteeIds.Contains(s.Id));
         }
 
-        /// <summary>
-        /// A mentee sends a Tier 1 request to a mentor.
-        /// Returns failure if the mentee is already matched, the mentor is already matched,
-        /// or a pending request already exists.
-        /// </summary>
         public async Task<Result> SendPairRequestAsync(int menteeId, int mentorId)
         {
             var matchedMentees = await _pairRepo.GetMatchedMenteeIdsAsync();
             if (matchedMentees.Contains(menteeId))
                 return Result.Failure("You are already matched with a mentor.");
 
-            var matchedMentors = await _pairRepo.GetMatchedMentorIdsAsync();
-            if (matchedMentors.Contains(mentorId))
+            var allPairs = await _pairRepo.GetAllAsync();
+            var currentMentees = allPairs.Count(p => p.MentorId == mentorId);
+            var mentorUser = await _userService.GetUserByIdAsync(mentorId);
+            var maxMentees = (mentorUser.Data as StudentModel)?.MentorProfile?.MaxMentees ?? 1;
+
+            if (currentMentees >= maxMentees)
                 return Result.Failure("That mentor is no longer available.");
 
             bool exists = await _pairRequestRepo.ExistsAsync(menteeId, mentorId);
@@ -87,53 +94,55 @@ namespace MentoringApp.Service
             return created ? Result.Ok() : Result.Failure("Failed to create request.");
         }
 
-        /// <summary>
-        /// A mentor accepts a pending pair request.
-        /// The supervisor ID is taken from an available supervisor (first one found for simplicity;
-        /// real logic may assign a specific supervisor).
-        /// </summary>
         public async Task<Result> AcceptPairRequestAsync(int requestId, int supervisorId)
         {
-            var requests = await _pairRequestRepo.GetByMentorAsync(-1); // workaround – fetch by id below
-            // We look up the request via mentor-side list; use a broad fetch
+            // TODO: replace loop with _pairRequestRepo.GetByIdAsync(requestId)
+            //       once that method is added to IPairRequestRepo.
             var allUsers = await _userService.GetAllUsersAsync();
+            var mentorIds = allUsers.OfType<StudentModel>().Where(s => s.IsMentor).Select(s => s.Id);
 
-            // Find the request in all pending requests for this supervisor's mentors
-            // Since we don't have GetByIdAsync on requests, find via mentor pool
-            var mentors = allUsers.OfType<StudentModel>().Where(s => s.IsMentor).Select(s => s.Id);
             PairRequestDto? req = null;
-            foreach (var mId in mentors)
+            foreach (var mentorId in mentorIds)
             {
-                var mReqs = await _pairRequestRepo.GetByMentorAsync(mId);
-                req = mReqs.FirstOrDefault(r => r.Id == requestId);
+                var reqs = await _pairRequestRepo.GetByMentorAsync(mentorId);
+                req = reqs.FirstOrDefault(r => r.Id == requestId);
                 if (req != null) break;
             }
 
             if (req == null) return Result.Failure("Request not found.");
             if (req.Status != "Pending") return Result.Failure("Request is no longer pending.");
 
-            // Create the pair using the tier from the request
+            var allPairs = await _pairRepo.GetAllAsync();
+            var currentMentees = allPairs.Count(p => p.MentorId == req.MentorId);
+            var mentorUser = await _userService.GetUserByIdAsync(req.MentorId);
+            var maxMentees = (mentorUser.Data as StudentModel)?.MentorProfile?.MaxMentees ?? 1;
+
+            if (currentMentees >= maxMentees)
+            {
+                await RejectPairRequestAsync(requestId);
+                return Result.Failure("You have reached your maximum number of mentees.");
+            }
+
+            int assignedSupervisorId = await _supervisorAssignment.GetForMenteeAsync(req.MenteeId);
+
             bool created = await _pairRepo.CreateWithTierAsync(
-                supervisorId, req.MentorId, req.MenteeId,
+                assignedSupervisorId, req.MentorId, req.MenteeId,
                 req.Tier, isProfileIncomplete: false);
 
             if (!created) return Result.Failure("Failed to create pair in database.");
 
-            // Mark request as accepted and cancel other pending requests for both users
             await _pairRequestRepo.UpdateStatusAsync(requestId, "Accepted");
             await _pairRequestRepo.CancelPendingForUsersAsync(req.MenteeId, req.MentorId);
 
             return Result.Ok();
         }
 
-        /// <summary>A mentor rejects a pair request.</summary>
         public async Task<Result> RejectPairRequestAsync(int requestId)
         {
             bool updated = await _pairRequestRepo.UpdateStatusAsync(requestId, "Rejected");
             return updated ? Result.Ok() : Result.Failure("Request not found.");
         }
 
-        /// <summary>Returns all pending requests for a mentor (Tier 1 and Tier 3).</summary>
         public async Task<IEnumerable<PairRequest>> GetPendingRequestsForMentorAsync(int mentorId)
         {
             var dtos = await _pairRequestRepo.GetByMentorAsync(mentorId);
@@ -143,7 +152,6 @@ namespace MentoringApp.Service
             {
                 var menteeResult = await _userService.GetUserByIdAsync(dto.MenteeId);
                 var menteeModel = menteeResult.Data as StudentModel;
-
                 var subjectName = await GetSubjectNameAsync(menteeModel?.MenteeProfile?.SubjectToLearn);
 
                 result.Add(new PairRequest
@@ -167,11 +175,6 @@ namespace MentoringApp.Service
         // TIER 2 – Score Matrix Generation
         // ════════════════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Runs after Tier 1 deadline. Calculates compatibility scores for all
-        /// remaining unmatched mentors and mentees, stores results in MatchScores table.
-        /// Score = 100 if subjects match exactly, 0 if they differ (simple single-subject version).
-        /// </summary>
         public async Task<Result> GenerateScoreMatrixAsync()
         {
             await _matchScoreRepo.ClearAllAsync();
@@ -186,18 +189,15 @@ namespace MentoringApp.Service
 
             foreach (var mentee in mentees)
             {
-                int? menteeSubject = mentee.MenteeProfile?.SubjectToLearn;
-
                 foreach (var mentor in mentors)
                 {
-                    int? mentorSubject = mentor.MentorProfile?.SubjectToTeach;
-
-                    double score = CalculateCompatibility(menteeSubject, mentorSubject);
                     scores.Add(new MatchScoreDto
                     {
                         MenteeId = mentee.Id,
                         MentorId = mentor.Id,
-                        ScorePercent = score
+                        ScorePercent = _scorer.Calculate(
+                            mentee.MenteeProfile?.SubjectToLearn,
+                            mentor.MentorProfile?.SubjectToTeach)
                     });
                 }
             }
@@ -210,23 +210,28 @@ namespace MentoringApp.Service
         // TIER 3 – Selection Gallery
         // ════════════════════════════════════════════════════════════════════
 
-        /// <summary>Returns the top 3 mentor recommendations for a mentee based on the score matrix.</summary>
         public async Task<IEnumerable<MatchScore>> GetTopRecommendationsAsync(int menteeId, int topN = 3)
         {
             var dtos = await _matchScoreRepo.GetTopForMenteeAsync(menteeId, topN);
-            // Also filter out mentors that became matched since Tier 2 ran
-            var matchedMentors = (await _pairRepo.GetMatchedMentorIdsAsync()).ToHashSet();
+
+            var allPairs = await _pairRepo.GetAllAsync();
+            var mentorPairCounts = allPairs
+                .GroupBy(p => p.MentorId)
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var result = new List<MatchScore>();
-            foreach (var dto in dtos.Where(d => !matchedMentors.Contains(d.MentorId)))
+
+            foreach (var dto in dtos)
             {
                 var mentorResult = await _userService.GetUserByIdAsync(dto.MentorId);
                 var mentorModel = mentorResult.Data as StudentModel;
-                var subjectName = await GetSubjectNameAsync(mentorModel?.MentorProfile?.SubjectToTeach);
+
+                int currentMentees = mentorPairCounts.GetValueOrDefault(dto.MentorId, 0);
+                int maxMentees = mentorModel?.MentorProfile?.MaxMentees ?? 1;
+                if (currentMentees >= maxMentees) continue;
 
                 var menteeResult = await _userService.GetUserByIdAsync(dto.MenteeId);
                 var menteeModel = menteeResult.Data as StudentModel;
-                var menteeSubjectName = await GetSubjectNameAsync(menteeModel?.MenteeProfile?.SubjectToLearn);
 
                 result.Add(new MatchScore
                 {
@@ -236,30 +241,32 @@ namespace MentoringApp.Service
                     ScorePercent = dto.ScorePercent,
                     MentorName = mentorModel?.UserName ?? "Unknown",
                     MentorProfilePicturePath = mentorModel?.ProfilePicturePath ?? string.Empty,
-                    MentorSubjectName = subjectName,
-                    MenteeSubjectName = menteeSubjectName
+                    MentorSubjectName = await GetSubjectNameAsync(mentorModel?.MentorProfile?.SubjectToTeach),
+                    MenteeSubjectName = await GetSubjectNameAsync(menteeModel?.MenteeProfile?.SubjectToLearn)
                 });
             }
 
             return result;
         }
 
-        /// <summary>
-        /// A mentee picks a mentor from the Tier 3 gallery –
-        /// creates an instant pair (no confirmation required in this implementation).
-        /// </summary>
         public async Task<Result> GalleryPickAsync(int menteeId, int mentorId, int supervisorId)
         {
             var matchedMentees = await _pairRepo.GetMatchedMenteeIdsAsync();
             if (matchedMentees.Contains(menteeId))
                 return Result.Failure("You are already matched.");
 
-            var matchedMentors = await _pairRepo.GetMatchedMentorIdsAsync();
-            if (matchedMentors.Contains(mentorId))
+            var allPairs = await _pairRepo.GetAllAsync();
+            var currentMentees = allPairs.Count(p => p.MentorId == mentorId);
+            var mentorUser = await _userService.GetUserByIdAsync(mentorId);
+            var maxMentees = (mentorUser.Data as StudentModel)?.MentorProfile?.MaxMentees ?? 1;
+
+            if (currentMentees >= maxMentees)
                 return Result.Failure("That mentor is no longer available.");
 
+            int assignedSupervisorId = await _supervisorAssignment.GetForMenteeAsync(menteeId);
+
             bool created = await _pairRepo.CreateWithTierAsync(
-                supervisorId, mentorId, menteeId,
+                assignedSupervisorId, mentorId, menteeId,
                 (int)MatchTier.GalleryChoice, isProfileIncomplete: false);
 
             if (!created) return Result.Failure("Failed to create pair.");
@@ -272,12 +279,7 @@ namespace MentoringApp.Service
         // TIER 4 – Algorithmic Auto-Match
         // ════════════════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Pairs remaining unmatched users using the Tier 2 score matrix.
-        /// Uses a greedy best-score-first approach (not full Gale-Shapley for simplicity).
-        /// Returns a count of pairs created.
-        /// </summary>
-        public async Task<Result<int>> RunAutoMatchAsync(int supervisorId)
+        public async Task<Result<int>> RunAutoMatchAsync()
         {
             var mentees = (await GetAvailableMenteesAsync()).Where(m => m.MenteeProfile != null).ToList();
             var mentors = (await GetAvailableMentorsAsync()).Where(m => m.MentorProfile != null).ToList();
@@ -285,7 +287,6 @@ namespace MentoringApp.Service
             if (!mentees.Any() || !mentors.Any())
                 return Result<int>.Ok(0);
 
-            // Fetch all scores and sort descending
             var allScores = (await _matchScoreRepo.GetAllAsync())
                 .Where(s => mentees.Any(m => m.Id == s.MenteeId) && mentors.Any(m => m.Id == s.MentorId))
                 .OrderByDescending(s => s.ScorePercent)
@@ -300,8 +301,10 @@ namespace MentoringApp.Service
                 if (matchedMentees.Contains(score.MenteeId)) continue;
                 if (matchedMentors.Contains(score.MentorId)) continue;
 
+                int assignedSupervisorId = await _supervisorAssignment.GetForMenteeAsync(score.MenteeId);
+
                 bool created = await _pairRepo.CreateWithTierAsync(
-                    supervisorId, score.MentorId, score.MenteeId,
+                    assignedSupervisorId, score.MentorId, score.MenteeId,
                     (int)MatchTier.AutoMatch, isProfileIncomplete: false);
 
                 if (created)
@@ -319,16 +322,15 @@ namespace MentoringApp.Service
         // TIER 5 – Fallback / Safety Net
         // ════════════════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Randomly pairs users who have incomplete profiles (no subject data).
-        /// Mentors with incomplete profiles may also be matched here.
-        /// </summary>
-        public async Task<Result<int>> RunFallbackMatchAsync(int supervisorId)
+        public async Task<Result<int>> RunFallbackMatchAsync()
         {
-            // Users with COMPLETE profiles are handled by Tier 4; here we grab the incomplete ones
             var allUsers = await _userService.GetAllUsersAsync();
             var matchedMenteeIds = (await _pairRepo.GetMatchedMenteeIdsAsync()).ToHashSet();
-            var matchedMentorIds = (await _pairRepo.GetMatchedMentorIdsAsync()).ToHashSet();
+
+            var allPairs = await _pairRepo.GetAllAsync();
+            var mentorPairCounts = allPairs
+                .GroupBy(p => p.MentorId)
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var incompleteMentees = allUsers
                 .OfType<StudentModel>()
@@ -337,7 +339,8 @@ namespace MentoringApp.Service
 
             var availableMentors = allUsers
                 .OfType<StudentModel>()
-                .Where(s => s.IsMentor && !matchedMentorIds.Contains(s.Id))
+                .Where(s => s.IsMentor &&
+                       mentorPairCounts.GetValueOrDefault(s.Id, 0) < (s.MentorProfile?.MaxMentees ?? 1))
                 .ToList();
 
             if (!incompleteMentees.Any() || !availableMentors.Any())
@@ -352,9 +355,10 @@ namespace MentoringApp.Service
                 if (!remainingMentors.TryDequeue(out var mentor)) break;
 
                 bool isIncomplete = mentee.MenteeProfile == null || mentor.MentorProfile == null;
+                int assignedSupervisorId = await _supervisorAssignment.GetForMenteeAsync(mentee.Id);
 
                 bool created = await _pairRepo.CreateWithTierAsync(
-                    supervisorId, mentor.Id, mentee.Id,
+                    assignedSupervisorId, mentor.Id, mentee.Id,
                     (int)MatchTier.FallbackRandom, isProfileIncomplete: isIncomplete);
 
                 if (created) pairsCreated++;
@@ -364,18 +368,8 @@ namespace MentoringApp.Service
         }
 
         // ════════════════════════════════════════════════════════════════════
-        // Helpers
+        // Private helpers
         // ════════════════════════════════════════════════════════════════════
-
-        /// <summary>
-        /// Compatibility score: 100 if subject IDs match, otherwise 0.
-        /// Can be extended to partial/weighted matching in the future.
-        /// </summary>
-        private static double CalculateCompatibility(int? menteeSubject, int? mentorSubject)
-        {
-            if (menteeSubject == null || mentorSubject == null) return 0;
-            return menteeSubject == mentorSubject ? 100.0 : 0.0;
-        }
 
         private async Task<string> GetSubjectNameAsync(int? subjectId)
         {

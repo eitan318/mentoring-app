@@ -4,7 +4,11 @@ using MentoringApp.Model;
 using MentoringApp.Model.User;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
+using MentoringApp.ViewModel.ViewModelPage.Admin;
+using MentoringApp.ViewModel.ViewModelPage.Supervisor;
+using MentoringApp.ViewModel.ViewModelPage.Student;
 using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
@@ -19,6 +23,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private readonly GradeService _gradeService;
         private readonly SubjectService _subjectService;
         private readonly UserService _userService;
+        private readonly INavigationService _navigationService;
 
         [ObservableProperty] private bool _isReadOnly = true;
         [ObservableProperty] private bool _isEditMode = false;
@@ -49,16 +54,19 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
 
         // Editable Student Data
         [ObservableProperty] private Grade _selectedGrade;
+        [ObservableProperty] private int _classNum;
         [ObservableProperty] private int _subjectToTeach = -1;
         [ObservableProperty] private int _subjectToLearn = -1;
+        [ObservableProperty] private int _maxMentees = 1;
 
-        public MyProfileViewModel(UserStore userStore, AuthService authService, GradeService gradeService, SubjectService subjectService, UserService userService)
+        public MyProfileViewModel(UserStore userStore, AuthService authService, GradeService gradeService, SubjectService subjectService, UserService userService, INavigationService navigationService)
         {
             _userStore = userStore;
             _authService = authService;
             _gradeService = gradeService;
             _subjectService = subjectService;
             _userService = userService;
+            _navigationService = navigationService;
             _ = InitializeAsync();
         }
         private async Task InitializeAsync()
@@ -86,10 +94,15 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             {
                 IsSupervisor = false;
                 SelectedGrade = student.Grade;
+                ClassNum = student.ClassNum;
                 HasMentorProfile = student.MentorProfile != null;
                 HasMenteeProfile = student.MenteeProfile != null;
 
-                if (HasMentorProfile) SubjectToTeach = student.MentorProfile.SubjectToTeach;
+                if (HasMentorProfile) 
+                {
+                    SubjectToTeach = student.MentorProfile.SubjectToTeach;
+                    MaxMentees = student.MentorProfile.MaxMentees;
+                }
                 if (HasMenteeProfile) SubjectToLearn = student.MenteeProfile.SubjectToLearn;
             }
             else { IsSupervisor = true; }
@@ -118,7 +131,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             if (user is StudentModel student)
             {
                 student.Grade = SelectedGrade;
-                if (HasMentorProfile && student.MentorProfile != null) student.MentorProfile.SubjectToTeach = SubjectToTeach;
+                student.ClassNum = ClassNum;
+                if (HasMentorProfile && student.MentorProfile != null) 
+                {
+                    student.MentorProfile.SubjectToTeach = SubjectToTeach;
+                    student.MentorProfile.MaxMentees = MaxMentees;
+                }
                 if (HasMenteeProfile && student.MenteeProfile != null) student.MenteeProfile.SubjectToLearn = SubjectToLearn;
             }
 
@@ -132,6 +150,17 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
 
             IsReadOnly = true;
             IsEditMode = false;
+
+            if (!_navigationService.CanGoBack())
+            {
+                await (user switch
+                {
+                    AdminModel => _navigationService.NavigateToAsync<AdminDashboardViewModel>(),
+                    SupervisorModel => _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(user.Id),
+                    StudentModel => _navigationService.NavigateToAsync<StudentDashboardViewModel>(),
+                    _ => Task.CompletedTask
+                });
+            }
         }
         [RelayCommand]
         private async Task UploadProfilePictureAsync()

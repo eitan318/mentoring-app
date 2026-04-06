@@ -23,6 +23,18 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [NotifyCanExecuteChangedFor(nameof(CreatePairCommand))]
         private StudentModel? _selectedMentee;
 
+        partial void OnSelectedMenteeChanged(StudentModel? value)
+        {
+            if (value != null && value.Grade != null)
+            {
+                var matchingSupervisor = AvailableSupervisors.FirstOrDefault(s => s.Grade?.Id == value.Grade.Id && s.ClassNum == value.ClassNum);
+                if (matchingSupervisor != null)
+                {
+                    SelectedSupervisor = matchingSupervisor;
+                }
+            }
+        }
+
         // Raw Data
         [ObservableProperty] private ObservableCollection<SupervisorModel> _availableSupervisors = [];
         [ObservableProperty] private ObservableCollection<StudentModel> _availableMentors = [];

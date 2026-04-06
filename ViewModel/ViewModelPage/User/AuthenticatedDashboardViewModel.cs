@@ -75,6 +75,19 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             }
 
             _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
+
+            if (IsProfileIncomplete(CurrentUser))
+            {
+                await _navigationService.NavigateToAsync<MyProfileViewModel>();
+                // Explicitly toggle edit mode so they know they need to fill it out
+                if (ActiveSubPage is MyProfileViewModel profileVm)
+                {
+                    profileVm.IsReadOnly = false;
+                    profileVm.IsEditMode = true;
+                }
+                return;
+            }
+
             await (CurrentUser switch
             {
                 AdminModel => _navigationService.NavigateToAsync<AdminDashboardViewModel>(),
@@ -82,6 +95,18 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
                 StudentModel => _navigationService.NavigateToAsync<StudentDashboardViewModel>(),
                 _ => Task.CompletedTask
             });
+        }
+
+        private bool IsProfileIncomplete(UserModel? user)
+        {
+            if (user is StudentModel student)
+            {
+                bool incomplete = student.Grade == null || student.Grade.Id == 0 || student.ClassNum <= 0;
+                if (student.IsMentor && student.MentorProfile?.SubjectToTeach <= 0) incomplete = true;
+                if (student.IsMentee && student.MenteeProfile?.SubjectToLearn <= 0) incomplete = true;
+                return incomplete;
+            }
+            return false;
         }
 
         [RelayCommand] private void NavigateProfile()

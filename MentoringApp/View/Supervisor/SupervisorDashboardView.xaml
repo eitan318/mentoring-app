@@ -113,82 +113,71 @@
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
-            </StackPanel>
 
-            <!-- ── Matching Control Panel ── -->
-            <Expander Grid.Row="1" Header="⚙ Matching Flow Controls" Margin="0,0,0,12"
-                      BorderBrush="#E0E0E0" BorderThickness="1">
-                <Border Background="#FAFAFA" Padding="12">
+                <Border Background="#E8EAF6" Padding="12" CornerRadius="6" Margin="0,15,0,0">
                     <StackPanel>
-                        <!-- Current Phase label -->
-                        <Border Background="#E3F2FD" CornerRadius="4" Padding="8,6" Margin="0,0,0,10">
-                            <TextBlock FontWeight="SemiBold" Foreground="#1976D2" Text="{Binding MatchingStatusLabel}" TextWrapping="Wrap"/>
+                        <!-- Phase Banner -->
+                        <Border Background="{Binding BannerColor}" BorderThickness="0" CornerRadius="6" Padding="12,8" Margin="0,0,0,15"
+                                Visibility="{Binding IsPhaseBannerVisible, Converter={StaticResource BoolToVis}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="{Binding BannerTitle}" FontWeight="Bold" Foreground="{Binding BannerTextColor}" FontSize="13"/>
+                                        <Button Content="🛈" Margin="6,0,0,0" Command="{Binding ShowPhaseInfoCommand}" ToolTip="Show Phase Information" 
+                                                Background="Transparent" BorderThickness="0" FontSize="12" Foreground="{Binding BannerTextColor}" Cursor="Hand"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding BannerSubtitle}" Foreground="{Binding BannerTextColor}" FontSize="11" Opacity="0.9" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding BannerTimer}" Foreground="{Binding BannerTextColor}" FontWeight="SemiBold" FontSize="11"/>
+                                </StackPanel>
+                            </Grid>
                         </Border>
-
-                        <!-- Operation result -->
-                        <Border Visibility="{Binding HasMatchingResult, Converter={StaticResource BoolToVis}}"
-                                Background="#E8F5E9" BorderBrush="#4CAF50" BorderThickness="1"
-                                CornerRadius="4" Padding="8,6" Margin="0,0,0,10">
-                            <TextBlock Text="{Binding MatchingOperationResult}" Foreground="#1B5E20" TextWrapping="Wrap"/>
-                        </Border>
-
-                        <!-- Tier 1 Deadline -->
-                        <TextBlock Text="Tier 1 Deadline:" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <DatePicker Grid.Column="0" SelectedDate="{Binding Tier1Deadline, Mode=TwoWay}" Margin="0,0,6,0"/>
-                            <Button Grid.Column="1" Content="Save" Padding="10,5"
-                                    Command="{Binding SaveTier1DeadlineCommand}"/>
-                        </Grid>
-
-                        <!-- Tier 3 Deadline -->
-                        <TextBlock Text="Tier 3 Deadline:" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <DatePicker Grid.Column="0" SelectedDate="{Binding Tier3Deadline, Mode=TwoWay}" Margin="0,0,6,0"/>
-                            <Button Grid.Column="1" Content="Save" Padding="10,5"
-                                    Command="{Binding SaveTier3DeadlineCommand}"/>
-                        </Grid>
-
-                        <!-- Tier trigger buttons -->
-                        <Separator Margin="0,0,0,10"/>
-                        <Button Content="▶ Run Tier 2 – Generate Score Matrix" Padding="10,7" Margin="0,0,0,6"
-                                Command="{Binding RunTier2MatrixCommand}" Background="#1565C0" Foreground="White" BorderThickness="0"/>
-                        <Button Content="▶ Run Tier 4 – Algorithmic Auto-Match" Padding="10,7" Margin="0,0,0,6"
-                                Command="{Binding RunTier4AutoMatchCommand}" Background="#6A1B9A" Foreground="White" BorderThickness="0"/>
-                        <Button Content="▶ Run Tier 5 – Fallback Random Assignment" Padding="10,7"
-                                Command="{Binding RunTier5FallbackCommand}" Background="#BF360C" Foreground="White" BorderThickness="0"/>
-
-                        <!-- Tier 5 Warnings -->
-                        <Border Visibility="{Binding HasIncompleteProfileWarnings, Converter={StaticResource BoolToVis}}"
-                                Background="#FFF3E0" BorderBrush="#E65100" BorderThickness="1"
-                                CornerRadius="4" Padding="10" Margin="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock FontWeight="Bold" Foreground="#BF360C" Margin="0,0,0,6"
-                                           Text="{Binding IncompleteProfileCount, StringFormat='⚠ {0} Randomly Matched – Profile Incomplete'}"/>
-                                <ItemsControl ItemsSource="{Binding IncompleteProfilePairs}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock FontSize="11" Foreground="#7F3B08" Margin="0,2,0,0">
-                                                <Run Text="• "/>
-                                                <Run Text="{Binding Mentor.UserName}"/>
-                                                <Run Text=" ↔ "/>
-                                                <Run Text="{Binding Mentee.UserName}"/>
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
+                        <TextBlock Text="{Binding ClassProgressInfo}" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding ClassProgressPercent}" Height="15" Margin="0,0,0,10"/>
+                        
+                        <TextBlock Text="Inactive Students (Missing Profile/Unmatched):" FontWeight="SemiBold" Foreground="#BF360C" Margin="0,0,0,4"/>
+                        <ItemsControl ItemsSource="{Binding InactiveStudents}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Foreground="#D84315" Margin="0,2,0,0">
+                                        <Run Text="• " FontWeight="Bold" />
+                                        <Run Text="{Binding UserName}" />
+                                        <Run Text=" (" />
+                                        <Run Text="{Binding Email}" />
+                                        <Run Text=")" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </Border>
-            </Expander>
+            </StackPanel>
+
+            <!-- Tier 5 Warnings -->
+            <Border Visibility="{Binding HasIncompleteProfileWarnings, Converter={StaticResource BoolToVis}}"
+                    Grid.Row="1" Background="#FFF3E0" BorderBrush="#E65100" BorderThickness="1"
+                    CornerRadius="4" Padding="10" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" Foreground="#BF360C" Margin="0,0,0,6"
+                               Text="{Binding IncompleteProfileCount, StringFormat='⚠ {0} Randomly Matched – Profile Incomplete'}"/>
+                    <ItemsControl ItemsSource="{Binding IncompleteProfilePairs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock FontSize="11" Foreground="#7F3B08" Margin="0,2,0,0">
+                                    <Run Text="• "/>
+                                    <Run Text="{Binding Mentor.UserName}"/>
+                                    <Run Text=" ↔ "/>
+                                    <Run Text="{Binding Mentee.UserName}"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
 
             <!-- Managed Pairs -->
             <DockPanel Grid.Row="2" Margin="0,0,0,15">

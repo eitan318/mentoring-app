@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +9,6 @@ namespace MentoringApp.Model.User.StudentProfiles
     public class MentorProfile
     {
         public int SubjectToTeach { get; set; }
+        public int MaxMentees { get; set; } = 1;
     }
 }

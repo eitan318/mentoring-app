@@ -16,14 +16,16 @@ namespace MentoringApp.Service
         private readonly IIssueRepo _issueRepo;       
         private readonly IIssueCategoryRepo _issueCategoryRepo;
         private readonly IPairRepo _pairRepo;
+        private readonly ISchoolClassRepo _schoolClassRepo;
 
-        public UserService(IUserRepo userRepository, IGradeRepo gradeRepository, IIssueRepo issueRepo, IIssueCategoryRepo issueCategoryRepo, IPairRepo pairRepo)
+        public UserService(IUserRepo userRepository, IGradeRepo gradeRepository, IIssueRepo issueRepo, IIssueCategoryRepo issueCategoryRepo, IPairRepo pairRepo, ISchoolClassRepo schoolClassRepo)
         {
             _userRepo = userRepository;
             _gradeRepo = gradeRepository;
             _issueRepo = issueRepo;
             _issueCategoryRepo = issueCategoryRepo;
             _pairRepo = pairRepo;
+            _schoolClassRepo = schoolClassRepo;
         }
 
         public async Task<Result<UserModel>> GetUserByIdAsync(int userId)
@@ -86,6 +88,13 @@ namespace MentoringApp.Service
 
                 case UserRoleType.Supervisor:
                     var supervisor = new SupervisorModel(dto.Id, dto.Email, dto.UserName, dto.NationalId);
+                    if (dto.GradeId.HasValue && dto.GradeId.Value > 0)
+                    {
+                        var supGradeDto = await _gradeRepo.GetByIdAsync(dto.GradeId.Value) 
+                                        ?? new GradeDto { Id = dto.GradeId.Value, Name = "Unknown", Num = 0 };
+                        supervisor.Grade = new Grade { Id = supGradeDto.Id, Name = supGradeDto.Name, Num = supGradeDto.Num };
+                    }
+                    supervisor.ClassNum = dto.ClassNum ?? 0;
 
                     var issueDtos = await _issueRepo.GetAllAsync();
                     var categoryDto = await _issueCategoryRepo.GetAllAsync();
@@ -93,6 +102,20 @@ namespace MentoringApp.Service
                     supervisor.Issues = IssueMapper.ToModels(issueDtos, categorys);
 
                     supervisor.SupervisedPairsCount = (await _pairRepo.GetBySupervisorIdAsync(supervisor.Id)).Count();
+
+                    // Load assigned school classes
+                    var classDtos = await _schoolClassRepo.GetBySupervisorAsync(supervisor.Id);
+                    var allGrades = (await _gradeRepo.GetAllGradesAsync()).ToDictionary(g => g.Id);
+                    supervisor.AssignedClasses = classDtos.Select(dto =>
+                    {
+                        if (!allGrades.TryGetValue(dto.GradeId, out var gDto)) return null;
+                        return new SchoolClass
+                        {
+                            Id = dto.Id,
+                            Grade = new Grade { Id = gDto.Id, Name = gDto.Name, Num = gDto.Num },
+                            ClassNum = dto.ClassNum
+                        };
+                    }).Where(x => x != null).Cast<SchoolClass>().ToList();
 
                     user = supervisor;
                     break;
@@ -102,10 +125,14 @@ namespace MentoringApp.Service
                                 ?? new GradeDto { Id = 0, Name = "Unknown", Num = 0 };
 
                     var student = new StudentModel(dto.Id, dto.Email, dto.UserName, dto.NationalId, new Grade { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num });
+                    student.ClassNum = dto.ClassNum ?? 0;
 
                     if (dto.MentorSubjectId.HasValue)
                     {
-                        student.MentorProfile = new MentorProfile { SubjectToTeach = dto.MentorSubjectId.Value };
+                        student.MentorProfile = new MentorProfile { 
+                            SubjectToTeach = dto.MentorSubjectId.Value,
+                            MaxMentees = dto.MaxMentees ?? 1
+                        };
                     }
 
 
@@ -170,12 +197,16 @@ namespace MentoringApp.Service
 
             if (user is StudentModel student)
             {
-                await _userRepo.UpdateStudentGradeAsync(student.Id, student.Grade.Id);
+                await _userRepo.UpdateStudentGradeAndClassAsync(student.Id, student.Grade.Id, student.ClassNum);
 
                 if (student.MentorProfile != null)
                 {
                     await _userRepo.UpsertMentorProfileAsync(student.Id, student.MentorProfile.SubjectToTeach);
                 }
+            }
+            else if (user is SupervisorModel supervisor)
+            {
+                // UpdateSupervisorClassesAsync is called separately from ManageUsersViewModel via SchoolClassService
             }
             else if (user is AdminModel)
             {

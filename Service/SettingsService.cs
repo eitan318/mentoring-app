@@ -1,19 +1,24 @@
 using MentoringApp.Data.Interfaces;
-using MentoringApp.Service;
 
 namespace MentoringApp.Service
 {
     public class SettingsService
     {
         private readonly ISettingsRepo _settingsRepo;
+
         public const string MeetingHoursBarrierKey = "MeetingHoursBarrier";
-        public const string Tier1DeadlineKey = "Tier1Deadline";
-        public const string Tier3DeadlineKey = "Tier3Deadline";
+        public const string GlobalLanguageKey = "GlobalLoginLanguage";
+        public const string Phase1DeadlineKey = "Phase1Deadline";
+        public const string Phase2DeadlineKey = "Phase2Deadline";
+        public const string IsPhase1CompleteKey = "IsPhase1Complete";
+        public const string IsProcessCompleteKey = "IsProcessComplete";
 
         public SettingsService(ISettingsRepo settingsRepo)
         {
             _settingsRepo = settingsRepo;
         }
+
+        // ── Meeting Hours ─────────────────────────────────────────────────────
 
         public Task<double> GetMeetingHoursBarrierAsync()
             => _settingsRepo.GetDoubleAsync(MeetingHoursBarrierKey, 10);
@@ -21,7 +26,7 @@ namespace MentoringApp.Service
         public Task SetMeetingHoursBarrierAsync(double hours)
             => _settingsRepo.SetDoubleAsync(MeetingHoursBarrierKey, hours);
 
-        private const string GlobalLanguageKey = "GlobalLoginLanguage";
+        // ── Language ──────────────────────────────────────────────────────────
 
         public Task<string> GetGlobalLanguageAsync()
             => _settingsRepo.GetStringAsync(GlobalLanguageKey, "en");
@@ -29,24 +34,52 @@ namespace MentoringApp.Service
         public Task SetGlobalLanguageAsync(string lang)
             => _settingsRepo.SetStringAsync(GlobalLanguageKey, lang);
 
-        // ── Tier Deadlines ────────────────────────────────────────────────────
+        // ── Phase 1 Deadline ──────────────────────────────────────────────────
 
-        public async Task<DateTime?> GetTier1DeadlineAsync()
+        public async Task<DateTime?> GetPhase1DeadlineAsync()
         {
-            string raw = await _settingsRepo.GetStringAsync(Tier1DeadlineKey, "");
+            string raw = await _settingsRepo.GetStringAsync(Phase1DeadlineKey, "");
             return DateTime.TryParse(raw, out var d) ? d : null;
         }
 
-        public Task SetTier1DeadlineAsync(DateTime date)
-            => _settingsRepo.SetStringAsync(Tier1DeadlineKey, date.ToString("o"));
+        public Task SetPhase1DeadlineAsync(DateTime date)
+            => _settingsRepo.SetStringAsync(Phase1DeadlineKey, date.ToString("o"));
 
-        public async Task<DateTime?> GetTier3DeadlineAsync()
+        public Task ClearPhase1DeadlineAsync()
+            => _settingsRepo.SetStringAsync(Phase1DeadlineKey, "");
+
+        // ── Phase 2 Deadline ──────────────────────────────────────────────────
+
+        public async Task<DateTime?> GetPhase2DeadlineAsync()
         {
-            string raw = await _settingsRepo.GetStringAsync(Tier3DeadlineKey, "");
+            string raw = await _settingsRepo.GetStringAsync(Phase2DeadlineKey, "");
             return DateTime.TryParse(raw, out var d) ? d : null;
         }
 
-        public Task SetTier3DeadlineAsync(DateTime date)
-            => _settingsRepo.SetStringAsync(Tier3DeadlineKey, date.ToString("o"));
+        public Task SetPhase2DeadlineAsync(DateTime date)
+            => _settingsRepo.SetStringAsync(Phase2DeadlineKey, date.ToString("o"));
+
+        public Task ClearPhase2DeadlineAsync()
+            => _settingsRepo.SetStringAsync(Phase2DeadlineKey, "");
+
+        // ── Phase State ───────────────────────────────────────────────────────
+
+        public async Task<bool> GetIsPhase1CompleteAsync()
+        {
+            string raw = await _settingsRepo.GetStringAsync(IsPhase1CompleteKey, "false");
+            return bool.TryParse(raw, out var b) && b;
+        }
+
+        public Task SetIsPhase1CompleteAsync(bool value)
+            => _settingsRepo.SetStringAsync(IsPhase1CompleteKey, value.ToString());
+
+        public async Task<bool> GetIsProcessCompleteAsync()
+        {
+            string raw = await _settingsRepo.GetStringAsync(IsProcessCompleteKey, "false");
+            return bool.TryParse(raw, out var b) && b;
+        }
+
+        public Task SetIsProcessCompleteAsync(bool value)
+            => _settingsRepo.SetStringAsync(IsProcessCompleteKey, value.ToString());
     }
 }

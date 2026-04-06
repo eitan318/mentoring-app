@@ -41,6 +41,7 @@ namespace MentoringApp.ViewModel.DI
             services.AddTransient<BrowseMentorsViewModel>();
             services.AddTransient<SelectionGalleryViewModel>();
             services.AddTransient<MentorRequestsViewModel>();
+            services.AddTransient<SystemSettingsViewModel>();
 
             return services;
         }

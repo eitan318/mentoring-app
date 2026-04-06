@@ -8,6 +8,9 @@ using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModelPage.User;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Windows.Threading;
+using System.Windows;
+using System;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 {
@@ -19,7 +22,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         protected readonly UserService _userService;
         protected readonly ReviewService _reviewService;
         protected readonly SettingsService _settingsService;
-        protected readonly MatchingFlowService _matchingFlowService;
 
         // Cached so we can reload data after returning from sub-pages
         private int _currentSupervisorId;
@@ -28,6 +30,24 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
         
         [ObservableProperty] private ObservableCollection<Pair> _pairsSupervised = [];
+        
+        [ObservableProperty] private ObservableCollection<StudentModel> _inactiveStudents = [];
+        [ObservableProperty] private string _classProgressInfo = string.Empty;
+        [ObservableProperty] private double _classProgressPercent = 0.0;
+
+        [ObservableProperty] private bool _isPhaseBannerVisible;
+        [ObservableProperty] private string _bannerTitle = string.Empty;
+        [ObservableProperty] private string _bannerSubtitle = string.Empty;
+        [ObservableProperty] private string _bannerTimer = string.Empty;
+        [ObservableProperty] private string _bannerColor = "#E3F2FD";
+        [ObservableProperty] private string _bannerTextColor = "#1565C0";
+        [ObservableProperty] private bool _isPhase1Active;
+        [ObservableProperty] private bool _isPhase2Active;
+
+        private DispatcherTimer? _timer;
+        private DateTime? _tier1Deadline;
+        private DateTime? _tier3Deadline;
+        private bool _isPhase1Complete;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
@@ -58,19 +78,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [RelayCommand]
         private void ToggleResolvedIssues() => ShowResolvedIssues = !ShowResolvedIssues;
 
-        // ── Matching-Flow State ───────────────────────────────────────────────
-
-        [ObservableProperty] private DateTime? _tier1Deadline;
-        [ObservableProperty] private DateTime? _tier3Deadline;
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(MatchingStatusLabel))]
-        private string _matchingPhaseLabel = "Tier 1 – Direct Request Window";
-
-        public string MatchingStatusLabel => _matchingPhaseLabel;
-
-        [ObservableProperty] private string _matchingOperationResult = string.Empty;
-        [ObservableProperty] private bool _hasMatchingResult;
+        // ── Matching-Flow State (Warnings for Tier 5) ─────────────────────────
 
         /// <summary>Pairs that were randomly matched due to incomplete profiles (Tier 5 warnings).</summary>
         [ObservableProperty] private ObservableCollection<Pair> _incompleteProfilePairs = [];
@@ -87,8 +95,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             IssueService issueService, 
             UserService userService,
             ReviewService reviewService,
-            SettingsService settingsService,
-            MatchingFlowService matchingFlowService)
+            SettingsService settingsService)
         {
             _navigationService = navigationService;
             _pairService = pairService;
@@ -96,7 +103,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             _userService = userService;
             _reviewService = reviewService;
             _settingsService = settingsService;
-            _matchingFlowService = matchingFlowService;
         }
 
         [RelayCommand]
@@ -143,90 +149,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             }
         }
 
-        // ── Deadline Management ───────────────────────────────────────────────
-
-        [RelayCommand]
-        private async Task SaveTier1Deadline()
-        {
-            if (Tier1Deadline.HasValue)
-            {
-                await _settingsService.SetTier1DeadlineAsync(Tier1Deadline.Value);
-                UpdateMatchingPhase();
-                MatchingOperationResult = "✓ Tier 1 deadline saved.";
-                HasMatchingResult = true;
-            }
-        }
-
-        [RelayCommand]
-        private async Task SaveTier3Deadline()
-        {
-            if (Tier3Deadline.HasValue)
-            {
-                await _settingsService.SetTier3DeadlineAsync(Tier3Deadline.Value);
-                UpdateMatchingPhase();
-                MatchingOperationResult = "✓ Tier 3 deadline saved.";
-                HasMatchingResult = true;
-            }
-        }
-
-        private void UpdateMatchingPhase()
-        {
-            var now = DateTime.Now;
-            if (Tier1Deadline == null)
-                MatchingPhaseLabel = "Tier 1 – Direct Request Window (no deadline set)";
-            else if (now < Tier1Deadline)
-                MatchingPhaseLabel = $"Tier 1 – Direct Request Window (closes {Tier1Deadline:d})";
-            else if (Tier3Deadline == null || now < Tier3Deadline)
-                MatchingPhaseLabel = $"Tier 3 – Selection Gallery (closes {Tier3Deadline?.ToString("d") ?? "no deadline set"})";
-            else
-                MatchingPhaseLabel = "Tier 4/5 – Auto-Match phase";
-        }
-
-        // ── Algorithmic Triggers ──────────────────────────────────────────────
-
-        [RelayCommand]
-        private async Task RunTier2Matrix()
-        {
-            MatchingOperationResult = "Running Tier 2: Generating score matrix…";
-            HasMatchingResult = true;
-
-            var result = await _matchingFlowService.GenerateScoreMatrixAsync();
-
-            MatchingOperationResult = result.Success
-                ? "✓ Score matrix generated. Tier 3 gallery is now active for mentees."
-                : $"✗ {result.ErrorMessage}";
-        }
-
-        [RelayCommand]
-        private async Task RunTier4AutoMatch()
-        {
-            MatchingOperationResult = "Running Tier 4: Algorithmic auto-match…";
-            HasMatchingResult = true;
-
-            var result = await _matchingFlowService.RunAutoMatchAsync(_currentSupervisorId);
-
-            MatchingOperationResult = result.Success
-                ? $"✓ Auto-match complete. {result.Data} new pairs created."
-                : $"✗ {result.ErrorMessage}";
-
-            await LoadSupervisorDataAsync(_currentSupervisorId);
-        }
-
-        [RelayCommand]
-        private async Task RunTier5Fallback()
-        {
-            MatchingOperationResult = "Running Tier 5: Fallback random assignment…";
-            HasMatchingResult = true;
-
-            var result = await _matchingFlowService.RunFallbackMatchAsync(_currentSupervisorId);
-
-            MatchingOperationResult = result.Success
-                ? $"✓ Fallback complete. {result.Data} pairs randomly assigned. Check warnings below."
-                : $"✗ {result.ErrorMessage}";
-
-            await LoadSupervisorDataAsync(_currentSupervisorId);
-        }
-
         // ── Data Loading ──────────────────────────────────────────────────────
 
         private async Task LoadSupervisorDataAsync(int supervisorId)
@@ -249,13 +171,51 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             {
                 AllIssues = new ObservableCollection<IssueModel>(issuesResult.Data ?? []);
             }
+
+            // Load Nudge Dashboard data
+            var allUsers = await _userService.GetAllUsersAsync();
+            var myStudents = allUsers.OfType<StudentModel>()
+                .Where(s => SelectedSupervisor != null && s.Grade?.Id == SelectedSupervisor.Grade?.Id && s.ClassNum == SelectedSupervisor.ClassNum)
+                .ToList();
+
+            int totalStudents = myStudents.Count;
+            var inactive = new List<StudentModel>();
+            
+            foreach (var student in myStudents)
+            {
+                bool isProfileIncomplete = student.Grade == null || student.Grade.Id == 0 || student.ClassNum <= 0;
+                if (student.IsMentor && student.MentorProfile?.SubjectToTeach <= 0) isProfileIncomplete = true;
+                if (student.IsMentee && student.MenteeProfile?.SubjectToLearn <= 0) isProfileIncomplete = true;
+
+                if (isProfileIncomplete)
+                {
+                    inactive.Add(student);
+                }
+            }
+
+            InactiveStudents = new ObservableCollection<StudentModel>(inactive);
+            
+            if (totalStudents > 0)
+            {
+                int registered = totalStudents - inactive.Count;
+                ClassProgressPercent = (double)registered / totalStudents * 100;
+                ClassProgressInfo = $"Class {SelectedSupervisor?.ClassNum}: {(int)ClassProgressPercent}% Complete ({registered}/{totalStudents} Registered)";
+            }
+            else
+            {
+                ClassProgressPercent = 0;
+                ClassProgressInfo = "No students in your class.";
+            }
         }
 
         private async Task LoadMatchingSettingsAsync()
         {
-            Tier1Deadline = await _settingsService.GetTier1DeadlineAsync();
-            Tier3Deadline = await _settingsService.GetTier3DeadlineAsync();
-            UpdateMatchingPhase();
+            // Timer
+            _tier1Deadline = await _settingsService.GetPhase1DeadlineAsync();
+            _tier3Deadline = await _settingsService.GetPhase2DeadlineAsync();
+            _isPhase1Complete = await _settingsService.GetIsPhase1CompleteAsync();
+
+            SetupTimer();
         }
 
         public new async Task OnNavigatedToAsync()
@@ -266,10 +226,84 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         public virtual async Task OnNavigatedToAsync(int supervisorId)
         {
             _currentSupervisorId = supervisorId;
-            await LoadSupervisorDataAsync(supervisorId);
-            await LoadMatchingSettingsAsync();
             Result<UserModel> res = await _userService.GetUserByIdAsync(supervisorId);
             SelectedSupervisor = res.Data as SupervisorModel;
+
+            await LoadSupervisorDataAsync(supervisorId);
+            await LoadMatchingSettingsAsync();
+        }
+
+        [RelayCommand]
+        private void ShowPhaseInfo()
+        {
+            if (IsPhase1Active)
+            {
+                MessageBox.Show("Phase 1: Mentee Enrollment.\nYour students are currently selecting mentors. Keep an eye on the inactive students list.", "Phase 1 Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else if (IsPhase2Active)
+            {
+                MessageBox.Show("Phase 2: Algorithmic Matching.\nThe system is processing leftover unmatched students. You may need to review fallback assignments soon.", "Phase 2 Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void SetupTimer()
+        {
+            _timer?.Stop();
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _timer.Tick += (s, e) => UpdatePhaseTimer();
+            UpdatePhaseTimer(); // Initial call
+            _timer.Start();
+        }
+
+        private void UpdatePhaseTimer()
+        {
+            // For Supervisor, we almost always show the banner unless all phases are done (for our case we'll just show it always until we decide otherwise, but let's toggle visibility based on if there's any active deadline)
+            IsPhaseBannerVisible = true;
+            
+            if (!_isPhase1Complete)
+            {
+                IsPhase1Active = true;
+                IsPhase2Active = false;
+                BannerTitle = "Phase 1: Mentee Matchmaking Window";
+                BannerSubtitle = "Mentees are currently browsing and selecting mentors.";
+                BannerColor = "#E3F2FD";
+                BannerTextColor = "#1565C0";
+
+                if (_tier1Deadline.HasValue)
+                {
+                    var diff = _tier1Deadline.Value - DateTime.Now;
+                    if (diff.TotalSeconds > 0)
+                        BannerTimer = $"Ends in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s";
+                    else
+                        BannerTimer = "Deadline Reached (Awaiting system run)";
+                }
+                else
+                {
+                    BannerTimer = "Pending System Activation";
+                }
+            }
+            else
+            {
+                IsPhase1Active = false;
+                IsPhase2Active = true;
+                BannerTitle = "Phase 2: Algorithmic Fallback";
+                BannerSubtitle = "The system is matching remaining mentees automatically.";
+                BannerColor = "#F3E5F5";
+                BannerTextColor = "#6A1B9A";
+
+                if (_tier3Deadline.HasValue)
+                {
+                    var diff = _tier3Deadline.Value - DateTime.Now;
+                    if (diff.TotalSeconds > 0)
+                        BannerTimer = $"Runs in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s";
+                    else
+                        BannerTimer = "Deadline Reached (Awaiting system run)";
+                }
+                else
+                {
+                    BannerTimer = "Pending Algorithmic Run";
+                }
+            }
         }
     }
 }
