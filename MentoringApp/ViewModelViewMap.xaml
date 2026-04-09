@@ -1,3 +1,10 @@
+<!--
+    ViewModel → View mapping used by WPF's implicit DataTemplate resolution.
+    The MainWindow (and the authenticated dashboard sub-page area) bind their ContentControl
+    to the current ViewModel. WPF automatically selects the matching DataTemplate here,
+    instantiating the correct View without any code-behind switch statements.
+    Add a new DataTemplate here whenever a new ViewModel/View pair is created.
+-->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

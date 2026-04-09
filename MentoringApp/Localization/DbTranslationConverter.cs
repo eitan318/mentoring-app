@@ -4,6 +4,18 @@ using System.Windows.Data;
 
 namespace MentoringApp.Localization
 {
+    /// <summary>
+    /// IMultiValueConverter that translates DB-stored English display names into the
+    /// active UI language using the <see cref="TranslationSource"/> resource dictionary.
+    ///
+    /// Expected XAML usage:
+    ///   value[0] = raw DB string (e.g. "9th")
+    ///   value[1] = TranslationSource.CurrentCulture (used only to trigger re-evaluation on language switch)
+    ///   ConverterParameter = resource key prefix (e.g. "DB_Grade_")
+    ///
+    /// The converter concatenates prefix + value (spaces stripped) to form the lookup key
+    /// (e.g. "DB_Grade_9th"), then falls back to the raw DB text if no translation is found.
+    /// </summary>
     public class DbTranslationConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
@@ -15,7 +27,7 @@ namespace MentoringApp.Localization
             if (string.IsNullOrEmpty(valueFromDb))
                 return valueFromDb;
 
-            // Parameter expects prefix, i.e., "DB_Grade_"
+            // ConverterParameter is the key prefix, e.g. "DB_Grade_"
             string prefix = parameter as string ?? "";
             string key = prefix + valueFromDb.Replace(" ", "");
 

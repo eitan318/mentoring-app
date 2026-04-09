@@ -13,8 +13,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace MentoringApp.ViewModel.ViewModelPage.User
 {
+    /// <summary>
+    /// Shell ViewModel that hosts the role-specific dashboard as a sub-page.
+    /// On login it opens a nested navigation context (<see cref="INavigationService.UseContext"/>)
+    /// so sub-page navigation doesn't affect the outer (login) history stack.
+    /// If the student's profile is incomplete, it immediately redirects to
+    /// <see cref="MyProfileViewModel"/> in edit mode before showing the dashboard.
+    /// </summary>
     public partial class AuthenticatedDashboardViewModel : ObservableObject, INavigatable
     {
+        // Disposing this handle pops the nested navigation context (sub-page area) on logout.
         private IDisposable _navContext;
         private readonly INavigationService _navigationService;
         private readonly UserStore _userStore;
@@ -97,6 +105,11 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             });
         }
 
+        /// <summary>
+        /// Returns true if a student is missing any required profile fields.
+        /// Admin and Supervisor accounts are always considered complete.
+        /// Required fields: Grade (non-zero id), ClassNum > 0, and subject IDs for any active role.
+        /// </summary>
         private bool IsProfileIncomplete(UserModel? user)
         {
             if (user is StudentModel student)

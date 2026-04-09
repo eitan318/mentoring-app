@@ -3,9 +3,22 @@ using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Stack-based navigation service.
+///
+/// Navigation contexts are layered via <see cref="UseContext"/>: the outermost context
+/// drives the MainWindow's content; inner contexts (e.g. the authenticated shell's
+/// sub-page area) sit on top of the stack.  Disposing a context handle pops it off and
+/// returns control to the caller beneath it.
+///
+/// Each context owns a <see cref="NavigationStore"/> that maintains its own back-stack,
+/// so GoBack() only unwinds within the active context.
+/// </summary>
 public class NavigationService : INavigationService
 {
     private readonly IServiceProvider _serviceProvider;
+
+    // Parallel stacks — index N of each corresponds to the same context level.
     private readonly Stack<Action<INavigatable>> _contextStack = new();
     private readonly Stack<NavigationStore> _storeStack = new();
 
@@ -14,6 +27,12 @@ public class NavigationService : INavigationService
         _serviceProvider = serviceProvider;
     }
 
+    /// <summary>
+    /// Registers a new navigation context backed by a fresh history stack.
+    /// The <paramref name="contextSetter"/> callback is invoked every time the current
+    /// ViewModel changes within this context (e.g. to update a ContentControl binding).
+    /// Dispose the returned handle to pop the context.
+    /// </summary>
     public IDisposable UseContext(Action<INavigatable> contextSetter)
     {
         var store = new NavigationStore();
@@ -105,10 +124,13 @@ public class NavigationService : INavigationService
                 {
                     if (_navigationHistory.Contains(value))
                     {
+                        // Navigating back to a VM already in history: unwind the stack
+                        // up to (but not including) that entry so GoBack() stays correct.
                         while (_navigationHistory.Pop() != value) { }
                     }
                     else
                     {
+                        // Forward navigation: push the current VM onto the back-stack.
                         _navigationHistory.Push(_currentViewModel);
                     }
                 }

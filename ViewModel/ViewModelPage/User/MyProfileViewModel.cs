@@ -67,6 +67,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             _subjectService = subjectService;
             _userService = userService;
             _navigationService = navigationService;
+            // Fire-and-forget: grade/subject lists load asynchronously after construction.
+            // The discard assignment prevents CS4014 without blocking the constructor.
             _ = InitializeAsync();
         }
         private async Task InitializeAsync()
@@ -151,6 +153,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             IsReadOnly = true;
             IsEditMode = false;
 
+            // If this page was opened because the profile was incomplete (no back history),
+            // navigate directly to the role dashboard instead of going back.
             if (!_navigationService.CanGoBack())
             {
                 await (user switch

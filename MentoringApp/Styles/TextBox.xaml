@@ -1,3 +1,12 @@
+<!--
+    Shared input styles:
+    - ErrorTemplate: renders FluentValidation errors below a control as italic red text.
+    - TextBox style: adds a placeholder ("hint") TextBlock that is visible only when
+      the field is both empty AND unfocused, using a MultiDataTrigger.
+      The hint text is driven by the control's Tag property.
+    - ComboBox style: same hint-text pattern via a SelectedItem=null Trigger.
+    Both styles apply the shared ErrorTemplate and turn the border red on validation errors.
+-->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ControlTemplate x:Key="ErrorTemplate">
         <StackPanel>

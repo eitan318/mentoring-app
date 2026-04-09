@@ -94,6 +94,14 @@ namespace MentoringApp.Service
             return created ? Result.Ok() : Result.Failure("Failed to create request.");
         }
 
+        /// <summary>
+        /// Accepts a pending pair request: validates mentor capacity, creates the pair, then
+        /// cancels all other pending requests for both the mentee and mentor to avoid duplicates.
+        /// </summary>
+        /// <remarks>
+        /// The request lookup iterates all mentors because <see cref="IPairRequestRepo"/>
+        /// does not yet expose a GetByIdAsync method. Replace with that once available.
+        /// </remarks>
         public async Task<Result> AcceptPairRequestAsync(int requestId, int supervisorId)
         {
             // TODO: replace loop with _pairRequestRepo.GetByIdAsync(requestId)
@@ -279,6 +287,13 @@ namespace MentoringApp.Service
         // TIER 4 – Algorithmic Auto-Match
         // ════════════════════════════════════════════════════════════════════
 
+        /// <summary>
+        /// Greedy auto-match over the pre-built score matrix (Tier 4).
+        /// Scores are sorted descending so the highest-compatibility pairs are assigned first.
+        /// Each mentee and mentor can appear in at most one pair per run — once committed,
+        /// both are excluded from further iterations via in-memory HashSets.
+        /// Returns the number of pairs successfully created.
+        /// </summary>
         public async Task<Result<int>> RunAutoMatchAsync()
         {
             var mentees = (await GetAvailableMenteesAsync()).Where(m => m.MenteeProfile != null).ToList();
@@ -322,6 +337,12 @@ namespace MentoringApp.Service
         // TIER 5 – Fallback / Safety Net
         // ════════════════════════════════════════════════════════════════════
 
+        /// <summary>
+        /// Fallback random match (Tier 5) for mentees still unmatched after auto-match.
+        /// Available mentors are shuffled randomly, then assigned one-per-mentee from a queue.
+        /// Pairs created here are flagged <c>isProfileIncomplete</c> when either participant
+        /// lacks a complete profile, so supervisors can review them.
+        /// </summary>
         public async Task<Result<int>> RunFallbackMatchAsync()
         {
             var allUsers = await _userService.GetAllUsersAsync();
@@ -346,6 +367,7 @@ namespace MentoringApp.Service
             if (!incompleteMentees.Any() || !availableMentors.Any())
                 return Result<int>.Ok(0);
 
+            // Shuffle mentors to avoid systematic bias in fallback assignment
             var rng = new Random();
             var remainingMentors = new Queue<StudentModel>(availableMentors.OrderBy(_ => rng.Next()));
             int pairsCreated = 0;
@@ -354,6 +376,7 @@ namespace MentoringApp.Service
             {
                 if (!remainingMentors.TryDequeue(out var mentor)) break;
 
+                // Flag for supervisor review if either profile is incomplete
                 bool isIncomplete = mentee.MenteeProfile == null || mentor.MentorProfile == null;
                 int assignedSupervisorId = await _supervisorAssignment.GetForMenteeAsync(mentee.Id);
 

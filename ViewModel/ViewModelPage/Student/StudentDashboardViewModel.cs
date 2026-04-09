@@ -18,10 +18,21 @@ using System.Windows.Threading;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Student
 {
+    /// <summary>
+    /// Student dashboard ViewModel. Dynamically composes the tab list (<see cref="Pairs"/>)
+    /// based on the current phase and the student's match status:
+    /// <list type="bullet">
+    ///   <item>Always shown when matched: <see cref="MentorDashboardViewModel"/> or <see cref="MenteeDashboardViewModel"/>.</item>
+    ///   <item>Phase 1 unmatched mentee: <see cref="BrowseMentorsViewModel"/> (browse &amp; request).</item>
+    ///   <item>Phase 2 unmatched mentee: <see cref="SelectionGalleryViewModel"/> (top-3 picks).</item>
+    ///   <item>Phase 2 mentor: <see cref="MentorRequestsViewModel"/> (review incoming requests).</item>
+    /// </list>
+    /// The <see cref="Pairs"/> collection uses <c>object</c> so the tab control's DataTemplate
+    /// selector can dispatch to different templates for each ViewModel type.
+    /// </summary>
     public partial class StudentDashboardViewModel : ObservableObject, INavigatable
     {
-        // object collection so it can hold PairMemberDashboardViewModel,
-        // BrowseMentorsViewModel, SelectionGalleryViewModel, MentorRequestsViewModel
+        // Heterogeneous tab items — WPF resolves the correct DataTemplate per item type.
         public ObservableCollection<object> Pairs { get; set; } = new();
 
         public bool HasNoPairs => Pairs.Count == 0;
@@ -229,8 +240,14 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
 
     // ─── Pair dashboard base ───────────────────────────────────────────────────
 
+    /// <summary>
+    /// Shared base for the mentor-side and mentee-side tab ViewModels.
+    /// Loads issues, reviews, and meeting-hour progress for the current pair.
+    /// Concrete subclasses expose role-specific labels and commands.
+    /// </summary>
     public abstract partial class PairMemberDashboardViewModel : ObservableObject
     {
+        /// <summary>Human-readable label for the counterpart's role, e.g. "MENTOR" or "MENTEE".</summary>
         public abstract string CounterpartRole { get; }
 
         protected readonly IWindowService _windowService;
