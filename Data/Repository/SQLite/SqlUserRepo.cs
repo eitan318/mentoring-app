@@ -9,6 +9,13 @@ using MentoringApp.Model.User;
 namespace MentoringApp.Data.Acess.SQLite
 {
     
+    /// <summary>
+    /// SQLite implementation of <see cref="IUserRepo"/>.
+    /// Users are stored in a vertical partition: a shared <c>Users</c> table holds identity data,
+    /// while <c>UserStudents</c>, <c>UserMentors</c>, <c>UserMentees</c>, <c>UserSupervisors</c>,
+    /// and <c>UserAdmins</c> hold role-specific columns.
+    /// <see cref="MapToFullDtoAsync"/> assembles a complete <see cref="UserDto"/> from these tables.
+    /// </summary>
     internal class SqlUserRepo : IUserRepo
     {
         private readonly ISQLiteConnectionService _db;
@@ -155,6 +162,10 @@ namespace MentoringApp.Data.Acess.SQLite
         }
 
 
+        /// <summary>
+        /// Resolves role by presence in the role tables: Admin trumps Supervisor, both trump Student.
+        /// Student is the implicit default when neither role table has a row for the user.
+        /// </summary>
         private async Task<UserRoleType> DetermineRoleAsync(int userId)
         {
             var role = UserRoleType.Student;
@@ -216,10 +227,16 @@ namespace MentoringApp.Data.Acess.SQLite
             };
         }
 
+        /// <summary>
+        /// Bulk-loads all role tables up front into dictionaries to avoid N+1 queries,
+        /// then projects each user row into a <see cref="UserDto"/> in parallel.
+        /// Role determination still requires two async checks per user (IsAdmin / IsSupervisor).
+        /// </summary>
         public async Task<IEnumerable<UserDto>> GetAllUserDtosAsync()
         {
             var users = await _db.QueryAsync<UserRow>("SELECT * FROM Users");
 
+            // Load all role tables once and index by UserId for O(1) lookups below
             var students = (await _db.QueryAsync<StudentRow>("SELECT * FROM UserStudents")).ToDictionary(s => s.UserId);
             var mentors = (await _db.QueryAsync<MentorRow>("SELECT * FROM UserMentors")).ToDictionary(m => m.UserId);
             var mentees = (await _db.QueryAsync<MenteeRow>("SELECT * FROM UserMentees")).ToDictionary(m => m.UserId);

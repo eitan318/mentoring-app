@@ -12,6 +12,12 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
+        <!--
+            StepTab: shared border style for each column of the 3-step phase stepper.
+            Each step uses DataTriggers bound to IsPhase1Active / IsPhase2Active / IsProcessComplete
+            to fill the circle icon and bold/activate the label text.
+            The step circle shows a checkmark once the phase is done or the process is complete.
+        -->
         <!-- ── Step button style ── -->
         <Style x:Key="StepTab" TargetType="Border">
             <Setter Property="Padding" Value="0,12"/>
@@ -20,6 +26,12 @@
             <Setter Property="Background" Value="Transparent"/>
         </Style>
 
+        <!--
+            DeadlineTemplate: reused by both Phase 1 and Phase 2 content areas.
+            Shows a DatePicker + "Set deadline" when no deadline is set (IsDeadlineNotScheduled),
+            or a live countdown + "Cancel" when one is active (IsDeadlineScheduled).
+            The countdown string is updated every second by a DispatcherTimer in the ViewModel.
+        -->
         <!-- ── Shared deadline DataTemplate ── -->
         <DataTemplate x:Key="DeadlineTemplate">
             <StackPanel>

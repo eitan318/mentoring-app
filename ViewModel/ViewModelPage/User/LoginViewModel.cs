@@ -19,6 +19,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private readonly SettingsService _settingsService;
         private readonly UserService _userService;
 
+        // When true, the email verification step is skipped and the user is logged in
+        // immediately after entering a valid National ID. Set to false for production builds.
         private static readonly bool _debugWithoutVerification = true;
 
         public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService authService, ILanguageService languageService, SettingsService settingsService, UserService userService)

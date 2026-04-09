@@ -26,6 +26,13 @@
                         <DataTemplate>
                             <TextBlock>
                                 <TextBlock.Text>
+                                    <!--
+                                        MultiBinding pattern used throughout for DB-stored display names:
+                                        value[0] = raw English name from DB (e.g. "9th")
+                                        value[1] = CurrentCulture (triggers re-evaluation on language switch)
+                                        DbTranslationConverter looks up "DB_Grade_9th" in the resource strings,
+                                        falling back to the raw DB value if no translation exists.
+                                    -->
                                     <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
                                         <Binding Path="Name" />
                                         <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />

@@ -44,6 +44,8 @@ namespace MentoringApp
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            // Set to true during development to wipe and re-seed the database on every launch.
+            // Must be false in production — data loss will occur if left enabled.
             bool recreateInitialDb = true;
             base.OnStartup(e);
 

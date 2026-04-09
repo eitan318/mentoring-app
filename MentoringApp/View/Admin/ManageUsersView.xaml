@@ -9,6 +9,19 @@
              mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="700"
              FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
+    <!--
+        Layout overview:
+        Row 0 — Add/Import toolbar (buttons + Excel help toggles).
+        Row 1 — Two-column split: left = search/filter + user list, right = detail sidebar.
+        Popups (student and supervisor import instructions) float over Row 0+1 using Grid.RowSpan;
+        they are shown/hidden via BoolToVis bound to IsStudentInfoVisible / IsSupervisorInfoVisible.
+
+        The student filter row (Row 1 of the left column) uses a DataTrigger on IsStudentFilterVisible
+        to collapse entirely when the role filter is not set to "Student".
+
+        Commands in the detail sidebar that act on SelectedUser use RelativeSource AncestorType=UserControl
+        to reach the ViewModel, because the sidebar DataContext is set to SelectedUser directly.
+    -->
     <!-- Root grid for layout and popups -->
     <Grid Margin="20">
         <Grid.RowDefinitions>

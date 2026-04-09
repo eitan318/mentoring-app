@@ -7,9 +7,15 @@ using MentoringApp.Model.User;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Handles the two-step email verification login flow and user registration.
+    /// Login: caller first calls <see cref="SendVerificationCodeAsync"/> (sends a 6-digit code
+    /// to the user's email), then calls <see cref="VerificationCodeValid"/> to consume the code,
+    /// then calls <see cref="LoginAsync"/> to obtain the <see cref="UserModel"/>.
+    /// </summary>
     public class AuthService
     {
-        private readonly UserService _userService; // Changed from IUserRepo
+        private readonly UserService _userService;
         private readonly IVerificationCodeRepo _verificationCodeRepository;
         private readonly EmailService _emailService;
         private readonly UserValidator _userValidator;
@@ -66,6 +72,10 @@ namespace MentoringApp.Service
         }
 
 
+        /// <summary>
+        /// Validates a verification code and, if valid, deletes it so it cannot be reused.
+        /// Codes expire after 10 minutes.
+        /// </summary>
         public async Task<Result> VerificationCodeValid(string verificationCodeInput)
         {
             if (string.IsNullOrWhiteSpace(verificationCodeInput))
@@ -80,9 +90,11 @@ namespace MentoringApp.Service
 
             var user = userResult.Data;
 
+            // Code valid for 10 minutes from creation
             bool isExpired = (DateTime.Now - user.CurrentVerificationCode.CreationDate).TotalMinutes > 10;
             if (isExpired) return Result.Failure("Code expired.");
 
+            // Consume the code so it cannot be reused
             bool cleared = await _verificationCodeRepository.DeleteAsync(userId.Value);
 
             return cleared ? Result.Ok() : Result.Failure("Database error.");

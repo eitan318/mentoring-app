@@ -9,6 +9,10 @@ using MentoringApp.Service.Mapping;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Application-level user service. Owns DTO-to-domain mapping (<see cref="MapDtoToUserAsync"/>)
+    /// and all CRUD operations that cross the data layer.
+    /// </summary>
     public class UserService
     {
         private readonly IUserRepo _userRepo;
@@ -76,6 +80,11 @@ namespace MentoringApp.Service
             return results;
         }
 
+        /// <summary>
+        /// Converts a flat <see cref="UserDto"/> into the appropriate domain model subtype
+        /// (<see cref="AdminModel"/>, <see cref="SupervisorModel"/>, or <see cref="StudentModel"/>),
+        /// eagerly loading related data (grade, issues, classes) via additional async queries.
+        /// </summary>
         private async Task<UserModel> MapDtoToUserAsync(UserDto dto)
         {
             UserModel user;
@@ -169,6 +178,10 @@ namespace MentoringApp.Service
 
 
 
+        /// <summary>
+        /// Loads all users and maps them concurrently.
+        /// Note: each mapping fires several DB queries, so this can be expensive for large datasets.
+        /// </summary>
         public async Task<IEnumerable<UserModel>> GetAllUsersAsync()
         {
             var dtos = await _userRepo.GetAllUserDtosAsync();
@@ -237,6 +250,11 @@ namespace MentoringApp.Service
             return updated ? Result.Ok() : Result.Failure("Failed to update language.");
         }
 
+        /// <summary>
+        /// Copies the source file into the app's LocalApplicationData folder,
+        /// naming it "{userId}{ext}" (overwriting any previous picture for that user).
+        /// Returns the absolute destination path that should be persisted to the DB.
+        /// </summary>
         private string MoveFileToLocalStorage(int userId, string sourceFilePath)
         {
             string ext = Path.GetExtension(sourceFilePath).ToLowerInvariant();

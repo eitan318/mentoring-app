@@ -128,6 +128,15 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         private HashSet<int> _pairedUserIds = [];
 
         // ── Filtered list ───────────────────────────────────────────────────
+        /// <summary>
+        /// Computed property that applies up to four filter layers on demand:
+        /// (1) free-text search on UserName/Email,
+        /// (2) role type (All / Supervisor / Student),
+        /// (3) student profile flags (IsMentor, IsMentee — AND when both checked),
+        /// (4) grade number range.
+        /// Each filter property setter calls <see cref="OnPropertyChanged"/> for this property
+        /// to trigger re-evaluation; no separate ObservableCollection copy is maintained.
+        /// </summary>
         public IEnumerable<UserModel> FilteredUsers
         {
             get
@@ -151,7 +160,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
                 // 3. Student-specific filters (only when role == Student)
                 if (SelectedRole == "Student")
                 {
-                    // Profile: if either is checked enforce it (both checked = must be both)
+                    // Both checked = must satisfy both roles simultaneously (mentor AND mentee)
                     if (FilterIsMentor || FilterIsMentee)
                     {
                         q = q.Where(u =>

@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Data.Acess.SQLite.ConnectionsService
 {
+    /// <summary>
+    /// Lightweight ADO.NET wrapper over SQLite.
+    /// Opens a new connection per call (no connection pooling concern — SQLite handles this).
+    /// Provides synchronous and async variants for single-row queries, multi-row queries,
+    /// and non-query execution.
+    /// Results are mapped to typed objects via reflection in <see cref="MapReaderToObject{T}"/>.
+    /// </summary>
     public class SQLiteConnectionService : ISQLiteConnectionService
     {
         private readonly string _connectionString;
@@ -132,7 +139,12 @@ namespace MentoringApp.Data.Acess.SQLite.ConnectionsService
             }
         }
 
-        // --- Helper: map a SqliteDataReader row to an object ---
+        /// <summary>
+        /// Maps a single reader row to a new instance of <typeparamref name="T"/> using reflection.
+        /// Matching is case-insensitive by column name. Columns not present as writable properties
+        /// (and vice versa) are silently skipped, making the mapper tolerant of schema changes.
+        /// Special handling: SQLite stores DateTime as ISO-8601 string and booleans as integers.
+        /// </summary>
         private static T MapReaderToObject<T>(SqliteDataReader reader) where T : new()
         {
             var result = new T();
@@ -154,17 +166,17 @@ namespace MentoringApp.Data.Acess.SQLite.ConnectionsService
                 if (value == DBNull.Value)
                     continue;
 
-                // Handle Nullable types
+                // Unwrap Nullable<T> so Convert.ChangeType receives the underlying type
                 var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
                 try
                 {
-                    // Special case for DateTime if stored as string in SQLite
+                    // SQLite stores DateTime as an ISO-8601 string
                     if (targetType == typeof(DateTime) && value is string s)
                     {
                         prop.SetValue(result, DateTime.Parse(s));
                     }
-                    // Special case for Enums
+                    // SQLite has no native enum type; values are stored as integers
                     else if (targetType.IsEnum)
                     {
                         prop.SetValue(result, Enum.ToObject(targetType, value));
@@ -176,7 +188,7 @@ namespace MentoringApp.Data.Acess.SQLite.ConnectionsService
                 }
                 catch
                 {
-                    // Logic for logging mapping errors could go here
+                    // Silently skip columns that cannot be converted; avoids crashing on schema mismatches
                 }
             }
 

@@ -14,6 +14,17 @@ using System;
 
 namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 {
+    /// <summary>
+    /// Supervisor dashboard ViewModel. Loaded with the supervisor's ID via
+    /// <see cref="OnNavigatedToAsync(int)"/> so it can be navigated to either from
+    /// the supervisor's own login or from the admin's "Inspect" action.
+    /// Provides:
+    ///   - Pair list with optional pair-detail side-pane (<see cref="SelectedPaneContent"/>).
+    ///   - Issue list filterable by selected pair, with pending/resolved split.
+    ///   - Class completion gauge (students with complete profiles vs. total).
+    ///   - Phase banner with live countdown driven by a DispatcherTimer.
+    ///   - Tier-5 warnings: pairs flagged as profile-incomplete or FallbackRandom.
+    /// </summary>
     public partial class SupervisorDashboardViewModel : ObservableObject, INavigatable<int>
     {
         protected readonly INavigationService _navigationService;
@@ -61,10 +72,15 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
         private Pair? _issueFilterPair;
 
+        /// <summary>
+        /// Pending issues, optionally scoped to the selected pair's participants.
+        /// When <see cref="IssueFilterPair"/> is null, all supervised issues are shown.
+        /// </summary>
         public IEnumerable<IssueModel> FilteredPendingIssues => AllIssues
             .Where(i => !i.IsResolved)
             .Where(i => IssueFilterPair == null || i.ReportedByUserId == IssueFilterPair.Mentor.Id || i.ReportedByUserId == IssueFilterPair.Mentee.Id);
 
+        /// <summary>Resolved issues scoped by the same pair filter.</summary>
         public IEnumerable<IssueModel> FilteredResolvedIssues => AllIssues
             .Where(i => i.IsResolved)
             .Where(i => IssueFilterPair == null || i.ReportedByUserId == IssueFilterPair.Mentor.Id || i.ReportedByUserId == IssueFilterPair.Mentee.Id);
@@ -172,7 +188,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
                 AllIssues = new ObservableCollection<IssueModel>(issuesResult.Data ?? []);
             }
 
-            // Load Nudge Dashboard data
+            // Build the class completion gauge: find students in the supervisor's class
+            // and check each for profile completeness (same rules as AuthenticatedDashboardViewModel).
             var allUsers = await _userService.GetAllUsersAsync();
             var myStudents = allUsers.OfType<StudentModel>()
                 .Where(s => SelectedSupervisor != null && s.Grade?.Id == SelectedSupervisor.Grade?.Id && s.ClassNum == SelectedSupervisor.ClassNum)
@@ -180,7 +197,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
             int totalStudents = myStudents.Count;
             var inactive = new List<StudentModel>();
-            
+
             foreach (var student in myStudents)
             {
                 bool isProfileIncomplete = student.Grade == null || student.Grade.Id == 0 || student.ClassNum <= 0;
