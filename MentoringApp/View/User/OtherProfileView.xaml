@@ -11,7 +11,7 @@
     <Grid Margin="30">
         <StackPanel>
             <!--  Circular profile picture  -->
-            <components:ProfilePictureControl Width="80" Height="80" HorizontalAlignment="Center" Margin="0,0,0,10" ImagePath="{Binding ProfilePicturePath}" />
+            <components:ProfilePictureControl Width="80" Height="80" HorizontalAlignment="Center" Margin="0,0,0,10" ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}" />
 
             <TextBlock Text="{Binding UserName}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
             <TextBlock Text="{Binding RoleName}" FontSize="14" Foreground="Gray" HorizontalAlignment="Center" Margin="0,0,0,20"/>
@@ -21,12 +21,24 @@
             <Label Content="{Binding [OtherProfile_Email_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
             <TextBlock Text="{Binding Email}" FontSize="16" Margin="5,0,0,15"/>
 
+            <Label Content="Phone Number" Foreground="Gray" FontSize="11"/>
+            <TextBlock Text="{Binding PhoneNumber}" FontSize="16" Margin="5,0,0,15"/>
+
+            <Label Content="Gender" Foreground="Gray" FontSize="11"/>
+            <TextBlock Text="{Binding GenderDisplay}" FontSize="16" Margin="5,0,0,15"/>
+
             <StackPanel Visibility="{Binding IsStudent, Converter={StaticResource BoolToVis}}">
                 <Label Content="{Binding [OtherProfile_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
                 <TextBlock Text="{Binding GradeName}" FontSize="16" Margin="5,0,0,15"/>
 
+                <Label Content="Preferred Mentor Gender" Foreground="Gray" FontSize="11"/>
+                <TextBlock Text="{Binding PreferredMentorGenderDisplay}" FontSize="16" Margin="5,0,0,15"/>
+
+                <Label Content="Preferred Mentee Gender" Foreground="Gray" FontSize="11"/>
+                <TextBlock Text="{Binding PreferredMenteeGenderDisplay}" FontSize="16" Margin="5,0,0,15"/>
+
                 <Label Content="{Binding [OtherProfile_MentoringDetails_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
-                <Border Background="#F9F9F9" Padding="10" CornerRadius="5">
+                <Border Background="#F9F9F9" Padding="10" Margin="5,0,0,15" CornerRadius="5">
                     <StackPanel>
                         <TextBlock Text="{Binding TeachingSubject}" Margin="0,2"/>
                         <TextBlock Text="{Binding LearningSubject}" Margin="0,2"/>

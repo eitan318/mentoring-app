@@ -6,22 +6,56 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:loc="clr-namespace:MentoringApp.Localization"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModelPage.Student;assembly=MentoringApp.ViewModel"
+    xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModel.Student;assembly=MentoringApp.ViewModel"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}"
     mc:Ignorable="d">
 
+    <!--
+        Layout:
+        Row 0 — Phase banner (visible only when IsPhaseBannerVisible; shown whenever the
+                student has at least one unmatched-role tab in the Pairs list).
+        Row 1 — Tab strip (ListBox of heterogeneous Pairs items).
+        Row 2 — Tab content area (ContentControl that dispatches per ViewModel type).
+
+        There is NO empty-state panel.  Every student always has at least one tab:
+        paired students get Mentor/Mentee dashboard tabs; unmatched students in Phase 1
+        get Browse Mentors and/or Mentor Requests tabs; unmatched students in Phase 2
+        get Selection Gallery and/or a passive Phase-2 mentor info tab.
+    -->
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />   <!-- Phase banner -->
+            <RowDefinition Height="Auto" />   <!-- Tab strip -->
+            <RowDefinition Height="*"    />   <!-- Tab content -->
         </Grid.RowDefinitions>
 
-        <!-- Tab strip — visible whenever there is at least one tab -->
+        <!-- ══ ROW 0: Phase banner ══════════════════════════════════════════ -->
+        <Border Grid.Row="0" Margin="10,10,10,0" Padding="16,12" CornerRadius="8"
+                Background="{Binding BannerColor}" BorderThickness="0"
+                Visibility="{Binding IsPhaseBannerVisible, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock FontSize="15" FontWeight="Bold"
+                               Foreground="{Binding BannerTextColor}" Text="{Binding BannerTitle}" />
+                    <Button Margin="6,0,0,0" Background="Transparent" BorderThickness="0"
+                            Command="{Binding ShowPhaseInfoCommand}" Content="🛈"
+                            Cursor="Hand" FontSize="14" Foreground="{Binding BannerTextColor}"
+                            ToolTip="Show Phase Information" />
+                </StackPanel>
+                <TextBlock Margin="0,0,0,4" FontSize="12" Opacity="0.9"
+                           Foreground="{Binding BannerTextColor}" Text="{Binding BannerSubtitle}"
+                           TextWrapping="Wrap" />
+                <TextBlock FontSize="13" FontWeight="SemiBold"
+                           Foreground="{Binding BannerTextColor}" Text="{Binding BannerTimer}" />
+            </StackPanel>
+        </Border>
+
+        <!-- ══ ROW 1: Tab strip ═════════════════════════════════════════════ -->
         <ListBox
-            Grid.Row="0"
+            Grid.Row="1"
             ItemsSource="{Binding Pairs}"
-            SelectedItem="{Binding SelectedPair}"
-            Visibility="{Binding HasNoPairs, Converter={StaticResource InverseBoolToVis}}">
+            SelectedItem="{Binding SelectedPair}">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal" />
@@ -36,18 +70,20 @@
                                 <StackPanel Margin="5" Orientation="Horizontal">
                                     <components:ProfilePictureControl
                                         Width="28" Height="28" Margin="0,0,6,0"
-                                        ImagePath="{Binding Counterpart.ProfilePicturePath}" />
+                                        ImagePath="{Binding Counterpart.ProfilePicturePath}"
+                                        Gender="{Binding Counterpart.Gender}" />
                                     <TextBlock VerticalAlignment="Center" FontSize="13"
-                                               Text="{Binding Counterpart.Name}" />
+                                               Text="{Binding Counterpart.UserName}" />
                                 </StackPanel>
                             </DataTemplate>
                             <DataTemplate DataType="{x:Type studentvm:MenteeDashboardViewModel}">
                                 <StackPanel Margin="5" Orientation="Horizontal">
                                     <components:ProfilePictureControl
                                         Width="28" Height="28" Margin="0,0,6,0"
-                                        ImagePath="{Binding Counterpart.ProfilePicturePath}" />
+                                        ImagePath="{Binding Counterpart.ProfilePicturePath}"
+                                        Gender="{Binding Counterpart.Gender}" />
                                     <TextBlock VerticalAlignment="Center" FontSize="13"
-                                               Text="{Binding Counterpart.Name}" />
+                                               Text="{Binding Counterpart.UserName}" />
                                 </StackPanel>
                             </DataTemplate>
                             <!-- Phase tabs: plain label -->
@@ -66,12 +102,11 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <!-- Content area — dispatches by concrete VM type -->
+        <!-- ══ ROW 2: Tab content ════════════════════════════════════════════ -->
         <ContentControl
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="10"
-            Content="{Binding SelectedPair}"
-            Visibility="{Binding HasNoPairs, Converter={StaticResource InverseBoolToVis}}">
+            Content="{Binding SelectedPair}">
             <ContentControl.Resources>
 
                 <!-- ── Mentor dashboard (you are mentoring a mentee) ── -->
@@ -209,7 +244,7 @@
                     </DockPanel>
                 </DataTemplate>
 
-                <!-- ── Phase 1 mentee tab: browse mentors ── -->
+                <!-- ── Phase 1 mentee tab: browse & request mentors ── -->
                 <DataTemplate DataType="{x:Type studentvm:BrowseMentorsViewModel}">
                     <DockPanel Margin="4">
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
@@ -255,18 +290,21 @@
                     </DockPanel>
                 </DataTemplate>
 
-                <!-- ── Phase 2 mentee tab: top ranked recommendations ── -->
+                <!-- ── Phase 2 mentee tab: top-3 ranked recommendations (choice is final) ── -->
                 <DataTemplate DataType="{x:Type studentvm:SelectionGalleryViewModel}">
                     <DockPanel Margin="4">
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="13" FontWeight="Bold" Text="Recommended mentors" />
+                            <TextBlock FontSize="13" FontWeight="Bold" Text="Your top mentor matches" />
                             <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
-                                       Text="Your top matches ranked by compatibility. Choose one to confirm pairing." />
+                                       Text="Ranked by compatibility. Choose one — your selection is final." />
                         </StackPanel>
 
-                        <Border DockPanel.Dock="Top" Margin="0,0,0,6"
+                        <!-- Already matched banner -->
+                        <Border DockPanel.Dock="Top" Margin="0,0,0,6" Padding="10,8"
+                                Background="#E8F5E9" CornerRadius="4"
                                 Visibility="{Binding AlreadyMatched, Converter={StaticResource BoolToVis}}">
-                            <TextBlock FontSize="12" Text="You are already matched. Check your dashboard." />
+                            <TextBlock FontSize="12" Foreground="#2E7D32" FontWeight="SemiBold"
+                                       Text="You are matched! Check the new tab." />
                         </Border>
 
                         <Border DockPanel.Dock="Top" Margin="0,0,0,8"
@@ -278,31 +316,38 @@
                                    Text="Loading…"
                                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
 
-                        <TextBlock DockPanel.Dock="Bottom" FontSize="11" Foreground="Gray" Margin="0,8,0,0"
-                                   Text="If accepted by the mentor, pairing is confirmed automatically."
-                                   TextWrapping="Wrap" />
-
                         <ScrollViewer>
                             <ItemsControl ItemsSource="{Binding Recommendations}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Padding="0,6" BorderBrush="#DDD" BorderThickness="0,0,0,1">
+                                        <Border Margin="0,0,0,8" Padding="12,10"
+                                                BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Right"
-                                                        Content="Choose"
-                                                        IsEnabled="{Binding DataContext.AlreadyMatched,
-                                                            RelativeSource={RelativeSource AncestorType=ItemsControl},
-                                                            Converter={StaticResource InverseBoolToVis}}"
-                                                        Command="{Binding DataContext.ChooseMentorCommand,
-                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                        CommandParameter="{Binding}" />
-                                                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center"
-                                                           Margin="0,0,10,0" FontSize="12" Foreground="Gray"
-                                                           Text="{Binding ScorePercent, StringFormat='{}{0:0}%'}" />
-                                                <StackPanel Margin="0,0,8,0">
-                                                    <TextBlock FontSize="13" Text="{Binding MentorName}" />
-                                                    <TextBlock FontSize="11" Foreground="Gray"
+                                                <!-- Match score badge -->
+                                                <Border DockPanel.Dock="Right" VerticalAlignment="Center"
+                                                        Background="#E3F2FD" CornerRadius="4"
+                                                        Padding="10,6" Margin="12,0,0,0">
+                                                    <StackPanel HorizontalAlignment="Center">
+                                                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="#1565C0"
+                                                                   HorizontalAlignment="Center"
+                                                                   Text="{Binding ScorePercent, StringFormat='{}{0:0}%'}" />
+                                                        <TextBlock FontSize="10" Foreground="#1565C0"
+                                                                   HorizontalAlignment="Center" Text="match" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock FontSize="14" FontWeight="SemiBold" Text="{Binding MentorName}" />
+                                                    <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,8"
                                                                Text="{Binding MentorSubjectName}" />
+                                                    <Button Content="Choose this mentor"
+                                                            IsEnabled="{Binding DataContext.AlreadyMatched,
+                                                                RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                                                Converter={StaticResource InverseBoolConverter}}"
+                                                            Command="{Binding DataContext.ChooseMentorCommand,
+                                                                RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            HorizontalAlignment="Left"
+                                                            Padding="10,4" />
                                                 </StackPanel>
                                             </DockPanel>
                                         </Border>
@@ -313,16 +358,33 @@
                     </DockPanel>
                 </DataTemplate>
 
-                <!-- ── Phase 2 mentor tab: accept / decline incoming requests ── -->
+                <!-- ── Mentor requests tab (Phase 1: accept/decline; Phase 2: passive info only) ── -->
                 <DataTemplate DataType="{x:Type studentvm:MentorRequestsViewModel}">
                     <DockPanel Margin="4">
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="13" FontWeight="Bold" Text="Incoming mentee requests" />
+                            <TextBlock FontSize="13" FontWeight="Bold" Text="Mentoring requests" />
+
+                            <!-- Phase 1: active instructions + deadline timer -->
                             <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
-                                       Text="Students who have requested you as their mentor." />
+                                       Text="Students who have requested you as their mentor."
+                                       Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
                             <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
-                                       Text="{Binding RequestWindowTimerDisplay}" />
+                                       Text="{Binding RequestWindowTimerDisplay}"
+                                       Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
                         </StackPanel>
+
+                        <!-- Phase 2: mentor is passive — no action required -->
+                        <Border DockPanel.Dock="Top" Margin="0,0,0,10" Padding="12,10"
+                                Background="#F3E5F5" CornerRadius="6"
+                                Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#6A1B9A"
+                                           Text="Mentees are now choosing their mentors" />
+                                <TextBlock FontSize="11" Foreground="#6A1B9A" Margin="0,4,0,0"
+                                           TextWrapping="Wrap"
+                                           Text="During this phase mentees pick from their top compatibility matches. You will be notified once paired — no action is required from you." />
+                            </StackPanel>
+                        </Border>
 
                         <Border DockPanel.Dock="Top" Margin="0,0,0,8"
                                 Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">
@@ -333,8 +395,10 @@
                                    Text="Loading…"
                                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
 
+                        <!-- "Accepting creates a pair" footnote only relevant in Phase 1 -->
                         <TextBlock DockPanel.Dock="Bottom" FontSize="11" Foreground="Gray" Margin="0,8,0,0"
                                    Text="Accepting a request will create an active pair."
+                                   Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}"
                                    TextWrapping="Wrap" />
 
                         <ScrollViewer>
@@ -343,7 +407,11 @@
                                     <DataTemplate>
                                         <Border Padding="0,6" BorderBrush="#DDD" BorderThickness="0,0,0,1">
                                             <DockPanel>
-                                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                                <!-- Accept / Decline only shown in Phase 1 -->
+                                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
+                                                            Visibility="{Binding DataContext.IsPhase2Active,
+                                                                RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                                                Converter={StaticResource InverseBoolToVis}}">
                                                     <Button Margin="0,0,6,0" Content="Accept"
                                                             Command="{Binding DataContext.AcceptRequestCommand,
                                                                 RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -372,42 +440,5 @@
             </ContentControl.Resources>
         </ContentControl>
 
-        <!-- Empty state: only shown when Pairs is empty AND no tabs were added
-             (i.e. matched student with no active pair yet — edge case) -->
-        <StackPanel
-            Grid.Row="1"
-            MaxWidth="380"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Visibility="{Binding HasNoPairs, Converter={StaticResource BoolToVis}}">
-            <TextBlock HorizontalAlignment="Center" FontSize="48" Foreground="#CCCCCC" Text="👤" />
-            <TextBlock Margin="0,12,0,6" HorizontalAlignment="Center"
-                       FontSize="20" FontWeight="SemiBold" Foreground="#888"
-                       Text="{Binding [Student_NoAssignment_Title], Source={x:Static loc:TranslationSource.Instance}}" />
-            <TextBlock Margin="0,0,0,20" HorizontalAlignment="Center"
-                       FontSize="14" Foreground="#AAA" TextWrapping="Wrap" TextAlignment="Center"
-                       Text="{Binding [Student_NoAssignment_Hint], Source={x:Static loc:TranslationSource.Instance}}" />
-
-            <!-- Phase banner still shown in empty state -->
-            <Border Margin="0,0,0,0" Padding="16,12"
-                    Background="{Binding BannerColor}" BorderThickness="0" CornerRadius="8"
-                    Visibility="{Binding IsPhaseBannerVisible, Converter={StaticResource BoolToVis}}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock FontSize="15" FontWeight="Bold"
-                                   Foreground="{Binding BannerTextColor}" Text="{Binding BannerTitle}" />
-                        <Button Margin="6,0,0,0" Background="Transparent" BorderThickness="0"
-                                Command="{Binding ShowPhaseInfoCommand}" Content="🛈"
-                                Cursor="Hand" FontSize="14" Foreground="{Binding BannerTextColor}"
-                                ToolTip="Show Phase Information" />
-                    </StackPanel>
-                    <TextBlock Margin="0,0,0,4" FontSize="12" Opacity="0.9"
-                               Foreground="{Binding BannerTextColor}" Text="{Binding BannerSubtitle}"
-                               TextWrapping="Wrap" />
-                    <TextBlock FontSize="13" FontWeight="SemiBold"
-                               Foreground="{Binding BannerTextColor}" Text="{Binding BannerTimer}" />
-                </StackPanel>
-            </Border>
-        </StackPanel>
     </Grid>
 </UserControl>

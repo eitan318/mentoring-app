@@ -172,6 +172,7 @@ namespace MentoringApp.Service
                     CreatedAt = DateTime.TryParse(dto.CreatedAt, out var d) ? d : DateTime.MinValue,
                     MenteeName = menteeModel?.UserName ?? "Unknown",
                     MenteeProfilePicturePath = menteeModel?.ProfilePicturePath ?? string.Empty,
+                    MenteeGender = menteeModel?.Gender ?? Gender.PreferNoAnswer,
                     MenteeSubjectName = subjectName
                 });
             }
@@ -205,7 +206,11 @@ namespace MentoringApp.Service
                         MentorId = mentor.Id,
                         ScorePercent = _scorer.Calculate(
                             mentee.MenteeProfile?.SubjectToLearn,
-                            mentor.MentorProfile?.SubjectToTeach)
+                            mentor.MentorProfile?.SubjectToTeach,
+                            mentee.PreferredMentorGender,
+                            mentor.Gender,
+                            mentor.PreferredMenteeGender,
+                            mentee.Gender)
                     });
                 }
             }
@@ -249,6 +254,7 @@ namespace MentoringApp.Service
                     ScorePercent = dto.ScorePercent,
                     MentorName = mentorModel?.UserName ?? "Unknown",
                     MentorProfilePicturePath = mentorModel?.ProfilePicturePath ?? string.Empty,
+                    MentorGender = mentorModel?.Gender ?? Gender.PreferNoAnswer,
                     MentorSubjectName = await GetSubjectNameAsync(mentorModel?.MentorProfile?.SubjectToTeach),
                     MenteeSubjectName = await GetSubjectNameAsync(menteeModel?.MenteeProfile?.SubjectToLearn)
                 });

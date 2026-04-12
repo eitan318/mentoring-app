@@ -6,7 +6,7 @@ using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
+namespace MentoringApp.ViewModel.ViewModel.Supervisor
 {
     public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
     {

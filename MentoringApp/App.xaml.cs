@@ -1,13 +1,15 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.DI;
-using MentoringApp.ViewModel.ViewModelPage.User;
+using MentoringApp.ViewModel.ViewModel.User;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using MentoringApp.Data.DI;
 using MentoringApp.ViewModel.DI;
 using MentoringApp.Service.DI;
+using MentoringApp.Service;
+using MentoringApp.ViewModel.Store;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -61,16 +63,42 @@ namespace MentoringApp
                 }
             }
 
-            // Initial Navigation
-            var navService = _serviceProvider.GetRequiredService<INavigationService>();
-            navService.NavigateToAsync<LoginViewModel>();
-
-            // Show MainWindow manually
+            // Show MainWindow first — this resolves MainWindowViewModel, which calls
+            // UseContext() and registers the navigation context on the stack.
+            // Any NavigateToAsync call before this point fires into an empty stack and is silently dropped.
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             var mainVM = _serviceProvider.GetRequiredService<MainWindowViewModel>();
             mainWindow.DataContext = mainVM;
-
             mainWindow.Show();
+
+            // Now the nav context exists — decide where to go.
+            var navService = _serviceProvider.GetRequiredService<INavigationService>();
+
+            if (!recreateInitialDb)
+            {
+                var sessionService = _serviceProvider.GetRequiredService<SessionService>();
+                var userStore      = _serviceProvider.GetRequiredService<UserStore>();
+
+                int? savedUserId = sessionService.LoadSession();
+                if (savedUserId.HasValue)
+                {
+                    using var scope = _serviceProvider.CreateScope();
+                    var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+                    var userResult  = await userService.GetUserByIdAsync(savedUserId.Value);
+
+                    if (userResult.Success && userResult.Data != null)
+                    {
+                        userStore.User = userResult.Data;
+                        await navService.NavigateToAsync<AuthenticatedDashboardViewModel>();
+                        return;
+                    }
+
+                    // Stored user no longer exists — wipe stale session
+                    sessionService.ClearSession();
+                }
+            }
+
+            await navService.NavigateToAsync<LoginViewModel>();
         }
     }
 }

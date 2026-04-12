@@ -1,9 +1,9 @@
 using MentoringApp.ViewModel.Store;
-using MentoringApp.ViewModel.ViewModelPage;
-using MentoringApp.ViewModel.ViewModelPage.Admin;
-using MentoringApp.ViewModel.ViewModelPage.User;
-using MentoringApp.ViewModel.ViewModelPage.Student;
-using MentoringApp.ViewModel.ViewModelPage.Supervisor;
+using MentoringApp.ViewModel.ViewModel;
+using MentoringApp.ViewModel.ViewModel.Admin;
+using MentoringApp.ViewModel.ViewModel.User;
+using MentoringApp.ViewModel.ViewModel.Student;
+using MentoringApp.ViewModel.ViewModel.Supervisor;
 using Microsoft.Extensions.DependencyInjection;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.Service;

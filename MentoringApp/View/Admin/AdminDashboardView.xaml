@@ -347,6 +347,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" FontSize="12" FontWeight="Medium"
@@ -361,6 +362,9 @@
             <TextBlock Grid.Column="3" FontSize="12" FontWeight="Medium"
                        Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
                        Text="{Binding [Admin_SupervisorHeader_Resolved],Source={x:Static loc:TranslationSource.Instance}}"/>
+            <TextBlock Grid.Column="4" FontSize="12" FontWeight="Medium"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                       Text="Classes"/>
         </Grid>
 
         <!-- ── Supervisors list ── -->
@@ -380,13 +384,28 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding UserName}"/>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding SupervisedPairsCount}"/>
                         <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#CC3300" Text="{Binding PendingIssues.Count}"/>
                         <TextBlock Grid.Column="3" VerticalAlignment="Center" Foreground="#227722" Text="{Binding ResolvedIssues.Count}"/>
-                        <Button Grid.Column="4" Padding="8,3" FontSize="11"
+                        <TextBlock Grid.Column="4" VerticalAlignment="Center"
+                                   Text="{Binding AssignedClasses.Count}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AssignedClasses.Count}" Value="0">
+                                            <Setter Property="Foreground" Value="#CC6600"/>
+                                            <Setter Property="FontStyle" Value="Italic"/>
+                                            <Setter Property="Text" Value="None"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button Grid.Column="5" Padding="8,3" FontSize="11"
                                 Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                 CommandParameter="{Binding}"
                                 Content="{Binding [Admin_Inspect_Button], Source={x:Static loc:TranslationSource.Instance}}"/>

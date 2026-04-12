@@ -23,6 +23,8 @@ namespace MentoringApp.Service.DI
             services.AddScoped<CompatibilityScorer>();
             services.AddScoped<SupervisorAssignmentService>();
 
+            services.AddSingleton<SessionService>();
+
             // Validator
             services.AddSingleton<UserValidator>();
 

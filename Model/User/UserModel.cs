@@ -24,6 +24,12 @@ namespace MentoringApp.Model.User
         [ObservableProperty]
         private string _language = "en";
 
+        [ObservableProperty]
+        private string? _phoneNumber;
+
+        [ObservableProperty]
+        private Gender _gender = Gender.PreferNoAnswer;
+
         public VerificationCode? CurrentVerificationCode { get; set; }
 
         protected UserModel() { }

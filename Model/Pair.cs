@@ -14,6 +14,9 @@ namespace MentoringApp.Model
         public required StudentModel Mentor { get; set; }
         public required int Id { get; set; }
 
+        /// <summary>The supervisor overseeing this pair.</summary>
+        public SupervisorModel? Supervisor { get; set; }
+
         /// <summary>Which tier of the matching process created this pair.</summary>
         public MatchTier MatchTier { get; set; } = MatchTier.AdminManual;
 

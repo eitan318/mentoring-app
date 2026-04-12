@@ -1,3 +1,5 @@
+using MentoringApp.Model.User;
+
 namespace MentoringApp.Model
 {
     /// <summary>
@@ -16,6 +18,7 @@ namespace MentoringApp.Model
         // Populated by service layer for UI display
         public string MentorName { get; set; } = string.Empty;
         public string MentorProfilePicturePath { get; set; } = string.Empty;
+        public Gender MentorGender { get; set; } = Gender.PreferNoAnswer;
         public string MentorSubjectName { get; set; } = string.Empty;
         public string MenteeSubjectName { get; set; } = string.Empty;
     }

@@ -6,12 +6,12 @@ using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.Admin;
-using MentoringApp.ViewModel.ViewModelPage.Student;
-using MentoringApp.ViewModel.ViewModelPage.Supervisor;
+using MentoringApp.ViewModel.ViewModel.Admin;
+using MentoringApp.ViewModel.ViewModel.Student;
+using MentoringApp.ViewModel.ViewModel.Supervisor;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
-namespace MentoringApp.ViewModel.ViewModelPage.User
+namespace MentoringApp.ViewModel.ViewModel.User
 {
     /// <summary>
     /// Shell ViewModel that hosts the role-specific dashboard as a sub-page.
@@ -28,13 +28,15 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private readonly UserStore _userStore;
         private readonly ILanguageService _languageService;
         private readonly UserService _userService;
+        private readonly SessionService _sessionService;
 
-        public AuthenticatedDashboardViewModel(UserStore userStore, INavigationService navigationService, ILanguageService languageService, UserService userService)
+        public AuthenticatedDashboardViewModel(UserStore userStore, INavigationService navigationService, ILanguageService languageService, UserService userService, SessionService sessionService)
         {
             _userStore = userStore;
             _navigationService = navigationService;
             _languageService = languageService;
             _userService = userService;
+            _sessionService = sessionService;
         }
 
         [ObservableProperty]
@@ -128,6 +130,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         }
         [RelayCommand] private void Logout()
         {
+            _sessionService.ClearSession();
             _navContext?.Dispose();
             _navigationService.NavigateToAsync<LoginViewModel>();
         }

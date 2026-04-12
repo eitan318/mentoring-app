@@ -7,7 +7,7 @@ using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.ComponentModel.DataAnnotations;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Student
+namespace MentoringApp.ViewModel.ViewModel.Student
 {
     public partial class AddReviewViewModel : ObservableValidator, INavigatable<Pair>, ICloseable
     {

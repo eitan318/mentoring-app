@@ -5,6 +5,7 @@
     xmlns:loc="clr-namespace:MentoringApp.Localization">
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
     <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+    <conv:InverseBoolConverter x:Key="InverseBoolConverter" />
     <conv:StringToImageSourceConverter x:Key="StringToImage" />
     <loc:DbTranslationConverter x:Key="DbTranslation" />
 </ResourceDictionary>

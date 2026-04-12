@@ -9,8 +9,9 @@ using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using MentoringApp.ViewModel.Helpers;
 
-namespace MentoringApp.ViewModel.ViewModelPage.User 
+namespace MentoringApp.ViewModel.ViewModel.User 
 {
     public partial class RegistrationViewModel : ObservableValidator, INavigatable<bool>, ICloseable
     {
@@ -51,6 +52,14 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private bool _isMentee;
         [ObservableProperty] private bool _supervisorOrStudentIsSupervisor;
         [ObservableProperty] private string _errorMessage = "";
+        [ObservableProperty] private string? _phoneNumber;
+        [ObservableProperty] private int _selectedGenderValue = (int)Gender.PreferNoAnswer;
+        [ObservableProperty] private int _selectedPreferredMentorGenderValue = (int)GenderPreference.NoPreference;
+        [ObservableProperty] private int _selectedPreferredMenteeGenderValue = (int)GenderPreference.NoPreference;
+        [ObservableProperty] private int _maxMentees = 1;
+
+        public static IReadOnlyList<GenderOption> GenderOptions { get; } = GenderHelper.GenderOptions;
+        public static IReadOnlyList<GenderPreferenceOption> GenderPreferenceOptions { get; } = GenderHelper.GenderPreferenceOptions;
         [ObservableProperty] [Required] private string _nationalId = "";
 
         [ObservableProperty]
@@ -92,12 +101,18 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             if (SupervisorOrStudentIsSupervisor)
             {
                 var supervisor = new SupervisorModel { UserName = UserName, Email = Email, NationalId = NationalId };
+                supervisor.PhoneNumber = PhoneNumber;
+                supervisor.Gender = (Gender)SelectedGenderValue;
                 return supervisor;
             }
 
             var student = new StudentModel { UserName = UserName, Email = Email, NationalId = NationalId, Grade = SelectedGrade!, ClassNum = ClassNum };
+            student.PhoneNumber = PhoneNumber;
+            student.Gender = (Gender)SelectedGenderValue;
+            student.PreferredMentorGender = (GenderPreference)SelectedPreferredMentorGenderValue;
+            student.PreferredMenteeGender = (GenderPreference)SelectedPreferredMenteeGenderValue;
             if (IsMentee) student.MenteeProfile = new MenteeProfile { SubjectToLearn = SubjectToLearn };
-            if (IsMentor) student.MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach };
+            if (IsMentor) student.MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach, MaxMentees = MaxMentees };
 
             return student;
         }

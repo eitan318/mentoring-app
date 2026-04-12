@@ -1,6 +1,6 @@
 
 using MentoringApp.Model;
-using MentoringApp.ViewModel.ViewModelPage.Supervisor;
+using MentoringApp.ViewModel.ViewModel.Supervisor;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;

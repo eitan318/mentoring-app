@@ -31,6 +31,8 @@ namespace MentoringApp.Data.DTO
         public string NationalId { get; set; } = string.Empty;
         public string? ProfilePicturePath { get; set; }
         public string Language { get; set; } = "en";
+        public string? PhoneNumber { get; set; }
+        public int Gender { get; set; } = 3; // Gender.PreferNoAnswer
 
         // Discriminator/Role info
         public UserRoleType Role { get; set; }
@@ -38,6 +40,8 @@ namespace MentoringApp.Data.DTO
         // Role-Specific Data (Now including Grade details)
         public int? GradeId { get; set; }
         public int? ClassNum { get; set; }
+        public int? PreferredMentorGender { get; set; } // GenderPreference — mentee's preference for mentor gender
+        public int? PreferredMenteeGender { get; set; } // GenderPreference — mentor's preference for mentee gender
 
 
         public int? MentorSubjectId { get; set; }

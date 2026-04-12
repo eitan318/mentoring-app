@@ -5,7 +5,7 @@ using MentoringApp.Model.User;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.User;
+using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.Service;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,7 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Admin
+namespace MentoringApp.ViewModel.ViewModel.Admin
 {
     /// <summary>A checkable wrapper around a SchoolClass for the supervisor assignment UI.</summary>
     public class SelectableSchoolClass : ObservableObject
@@ -27,6 +27,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         }
         public SelectableSchoolClass(SchoolClass c, bool selected = false) { Class = c; IsSelected = selected; }
     }
+
     public partial class ManageUsersViewModel : ObservableObject, INavigatable
     {
         private readonly IFileService _fileService;
@@ -52,7 +53,10 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [NotifyCanExecuteChangedFor(nameof(DeleteUserCommand))]
         [NotifyCanExecuteChangedFor(nameof(ViewUserCommand))]
         [NotifyCanExecuteChangedFor(nameof(SaveSupervisorClassCommand))]
+        [NotifyPropertyChangedFor(nameof(IsSupervisorSelected))]
         private UserModel? _selectedUser;
+
+        public bool IsSupervisorSelected => SelectedUser is SupervisorModel;
 
         private bool HasSelectedUser => SelectedUser != null;
 
@@ -67,20 +71,27 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         // True when the student-specific panel should be visible
         public bool IsStudentFilterVisible => SelectedRole == "Student";
 
-        // ── Edit Supervisor — Checkable class list ──────────────────────────
-        /// <summary>All system-defined school classes with selection state for the current supervisor.</summary>
-        public ObservableCollection<SelectableSchoolClass> SelectableClasses { get; set; } = [];
+        // ── Edit Supervisor — Multi-class assignment ────────────────────────
+        [ObservableProperty] private string _supervisorClassSaveStatus = "";
+        [ObservableProperty] private bool _supervisorClassSaveIsError;
+
         public ObservableCollection<Grade> AllGrades { get; set; } = [];
+
+        /// <summary>
+        /// Checkable class list for the selected supervisor.
+        /// Only contains classes not assigned to any OTHER supervisor,
+        /// plus any classes already held by this supervisor.
+        /// </summary>
+        public ObservableCollection<SelectableSchoolClass> SelectableClasses { get; } = [];
 
         [RelayCommand(CanExecute = nameof(HasSelectedUser))]
         private async Task SaveSupervisorClass()
         {
             if (SelectedUser is not SupervisorModel supervisor) return;
-            var selected = SelectableClasses.Where(c => c.IsSelected).Select(c => c.Class.Id).ToList();
-            var res = await _schoolClassService.SetSupervisorClassesAsync(supervisor.Id, selected);
+            var ids = SelectableClasses.Where(c => c.IsSelected).Select(c => c.Class.Id).ToList();
+            var res = await _schoolClassService.SetSupervisorClassesAsync(supervisor.Id, ids);
             if (res.Success)
             {
-                // Refresh in-memory model
                 var refreshed = await _userService.GetUserByIdAsync(supervisor.Id);
                 if (refreshed.Success && refreshed.Data is SupervisorModel updated)
                 {
@@ -89,26 +100,36 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
                     SelectedUser = updated;
                 }
                 OnPropertyChanged(nameof(FilteredUsers));
-                MessageBox.Show("Supervisor classes saved.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                SupervisorClassSaveIsError = false;
+                SupervisorClassSaveStatus = "✓ Saved";
+                _ = Task.Delay(3000).ContinueWith(_ => SupervisorClassSaveStatus = "",
+                    System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
             }
             else
             {
-                MessageBox.Show($"Failed: {res.ErrorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                SupervisorClassSaveIsError = true;
+                SupervisorClassSaveStatus = $"✗ {res.ErrorMessage}";
             }
         }
 
         partial void OnSelectedUserChanged(UserModel? value)
         {
             SelectableClasses.Clear();
-            if (value is SupervisorModel supervisor)
-            {
-                var assignedIds = supervisor.AssignedClasses.Select(c => c.Id).ToHashSet();
-                // Populate from the full list loaded in OnNavigatedToAsync
-                foreach (var sc in _allSchoolClasses)
-                {
-                    SelectableClasses.Add(new SelectableSchoolClass(sc, assignedIds.Contains(sc.Id)));
-                }
-            }
+            SupervisorClassSaveStatus = "";
+            SupervisorClassSaveIsError = false;
+            if (value is not SupervisorModel supervisor) return;
+
+            // Class IDs already assigned to OTHER supervisors (off-limits)
+            var takenByOthers = AllUsers
+                .OfType<SupervisorModel>()
+                .Where(s => s.Id != supervisor.Id)
+                .SelectMany(s => s.AssignedClasses.Select(c => c.Id))
+                .ToHashSet();
+
+            var assignedToThis = supervisor.AssignedClasses.Select(c => c.Id).ToHashSet();
+
+            foreach (var sc in _allSchoolClasses.Where(sc => !takenByOthers.Contains(sc.Id)))
+                SelectableClasses.Add(new SelectableSchoolClass(sc, assignedToThis.Contains(sc.Id)));
         }
 
         private List<SchoolClass> _allSchoolClasses = new();

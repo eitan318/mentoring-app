@@ -63,7 +63,8 @@
                                 <!-- Avatar -->
                                 <components:ProfilePictureControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
                                     Width="52" Height="52" Margin="0,0,14,0" VerticalAlignment="Center"
-                                    ImagePath="{Binding MenteeProfilePicturePath}"/>
+                                    ImagePath="{Binding MenteeProfilePicturePath}"
+                                    Gender="{Binding MenteeGender}"/>
 
                                 <!-- Info -->
                                 <StackPanel Grid.Row="0" Grid.Column="1">

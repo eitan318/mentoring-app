@@ -55,11 +55,6 @@
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
                 <Button
-                    Width="100"
-                    Margin="5"
-                    Command="{Binding BackCommand}"
-                    Content="{Binding [Nav_Back], Source={x:Static loc:TranslationSource.Instance}}" />
-                <Button
                     Width="120"
                     Margin="5"
                     Background="DarkGreen"

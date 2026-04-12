@@ -135,15 +135,20 @@ namespace MentoringApp.Service
 
                     var student = new StudentModel(dto.Id, dto.Email, dto.UserName, dto.NationalId, new Grade { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num });
                     student.ClassNum = dto.ClassNum ?? 0;
+                    student.PreferredMentorGender = dto.PreferredMentorGender.HasValue
+                        ? (MentoringApp.Model.User.GenderPreference)dto.PreferredMentorGender.Value
+                        : MentoringApp.Model.User.GenderPreference.NoPreference;
+                    student.PreferredMenteeGender = dto.PreferredMenteeGender.HasValue
+                        ? (MentoringApp.Model.User.GenderPreference)dto.PreferredMenteeGender.Value
+                        : MentoringApp.Model.User.GenderPreference.NoPreference;
 
                     if (dto.MentorSubjectId.HasValue)
                     {
-                        student.MentorProfile = new MentorProfile { 
+                        student.MentorProfile = new MentorProfile {
                             SubjectToTeach = dto.MentorSubjectId.Value,
                             MaxMentees = dto.MaxMentees ?? 1
                         };
                     }
-
 
                     if (dto.MenteeSubjectId.HasValue)
                     {
@@ -172,6 +177,10 @@ namespace MentoringApp.Service
 
             // Map language preference
             user.Language = dto.Language ?? "en";
+
+            // Map contact and gender info
+            user.PhoneNumber = dto.PhoneNumber;
+            user.Gender = (MentoringApp.Model.User.Gender)dto.Gender;
 
             return user;
         }
@@ -204,13 +213,14 @@ namespace MentoringApp.Service
             if (user == null) return Result.Failure("User data is null.");
 
             bool baseUpdated = await _userRepo.UpdateBaseInfoAsync(
-                user.Id, user.UserName, user.Email, user.NationalId);
+                user.Id, user.UserName, user.Email, user.NationalId, user.PhoneNumber, (int)user.Gender);
 
             if (!baseUpdated) return Result.Failure("User not found or base update failed.");
 
             if (user is StudentModel student)
             {
                 await _userRepo.UpdateStudentGradeAndClassAsync(student.Id, student.Grade.Id, student.ClassNum);
+                await _userRepo.UpdateStudentPreferredGendersAsync(student.Id, (int)student.PreferredMentorGender, (int)student.PreferredMenteeGender);
 
                 if (student.MentorProfile != null)
                 {

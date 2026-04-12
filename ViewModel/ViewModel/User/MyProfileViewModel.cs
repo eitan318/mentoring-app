@@ -6,15 +6,16 @@ using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
-using MentoringApp.ViewModel.ViewModelPage.Admin;
-using MentoringApp.ViewModel.ViewModelPage.Supervisor;
-using MentoringApp.ViewModel.ViewModelPage.Student;
+using MentoringApp.ViewModel.ViewModel.Admin;
+using MentoringApp.ViewModel.ViewModel.Supervisor;
+using MentoringApp.ViewModel.ViewModel.Student;
 using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.ViewModel.Helpers;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace MentoringApp.ViewModel.ViewModelPage.User
+namespace MentoringApp.ViewModel.ViewModel.User
 {
     public partial class MyProfileViewModel : ObservableValidator, INavigatable
     {
@@ -51,6 +52,16 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private bool _hasMentorProfile;
         [ObservableProperty] private bool _hasMenteeProfile;
         [ObservableProperty] private bool _isSupervisor;
+        [ObservableProperty] private bool _isAdmin;
+        [ObservableProperty] private string _roleBadge = string.Empty;
+
+        // Contact & Gender (all users)
+        [ObservableProperty] private string? _phoneNumber;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Gender))]
+        private int _selectedGenderValue = (int)Gender.PreferNoAnswer;
+
+        public Gender Gender => (Gender)SelectedGenderValue;
 
         // Editable Student Data
         [ObservableProperty] private Grade _selectedGrade;
@@ -58,6 +69,11 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         [ObservableProperty] private int _subjectToTeach = -1;
         [ObservableProperty] private int _subjectToLearn = -1;
         [ObservableProperty] private int _maxMentees = 1;
+        [ObservableProperty] private int _selectedPreferredMentorGenderValue = (int)GenderPreference.NoPreference;
+        [ObservableProperty] private int _selectedPreferredMenteeGenderValue = (int)GenderPreference.NoPreference;
+
+        public static IReadOnlyList<GenderOption> GenderOptions { get; } = GenderHelper.GenderOptions;
+        public static IReadOnlyList<GenderPreferenceOption> GenderPreferenceOptions { get; } = GenderHelper.GenderPreferenceOptions;
 
         public MyProfileViewModel(UserStore userStore, AuthService authService, GradeService gradeService, SubjectService subjectService, UserService userService, INavigationService navigationService)
         {
@@ -91,23 +107,47 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             Email = user.Email;
             NationalId = user.NationalId;
             ProfilePicturePath = user.ProfilePicturePath;
+            PhoneNumber = user.PhoneNumber;
+            SelectedGenderValue = (int)user.Gender;
 
-            if (user is StudentModel student)
+            if (user is AdminModel)
             {
+                IsAdmin = true;
+                IsSupervisor = false;
+                RoleBadge = "Admin";
+            }
+            else if (user is StudentModel student)
+            {
+                IsAdmin = false;
                 IsSupervisor = false;
                 SelectedGrade = student.Grade;
                 ClassNum = student.ClassNum;
+                SelectedPreferredMentorGenderValue = (int)student.PreferredMentorGender;
+                SelectedPreferredMenteeGenderValue = (int)student.PreferredMenteeGender;
                 HasMentorProfile = student.MentorProfile != null;
                 HasMenteeProfile = student.MenteeProfile != null;
 
-                if (HasMentorProfile) 
+                RoleBadge = (HasMentorProfile, HasMenteeProfile) switch
+                {
+                    (true, true)  => "Student · Mentor & Mentee",
+                    (true, false) => "Student · Mentor",
+                    (false, true) => "Student · Mentee",
+                    _             => "Student"
+                };
+
+                if (HasMentorProfile)
                 {
                     SubjectToTeach = student.MentorProfile.SubjectToTeach;
                     MaxMentees = student.MentorProfile.MaxMentees;
                 }
                 if (HasMenteeProfile) SubjectToLearn = student.MenteeProfile.SubjectToLearn;
             }
-            else { IsSupervisor = true; }
+            else
+            {
+                IsAdmin = false;
+                IsSupervisor = true;
+                RoleBadge = "Supervisor";
+            }
         }
 
         [RelayCommand]
@@ -129,12 +169,16 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             // Update base user info
             user.UserName = UserName;
             user.Email = Email;
+            user.PhoneNumber = PhoneNumber;
+            user.Gender = (Gender)SelectedGenderValue;
 
             if (user is StudentModel student)
             {
                 student.Grade = SelectedGrade;
                 student.ClassNum = ClassNum;
-                if (HasMentorProfile && student.MentorProfile != null) 
+                student.PreferredMentorGender = (GenderPreference)SelectedPreferredMentorGenderValue;
+                student.PreferredMenteeGender = (GenderPreference)SelectedPreferredMenteeGenderValue;
+                if (HasMentorProfile && student.MentorProfile != null)
                 {
                     student.MentorProfile.SubjectToTeach = SubjectToTeach;
                     student.MentorProfile.MaxMentees = MaxMentees;

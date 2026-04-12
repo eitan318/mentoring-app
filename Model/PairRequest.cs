@@ -1,3 +1,5 @@
+using MentoringApp.Model.User;
+
 namespace MentoringApp.Model
 {
     /// <summary>
@@ -27,6 +29,7 @@ namespace MentoringApp.Model
         public string MenteeName { get; set; } = string.Empty;
         public string MentorName { get; set; } = string.Empty;
         public string MenteeProfilePicturePath { get; set; } = string.Empty;
+        public Gender MenteeGender { get; set; } = Gender.PreferNoAnswer;
 
         // Subject/interest information (populated from profile)
         public string MenteeSubjectName { get; set; } = string.Empty;

@@ -7,10 +7,15 @@ using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.Supervisor;
+using MentoringApp.ViewModel.ViewModel.Supervisor;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Admin
+namespace MentoringApp.ViewModel.ViewModel.Admin
 {
+    /// <summary>
+    /// Admin pair management ViewModel. Displays all pairs with search filtering.
+    /// Selecting a pair eagerly loads its review count and unresolved issue count
+    /// for display in the sidebar before navigating to the full <see cref="PairDetailsViewModel"/>.
+    /// </summary>
     public partial class ManagePairsViewModel : ObservableObject, INavigatable
     {
         private readonly IWindowService _windowService;

@@ -12,6 +12,7 @@ namespace MentoringApp.Service
         public const string Phase2DeadlineKey = "Phase2Deadline";
         public const string IsPhase1CompleteKey = "IsPhase1Complete";
         public const string IsProcessCompleteKey = "IsProcessComplete";
+        public const string IsSchoolConfiguredKey = "IsSchoolConfigured";
 
         public SettingsService(ISettingsRepo settingsRepo)
         {
@@ -81,5 +82,16 @@ namespace MentoringApp.Service
 
         public Task SetIsProcessCompleteAsync(bool value)
             => _settingsRepo.SetStringAsync(IsProcessCompleteKey, value.ToString());
+
+        // ── School Configuration ──────────────────────────────────────────────
+
+        public async Task<bool> GetIsSchoolConfiguredAsync()
+        {
+            string raw = await _settingsRepo.GetStringAsync(IsSchoolConfiguredKey, "false");
+            return bool.TryParse(raw, out var b) && b;
+        }
+
+        public Task SetIsSchoolConfiguredAsync(bool value)
+            => _settingsRepo.SetStringAsync(IsSchoolConfiguredKey, value.ToString());
     }
 }

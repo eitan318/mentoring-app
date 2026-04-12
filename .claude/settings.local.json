@@ -3,7 +3,11 @@
     "allow": [
       "Bash(grep -E \"\\\\.\\(cs|xaml\\)$\")",
       "Bash(grep \"\\\\.cs$\")",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(grep -v \"^$\")",
+      "Bash(xargs grep:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet test:*)"
     ]
   }
 }

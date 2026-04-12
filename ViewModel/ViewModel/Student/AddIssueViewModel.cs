@@ -8,7 +8,7 @@ using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Student
+namespace MentoringApp.ViewModel.ViewModel.Student
 {
     public partial class AddIssueViewModel : ObservableValidator, INavigatable<IEnumerable<IssueCategoryModel>>, ICloseable 
     {

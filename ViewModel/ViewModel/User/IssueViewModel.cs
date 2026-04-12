@@ -5,7 +5,7 @@ using MentoringApp.Service;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 
-namespace MentoringApp.ViewModel.ViewModelPage.User
+namespace MentoringApp.ViewModel.ViewModel.User
 {
     public partial class IssueViewModel : ObservableObject, INavigatable<int>
     {

@@ -4,15 +4,16 @@ using MentoringApp.Model;
 using MentoringApp.Model.User;
 using MentoringApp.Service;
 using MentoringApp.ViewModel.Navigation;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.User;
+using MentoringApp.ViewModel.ViewModel.User;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Windows;
 using System;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
+namespace MentoringApp.ViewModel.ViewModel.Supervisor
 {
     /// <summary>
     /// Supervisor dashboard ViewModel. Loaded with the supervisor's ID via
@@ -33,6 +34,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         protected readonly UserService _userService;
         protected readonly ReviewService _reviewService;
         protected readonly SettingsService _settingsService;
+        private readonly UserStore _userStore;
 
         // Cached so we can reload data after returning from sub-pages
         private int _currentSupervisorId;
@@ -59,6 +61,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         private DateTime? _tier1Deadline;
         private DateTime? _tier3Deadline;
         private bool _isPhase1Complete;
+        private bool _isProcessComplete;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
@@ -70,7 +73,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
         [NotifyPropertyChangedFor(nameof(FilteredResolvedIssues))]
         [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
+        [NotifyPropertyChangedFor(nameof(IssuesSectionContextTitle))]
         private Pair? _issueFilterPair;
+
+        public string IssuesSectionContextTitle => IssueFilterPair == null
+            ? "Issues"
+            : $"Issues of {IssueFilterPair.Mentor.UserName} & {IssueFilterPair.Mentee.UserName}";
 
         /// <summary>
         /// Pending issues, optionally scoped to the selected pair's participants.
@@ -89,10 +97,16 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
         [ObservableProperty] private object? _selectedPaneContent;
 
-        [ObservableProperty] private bool _showResolvedIssues;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsShowingPending))]
+        [NotifyPropertyChangedFor(nameof(IsShowingResolved))]
+        private bool _showResolvedIssues;
 
-        [RelayCommand]
-        private void ToggleResolvedIssues() => ShowResolvedIssues = !ShowResolvedIssues;
+        public bool IsShowingPending  => !ShowResolvedIssues;
+        public bool IsShowingResolved =>  ShowResolvedIssues;
+
+        [RelayCommand] private void ShowPending()  => ShowResolvedIssues = false;
+        [RelayCommand] private void ShowResolved() => ShowResolvedIssues = true;
 
         // ── Matching-Flow State (Warnings for Tier 5) ─────────────────────────
 
@@ -105,13 +119,17 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
         public bool HasIncompleteProfileWarnings => IncompleteProfileCount > 0;
 
+        /// <summary>True when the current logged-in user is an admin (viewing someone else's dashboard).</summary>
+        public bool IsAdminViewing => _userStore.User is AdminModel;
+
         public SupervisorDashboardViewModel(
-            INavigationService navigationService, 
-            PairService pairService, 
-            IssueService issueService, 
+            INavigationService navigationService,
+            PairService pairService,
+            IssueService issueService,
             UserService userService,
             ReviewService reviewService,
-            SettingsService settingsService)
+            SettingsService settingsService,
+            UserStore userStore)
         {
             _navigationService = navigationService;
             _pairService = pairService;
@@ -119,6 +137,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
             _userService = userService;
             _reviewService = reviewService;
             _settingsService = settingsService;
+            _userStore = userStore;
         }
 
         [RelayCommand]
@@ -188,49 +207,50 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
                 AllIssues = new ObservableCollection<IssueModel>(issuesResult.Data ?? []);
             }
 
-            // Build the class completion gauge: find students in the supervisor's class
-            // and check each for profile completeness (same rules as AuthenticatedDashboardViewModel).
+            // Build the class-completion gauge across ALL classes assigned to this supervisor.
             var allUsers = await _userService.GetAllUsersAsync();
+
+            var assignedSlots = SelectedSupervisor?.AssignedClasses
+                .Select(c => (gradeId: c.Grade.Id, classNum: c.ClassNum))
+                .ToHashSet() ?? [];
+
             var myStudents = allUsers.OfType<StudentModel>()
-                .Where(s => SelectedSupervisor != null && s.Grade?.Id == SelectedSupervisor.Grade?.Id && s.ClassNum == SelectedSupervisor.ClassNum)
+                .Where(s => s.Grade != null && assignedSlots.Contains((s.Grade.Id, s.ClassNum)))
                 .ToList();
 
             int totalStudents = myStudents.Count;
-            var inactive = new List<StudentModel>();
-
-            foreach (var student in myStudents)
+            var inactive = myStudents.Where(s =>
             {
-                bool isProfileIncomplete = student.Grade == null || student.Grade.Id == 0 || student.ClassNum <= 0;
-                if (student.IsMentor && student.MentorProfile?.SubjectToTeach <= 0) isProfileIncomplete = true;
-                if (student.IsMentee && student.MenteeProfile?.SubjectToLearn <= 0) isProfileIncomplete = true;
-
-                if (isProfileIncomplete)
-                {
-                    inactive.Add(student);
-                }
-            }
+                if (s.Grade == null || s.Grade.Id == 0 || s.ClassNum <= 0) return true;
+                if (s.IsMentor  && s.MentorProfile?.SubjectToTeach <= 0) return true;
+                if (s.IsMentee  && s.MenteeProfile?.SubjectToLearn <= 0) return true;
+                return false;
+            }).ToList();
 
             InactiveStudents = new ObservableCollection<StudentModel>(inactive);
-            
+
             if (totalStudents > 0)
             {
                 int registered = totalStudents - inactive.Count;
                 ClassProgressPercent = (double)registered / totalStudents * 100;
-                ClassProgressInfo = $"Class {SelectedSupervisor?.ClassNum}: {(int)ClassProgressPercent}% Complete ({registered}/{totalStudents} Registered)";
+                string classLabel = assignedSlots.Count == 1
+                    ? $"Class {assignedSlots.First().classNum}"
+                    : $"{assignedSlots.Count} classes";
+                ClassProgressInfo = $"{classLabel}: {(int)ClassProgressPercent}% complete ({registered}/{totalStudents} registered)";
             }
             else
             {
                 ClassProgressPercent = 0;
-                ClassProgressInfo = "No students in your class.";
+                ClassProgressInfo = "No students found in your assigned classes.";
             }
         }
 
         private async Task LoadMatchingSettingsAsync()
         {
-            // Timer
-            _tier1Deadline = await _settingsService.GetPhase1DeadlineAsync();
-            _tier3Deadline = await _settingsService.GetPhase2DeadlineAsync();
+            _tier1Deadline    = await _settingsService.GetPhase1DeadlineAsync();
+            _tier3Deadline    = await _settingsService.GetPhase2DeadlineAsync();
             _isPhase1Complete = await _settingsService.GetIsPhase1CompleteAsync();
+            _isProcessComplete = await _settingsService.GetIsProcessCompleteAsync();
 
             SetupTimer();
         }
@@ -253,13 +273,35 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
         [RelayCommand]
         private void ShowPhaseInfo()
         {
-            if (IsPhase1Active)
+            if (_isProcessComplete)
             {
-                MessageBox.Show("Phase 1: Mentee Enrollment.\nYour students are currently selecting mentors. Keep an eye on the inactive students list.", "Phase 1 Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    "The matching process is complete. All students have been assigned a pair.\n\n" +
+                    "You can still manage issues and review pair activity from this dashboard.",
+                    "Matching Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else if (IsPhase1Active)
+            {
+                MessageBox.Show(
+                    "Registration Phase\n\n" +
+                    "Students are logging in and completing their profiles.\n\n" +
+                    "Mentees can browse available mentors and send a direct pairing request. " +
+                    "If a mentor accepts, they become paired immediately.\n\n" +
+                    "Watch the inactive students list — students who haven't completed their profiles " +
+                    "will not appear in the matching pool.",
+                    "Registration Phase", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else if (IsPhase2Active)
             {
-                MessageBox.Show("Phase 2: Algorithmic Matching.\nThe system is processing leftover unmatched students. You may need to review fallback assignments soon.", "Phase 2 Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    "Mentor Selection Phase\n\n" +
+                    "Each mentee who is still unmatched is shown their top algorithmically ranked " +
+                    "mentor suggestions and can choose one.\n\n" +
+                    "When the deadline passes (or the admin runs the auto-match manually), " +
+                    "any mentee who still hasn't chosen is paired automatically by the algorithm. " +
+                    "A fallback pass then handles any remaining edge cases.\n\n" +
+                    "You may see new pairs appear in your list as students make their selections.",
+                    "Mentor Selection Phase", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -274,51 +316,66 @@ namespace MentoringApp.ViewModel.ViewModelPage.Supervisor
 
         private void UpdatePhaseTimer()
         {
-            // For Supervisor, we almost always show the banner unless all phases are done (for our case we'll just show it always until we decide otherwise, but let's toggle visibility based on if there's any active deadline)
+            // ── Phase 3: Matching complete ────────────────────────────────────
+            if (_isProcessComplete)
+            {
+                IsPhase1Active = false;
+                IsPhase2Active = false;
+                IsPhaseBannerVisible = true;
+                BannerTitle = "Matching Complete";
+                BannerSubtitle = "All students have been paired. No further action is required.";
+                BannerTimer = string.Empty;
+                return;
+            }
+
             IsPhaseBannerVisible = true;
-            
+
+            // ── Phase 1: Registration open ────────────────────────────────────
+            // Admin has not yet started the selection phase.
+            // Students are signing up, filling profiles, and mentees may send
+            // direct pairing requests to mentors.
             if (!_isPhase1Complete)
             {
                 IsPhase1Active = true;
                 IsPhase2Active = false;
-                BannerTitle = "Phase 1: Mentee Matchmaking Window";
-                BannerSubtitle = "Mentees are currently browsing and selecting mentors.";
-                BannerColor = "#E3F2FD";
-                BannerTextColor = "#1565C0";
+                BannerTitle = "Registration Phase";
+                BannerSubtitle = "Students are registering and completing their profiles. " +
+                                 "Mentees may send direct pairing requests to mentors.";
 
                 if (_tier1Deadline.HasValue)
                 {
                     var diff = _tier1Deadline.Value - DateTime.Now;
-                    if (diff.TotalSeconds > 0)
-                        BannerTimer = $"Ends in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s";
-                    else
-                        BannerTimer = "Deadline Reached (Awaiting system run)";
+                    BannerTimer = diff.TotalSeconds > 0
+                        ? $"Registration closes in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s"
+                        : "Registration deadline reached — awaiting admin action";
                 }
                 else
                 {
-                    BannerTimer = "Pending System Activation";
+                    BannerTimer = "No deadline set";
                 }
             }
+            // ── Phase 2: Mentor selection open ────────────────────────────────
+            // Admin started the selection phase.
+            // Each unmatched mentee can now pick from their top algorithmically
+            // ranked mentor suggestions. The auto-match runs at the deadline.
             else
             {
                 IsPhase1Active = false;
                 IsPhase2Active = true;
-                BannerTitle = "Phase 2: Algorithmic Fallback";
-                BannerSubtitle = "The system is matching remaining mentees automatically.";
-                BannerColor = "#F3E5F5";
-                BannerTextColor = "#6A1B9A";
+                BannerTitle = "Mentor Selection Phase";
+                BannerSubtitle = "Unmatched mentees are choosing from their top suggested mentors. " +
+                                 "Remaining unmatched students will be auto-paired at the deadline.";
 
                 if (_tier3Deadline.HasValue)
                 {
                     var diff = _tier3Deadline.Value - DateTime.Now;
-                    if (diff.TotalSeconds > 0)
-                        BannerTimer = $"Runs in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s";
-                    else
-                        BannerTimer = "Deadline Reached (Awaiting system run)";
+                    BannerTimer = diff.TotalSeconds > 0
+                        ? $"Auto-match runs in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s"
+                        : "Selection deadline reached — awaiting admin action";
                 }
                 else
                 {
-                    BannerTimer = "Pending Algorithmic Run";
+                    BannerTimer = "No deadline set";
                 }
             }
         }
