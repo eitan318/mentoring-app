@@ -12,7 +12,7 @@
                 <!--  ── Profile Picture Section ──  -->
                 <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
                     <Grid Width="100" Height="100">
-                        <components:ProfilePictureControl ImagePath="{Binding ProfilePicturePath}" />
+                        <components:ProfilePictureControl ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}" />
                         <!--  Camera overlay button  -->
                         <Button
                             Width="28" Height="28"
@@ -32,6 +32,14 @@
                         Text="{Binding [Profile_ChangePhoto_Hint], Source={x:Static loc:TranslationSource.Instance}}" />
                 </StackPanel>
 
+                <!-- Role badge pill -->
+                <Border Background="#F0F4FF" BorderBrush="#C7D4F5" BorderThickness="1"
+                        CornerRadius="12" Padding="14,4" Margin="0,4,0,18"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding RoleBadge}" FontSize="13" FontWeight="SemiBold"
+                               Foreground="#3B5BDB" />
+                </Border>
+
                 <Label Content="{Binding [Profile_Username_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                 <TextBox IsReadOnly="{Binding IsReadOnly}" Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
 
@@ -43,6 +51,17 @@
                     Background="#F0F0F0"
                     IsReadOnly="True"
                     Text="{Binding NationalId}" />
+
+                <Label Margin="0,10,0,0" Content="Phone Number" />
+                <TextBox IsReadOnly="{Binding IsReadOnly}" Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Margin="0,10,0,0" Content="Gender" />
+                <ComboBox
+                    IsEnabled="{Binding IsEditMode}"
+                    ItemsSource="{Binding GenderOptions}"
+                    SelectedValue="{Binding SelectedGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedValuePath="Value"
+                    DisplayMemberPath="Display" />
 
                 <StackPanel Visibility="{Binding IsSupervisor, Converter={StaticResource InverseBoolToVis}}">
 
@@ -69,6 +88,7 @@
                     <Label Margin="0,10,0,0" Content="Class Num" />
                     <TextBox IsReadOnly="{Binding IsReadOnly}" Text="{Binding ClassNum, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
 
+                    <!-- Mentor section: subject, max mentees, preferred mentee gender -->
                     <StackPanel Visibility="{Binding HasMentorProfile, Converter={StaticResource BoolToVis}}">
                         <Label Margin="0,10,0,0" Content="{Binding [Profile_SubjectToTeach_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                         <ComboBox
@@ -90,11 +110,20 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                        
+
                         <Label Margin="0,10,0,0" Content="Max Mentees" />
                         <TextBox IsReadOnly="{Binding IsReadOnly}" Text="{Binding MaxMentees, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+
+                        <Label Margin="0,10,0,0" Content="Preferred Mentee Gender" />
+                        <ComboBox
+                            IsEnabled="{Binding IsEditMode}"
+                            ItemsSource="{Binding GenderPreferenceOptions}"
+                            SelectedValue="{Binding SelectedPreferredMenteeGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedValuePath="Value"
+                            DisplayMemberPath="Display" />
                     </StackPanel>
 
+                    <!-- Mentee section: subject to learn, preferred mentor gender -->
                     <StackPanel Visibility="{Binding HasMenteeProfile, Converter={StaticResource BoolToVis}}">
                         <Label Margin="0,10,0,0" Content="{Binding [Profile_SubjectToLearn_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                         <ComboBox
@@ -116,6 +145,14 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
+
+                        <Label Margin="0,10,0,0" Content="Preferred Mentor Gender" />
+                        <ComboBox
+                            IsEnabled="{Binding IsEditMode}"
+                            ItemsSource="{Binding GenderPreferenceOptions}"
+                            SelectedValue="{Binding SelectedPreferredMentorGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedValuePath="Value"
+                            DisplayMemberPath="Display" />
                     </StackPanel>
                 </StackPanel>
 

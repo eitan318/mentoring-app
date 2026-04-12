@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.User;
+using MentoringApp.ViewModel.ViewModel.User;
 
 public partial class MainWindowViewModel : ObservableObject, INavigatable
 {
@@ -15,7 +15,8 @@ public partial class MainWindowViewModel : ObservableObject, INavigatable
     {
         _navigationService = navigationService;
         navigationService.UseContext(vm => CurrentViewModel = vm);
-        _ = _navigationService.NavigateToAsync<LoginViewModel>();
+        // Initial navigation is handled by App.xaml.cs after the window is shown,
+        // so the nav context already exists when it fires.
     }
 
     public void OnWindowClosed()

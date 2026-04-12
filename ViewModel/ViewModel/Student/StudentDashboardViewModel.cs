@@ -7,7 +7,7 @@ using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.User;
+using MentoringApp.ViewModel.ViewModel.User;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Student
+namespace MentoringApp.ViewModel.ViewModel.Student
 {
     /// <summary>
     /// Student dashboard ViewModel. Dynamically composes the tab list (<see cref="Pairs"/>)
@@ -106,6 +106,11 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
 
             SetupTimer();
 
+            // Track per-role match status independently so dual-role students
+            // always get the correct set of tabs regardless of the other role.
+            bool mentorIsMatched = false;
+            bool menteeIsMatched = false;
+
             // --- Real pair tabs (always shown when matched) ---
             if (currentUser.IsMentor)
             {
@@ -117,6 +122,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
                         _reviewService, _userStore, _settingsService, result.Data);
                     await vm.LoadDataAsync();
                     Pairs.Add(vm);
+                    mentorIsMatched = true;
                 }
             }
 
@@ -130,30 +136,43 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
                         _reviewService, _userStore, _settingsService, result.Data);
                     await vm.LoadDataAsync();
                     Pairs.Add(vm);
+                    menteeIsMatched = true;
                 }
             }
 
-            // --- Phase 2 tabs (only when unmatched and phase 1 is over) ---
-            if (_isPhase1Complete && Pairs.Count == 0)
+            // --- Phase 2 tabs for each unmatched role (phase 1 is over) ---
+            if (_isPhase1Complete)
             {
-                if (currentUser.IsMentee)
+                if (currentUser.IsMentee && !menteeIsMatched)
                 {
                     await _selectionGalleryVm.LoadAsync();
                     Pairs.Add(_selectionGalleryVm);
                 }
 
-                if (currentUser.IsMentor)
+                if (currentUser.IsMentor && !mentorIsMatched)
                 {
+                    // Mentor is passive in Phase 2: mentees choose, no accept/decline
+                    _mentorRequestsVm.IsPhase2Active = true;
                     await _mentorRequestsVm.LoadAsync();
                     Pairs.Add(_mentorRequestsVm);
                 }
             }
 
-            // --- Phase 1 browse tab (mentee, unmatched, phase 1 still open) ---
-            if (!_isPhase1Complete && Pairs.Count == 0 && currentUser.IsMentee)
+            // --- Phase 1 tabs for each unmatched role ---
+            if (!_isPhase1Complete)
             {
-                await _browseMentorsVm.LoadAsync();
-                Pairs.Add(_browseMentorsVm);
+                if (currentUser.IsMentee && !menteeIsMatched)
+                {
+                    await _browseMentorsVm.LoadAsync();
+                    Pairs.Add(_browseMentorsVm);
+                }
+
+                if (currentUser.IsMentor && !mentorIsMatched)
+                {
+                    _mentorRequestsVm.IsPhase2Active = false;
+                    await _mentorRequestsVm.LoadAsync();
+                    Pairs.Add(_mentorRequestsVm);
+                }
             }
 
             SelectedPair = Pairs.Count > 0 ? Pairs[0] : null;
@@ -184,7 +203,12 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
 
         private void UpdatePhaseTimer()
         {
-            if (!HasNoPairs)
+            // Show banner whenever there is an active phase tab (unmatched role).
+            // Fully-paired students have no phase tabs, so they see no banner.
+            bool hasPhaseTab = Pairs.OfType<BrowseMentorsViewModel>().Any()
+                            || Pairs.OfType<MentorRequestsViewModel>().Any()
+                            || Pairs.OfType<SelectionGalleryViewModel>().Any();
+            if (!hasPhaseTab)
             {
                 IsPhaseBannerVisible = false;
                 return;
@@ -258,6 +282,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         protected readonly SettingsService _settingsService;
 
         [ObservableProperty] private StudentModel _counterpart;
+        [ObservableProperty] private SupervisorModel? _supervisor;
+        public bool HasSupervisor => Supervisor != null;
 
         public Pair Pair { get; }
 
@@ -286,6 +312,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
             _settingsService = settingsService;
             Pair = pair;
             Counterpart = counterpart;
+            Supervisor = pair.Supervisor;
         }
 
         public virtual async Task LoadDataAsync()
@@ -457,6 +484,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         [ObservableProperty] private string? _statusMessage;
         [ObservableProperty] private bool _hasStatusMessage;
         [ObservableProperty] private string _requestWindowTimerDisplay = string.Empty;
+        /// <summary>True when this tab is shown in Phase 2 — hides Accept/Decline, shows passive info banner.</summary>
+        [ObservableProperty] private bool _isPhase2Active;
 
         public int AssignedSupervisorId { get; set; } = 1;
 
@@ -567,6 +596,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
                     MentorId = mentor.Id,
                     MentorName = mentor.UserName,
                     ProfilePicturePath = mentor.ProfilePicturePath,
+                    Gender = mentor.Gender,
                     SubjectName = subjectName,
                     GradeName = mentor.Grade.Name
                 });
@@ -599,5 +629,6 @@ namespace MentoringApp.ViewModel.ViewModelPage.Student
         public string SubjectName { get; set; } = string.Empty;
         public string GradeName { get; set; } = string.Empty;
         public string ProfilePicturePath { get; set; } = string.Empty;
+        public Gender Gender { get; set; } = Gender.PreferNoAnswer;
     }
 }

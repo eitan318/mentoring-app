@@ -3,7 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="root">
     <Grid>
-        <Ellipse Fill="#CCCCCC" />
+        <Ellipse Fill="{Binding DefaultFill, ElementName=root}" />
+        <Viewbox Margin="5"
+                 Visibility="{Binding ShowDefaultAvatar, ElementName=root, Converter={StaticResource BoolToVis}}">
+            <TextBlock
+                Text="&#xE77B;"
+                FontFamily="Segoe MDL2 Assets"
+                Foreground="White" />
+        </Viewbox>
         <Ellipse>
             <Ellipse.Fill>
                 <ImageBrush

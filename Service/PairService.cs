@@ -5,6 +5,13 @@ using MentoringApp.Model.User;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// CRUD and query operations for mentor–mentee pairs.
+    /// Hydrates <see cref="Pair"/> models from <see cref="PairDto"/>s by loading both
+    /// mentor and mentee as <see cref="StudentModel"/> instances via <see cref="UserService"/>.
+    /// Returns <c>null</c> from <see cref="MapDtoToPairAsync"/> if either user fails to load,
+    /// so callers should check <see cref="Result{T}.Success"/> before using the data.
+    /// </summary>
     public class PairService
     {
         private readonly IPairRepo _pairRepo;
@@ -97,11 +104,15 @@ namespace MentoringApp.Service
             if (mentorResult.Data is not StudentModel mentor) return null;
             if (menteeResult.Data is not StudentModel mentee) return null;
 
+            var supervisorResult = await _userService.GetUserByIdAsync(dto.SupervisorId);
+            var supervisor = supervisorResult.Data as SupervisorModel;
+
             return new Pair
             {
                 Id = dto.Id,
                 Mentor = mentor,
                 Mentee = mentee,
+                Supervisor = supervisor,
                 MatchTier = (MatchTier)dto.MatchTier,
                 IsProfileIncomplete = dto.IsProfileIncomplete
             };

@@ -58,9 +58,9 @@
   <data name="Login_Login_Button" xml:space="preserve"><value>כניסה</value></data>
 
   <!-- Registration -->
-  <data name="Register_Username_Tag" xml:space="preserve"><value>שם משתמש</value></data>
-  <data name="Register_Email_Tag" xml:space="preserve"><value>כתובת אימייל</value></data>
-  <data name="Register_NationalId_Tag" xml:space="preserve"><value>תעודת זהות</value></data>
+  <data name="Register_Username_Tag" xml:space="preserve"><value>שם משתמש *</value></data>
+  <data name="Register_Email_Tag" xml:space="preserve"><value>כתובת אימייל *</value></data>
+  <data name="Register_NationalId_Tag" xml:space="preserve"><value>תעודת זהות *</value></data>
   <data name="Register_SupervisorNoData" xml:space="preserve"><value>נתוני מדריך: אין נתונים</value></data>
   <data name="Register_Grade_Tag" xml:space="preserve"><value>כיתה (לדוגמה: י׳)</value></data>
   <data name="Register_IsMentor_Check" xml:space="preserve"><value>מנטור</value></data>
@@ -102,6 +102,7 @@
   <data name="Student_MyIssues_Label" xml:space="preserve"><value>הבעיות הפעילות שלי</value></data>
   <data name="Student_NoAssignment_Title" xml:space="preserve"><value>לא שובצת עם מנטור או מתאמן</value></data>
   <data name="Student_NoAssignment_Hint" xml:space="preserve"><value>פנה אל המדריך או מנהל המערכת לשיבוץ.</value></data>
+  <data name="Student_Supervisor_Label" xml:space="preserve"><value>המדריך שלך</value></data>
 
   <!-- Add Review -->
   <data name="Review_Content_Label" xml:space="preserve"><value>תוכן הסקירה</value></data>

@@ -36,7 +36,8 @@
                         <StackPanel Orientation="Horizontal">
                             <components:ProfilePictureControl Width="60" Height="60" Margin="0,0,12,0"
                                                               VerticalAlignment="Center"
-                                                              ImagePath="{Binding CurrentPair.Mentor.ProfilePicturePath}"/>
+                                                              ImagePath="{Binding CurrentPair.Mentor.ProfilePicturePath}"
+                                                              Gender="{Binding CurrentPair.Mentor.Gender}"/>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="{Binding [Admin_ManagePair_Mentor], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" Foreground="#888" FontWeight="SemiBold" Margin="0,0,0,2"/>
                                 <TextBlock Text="{Binding CurrentPair.Mentor.UserName}" FontWeight="Bold" FontSize="16"/>
@@ -64,7 +65,8 @@
                         <StackPanel Orientation="Horizontal">
                             <components:ProfilePictureControl Width="60" Height="60" Margin="0,0,12,0"
                                                               VerticalAlignment="Center"
-                                                              ImagePath="{Binding CurrentPair.Mentee.ProfilePicturePath}"/>
+                                                              ImagePath="{Binding CurrentPair.Mentee.ProfilePicturePath}"
+                                                              Gender="{Binding CurrentPair.Mentee.Gender}"/>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="{Binding [Admin_ManagePair_Mentee], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" Foreground="#888" FontWeight="SemiBold" Margin="0,0,0,2"/>
                                 <TextBlock Text="{Binding CurrentPair.Mentee.UserName}" FontWeight="Bold" FontSize="16"/>

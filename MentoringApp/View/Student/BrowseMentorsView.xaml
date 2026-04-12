@@ -58,7 +58,8 @@
                                 <!-- Avatar -->
                                 <components:ProfilePictureControl Grid.Column="0"
                                     Width="56" Height="56" Margin="0,0,14,0" VerticalAlignment="Center"
-                                    ImagePath="{Binding ProfilePicturePath}"/>
+                                    ImagePath="{Binding ProfilePicturePath}"
+                                    Gender="{Binding Gender}"/>
 
                                 <!-- Info -->
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">

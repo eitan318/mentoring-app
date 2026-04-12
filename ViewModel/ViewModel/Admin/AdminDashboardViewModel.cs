@@ -6,13 +6,19 @@ using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
-using MentoringApp.ViewModel.ViewModelPage.Supervisor;
+using MentoringApp.ViewModel.ViewModel.Supervisor;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Admin
+namespace MentoringApp.ViewModel.ViewModel.Admin
 {
+    /// <summary>
+    /// Admin dashboard ViewModel. Manages the two-phase matching lifecycle:
+    /// Phase 1 (registration + manual requests) and Phase 2 (scored selection gallery + auto-match fallback).
+    /// A DispatcherTimer fires every second to keep the active deadline countdown current.
+    /// <c>IsSelectionPhaseActive</c>/<c>IsProcessComplete</c> flags gate which controls are visible.
+    /// </summary>
     public partial class AdminDashboardViewModel : ObservableObject, INavigatable
     {
         private readonly INavigationService _navigationService;
@@ -98,6 +104,14 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
 
         private async Task LoadDataAsync()
         {
+            // First-time setup: redirect admin to school configuration before anything else.
+            bool schoolConfigured = await _settingsService.GetIsSchoolConfiguredAsync();
+            if (!schoolConfigured)
+            {
+                await _navigationService.NavigateToAsync<SystemSettingsViewModel>();
+                return;
+            }
+
             IsSelectionPhaseActive = await _settingsService.GetIsPhase1CompleteAsync();
             IsProcessComplete = await _settingsService.GetIsProcessCompleteAsync();
 

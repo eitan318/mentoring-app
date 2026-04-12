@@ -53,7 +53,8 @@
                                     <!-- Mentor -->
                                     <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0"
                                                                       VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"/>
+                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"
+                                                                      Gender="{Binding Mentor.Gender}"/>
                                     <TextBlock VerticalAlignment="Center" FontWeight="Bold" Text="{Binding Mentor.UserName}" Margin="0,0,6,0"/>
 
                                     <TextBlock VerticalAlignment="Center" Text="→" Foreground="Gray" Margin="0,0,6,0"/>
@@ -61,7 +62,8 @@
                                     <!-- Mentee -->
                                     <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0"
                                                                       VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"/>
+                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"
+                                                                      Gender="{Binding Mentee.Gender}"/>
                                     <TextBlock VerticalAlignment="Center" Text="{Binding Mentee.UserName}"/>
                                 </StackPanel>
                             </Border>
@@ -109,7 +111,8 @@
                                 <StackPanel Orientation="Horizontal">
                                     <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
                                                                       VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"/>
+                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"
+                                                                      Gender="{Binding Mentor.Gender}"/>
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Mentor.UserName}" FontWeight="Bold" FontSize="15"/>
                                         <TextBlock Text="{Binding Mentor.Email}" Foreground="Gray" FontSize="12"/>
@@ -136,7 +139,8 @@
                                 <StackPanel Orientation="Horizontal">
                                     <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
                                                                       VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"/>
+                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"
+                                                                      Gender="{Binding Mentee.Gender}"/>
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Mentee.UserName}" FontWeight="Bold" FontSize="15"/>
                                         <TextBlock Text="{Binding Mentee.Email}" Foreground="Gray" FontSize="12"/>

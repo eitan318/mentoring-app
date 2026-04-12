@@ -6,6 +6,12 @@ using MentoringApp.Service.Mapping;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Issue CRUD and query operations.
+    /// Two mapping paths exist: <c>IssueMapper</c>/<c>IssueCategoryMapper</c> for batch conversion,
+    /// and per-item async mapping for single-issue lookups.
+    /// All write operations return <see cref="Result"/> so callers can surface errors without exceptions.
+    /// </summary>
     public class IssueService
     {
         private readonly IIssueRepo _issueRepo;

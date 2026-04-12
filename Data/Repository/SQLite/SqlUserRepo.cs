@@ -79,14 +79,14 @@ namespace MentoringApp.Data.Acess.SQLite
 
             const string sql = @"
         /* 1. Create the base user */
-        INSERT INTO Users (UserName, Email, NationalId, ProfilePicturePath, Language) 
-        VALUES (@UserName, @Email, @NationalId, @ProfilePicturePath, @Language);
+        INSERT INTO Users (UserName, Email, NationalId, ProfilePicturePath, Language, PhoneNumber, Gender)
+        VALUES (@UserName, @Email, @NationalId, @ProfilePicturePath, @Language, @PhoneNumber, @Gender);
 
         /* 2. Get the generated ID and use it for role tables */
         /* We use the WHERE clause as an 'if' statement inside SQL */
 
-        INSERT INTO UserStudents (UserId, GradeId, ClassNum)
-        SELECT last_insert_rowid(), @GradeId, @StudentClassNum WHERE @IsStudent = 1;
+        INSERT INTO UserStudents (UserId, GradeId, ClassNum, PreferredMentorGender, PreferredMenteeGender)
+        SELECT last_insert_rowid(), @GradeId, @StudentClassNum, @PreferredMentorGender, @PreferredMenteeGender WHERE @IsStudent = 1;
 
         INSERT INTO UserMentors (UserId, SubjectToTeach, MaxMentees)
         SELECT last_insert_rowid(), @MentorSubId, @MaxMentees WHERE @IsMentor = 1;
@@ -115,6 +115,8 @@ namespace MentoringApp.Data.Acess.SQLite
                 user.NationalId,
                 ProfilePicturePath = user.ProfilePicturePath,
                 Language = user.Language,
+                PhoneNumber = user.PhoneNumber,
+                Gender = (int)user.Gender,
                 IsStudent = isStudent ? 1 : 0,
                 IsMentor = isMentor ? 1 : 0,
                 IsMentee = isMentee ? 1 : 0,
@@ -122,6 +124,8 @@ namespace MentoringApp.Data.Acess.SQLite
                 IsAdmin = isAdmin ? 1 : 0,
                 GradeId = (user as StudentModel)?.Grade.Id ?? 0,
                 StudentClassNum = (user as StudentModel)?.ClassNum ?? 0,
+                PreferredMentorGender = (int)((user as StudentModel)?.PreferredMentorGender ?? MentoringApp.Model.User.GenderPreference.NoPreference),
+                PreferredMenteeGender = (int)((user as StudentModel)?.PreferredMenteeGender ?? MentoringApp.Model.User.GenderPreference.NoPreference),
                 MentorSubId = (user as StudentModel)?.MentorProfile?.SubjectToTeach ?? 0,
                 MaxMentees = (user as StudentModel)?.MentorProfile?.MaxMentees ?? 1,
                 MenteeSubId = (user as StudentModel)?.MenteeProfile?.SubjectToLearn ?? 0,
@@ -216,9 +220,13 @@ namespace MentoringApp.Data.Acess.SQLite
                 NationalId = userRow.NationalId,
                 ProfilePicturePath = userRow.ProfilePicturePath,
                 Language = userRow.Language ?? "en",
+                PhoneNumber = userRow.PhoneNumber,
+                Gender = userRow.Gender,
                 Role = roleType,
                 GradeId = roleType == UserRoleType.Supervisor ? null : studentData?.GradeId,
                 ClassNum = roleType == UserRoleType.Supervisor ? null : studentData?.ClassNum,
+                PreferredMentorGender = roleType == UserRoleType.Student ? studentData?.PreferredMentorGender : null,
+                PreferredMenteeGender = roleType == UserRoleType.Student ? studentData?.PreferredMenteeGender : null,
                 MentorSubjectId = mentorData?.SubjectToTeach,
                 MaxMentees = mentorData?.MaxMentees,
                 MenteeSubjectId = menteeData?.SubjectToLearn,
@@ -244,6 +252,11 @@ namespace MentoringApp.Data.Acess.SQLite
 
             var tasks = users.Select(async u =>
             {
+                var role = await DetermineRoleAsync(u.Id);
+                bool isSupervisor = role == UserRoleType.Supervisor;
+                students.TryGetValue(u.Id, out var studentRow);
+                mentors.TryGetValue(u.Id, out var mentorRow);
+                mentees.TryGetValue(u.Id, out var menteeRow);
                 return new UserDto
                 {
                     Id = u.Id,
@@ -251,16 +264,16 @@ namespace MentoringApp.Data.Acess.SQLite
                     Email = u.Email,
                     NationalId = u.NationalId,
                     ProfilePicturePath = u.ProfilePicturePath,
-                    Role = await DetermineRoleAsync(u.Id),
-                    GradeId = supervisors.TryGetValue(u.Id, out var _) && await DetermineRoleAsync(u.Id) == UserRoleType.Supervisor
-                                ? null
-                                : (students.TryGetValue(u.Id, out var s) ? s.GradeId : null),
-                    ClassNum = supervisors.TryGetValue(u.Id, out var __) && await DetermineRoleAsync(u.Id) == UserRoleType.Supervisor
-                                ? null
-                                : (students.TryGetValue(u.Id, out var sClass) ? sClass.ClassNum : null),
-                    MentorSubjectId = mentors.TryGetValue(u.Id, out var m) ? m.SubjectToTeach : null,
-                    MaxMentees = mentors.TryGetValue(u.Id, out var mMax) ? mMax.MaxMentees : null,
-                    MenteeSubjectId = mentees.TryGetValue(u.Id, out var me) ? me.SubjectToLearn : null
+                    PhoneNumber = u.PhoneNumber,
+                    Gender = u.Gender,
+                    Role = role,
+                    GradeId = isSupervisor ? null : studentRow?.GradeId,
+                    ClassNum = isSupervisor ? null : studentRow?.ClassNum,
+                    PreferredMentorGender = isSupervisor ? null : (int?)studentRow?.PreferredMentorGender,
+                    PreferredMenteeGender = isSupervisor ? null : (int?)studentRow?.PreferredMenteeGender,
+                    MentorSubjectId = mentorRow?.SubjectToTeach,
+                    MaxMentees = mentorRow?.MaxMentees,
+                    MenteeSubjectId = menteeRow?.SubjectToLearn
                 };
             });
 
@@ -292,10 +305,16 @@ namespace MentoringApp.Data.Acess.SQLite
             return rows > 0;
         }
 
-        public async Task<bool> UpdateBaseInfoAsync(int id, string name, string email, string nationalId)
+        public async Task<bool> UpdateBaseInfoAsync(int id, string name, string email, string nationalId, string? phoneNumber, int gender)
         {
-            const string sql = "UPDATE Users SET UserName = @name, Email = @email, NationalId = @nationalId WHERE Id = @id";
-            return await _db.ExecuteAsync(sql, new { id, name, email, nationalId }) > 0;
+            const string sql = "UPDATE Users SET UserName = @name, Email = @email, NationalId = @nationalId, PhoneNumber = @phoneNumber, Gender = @gender WHERE Id = @id";
+            return await _db.ExecuteAsync(sql, new { id, name, email, nationalId, phoneNumber, gender }) > 0;
+        }
+
+        public async Task UpdateStudentPreferredGendersAsync(int userId, int preferredMentorGender, int preferredMenteeGender)
+        {
+            const string sql = "UPDATE UserStudents SET PreferredMentorGender = @preferredMentorGender, PreferredMenteeGender = @preferredMenteeGender WHERE UserId = @userId";
+            await _db.ExecuteAsync(sql, new { userId, preferredMentorGender, preferredMenteeGender });
         }
 
         public async Task UpdateStudentGradeAndClassAsync(int userId, int gradeId, int classNum)
@@ -324,6 +343,8 @@ namespace MentoringApp.Data.Acess.SQLite
             public string NationalId { get; set; } = string.Empty;
             public string? ProfilePicturePath { get; set; }
             public string? Language { get; set; }
+            public string? PhoneNumber { get; set; }
+            public int Gender { get; set; } = 3;
         }
 
 
@@ -333,6 +354,8 @@ namespace MentoringApp.Data.Acess.SQLite
             public int UserId { get; set; }
             public int GradeId { get; set; }
             public int ClassNum { get; set; }
+            public int PreferredMentorGender { get; set; } = 2;
+            public int PreferredMenteeGender { get; set; } = 2;
         }
 
         private class MentorRow

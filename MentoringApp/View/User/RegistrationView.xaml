@@ -8,6 +8,16 @@
 
     <Grid Margin="20">
         <StackPanel>
+            <!-- Info banner: admin does not need to fill every field -->
+            <Border Background="#EEF4FF" BorderBrush="#9ABFFF" BorderThickness="1"
+                    CornerRadius="4" Padding="10,8" Margin="0,0,0,14">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="ℹ " FontSize="14" VerticalAlignment="Top" Foreground="#1A56DB"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="#1E3A6E" FontSize="12"
+                               Text="Only the required fields (marked with *) must be filled. Everything else is optional — the user can complete their profile after their first login."/>
+                </StackPanel>
+            </Border>
+
             <TextBox Tag="{Binding [Register_Username_Tag], Source={x:Static loc:TranslationSource.Instance}}"
                      Text="{Binding UserName}" />
             <TextBox Tag="{Binding [Register_Email_Tag], Source={x:Static loc:TranslationSource.Instance}}"
@@ -15,7 +25,19 @@
             <TextBox Tag="{Binding [Register_NationalId_Tag], Source={x:Static loc:TranslationSource.Instance}}"
                      Text="{Binding NationalId}" />
 
-            <!-- Grade and Class Num (for Student only, Admin assigns classes to Supervisor later) -->
+            <TextBox Tag="Phone Number (optional)"
+                     Text="{Binding PhoneNumber}"
+                     Margin="0,5" />
+
+            <Label Content="Gender (optional)" Margin="0,5,0,0" />
+            <ComboBox
+                ItemsSource="{Binding GenderOptions}"
+                SelectedValue="{Binding SelectedGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                SelectedValuePath="Value"
+                DisplayMemberPath="Display"
+                Margin="0,5" />
+
+            <!-- Grade and Class Num (for Student only) -->
             <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
                 <ComboBox
                     ItemsSource="{Binding Grades}"
@@ -26,13 +48,6 @@
                         <DataTemplate>
                             <TextBlock>
                                 <TextBlock.Text>
-                                    <!--
-                                        MultiBinding pattern used throughout for DB-stored display names:
-                                        value[0] = raw English name from DB (e.g. "9th")
-                                        value[1] = CurrentCulture (triggers re-evaluation on language switch)
-                                        DbTranslationConverter looks up "DB_Grade_9th" in the resource strings,
-                                        falling back to the raw DB value if no translation exists.
-                                    -->
                                     <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
                                         <Binding Path="Name" />
                                         <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
@@ -43,13 +58,11 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
-                <TextBox Tag="Class Num"
+                <TextBox Tag="Class Number (optional)"
                          Text="{Binding ClassNum}"
                          Margin="0,5" />
-            </StackPanel>
 
-            <!-- Student only roles -->
-            <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
+                <!-- Mentor / Mentee role selection -->
                 <CheckBox
                     Margin="0,5"
                     Content="{Binding [Register_IsMentor_Check], Source={x:Static loc:TranslationSource.Instance}}"
@@ -60,12 +73,14 @@
                     IsChecked="{Binding IsMentee}" />
             </StackPanel>
 
+            <!-- Mentor-specific fields: subject to teach, max mentees, preferred mentee gender -->
             <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
                 <ComboBox
                     ItemsSource="{Binding Subjects}"
                     SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                     SelectedValuePath="Id"
-                    Tag="{Binding [Register_SubjectToTeach_Tag], Source={x:Static loc:TranslationSource.Instance}}">
+                    Tag="{Binding [Register_SubjectToTeach_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                    Margin="0,5">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock>
@@ -79,14 +94,28 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+
+                <Label Content="Max Mentees (optional)" Margin="0,5,0,0" />
+                <TextBox Text="{Binding MaxMentees, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,5" />
+
+                <Label Content="Preferred Mentee Gender (optional)" Margin="0,5,0,0" />
+                <ComboBox
+                    ItemsSource="{Binding GenderPreferenceOptions}"
+                    SelectedValue="{Binding SelectedPreferredMenteeGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedValuePath="Value"
+                    DisplayMemberPath="Display"
+                    Margin="0,5" />
             </StackPanel>
 
+            <!-- Mentee-specific fields: subject to learn, preferred mentor gender -->
             <StackPanel Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
                 <ComboBox
                     ItemsSource="{Binding Subjects}"
                     SelectedValue="{Binding SubjectToLearn, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                     SelectedValuePath="Id"
-                    Tag="{Binding [Register_SubjectToLearn_Tag], Source={x:Static loc:TranslationSource.Instance}}">
+                    Tag="{Binding [Register_SubjectToLearn_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                    Margin="0,5">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock>
@@ -100,6 +129,14 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+
+                <Label Content="Preferred Mentor Gender (optional)" Margin="0,5,0,0" />
+                <ComboBox
+                    ItemsSource="{Binding GenderPreferenceOptions}"
+                    SelectedValue="{Binding SelectedPreferredMentorGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedValuePath="Value"
+                    DisplayMemberPath="Display"
+                    Margin="0,5" />
             </StackPanel>
 
             <Button

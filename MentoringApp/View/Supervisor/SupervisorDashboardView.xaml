@@ -13,6 +13,7 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
         <DataTemplate x:Key="IssueItemTemplate">
             <StackPanel Margin="5">
                 <TextBlock
@@ -55,9 +56,7 @@
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Cursor" Value="Hand" />
-
             <EventSetter Event="PreviewMouseLeftButtonDown" Handler="OnIssueItemClick" />
-
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#F0F0F0" />
@@ -68,13 +67,43 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Underline-tab style for RadioButtons used as issue tab toggles -->
+        <Style x:Key="IssueTabStyle" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Border" Padding="6,3,6,5"
+                                BorderThickness="0,0,0,2" BorderBrush="Transparent">
+                            <TextBlock x:Name="Label"
+                                       Text="{TemplateBinding Content}"
+                                       FontSize="13"
+                                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush"
+                                        Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                <Setter TargetName="Label" Property="FontWeight" Value="SemiBold"/>
+                                <Setter TargetName="Label" Property="Foreground"
+                                        Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Label" Property="Foreground"
+                                        Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="PairListViewItemStyle" TargetType="ListViewItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Cursor" Value="Hand" />
-
             <EventSetter Event="PreviewMouseLeftButtonDown" Handler="OnPairItemClick" />
-
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#F0F0F0" />
@@ -95,17 +124,54 @@
         <!-- ── MASTER PANE (LEFT) ── -->
         <Grid Grid.Column="0" Margin="0,0,15,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="1.5*" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+                <!-- 0: Phase notification -->
+                <RowDefinition Height="Auto"/>
+                <!-- 1: Supervisor name (admin-only) -->
+                <RowDefinition Height="Auto"/>
+                <!-- 2: Stats / progress -->
+                <RowDefinition Height="Auto"/>
+                <!-- 3: Tier 5 warnings -->
+                <RowDefinition Height="Auto"/>
+                <!-- 4: Pairs list -->
+                <RowDefinition Height="1.5*"/>
+                <!-- 5: Issues header -->
+                <RowDefinition Height="Auto"/>
+                <!-- 6: Issues list -->
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Supervisor MetaData -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,15">
-                <TextBlock FontSize="28" FontWeight="Bold" Text="{Binding SelectedSupervisor.UserName}" />
-                <TextBlock FontWeight="Medium" Foreground="Gray">
+            <!-- ── Row 0: Phase notification ── -->
+            <Border Grid.Row="0"
+                    Visibility="{Binding IsPhaseBannerVisible, Converter={StaticResource BoolToVis}}"
+                    BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                    BorderThickness="1"
+                    Padding="10,8"
+                    Margin="0,0,0,12">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right"
+                            Content="🛈"
+                            Command="{Binding ShowPhaseInfoCommand}"
+                            ToolTip="Show phase information"
+                            Background="Transparent" BorderThickness="0"
+                            FontSize="13" Cursor="Hand"
+                            VerticalAlignment="Top" Margin="8,0,0,0"/>
+                    <StackPanel>
+                        <TextBlock Text="{Binding BannerTitle}"
+                                   FontWeight="SemiBold" FontSize="13" Margin="0,0,0,3"/>
+                        <TextBlock Text="{Binding BannerSubtitle}"
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                   FontSize="11" TextWrapping="Wrap" Margin="0,0,0,3"/>
+                        <TextBlock Text="{Binding BannerTimer}" FontSize="11" FontWeight="Medium"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- ── Row 1: Supervisor name (admin viewing only) ── -->
+            <StackPanel Grid.Row="1"
+                        Visibility="{Binding IsAdminViewing, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,0,10">
+                <TextBlock FontSize="22" FontWeight="Bold" Text="{Binding SelectedSupervisor.UserName}"/>
+                <TextBlock Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontSize="12">
                     <TextBlock.Text>
                         <MultiBinding StringFormat="{}{1} {0}">
                             <Binding Path="PairsSupervised.Count"/>
@@ -113,61 +179,53 @@
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
-
-                <Border Background="#E8EAF6" Padding="12" CornerRadius="6" Margin="0,15,0,0">
-                    <StackPanel>
-                        <!-- Phase Banner -->
-                        <Border Background="{Binding BannerColor}" BorderThickness="0" CornerRadius="6" Padding="12,8" Margin="0,0,0,15"
-                                Visibility="{Binding IsPhaseBannerVisible, Converter={StaticResource BoolToVis}}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <TextBlock Text="{Binding BannerTitle}" FontWeight="Bold" Foreground="{Binding BannerTextColor}" FontSize="13"/>
-                                        <Button Content="🛈" Margin="6,0,0,0" Command="{Binding ShowPhaseInfoCommand}" ToolTip="Show Phase Information" 
-                                                Background="Transparent" BorderThickness="0" FontSize="12" Foreground="{Binding BannerTextColor}" Cursor="Hand"/>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding BannerSubtitle}" Foreground="{Binding BannerTextColor}" FontSize="11" Opacity="0.9" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                                    <TextBlock Text="{Binding BannerTimer}" Foreground="{Binding BannerTextColor}" FontWeight="SemiBold" FontSize="11"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <TextBlock Text="{Binding ClassProgressInfo}" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding ClassProgressPercent}" Height="15" Margin="0,0,0,10"/>
-                        
-                        <TextBlock Text="Inactive Students (Missing Profile/Unmatched):" FontWeight="SemiBold" Foreground="#BF360C" Margin="0,0,0,4"/>
-                        <ItemsControl ItemsSource="{Binding InactiveStudents}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Foreground="#D84315" Margin="0,2,0,0">
-                                        <Run Text="• " FontWeight="Bold" />
-                                        <Run Text="{Binding UserName}" />
-                                        <Run Text=" (" />
-                                        <Run Text="{Binding Email}" />
-                                        <Run Text=")" />
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </Border>
             </StackPanel>
 
-            <!-- Tier 5 Warnings -->
-            <Border Visibility="{Binding HasIncompleteProfileWarnings, Converter={StaticResource BoolToVis}}"
-                    Grid.Row="1" Background="#FFF3E0" BorderBrush="#E65100" BorderThickness="1"
-                    CornerRadius="4" Padding="10" Margin="0,0,0,15">
+            <!-- ── Row 2: Class progress + inactive students (registration phase only) ── -->
+            <StackPanel Grid.Row="2" Margin="0,0,0,12"
+                        Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding ClassProgressInfo}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ClassProgressPercent}" Height="10" Margin="0,0,0,8"/>
+                <TextBlock Text="Students with incomplete profiles:"
+                           FontWeight="SemiBold" Margin="0,0,0,4">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding InactiveStudents.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <ItemsControl ItemsSource="{Binding InactiveStudents}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="0,1,0,0">
+                                <Run Text="• " FontWeight="Bold"/>
+                                <Run Text="{Binding UserName}"/>
+                                <Run Text=" ("/>
+                                <Run Text="{Binding Email}"/>
+                                <Run Text=")"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- ── Row 3: Tier 5 warnings ── -->
+            <Border Grid.Row="3"
+                    Visibility="{Binding HasIncompleteProfileWarnings, Converter={StaticResource BoolToVis}}"
+                    BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                    BorderThickness="1"
+                    Padding="10,8" Margin="0,0,0,12">
                 <StackPanel>
-                    <TextBlock FontWeight="Bold" Foreground="#BF360C" Margin="0,0,0,6"
+                    <TextBlock FontWeight="Bold" Margin="0,0,0,5"
                                Text="{Binding IncompleteProfileCount, StringFormat='⚠ {0} Randomly Matched – Profile Incomplete'}"/>
                     <ItemsControl ItemsSource="{Binding IncompleteProfilePairs}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock FontSize="11" Foreground="#7F3B08" Margin="0,2,0,0">
+                                <TextBlock FontSize="11" Margin="0,2,0,0">
                                     <Run Text="• "/>
                                     <Run Text="{Binding Mentor.UserName}"/>
                                     <Run Text=" ↔ "/>
@@ -179,39 +237,49 @@
                 </StackPanel>
             </Border>
 
-            <!-- Managed Pairs -->
-            <DockPanel Grid.Row="2" Margin="0,0,0,15">
+            <!-- ── Row 4: Managed pairs ── -->
+            <DockPanel Grid.Row="4" Margin="0,0,0,12">
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,5">
-                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding [Supervisor_ManagedPairs_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                    <Button HorizontalAlignment="Right" Content="Clear Selection" Background="Transparent" BorderThickness="0" Foreground="Blue" Cursor="Hand" Command="{Binding SelectPairCommand}" CommandParameter="{x:Null}">
+                    <TextBlock FontSize="14" FontWeight="SemiBold"
+                               Text="{Binding [Supervisor_ManagedPairs_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                               VerticalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right" Content="Clear Selection"
+                            Background="Transparent" BorderThickness="0" Foreground="Blue"
+                            Cursor="Hand" Command="{Binding SelectPairCommand}" CommandParameter="{x:Null}">
                         <Button.Style>
                             <Style TargetType="Button">
-                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Visibility" Value="Visible"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IssueFilterPair}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
                     </Button>
                 </DockPanel>
-                <ListView ItemsSource="{Binding PairsSupervised}" ItemContainerStyle="{StaticResource PairListViewItemStyle}">
+                <ListView ItemsSource="{Binding PairsSupervised}"
+                          ItemContainerStyle="{StaticResource PairListViewItemStyle}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <DockPanel Margin="5" LastChildFill="True">
-                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                    <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentor.ProfilePicturePath}" />
-                                    <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MentorPrefix], Source={x:Static loc:TranslationSource.Instance}}" />
-                                    <TextBlock Margin="0,0,12,0" Text="{Binding Mentor.UserName}" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <components:ProfilePictureControl Width="28" Height="28" Margin="0,0,6,0"
+                                        VerticalAlignment="Center" ImagePath="{Binding Mentor.ProfilePicturePath}"
+                                        Gender="{Binding Mentor.Gender}"/>
+                                    <TextBlock FontWeight="Bold"
+                                               Text="{Binding [Supervisor_MentorPrefix], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                    <TextBlock Margin="0,0,12,0" Text="{Binding Mentor.UserName}"/>
 
-                                    <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}" />
-                                    <TextBlock FontWeight="Bold" Text="{Binding [Supervisor_MenteePrefix], Source={x:Static loc:TranslationSource.Instance}}" />
-                                    <TextBlock Text="{Binding Mentee.UserName}" />
+                                    <components:ProfilePictureControl Width="28" Height="28" Margin="0,0,6,0"
+                                        VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}"
+                                        Gender="{Binding Mentee.Gender}"/>
+                                    <TextBlock FontWeight="Bold"
+                                               Text="{Binding [Supervisor_MenteePrefix], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                    <TextBlock Text="{Binding Mentee.UserName}"/>
 
-                                    <!-- Tier badge -->
-                                    <Border Margin="10,0,0,0" CornerRadius="3" Padding="5,2" Background="#E3F2FD">
-                                        <TextBlock FontSize="10" Foreground="#1565C0" Text="{Binding MatchTier}"/>
+                                    <Border Margin="10,0,0,0" BorderBrush="#AAAAAA" BorderThickness="1" Padding="4,1">
+                                        <TextBlock FontSize="10" Text="{Binding MatchTier}"/>
                                     </Border>
                                 </StackPanel>
                             </DockPanel>
@@ -220,25 +288,34 @@
                 </ListView>
             </DockPanel>
 
-            <!-- Pending / Resolved Issues -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,5">
-                <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="DarkRed" Text="{Binding [Supervisor_PendingIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,15,0" />
-                <Button Command="{Binding ToggleResolvedIssuesCommand}" Padding="8,4" VerticalAlignment="Center">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Content" Value="{Binding [Supervisor_ViewResolved_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowResolvedIssues}" Value="True">
-                                    <Setter Property="Content" Value="{Binding [Supervisor_HideResolved_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </StackPanel>
-            
-            <Grid Grid.Row="4">
-                <ListView ItemsSource="{Binding FilteredPendingIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}">
+            <!-- ── Row 5: Issues header ── -->
+            <DockPanel Grid.Row="5" Margin="0,0,0,2">
+                <!-- Tab toggles -->
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <RadioButton Content="Pending"
+                                 Style="{StaticResource IssueTabStyle}"
+                                 IsChecked="{Binding IsShowingPending, Mode=OneWay}"
+                                 Command="{Binding ShowPendingCommand}"/>
+                    <RadioButton Content="Resolved"
+                                 Style="{StaticResource IssueTabStyle}"
+                                 IsChecked="{Binding IsShowingResolved, Mode=OneWay}"
+                                 Command="{Binding ShowResolvedCommand}"
+                                 Margin="4,0,0,0"/>
+                </StackPanel>
+                <!-- Context title -->
+                <TextBlock DockPanel.Dock="Right"
+                           Text="{Binding IssuesSectionContextTitle}"
+                           FontSize="12" FontStyle="Italic"
+                           Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                           HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                           Margin="0,0,0,5"/>
+            </DockPanel>
+
+            <!-- ── Row 6: Issues list ── -->
+            <Grid Grid.Row="6">
+                <ListView ItemsSource="{Binding FilteredPendingIssues}"
+                          ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
+                          ItemTemplate="{StaticResource IssueItemTemplate}">
                     <ListView.Style>
                         <Style TargetType="ListView">
                             <Setter Property="Visibility" Value="Visible"/>
@@ -250,15 +327,19 @@
                         </Style>
                     </ListView.Style>
                 </ListView>
-                <ListView ItemsSource="{Binding FilteredResolvedIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}" Visibility="{Binding ShowResolvedIssues, Converter={StaticResource BoolToVis}}" />
+                <ListView ItemsSource="{Binding FilteredResolvedIssues}"
+                          ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
+                          ItemTemplate="{StaticResource IssueItemTemplate}"
+                          Visibility="{Binding ShowResolvedIssues, Converter={StaticResource BoolToVis}}"/>
             </Grid>
         </Grid>
 
         <!-- ── DETAIL PANE (RIGHT) ── -->
-        <Border Grid.Column="1" BorderBrush="#DDD" BorderThickness="1" Background="#FAFAFA" CornerRadius="4" Padding="0">
+        <Border Grid.Column="1" BorderBrush="#DDD" BorderThickness="1" Padding="0">
             <Grid>
-                <!-- Placeholder text when no detail is selected -->
-                <TextBlock Text="Select a pair or an issue from the lists to view its details." Foreground="#AAA" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Medium">
+                <TextBlock Text="Select a pair or an issue from the lists to view its details."
+                           Foreground="#AAA" FontSize="14" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" FontWeight="Medium">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -270,9 +351,7 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                
-                <!-- Injected Child ViewModel View -->
-                <ContentControl Content="{Binding SelectedPaneContent}" Margin="10" />
+                <ContentControl Content="{Binding SelectedPaneContent}" Margin="10"/>
             </Grid>
         </Border>
     </Grid>

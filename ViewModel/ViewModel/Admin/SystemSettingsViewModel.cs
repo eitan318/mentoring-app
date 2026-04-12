@@ -7,12 +7,14 @@ using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.Windows;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Admin
+namespace MentoringApp.ViewModel.ViewModel.Admin
 {
     public partial class SystemSettingsViewModel : ObservableObject, INavigatable
     {
         private readonly SchoolClassService _schoolClassService;
         private readonly GradeService _gradeService;
+        private readonly SettingsService _settingsService;
+        private readonly INavigationService _navigationService;
 
         public ObservableCollection<SchoolClass> AllClasses { get; set; } = new();
         public ObservableCollection<Grade> AvailableGrades { get; set; } = new();
@@ -26,14 +28,25 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
         [ObservableProperty]
         private SchoolClass? _selectedClass;
 
-        public SystemSettingsViewModel(SchoolClassService schoolClassService, GradeService gradeService)
+        /// <summary>True when the admin has not yet completed the initial school configuration.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanContinueToDashboard))]
+        private bool _isFirstTimeSetup;
+
+        public bool CanContinueToDashboard => IsFirstTimeSetup && AllClasses.Count > 0;
+
+        public SystemSettingsViewModel(SchoolClassService schoolClassService, GradeService gradeService, SettingsService settingsService, INavigationService navigationService)
         {
             _schoolClassService = schoolClassService;
             _gradeService = gradeService;
+            _settingsService = settingsService;
+            _navigationService = navigationService;
         }
 
         public async Task OnNavigatedToAsync()
         {
+            IsFirstTimeSetup = !await _settingsService.GetIsSchoolConfiguredAsync();
+
             var grades = await _gradeService.GetAllGradesAsync();
             if (grades.Success && grades.Data != null)
             {
@@ -72,11 +85,21 @@ namespace MentoringApp.ViewModel.ViewModelPage.Admin
             {
                 ClassNumInput = "";
                 await RefreshClassesAsync();
+                // Mark school as configured once the first class exists
+                if (!await _settingsService.GetIsSchoolConfiguredAsync())
+                    await _settingsService.SetIsSchoolConfiguredAsync(true);
+                OnPropertyChanged(nameof(CanContinueToDashboard));
             }
             else
             {
                 MessageBox.Show(result.ErrorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        [RelayCommand]
+        private async Task GoToDashboard()
+        {
+            await _navigationService.GoBackAsync();
         }
 
         [RelayCommand]

@@ -6,7 +6,7 @@ using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
 
-namespace MentoringApp.ViewModel.ViewModelPage.Admin
+namespace MentoringApp.ViewModel.ViewModel.Admin
 {
     public partial class CreatePairViewModel : ObservableObject, INavigatable
     {

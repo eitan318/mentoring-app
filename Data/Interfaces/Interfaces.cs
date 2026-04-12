@@ -20,9 +20,10 @@ namespace MentoringApp.Data.Interfaces
 
         Task<bool> DeleteUserAsync(int userId);
 
-        Task<bool> UpdateBaseInfoAsync(int id, string name, string email, string nationalId);
+        Task<bool> UpdateBaseInfoAsync(int id, string name, string email, string nationalId, string? phoneNumber, int gender);
 
         Task UpdateStudentGradeAndClassAsync(int userId, int gradeId, int classNum);
+        Task UpdateStudentPreferredGendersAsync(int userId, int preferredMentorGender, int preferredMenteeGender);
         Task UpdateSupervisorClassesAsync(int supervisorId, IEnumerable<int> schoolClassIds);
 
         Task UpsertMentorProfileAsync(int userId, int subjectId);

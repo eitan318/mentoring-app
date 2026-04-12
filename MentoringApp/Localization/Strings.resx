@@ -58,9 +58,9 @@
   <data name="Login_Login_Button" xml:space="preserve"><value>Login</value></data>
 
   <!-- Registration -->
-  <data name="Register_Username_Tag" xml:space="preserve"><value>Username</value></data>
-  <data name="Register_Email_Tag" xml:space="preserve"><value>Email Address</value></data>
-  <data name="Register_NationalId_Tag" xml:space="preserve"><value>National ID</value></data>
+  <data name="Register_Username_Tag" xml:space="preserve"><value>Username *</value></data>
+  <data name="Register_Email_Tag" xml:space="preserve"><value>Email Address *</value></data>
+  <data name="Register_NationalId_Tag" xml:space="preserve"><value>National ID *</value></data>
   <data name="Register_SupervisorNoData" xml:space="preserve"><value>Supervisor data: no data</value></data>
   <data name="Register_Grade_Tag" xml:space="preserve"><value>Grade (e.g. 10)</value></data>
   <data name="Register_IsMentor_Check" xml:space="preserve"><value>Is Mentor</value></data>
@@ -102,6 +102,7 @@
   <data name="Student_MyIssues_Label" xml:space="preserve"><value>My Active Issues</value></data>
   <data name="Student_NoAssignment_Title" xml:space="preserve"><value>No mentor or mentee assigned</value></data>
   <data name="Student_NoAssignment_Hint" xml:space="preserve"><value>Contact your supervisor or administrator to get paired.</value></data>
+  <data name="Student_Supervisor_Label" xml:space="preserve"><value>Your Supervisor</value></data>
 
   <!-- Add Review -->
   <data name="Review_Content_Label" xml:space="preserve"><value>Review Content</value></data>

@@ -8,7 +8,7 @@ using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
 using System.Collections.ObjectModel;
 
-namespace MentoringApp.ViewModel.ViewModelPage.User
+namespace MentoringApp.ViewModel.ViewModel.User
 {
     public partial class LoginViewModel : ObservableValidator, INavigatable
     {
@@ -18,12 +18,13 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
         private readonly ILanguageService _languageService;
         private readonly SettingsService _settingsService;
         private readonly UserService _userService;
+        private readonly SessionService _sessionService;
 
         // When true, the email verification step is skipped and the user is logged in
         // immediately after entering a valid National ID. Set to false for production builds.
         private static readonly bool _debugWithoutVerification = true;
 
-        public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService authService, ILanguageService languageService, SettingsService settingsService, UserService userService)
+        public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService authService, ILanguageService languageService, SettingsService settingsService, UserService userService, SessionService sessionService)
         {
             _userStore = userStore;
             _authService = authService;
@@ -31,6 +32,7 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
             _languageService = languageService;
             _settingsService = settingsService;
             _userService = userService;
+            _sessionService = sessionService;
         }
 
         // Language selection
@@ -119,7 +121,8 @@ namespace MentoringApp.ViewModel.ViewModelPage.User
                     user.Language = SelectedLanguage;
                     _ = _userService.UpdateLanguageAsync(user.Id, SelectedLanguage);
                 }
-                
+
+                _sessionService.SaveSession(user.Id);
                 _userStore.User = user;
                 await _navigationService.NavigateToAsync<AuthenticatedDashboardViewModel>();
             }

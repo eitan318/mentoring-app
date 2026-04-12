@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Launch Swarm",
+            "dependsOn": [
+                "Agent: Implementer",
+                "Agent: Docs Architect"
+            ],
+            "dependsOrder": "parallel",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Agent: Implementer",
+            "type": "shell",
+            "command": "claude",
+            "presentation": { "group": "swarm", "panel": "dedicated", "index": 1 }
+        },
+        {
+            "label": "Agent: Docs Architect",
+            "type": "shell",
+            "command": "claude",
+            "presentation": { "group": "swarm", "panel": "dedicated", "index": 2 }
+        }
+    ]
+}

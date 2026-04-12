@@ -2,7 +2,7 @@ using System;
 using System.Windows.Controls;
 using System.Windows.Input;
 using MentoringApp.Model;
-using MentoringApp.ViewModel.ViewModelPage.Admin;
+using MentoringApp.ViewModel.ViewModel.Admin;
 
 namespace MentoringApp.View.Admin
 {

@@ -1,4 +1,4 @@
-using MentoringApp.ViewModel.ViewModelPage.Student;
+using MentoringApp.ViewModel.ViewModel.Student;
 using System.Windows.Controls;
 
 namespace MentoringApp.View.Student

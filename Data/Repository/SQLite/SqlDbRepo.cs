@@ -45,7 +45,9 @@ namespace MentoringApp.Data.Acess.SQLite
                     Email TEXT NOT NULL,
                     NationalId TEXT NOT NULL,
                     ProfilePicturePath TEXT NULL,
-                    Language TEXT NOT NULL DEFAULT 'en'
+                    Language TEXT NOT NULL DEFAULT 'en',
+                    PhoneNumber TEXT NULL,
+                    Gender INTEGER NOT NULL DEFAULT 3
                 );
 
                 CREATE TABLE Grades (
@@ -63,6 +65,8 @@ namespace MentoringApp.Data.Acess.SQLite
                     UserId INTEGER PRIMARY KEY,
                     GradeId INTEGER NOT NULL,
                     ClassNum INTEGER NOT NULL DEFAULT 0,
+                    PreferredMentorGender INTEGER NOT NULL DEFAULT 2,
+                    PreferredMenteeGender INTEGER NOT NULL DEFAULT 2,
                     FOREIGN KEY (UserId) REFERENCES Users(Id)
                 );
 
@@ -176,6 +180,11 @@ namespace MentoringApp.Data.Acess.SQLite
                     Key TEXT PRIMARY KEY,
                     Value TEXT NOT NULL
                 );
+
+                INSERT INTO Grades (Name, Num) VALUES
+                    ('1st',  1), ('2nd',  2), ('3rd',  3), ('4th',  4),
+                    ('5th',  5), ('6th',  6), ('7th',  7), ('8th',  8),
+                    ('9th',  9), ('10th', 10), ('11th', 11), ('12th', 12);
             ";
 
             using var cmd = new SqliteCommand(dropSql, conn);
