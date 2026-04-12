@@ -159,6 +159,8 @@
                 <Grid Margin="0,20,0,0">
                     <Button
                         Height="35"
+                        Cursor="Hand"
+                        ToolTip="Edit your profile"
                         Command="{Binding ToggleEditCommand}"
                         Content="{Binding [Profile_EditProfile_Button], Source={x:Static loc:TranslationSource.Instance}}"
                         Visibility="{Binding IsReadOnly, Converter={StaticResource BoolToVis}}" />
@@ -166,6 +168,8 @@
                     <Button
                         Height="35"
                         Background="LightGreen"
+                        Cursor="Hand"
+                        ToolTip="Save your changes"
                         Command="{Binding SaveCommand}"
                         Content="{Binding [Profile_SaveChanges_Button], Source={x:Static loc:TranslationSource.Instance}}"
                         Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVis}}" />

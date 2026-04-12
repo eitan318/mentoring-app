@@ -19,7 +19,7 @@
 
         <!-- ── TOP BAR ──────────────────────────────────────────────────── -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-            <Button Command="{Binding CreatePairCommand}" Content="{Binding [Admin_ManagePair_Create], Source={x:Static loc:TranslationSource.Instance}}" Padding="8,4"/>
+            <Button Command="{Binding CreatePairCommand}" Content="{Binding [Admin_ManagePair_Create], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Padding="8,4"/>
         </StackPanel>
 
         <!-- ── MAIN SPLIT ─────────────────────────────────────────────── -->
@@ -181,10 +181,13 @@
                             <TextBlock Text="{Binding [Admin_ManagePair_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,10"/>
                             <Button Content="{Binding [Admin_ManagePair_ViewDetails], Source={x:Static loc:TranslationSource.Instance}}"
                                     Command="{Binding DataContext.SelectPairCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    Cursor="Hand"
                                     Margin="0,0,0,10" Padding="5,8"/>
                             <Button Content="{Binding [Admin_ManagePair_Separate], Source={x:Static loc:TranslationSource.Instance}}"
                                     Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
+                                    Cursor="Hand"
+                                    ToolTip="Permanently dissolve this mentoring pair"
                                     Padding="5,8"/>
                         </StackPanel>
                     </ScrollViewer>

@@ -49,16 +49,18 @@
                 Orientation="Horizontal">
 
                 <!--  Language toggle  -->
+                <TextBlock Text="Language:" VerticalAlignment="Center" Margin="0,0,4,0" />
                 <ComboBox
                     Margin="0,0,8,0"
                     Width="55"
                     VerticalAlignment="Center"
                     ItemsSource="{Binding AvailableLanguages}"
                     SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
-                    ToolTip="{Binding [Language_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                    ToolTip="Switch application language" />
 
                 <Button
                     Margin="0,0,6,0"
+                    Cursor="Hand"
                     Command="{Binding NavigateProfileCommand}"
                     Visibility="{Binding IsProfileButtonVisible, Converter={StaticResource BoolToVis}}">
                     <StackPanel VerticalAlignment="Center" Orientation="Horizontal">

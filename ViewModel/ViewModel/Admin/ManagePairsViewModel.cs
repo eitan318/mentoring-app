@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
@@ -124,6 +125,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         private async Task Separate()
         {
             if (SelectedPair is null) return;
+            var confirm = MessageBox.Show(
+                "Are you sure you want to separate this pair? This action cannot be undone.",
+                "Confirm Separate", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (confirm != MessageBoxResult.Yes) return;
+
             await _pairService.SeparatePairAsync(SelectedPair.Id);
             await RefreshPairs();
         }

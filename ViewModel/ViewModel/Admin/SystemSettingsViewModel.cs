@@ -2,10 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Service;
+using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
-using System.Windows;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin
 {
@@ -15,6 +15,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         private readonly GradeService _gradeService;
         private readonly SettingsService _settingsService;
         private readonly INavigationService _navigationService;
+        private readonly IToastService _toastService;
+        private readonly ILocalizationService _loc;
 
         public ObservableCollection<SchoolClass> AllClasses { get; set; } = new();
         public ObservableCollection<Grade> AvailableGrades { get; set; } = new();
@@ -35,12 +37,14 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
 
         public bool CanContinueToDashboard => IsFirstTimeSetup && AllClasses.Count > 0;
 
-        public SystemSettingsViewModel(SchoolClassService schoolClassService, GradeService gradeService, SettingsService settingsService, INavigationService navigationService)
+        public SystemSettingsViewModel(SchoolClassService schoolClassService, GradeService gradeService, SettingsService settingsService, INavigationService navigationService, IToastService toastService, ILocalizationService loc)
         {
             _schoolClassService = schoolClassService;
             _gradeService = gradeService;
             _settingsService = settingsService;
             _navigationService = navigationService;
+            _toastService = toastService;
+            _loc = loc;
         }
 
         public async Task OnNavigatedToAsync()
@@ -71,12 +75,12 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         {
             if (SelectedGrade == null)
             {
-                MessageBox.Show("Please select a grade first.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _toastService.Warning(_loc.Get("SysSettings_Validation_SelectGrade"));
                 return;
             }
             if (!int.TryParse(ClassNumInput, out int num) || num <= 0)
             {
-                MessageBox.Show("Please enter a valid positive class number.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _toastService.Warning(_loc.Get("SysSettings_Validation_InvalidClassNum"));
                 return;
             }
 
@@ -85,14 +89,13 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             {
                 ClassNumInput = "";
                 await RefreshClassesAsync();
-                // Mark school as configured once the first class exists
                 if (!await _settingsService.GetIsSchoolConfiguredAsync())
                     await _settingsService.SetIsSchoolConfiguredAsync(true);
                 OnPropertyChanged(nameof(CanContinueToDashboard));
             }
             else
             {
-                MessageBox.Show(result.ErrorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _toastService.Error(result.ErrorMessage ?? "");
             }
         }
 
@@ -107,13 +110,14 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         {
             if (SelectedClass == null)
             {
-                MessageBox.Show("Please select a class from the list to remove.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _toastService.Warning(_loc.Get("SysSettings_Validation_SelectClass"));
                 return;
             }
-            var confirm = MessageBox.Show(
-                $"Remove {SelectedClass.DisplayName} from the system? Any supervisors assigned to this class will lose the assignment.",
-                "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (confirm != MessageBoxResult.Yes) return;
+
+            bool confirmed = await _toastService.ConfirmAsync(
+                _loc.Get("SysSettings_Confirm_RemoveClass_Title"),
+                _loc.Format("SysSettings_Confirm_RemoveClass_Body", SelectedClass.DisplayName));
+            if (!confirmed) return;
 
             var result = await _schoolClassService.DeleteClassAsync(SelectedClass.Id);
             if (result.Success)
@@ -123,7 +127,7 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             }
             else
             {
-                MessageBox.Show(result.ErrorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _toastService.Error(result.ErrorMessage ?? "");
             }
         }
     }

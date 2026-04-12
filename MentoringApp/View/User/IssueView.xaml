@@ -58,6 +58,8 @@
                     Width="120"
                     Margin="5"
                     Background="DarkGreen"
+                    Cursor="Hand"
+                    ToolTip="Mark this issue as resolved"
                     Command="{Binding ResolveIssueCommand}"
                     Content="{Binding [Issue_Resolve_Button], Source={x:Static loc:TranslationSource.Instance}}"
                     Foreground="White"

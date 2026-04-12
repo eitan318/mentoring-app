@@ -45,13 +45,16 @@
             </StackPanel>
         </Grid>
 
-        <Button Grid.Row="1" 
-                Content="{Binding [Admin_CreatePair_Button], Source={x:Static loc:TranslationSource.Instance}}" 
-                Command="{Binding CreatePairCommand}" 
-                Height="40" 
+        <Button Grid.Row="1"
+                Content="{Binding [Admin_CreatePair_Button], Source={x:Static loc:TranslationSource.Instance}}"
+                Command="{Binding CreatePairCommand}"
+                Height="40"
                 Width="200"
                 Margin="0,20,0,0"
                 HorizontalAlignment="Center"
-                FontWeight="Bold"/>
+                FontWeight="Bold"
+                IsDefault="True"
+                Cursor="Hand"
+                ToolTip="Create a pair with the selected supervisor, mentor, and mentee"/>
     </Grid>
 </UserControl>

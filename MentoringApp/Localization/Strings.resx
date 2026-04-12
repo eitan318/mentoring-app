@@ -153,7 +153,7 @@
   <data name="Admin_ManagePair_SearchHint" xml:space="preserve"><value>Search by Mentor or Mentee name</value></data>
   <data name="Admin_ManagePair_SelectHint" xml:space="preserve"><value>Select a pair from the list to view details.</value></data>
   <data name="Admin_ManagePair_Mentor" xml:space="preserve"><value>Mentor</value></data>
-  <data name="Admin_ManagePair_Grade" xml:space="preserve"><value>Grade: {0}</value></data>
+  <data name="Admin_ManagePair_Grade" xml:space="preserve"><value>Grade:</value></data>
   <data name="Admin_ManagePair_Mentee" xml:space="preserve"><value>Mentee</value></data>
   <data name="Admin_ManagePair_RecentActivity" xml:space="preserve"><value>Recent Activity</value></data>
   <data name="Admin_ManagePair_TotalReviews" xml:space="preserve"><value>Total Reviews: </value></data>
@@ -180,7 +180,7 @@
   <data name="Admin_ManageUsers_Grade" xml:space="preserve"><value>Grade:</value></data>
   <data name="Admin_ManageUsers_To" xml:space="preserve"><value>to</value></data>
   <data name="Admin_ManageUsers_DetailsHeader" xml:space="preserve"><value>Selected User Details</value></data>
-  <data name="Admin_ManageUsers_SelectHint" xml:space="preserve"><value>Select a user from the list to view details.</value></data>
+  <data name="Admin_ManageUsers_SelectHint" xml:space="preserve"><value>Select a user from the list on the left to view and manage their details.</value></data>
   <data name="Admin_ManageUsers_AccountInfo" xml:space="preserve"><value>Account Information</value></data>
   <data name="Admin_ManageUsers_NationalId" xml:space="preserve"><value>National ID:</value></data>
   <data name="Admin_ManageUsers_Actions" xml:space="preserve"><value>Actions</value></data>
@@ -194,6 +194,198 @@
   <data name="Admin_ManageUsers_DownloadTemplate" xml:space="preserve"><value>Download Template</value></data>
   <data name="Admin_ManageUsers_Close" xml:space="preserve"><value>Close</value></data>
   <data name="Admin_ManageUsers_SupervisorInstructions" xml:space="preserve"><value>Import Supervisors Instructions</value></data>
+
+  <!-- Toast / Modal UI -->
+  <data name="Toast_OK_Button" xml:space="preserve"><value>OK</value></data>
+  <data name="Confirm_Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="Confirm_No" xml:space="preserve"><value>No</value></data>
+
+  <!-- Admin Dashboard — Phase Panel -->
+  <data name="Admin_SystemSettings_Button" xml:space="preserve"><value>⚙ System Settings</value></data>
+  <data name="Admin_Phase_Deadline_Label" xml:space="preserve"><value>Deadline:</value></data>
+  <data name="Admin_Phase_SetDeadline_Button" xml:space="preserve"><value>Set deadline</value></data>
+  <data name="Admin_Phase_TimeRemaining_Label" xml:space="preserve"><value>Time remaining</value></data>
+  <data name="Admin_Phase_CancelDeadline_Button" xml:space="preserve"><value>Cancel deadline</value></data>
+  <data name="Admin_Phase1_Title" xml:space="preserve"><value>Phase 1 — Registration &amp; manual pairing</value></data>
+  <data name="Admin_Phase2_Title" xml:space="preserve"><value>Phase 2 — Selection gallery &amp; auto-match</value></data>
+  <data name="Admin_Phase_StartPhase2_Button" xml:space="preserve"><value>▶ Start phase 2 now</value></data>
+  <data name="Admin_Phase_RunAutoMatch_Button" xml:space="preserve"><value>▶ Run auto-match now</value></data>
+  <data name="Admin_Phase_Complete_Text" xml:space="preserve"><value>All pairs have been assigned. The matching process is complete.</value></data>
+  <data name="Admin_Phase1_Summary" xml:space="preserve"><value>Students log in and fill their details. Mentees can send requests to mentors, who can accept and get paired.</value></data>
+  <data name="Admin_Phase2_Summary" xml:space="preserve"><value>Unpaired mentees see their top 3 mentor matches and choose one. Remaining unpaired users are auto-matched at the deadline.</value></data>
+  <data name="Admin_Supervisors_Classes_Header" xml:space="preserve"><value>Classes</value></data>
+  <data name="Admin_Supervisors_None_Label" xml:space="preserve"><value>None</value></data>
+  <data name="Admin_Phase1Info_Title" xml:space="preserve"><value>Phase 1 — Registration &amp; Manual Pairing</value></data>
+  <data name="Admin_Phase1Info_Body" xml:space="preserve"><value>Students log in and fill in their details.
+
+Mentees can browse available mentors and send pairing requests. A mentor who accepts becomes paired with that mentee, and the pair's supervisor is automatically set to the mentee's class teacher.
+
+When you are satisfied with the manual pairings (or the deadline passes), move on to Phase 2 to handle any remaining unpaired mentees.</value></data>
+  <data name="Admin_Phase2Info_Title" xml:space="preserve"><value>Phase 2 — Selection Gallery &amp; Auto-Match</value></data>
+  <data name="Admin_Phase2Info_Body" xml:space="preserve"><value>Every mentee who completed their profile but was not yet paired is shown their top 3 algorithmically ranked mentor matches and can choose one.
+
+When the deadline passes (or you press 'Run now'), any mentee who still hasn't chosen is matched automatically by the algorithm. A fallback pass then handles any remaining edge cases.</value></data>
+  <data name="Admin_Timer_Pending" xml:space="preserve"><value>00:00:00 — Pending</value></data>
+
+  <!-- System Settings -->
+  <data name="SysSettings_Title" xml:space="preserve"><value>⚙ System Settings</value></data>
+  <data name="SysSettings_Description" xml:space="preserve"><value>Define the participating grades and class numbers for this academic year.</value></data>
+  <data name="SysSettings_Welcome_Title" xml:space="preserve"><value>Welcome! Before you can use the admin dashboard, please configure the participating school grades and classes.</value></data>
+  <data name="SysSettings_Welcome_Subtitle" xml:space="preserve"><value>Select grades (1–12) and add the class numbers for each. You can edit this at any time.</value></data>
+  <data name="SysSettings_Continue_Button" xml:space="preserve"><value>✓ Continue to Dashboard</value></data>
+  <data name="SysSettings_AddClass_Header" xml:space="preserve"><value>Add Participating Class</value></data>
+  <data name="SysSettings_Grade_Label" xml:space="preserve"><value>Grade</value></data>
+  <data name="SysSettings_ClassNumber_Label" xml:space="preserve"><value>Class Number</value></data>
+  <data name="SysSettings_ClassNumber_Tag" xml:space="preserve"><value>e.g. 1, 2, 3 …</value></data>
+  <data name="SysSettings_AddClass_Button" xml:space="preserve"><value>➕ Add Class</value></data>
+  <data name="SysSettings_ParticipatingClasses_Header" xml:space="preserve"><value>Participating Classes</value></data>
+  <data name="SysSettings_RemoveSelected_Button" xml:space="preserve"><value>🗑 Remove Selected</value></data>
+  <data name="SysSettings_ClassSeparator" xml:space="preserve"><value>– Class </value></data>
+  <data name="SysSettings_Tip" xml:space="preserve"><value>Tip: These classes are available for supervisor assignment in 'Manage Users'.</value></data>
+  <data name="SysSettings_Validation_SelectGrade" xml:space="preserve"><value>Please select a grade first.</value></data>
+  <data name="SysSettings_Validation_InvalidClassNum" xml:space="preserve"><value>Please enter a valid positive class number.</value></data>
+  <data name="SysSettings_Validation_SelectClass" xml:space="preserve"><value>Please select a class from the list to remove.</value></data>
+  <data name="SysSettings_Confirm_RemoveClass_Title" xml:space="preserve"><value>Confirm Remove</value></data>
+  <data name="SysSettings_Confirm_RemoveClass_Body" xml:space="preserve"><value>Remove {0} from the system? Any supervisors assigned to this class will lose the assignment.</value></data>
+
+  <!-- Manage Users -->
+  <data name="ManageUsers_AssignedClasses_Header" xml:space="preserve"><value>Assigned Classes</value></data>
+  <data name="ManageUsers_SaveClasses_Button" xml:space="preserve"><value>Save Classes</value></data>
+  <data name="ManageUsers_ClassesAssigned_Format" xml:space="preserve"><value>{0} class(es) assigned</value></data>
+  <data name="ManageUsers_NoClassesAssigned" xml:space="preserve"><value>No classes assigned</value></data>
+  <data name="ManageUsers_ImportStudents_Success" xml:space="preserve"><value>Successfully imported {0} student(s).</value></data>
+  <data name="ManageUsers_ImportStudents_Error" xml:space="preserve"><value>Import failed: {0}</value></data>
+  <data name="ManageUsers_ImportSupervisors_Success" xml:space="preserve"><value>Successfully imported {0} supervisor(s).</value></data>
+  <data name="ManageUsers_ImportSupervisors_Error" xml:space="preserve"><value>Import failed: {0}</value></data>
+  <data name="ManageUsers_TemplateSaved_Success" xml:space="preserve"><value>Template saved successfully.</value></data>
+  <data name="ManageUsers_TemplateSaved_Error" xml:space="preserve"><value>Could not save template: {0}</value></data>
+
+  <!-- Student Dashboard tabs -->
+  <data name="Student_AvailableMentors_Header" xml:space="preserve"><value>Available mentors</value></data>
+  <data name="Student_AvailableMentors_Desc" xml:space="preserve"><value>Send a request to a mentor you would like to be paired with.</value></data>
+  <data name="Student_Loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="Student_SendRequest_Button" xml:space="preserve"><value>Send Request</value></data>
+  <data name="Student_TopMatches_Header" xml:space="preserve"><value>Your top mentor matches</value></data>
+  <data name="Student_TopMatches_Desc" xml:space="preserve"><value>Ranked by compatibility. Choose one — your selection is final.</value></data>
+  <data name="Student_AlreadyMatched_Banner" xml:space="preserve"><value>You are matched! Check the new tab.</value></data>
+  <data name="Student_Match_Label" xml:space="preserve"><value>match</value></data>
+  <data name="Student_ChooseMentor_Button" xml:space="preserve"><value>Choose this mentor</value></data>
+  <data name="Student_MentoringRequests_Header" xml:space="preserve"><value>Mentoring requests</value></data>
+  <data name="Student_MentoringRequests_Desc" xml:space="preserve"><value>Students who have requested you as their mentor.</value></data>
+  <data name="Student_Phase2_NoAction" xml:space="preserve"><value>No action required — you will be notified once paired.</value></data>
+  <data name="Student_AcceptCreates_Footnote" xml:space="preserve"><value>Accepting a request will create an active pair.</value></data>
+  <data name="Student_Phase_ShowInfo_Tooltip" xml:space="preserve"><value>Show Phase Information</value></data>
+  <data name="Student_Accept_Button" xml:space="preserve"><value>Accept</value></data>
+  <data name="Student_Decline_Button" xml:space="preserve"><value>Decline</value></data>
+
+  <!-- Student phase banner (C# runtime) -->
+  <data name="Student_BannerPhase1_Title" xml:space="preserve"><value>Phase 1: Registration</value></data>
+  <data name="Student_BannerPhase1_Subtitle" xml:space="preserve"><value>Mentees may send direct requests to mentors. If you do not match by the deadline, you will be automatically matched in Phase 2.</value></data>
+  <data name="Student_BannerPhase2_Title" xml:space="preserve"><value>Phase 2: Algorithmic Fallback</value></data>
+  <data name="Student_BannerPhase2_Subtitle" xml:space="preserve"><value>Any unmatched mentees will be automatically matched.</value></data>
+  <data name="Student_BannerTimer_PendingActivation" xml:space="preserve"><value>Pending System Activation</value></data>
+  <data name="Student_BannerTimer_PendingAlgorithm" xml:space="preserve"><value>Pending Algorithmic Run</value></data>
+  <data name="Student_BannerTimer_DeadlineReached" xml:space="preserve"><value>Deadline Reached (Awaiting system run)</value></data>
+  <data name="Student_BannerTimer_EndsIn" xml:space="preserve"><value>Ends in: {0}</value></data>
+  <data name="Student_BannerTimer_RunsIn" xml:space="preserve"><value>Runs in: {0}</value></data>
+  <data name="Student_Phase1Info_Title" xml:space="preserve"><value>Phase 1 Info</value></data>
+  <data name="Student_Phase1Info_Body" xml:space="preserve"><value>Phase 1: Mentee Enrollment.
+
+Mentees should select and send requests to mentors. If you do not match by the deadline, you will be automatically matched in Phase 2.</value></data>
+  <data name="Student_Phase2Info_Title" xml:space="preserve"><value>Phase 2 Info</value></data>
+  <data name="Student_Phase2Info_Body" xml:space="preserve"><value>Phase 2: Algorithmic Matching.
+
+The system is currently processing matches based on compatibility. Please wait until this phase completes.</value></data>
+
+  <!-- Browse Mentors -->
+  <data name="Browse_Header" xml:space="preserve"><value>🔍 Browse Mentors</value></data>
+  <data name="Browse_Description" xml:space="preserve"><value>Browse available mentors below and send a request. Once a mentor accepts, you'll be paired.</value></data>
+  <data name="Browse_Loading" xml:space="preserve"><value>Loading mentors…</value></data>
+  <data name="Browse_Teaches_Label" xml:space="preserve"><value>📘 Teaches: </value></data>
+  <data name="Browse_Grade_Label" xml:space="preserve"><value>🎓 Grade: </value></data>
+  <data name="Browse_SendRequest_Button" xml:space="preserve"><value>Send Request</value></data>
+
+  <!-- Mentor Requests -->
+  <data name="MentorReq_Header" xml:space="preserve"><value>📬 Mentoring Requests</value></data>
+  <data name="MentorReq_Description" xml:space="preserve"><value>Students who want you as their mentor. Review their profile and decide.</value></data>
+  <data name="MentorReq_Loading" xml:space="preserve"><value>Loading requests…</value></data>
+  <data name="MentorReq_Accept_Button" xml:space="preserve"><value>✓ Accept</value></data>
+  <data name="MentorReq_Decline_Button" xml:space="preserve"><value>✗ Decline</value></data>
+  <data name="MentorReq_WantsToLearn_Label" xml:space="preserve"><value>📗 Wants to learn: </value></data>
+
+  <!-- Selection Gallery -->
+  <data name="Selection_Header" xml:space="preserve"><value>⭐ Your Top Mentor Matches</value></data>
+  <data name="Selection_Description" xml:space="preserve"><value>Based on your learning interests, here are your top 3 most compatible mentors. Choose one to be paired instantly.</value></data>
+  <data name="Selection_AlreadyMatched" xml:space="preserve"><value>🎉 You are already matched! Check your dashboard.</value></data>
+  <data name="Selection_Loading" xml:space="preserve"><value>Loading recommendations…</value></data>
+  <data name="Selection_Choose_Button" xml:space="preserve"><value>✓ Choose This Mentor</value></data>
+
+  <!-- Supervisor Dashboard -->
+  <data name="Supervisor_InactiveStudents_Header" xml:space="preserve"><value>Students with incomplete profiles:</value></data>
+  <data name="Supervisor_ClearSelection_Button" xml:space="preserve"><value>Clear Selection</value></data>
+  <data name="Supervisor_ShowPhaseInfo_Tooltip" xml:space="preserve"><value>Show phase information</value></data>
+  <data name="Supervisor_BannerComplete_Title" xml:space="preserve"><value>Matching Complete</value></data>
+  <data name="Supervisor_BannerComplete_Subtitle" xml:space="preserve"><value>All students have been paired. No further action is required.</value></data>
+  <data name="Supervisor_BannerPhase1_Title" xml:space="preserve"><value>Registration Phase</value></data>
+  <data name="Supervisor_BannerPhase1_Subtitle" xml:space="preserve"><value>Students are registering and completing their profiles. Mentees may send direct pairing requests to mentors.</value></data>
+  <data name="Supervisor_BannerPhase2_Title" xml:space="preserve"><value>Mentor Selection Phase</value></data>
+  <data name="Supervisor_BannerPhase2_Subtitle" xml:space="preserve"><value>Unmatched mentees are choosing from their top suggested mentors. Remaining unmatched students will be auto-paired at the deadline.</value></data>
+  <data name="Supervisor_BannerTimer_NoDeadline" xml:space="preserve"><value>No deadline set</value></data>
+  <data name="Supervisor_BannerTimer_RegClosesIn" xml:space="preserve"><value>Registration closes in: {0}</value></data>
+  <data name="Supervisor_BannerTimer_RegDeadlineReached" xml:space="preserve"><value>Registration deadline reached — awaiting admin action</value></data>
+  <data name="Supervisor_BannerTimer_AutoMatchIn" xml:space="preserve"><value>Auto-match runs in: {0}</value></data>
+  <data name="Supervisor_BannerTimer_SelectionDeadlineReached" xml:space="preserve"><value>Selection deadline reached — awaiting admin action</value></data>
+  <data name="Supervisor_PhaseComplete_Info_Title" xml:space="preserve"><value>Matching Complete</value></data>
+  <data name="Supervisor_PhaseComplete_Info_Body" xml:space="preserve"><value>The matching process is complete. All students have been assigned a pair.
+
+You can still manage issues and review pair activity from this dashboard.</value></data>
+  <data name="Supervisor_Phase1Info_Title" xml:space="preserve"><value>Registration Phase</value></data>
+  <data name="Supervisor_Phase1Info_Body" xml:space="preserve"><value>Students are logging in and completing their profiles.
+
+Mentees can browse available mentors and send a direct pairing request. If a mentor accepts, they become paired immediately.
+
+Watch the inactive students list — students who haven't completed their profiles will not appear in the matching pool.</value></data>
+  <data name="Supervisor_Phase2Info_Title" xml:space="preserve"><value>Mentor Selection Phase</value></data>
+  <data name="Supervisor_Phase2Info_Body" xml:space="preserve"><value>Each mentee who is still unmatched is shown their top algorithmically ranked mentor suggestions and can choose one.
+
+When the deadline passes (or the admin runs the auto-match manually), any mentee who still hasn't chosen is paired automatically by the algorithm. A fallback pass then handles any remaining edge cases.
+
+You may see new pairs appear in your list as students make their selections.</value></data>
+
+  <!-- Registration View -->
+  <data name="Register_InfoBanner" xml:space="preserve"><value>Only the required fields (marked with *) must be filled. Everything else is optional — the user can complete their profile after their first login.</value></data>
+  <data name="Register_Phone_Tag" xml:space="preserve"><value>Phone Number (optional)</value></data>
+  <data name="Register_Gender_Label" xml:space="preserve"><value>Gender (optional)</value></data>
+  <data name="Register_ClassNum_Tag" xml:space="preserve"><value>Class Number (optional)</value></data>
+  <data name="Register_MaxMentees_Label" xml:space="preserve"><value>Max Mentees (optional)</value></data>
+  <data name="Register_PreferredMenteeGender_Label" xml:space="preserve"><value>Preferred Mentee Gender (optional)</value></data>
+  <data name="Register_PreferredMentorGender_Label" xml:space="preserve"><value>Preferred Mentor Gender (optional)</value></data>
+  <data name="Register_RequiredField" xml:space="preserve"><value>* Required field</value></data>
+
+  <!-- My Profile View -->
+  <data name="Profile_Phone_Label" xml:space="preserve"><value>Phone Number</value></data>
+  <data name="Profile_Gender_Label" xml:space="preserve"><value>Gender</value></data>
+  <data name="Profile_ClassNum_Label" xml:space="preserve"><value>Class Num</value></data>
+  <data name="Profile_MaxMentees_Label" xml:space="preserve"><value>Max Mentees</value></data>
+  <data name="Profile_PreferredMenteeGender_Label" xml:space="preserve"><value>Preferred Mentee Gender</value></data>
+  <data name="Profile_PreferredMentorGender_Label" xml:space="preserve"><value>Preferred Mentor Gender</value></data>
+
+  <!-- Other Profile View -->
+  <data name="OtherProfile_PhoneNumber_Label" xml:space="preserve"><value>Phone Number</value></data>
+  <data name="OtherProfile_Gender_Label" xml:space="preserve"><value>Gender</value></data>
+  <data name="OtherProfile_PreferredMentorGender_Label" xml:space="preserve"><value>Preferred Mentor Gender</value></data>
+  <data name="OtherProfile_PreferredMenteeGender_Label" xml:space="preserve"><value>Preferred Mentee Gender</value></data>
+
+  <!-- Role labels (C# runtime) -->
+  <data name="Role_Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="Role_Supervisor" xml:space="preserve"><value>Supervisor</value></data>
+  <data name="Role_Student" xml:space="preserve"><value>Student</value></data>
+  <data name="Role_StudentMentor" xml:space="preserve"><value>Student · Mentor</value></data>
+  <data name="Role_StudentMentee" xml:space="preserve"><value>Student · Mentee</value></data>
+  <data name="Role_StudentBoth" xml:space="preserve"><value>Student · Mentor &amp; Mentee</value></data>
+  <data name="OtherProfile_None" xml:space="preserve"><value>None</value></data>
+  <data name="OtherProfile_Teaching_Format" xml:space="preserve"><value>Teaching: {0}</value></data>
+  <data name="OtherProfile_Learning_Format" xml:space="preserve"><value>Learning: {0}</value></data>
 
   <!-- Database Dynamic Values -->
   <data name="DB_Grade_9th" xml:space="preserve"><value>9th Grade</value></data>

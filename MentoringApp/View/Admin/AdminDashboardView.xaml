@@ -79,12 +79,15 @@
         <!-- ── Action buttons ── -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
             <Button Margin="0,0,8,0" Padding="10,5"
+                    Cursor="Hand"
                     Command="{Binding ManagePairsCommand}"
                     Content="{Binding [Admin_ManagePairs_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
             <Button Margin="0,0,8,0" Padding="10,5"
+                    Cursor="Hand"
                     Command="{Binding ManageUsersCommand}"
                     Content="{Binding [Admin_ManageUsers_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
             <Button Margin="0,0,8,0" Padding="10,5"
+                    Cursor="Hand"
                     Command="{Binding SystemSettingsCommand}"
                     Content="⚙ System Settings"/>
         </StackPanel>
@@ -313,6 +316,8 @@
                         <Separator Margin="0,12,0,10"/>
                         <Button Content="▶ Start phase 2 now" Padding="10,5"
                                 HorizontalAlignment="Left"
+                                Cursor="Hand"
+                                ToolTip="End Phase 1 and begin Phase 2 algorithmic matching. This cannot be undone."
                                 Command="{Binding StartSelectionPhaseCommand}"/>
                     </StackPanel>
 
@@ -328,6 +333,8 @@
                         <Separator Margin="0,12,0,10"/>
                         <Button Content="▶ Run auto-match now" Padding="10,5"
                                 HorizontalAlignment="Left"
+                                Cursor="Hand"
+                                ToolTip="Run the automatic matching algorithm for all unmatched mentees. This cannot be undone."
                                 Command="{Binding RunAutoMatchCommand}"/>
                     </StackPanel>
 
@@ -406,6 +413,7 @@
                             </TextBlock.Style>
                         </TextBlock>
                         <Button Grid.Column="5" Padding="8,3" FontSize="11"
+                                Cursor="Hand"
                                 Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                 CommandParameter="{Binding}"
                                 Content="{Binding [Admin_Inspect_Button], Source={x:Static loc:TranslationSource.Instance}}"/>

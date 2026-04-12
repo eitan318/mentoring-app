@@ -31,6 +31,8 @@
                         Command="{Binding GoToDashboardCommand}"
                         IsEnabled="{Binding CanContinueToDashboard}"
                         Padding="14,6" Background="#388E3C" Foreground="White" BorderThickness="0"
+                        Cursor="Hand"
+                        ToolTip="Continue to the main dashboard"
                         VerticalAlignment="Center">
                     <Button.Style>
                         <Style TargetType="Button">
@@ -99,7 +101,8 @@
                         <Button Content="➕ Add Class"
                                 Command="{Binding AddClassCommand}"
                                 Padding="12,8" HorizontalAlignment="Left"
-                                Background="#1976D2" Foreground="White" BorderThickness="0">
+                                Background="#1976D2" Foreground="White" BorderThickness="0"
+                                Cursor="Hand">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
@@ -119,7 +122,8 @@
                     <Button DockPanel.Dock="Right" Content="🗑 Remove Selected"
                             Command="{Binding DeleteClassCommand}"
                             HorizontalAlignment="Right"
-                            Padding="8,4" Background="#D32F2F" Foreground="White" BorderThickness="0">
+                            Padding="8,4" Background="#D32F2F" Foreground="White" BorderThickness="0"
+                            Cursor="Hand">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">

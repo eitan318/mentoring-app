@@ -139,9 +139,12 @@
                     Margin="0,5" />
             </StackPanel>
 
+            <TextBlock Text="* Required field" FontSize="10" Foreground="Gray" Margin="0,6,0,0" />
             <Button
                 Height="35"
                 Margin="0,10,0,0"
+                Cursor="Hand"
+                IsDefault="True"
                 Command="{Binding RegisterCommand}"
                 Content="{Binding [Register_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}" />
 

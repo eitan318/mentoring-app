@@ -12,6 +12,8 @@ namespace MentoringApp.DI
             services.AddSingleton<IWindowService, WindowService>();
             services.AddSingleton<IFileService, FileService>();
             services.AddSingleton<ILanguageService, LanguageService>();
+            services.AddSingleton<IToastService>(ToastService.Instance);
+            services.AddSingleton<ILocalizationService, LocalizationService>();
             services.AddTransient<DummyDataSeeder>();
             services.AddSingleton<MainWindow>();
 

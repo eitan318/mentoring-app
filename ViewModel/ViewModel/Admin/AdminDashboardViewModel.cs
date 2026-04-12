@@ -8,7 +8,6 @@ using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModel.Supervisor;
 using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Threading;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin
@@ -25,6 +24,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         private readonly UserService _userService;
         private readonly MatchingFlowService _matchingFlowService;
         private readonly SettingsService _settingsService;
+        private readonly IToastService _toastService;
+        private readonly ILocalizationService _loc;
         private readonly DispatcherTimer _uiUpdateTimer;
 
         [ObservableProperty] private string _statusMessage = "";
@@ -48,8 +49,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
 
         // ── Phase Descriptions (short, shown inline) ──────────────────────────
 
-        public string Phase1Summary => "Students log in and fill their details. Mentees can send requests to mentors, who can accept and get paired.";
-        public string Phase2Summary => "Unpaired mentees see their top 3 mentor matches and choose one. Remaining unpaired users are auto-matched at the deadline.";
+        public string Phase1Summary => _loc.Get("Admin_Phase1_Summary");
+        public string Phase2Summary => _loc.Get("Admin_Phase2_Summary");
 
         // ── Active Deadline (single set of controls, VM swaps the data) ───────
 
@@ -75,12 +76,16 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             INavigationService navigationService,
             UserService userService,
             MatchingFlowService matchingFlowService,
-            SettingsService settingsService)
+            SettingsService settingsService,
+            IToastService toastService,
+            ILocalizationService loc)
         {
             _navigationService = navigationService;
             _userService = userService;
             _matchingFlowService = matchingFlowService;
             _settingsService = settingsService;
+            _toastService = toastService;
+            _loc = loc;
 
             _uiUpdateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _uiUpdateTimer.Tick += OnTimerTick;
@@ -94,7 +99,7 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             if (!ActiveDeadline.HasValue) { DeadlineTimeRemaining = string.Empty; return; }
             var remaining = ActiveDeadline.Value - DateTime.Now;
             DeadlineTimeRemaining = remaining.TotalSeconds <= 0
-                ? "00:00:00 — Pending"
+                ? _loc.Get("Admin_Timer_Pending")
                 : $"{remaining.Days}d {remaining.Hours:D2}h {remaining.Minutes:D2}m {remaining.Seconds:D2}s";
         }
 
@@ -159,6 +164,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         [RelayCommand]
         private async Task StartSelectionPhase()
         {
+            var confirm = MessageBox.Show(
+                "Are you sure you want to start Phase 2? This will end Phase 1 and cannot be undone.",
+                "Confirm Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (confirm != MessageBoxResult.Yes) return;
+
             ShowResult("Generating suitability scores and opening selection gallery…");
 
             var result = await _matchingFlowService.GenerateScoreMatrixAsync();
@@ -182,6 +192,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         [RelayCommand]
         private async Task RunAutoMatch()
         {
+            var confirm = MessageBox.Show(
+                "Are you sure you want to run auto-match? This will algorithmically pair all remaining unmatched mentees and cannot be undone.",
+                "Confirm Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (confirm != MessageBoxResult.Yes) return;
+
             ShowResult("Running final algorithmic auto-match…");
 
             var result = await _matchingFlowService.RunAutoMatchAsync();
@@ -206,27 +221,16 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         // ── Info Dialogs ──────────────────────────────────────────────────────
 
         [RelayCommand]
-        private void ShowPhase1Info() =>
-            MessageBox.Show(
-                "Students log in and fill in their details.\n\n" +
-                "Mentees can browse available mentors and send pairing requests. " +
-                "A mentor who accepts becomes paired with that mentee, and the pair's supervisor " +
-                "is automatically set to the mentee's class teacher.\n\n" +
-                "When you are satisfied with the manual pairings (or the deadline passes), " +
-                "move on to Phase 2 to handle any remaining unpaired mentees.",
-                "Phase 1 — Registration & Manual Pairing",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+        private async Task ShowPhase1Info() =>
+            await _toastService.ShowInfoAsync(
+                _loc.Get("Admin_Phase1Info_Title"),
+                _loc.Get("Admin_Phase1Info_Body"));
 
         [RelayCommand]
-        private void ShowPhase2Info() =>
-            MessageBox.Show(
-                "Every mentee who completed their profile but was not yet paired is shown " +
-                "their top 3 algorithmically ranked mentor matches and can choose one.\n\n" +
-                "When the deadline passes (or you press 'Run now'), any mentee who still " +
-                "hasn't chosen is matched automatically by the algorithm. " +
-                "A fallback pass then handles any remaining edge cases.",
-                "Phase 2 — Selection Gallery & Auto-Match",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+        private async Task ShowPhase2Info() =>
+            await _toastService.ShowInfoAsync(
+                _loc.Get("Admin_Phase2Info_Title"),
+                _loc.Get("Admin_Phase2Info_Body"));
 
         // ── Navigation Commands ───────────────────────────────────────────────
 
