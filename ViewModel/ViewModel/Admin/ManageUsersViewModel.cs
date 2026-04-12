@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin
 {
@@ -33,6 +32,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         private readonly IFileService _fileService;
         private readonly INavigationService _navigationService;
         private readonly IWindowService _windowService;
+        private readonly IToastService _toastService;
+        private readonly ILocalizationService _loc;
         private readonly UserService _userService;
         private readonly PairService _pairService;
         private readonly ExcelImportService _excelImportService;
@@ -232,6 +233,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             IFileService fileService,
             IWindowService windowService,
             INavigationService navigationService,
+            IToastService toastService,
+            ILocalizationService loc,
             UserService userService,
             PairService pairService,
             ExcelImportService excelImportService,
@@ -241,6 +244,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             _fileService        = fileService;
             _windowService      = windowService;
             _navigationService  = navigationService;
+            _toastService       = toastService;
+            _loc                = loc;
             _userService        = userService;
             _pairService        = pairService;
             _excelImportService = excelImportService;
@@ -297,6 +302,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         private async Task DeleteUser()
         {
             if (SelectedUser is null) return;
+            bool confirmed = await _toastService.ConfirmAsync(
+                _loc.Get("Confirm_DeleteUser_Title"),
+                _loc.Get("Confirm_DeleteUser_Body"));
+            if (!confirmed) return;
+
             await _userService.DeleteUserAsync(SelectedUser.Id);
             AllUsers.Remove(SelectedUser);
             SelectedUser = null;
@@ -321,13 +331,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             var result = await _excelImportService.ImportStudentsFromExcelAsync(file);
             if (result.Success)
             {
-                MessageBox.Show($"Successfully imported {result.Data} student(s).",
-                    "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                _toastService.Success(_loc.Format("ManageUsers_ImportStudents_Success", result.Data));
                 await OnNavigatedToAsync();
             }
             else
-                MessageBox.Show($"Import failed: {result.ErrorMessage}",
-                    "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _toastService.Error(_loc.Format("ManageUsers_ImportStudents_Error", result.ErrorMessage ?? ""));
         }
 
         [RelayCommand]
@@ -340,13 +348,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             var result = await _excelImportService.ImportSupervisorsFromExcelAsync(file);
             if (result.Success)
             {
-                MessageBox.Show($"Successfully imported {result.Data} supervisor(s).",
-                    "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                _toastService.Success(_loc.Format("ManageUsers_ImportSupervisors_Success", result.Data));
                 await OnNavigatedToAsync();
             }
             else
-                MessageBox.Show($"Import failed: {result.ErrorMessage}",
-                    "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _toastService.Error(_loc.Format("ManageUsers_ImportSupervisors_Error", result.ErrorMessage ?? ""));
         }
 
         // ── Template download ───────────────────────────────────────────────
@@ -357,9 +363,9 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             if (string.IsNullOrEmpty(savePath)) return;
             var result = _excelImportService.GenerateTemplate(isSupervisor: false, savePath);
             if (result.Success)
-                MessageBox.Show("Template saved successfully.", "Download Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                _toastService.Success(_loc.Get("ManageUsers_TemplateSaved_Success"));
             else
-                MessageBox.Show($"Could not save template: {result.ErrorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _toastService.Error(_loc.Format("ManageUsers_TemplateSaved_Error", result.ErrorMessage ?? ""));
         }
 
         [RelayCommand]

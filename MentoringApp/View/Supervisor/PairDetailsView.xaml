@@ -97,7 +97,7 @@
                             <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}"/>
                         </TextBlock>
                     </DockPanel>
-                    <ProgressBar Height="10" Minimum="0" Maximum="100" Value="{Binding HoursProgress}"/>
+                    <ProgressBar Height="10" Minimum="0" Maximum="100" Value="{Binding HoursProgress}" ToolTip="Meeting hours progress toward the required goal"/>
                 </StackPanel>
             </StackPanel>
         </Border>

@@ -36,7 +36,8 @@
                 Width="100"
                 Margin="0,0,0,20"
                 HorizontalAlignment="Left"
-                Text="{Binding AmountOfHours, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding AmountOfHours, UpdateSourceTrigger=PropertyChanged}"
+                ToolTip="Enter the number of meeting hours (e.g. 1.5)" />
 
             <Button
                 Width="120"
@@ -44,7 +45,9 @@
                 Background="Teal"
                 Command="{Binding AddReviewCommand}"
                 Content="{Binding [Review_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}"
-                Foreground="White" />
+                Foreground="White"
+                IsDefault="True"
+                Cursor="Hand" />
         </StackPanel>
     </Grid>
 </UserControl>

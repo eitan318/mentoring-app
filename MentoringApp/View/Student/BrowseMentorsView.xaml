@@ -38,6 +38,21 @@
         <TextBlock Grid.Row="2" Text="Loading mentors…" Foreground="#999"
                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8"/>
 
+        <!-- Empty state -->
+        <TextBlock x:Name="emptyMentors" Grid.Row="3" Text="No mentors are currently available."
+                   FontSize="12" Foreground="Gray" Margin="0,8,0,0">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Mentors.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
         <!-- Mentor cards list -->
         <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
             <ItemsControl ItemsSource="{Binding Mentors}">

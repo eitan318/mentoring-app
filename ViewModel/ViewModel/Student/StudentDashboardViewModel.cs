@@ -581,11 +581,12 @@ namespace MentoringApp.ViewModel.ViewModel.Student
             IsLoading = true;
             Mentors.Clear();
 
+            var currentUser = _userStore.User as StudentModel;
             var availableMentors = await _matchingFlowService.GetAvailableMentorsAsync();
             var subjects = (await _subjectService.GetAllSubjectsAsync()).Data ?? [];
             var subjectMap = subjects.ToDictionary(s => s.Id, s => s.Name);
 
-            foreach (var mentor in availableMentors)
+            foreach (var mentor in availableMentors.Where(m => m.Id != currentUser?.Id))
             {
                 string subjectName = mentor.MentorProfile != null &&
                     subjectMap.TryGetValue(mentor.MentorProfile.SubjectToTeach, out string? sn)

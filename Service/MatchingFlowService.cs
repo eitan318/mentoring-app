@@ -74,6 +74,9 @@ namespace MentoringApp.Service
 
         public async Task<Result> SendPairRequestAsync(int menteeId, int mentorId)
         {
+            if (menteeId == mentorId)
+                return Result.Failure("You cannot send a request to yourself.");
+
             var matchedMentees = await _pairRepo.GetMatchedMenteeIdsAsync();
             if (matchedMentees.Contains(menteeId))
                 return Result.Failure("You are already matched with a mentor.");

@@ -41,7 +41,7 @@
                     <Button Margin="6,0,0,0" Background="Transparent" BorderThickness="0"
                             Command="{Binding ShowPhaseInfoCommand}" Content="🛈"
                             Cursor="Hand" FontSize="14" Foreground="{Binding BannerTextColor}"
-                            ToolTip="Show Phase Information" />
+                            ToolTip="Click for details about the current phase" />
                 </StackPanel>
                 <TextBlock Margin="0,0,0,4" FontSize="12" Opacity="0.9"
                            Foreground="{Binding BannerTextColor}" Text="{Binding BannerSubtitle}"
@@ -54,6 +54,7 @@
         <!-- ══ ROW 1: Tab strip ═════════════════════════════════════════════ -->
         <ListBox
             Grid.Row="1"
+            Cursor="Hand"
             ItemsSource="{Binding Pairs}"
             SelectedItem="{Binding SelectedPair}">
             <ListBox.ItemsPanel>
@@ -371,20 +372,12 @@
                             <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
                                        Text="{Binding RequestWindowTimerDisplay}"
                                        Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
-                        </StackPanel>
 
-                        <!-- Phase 2: mentor is passive — no action required -->
-                        <Border DockPanel.Dock="Top" Margin="0,0,0,10" Padding="12,10"
-                                Background="#F3E5F5" CornerRadius="6"
-                                Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}">
-                            <StackPanel>
-                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#6A1B9A"
-                                           Text="Mentees are now choosing their mentors" />
-                                <TextBlock FontSize="11" Foreground="#6A1B9A" Margin="0,4,0,0"
-                                           TextWrapping="Wrap"
-                                           Text="During this phase mentees pick from their top compatibility matches. You will be notified once paired — no action is required from you." />
-                            </StackPanel>
-                        </Border>
+                            <!-- Phase 2: single-line note (outer banner already describes the phase) -->
+                            <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
+                                       Text="No action required — you will be notified once paired."
+                                       Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
 
                         <Border DockPanel.Dock="Top" Margin="0,0,0,8"
                                 Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">

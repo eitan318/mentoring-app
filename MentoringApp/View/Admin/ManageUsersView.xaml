@@ -35,18 +35,18 @@
         <GroupBox Header="{Binding [Admin_ManageUsers_AddImportHeader], Source={x:Static loc:TranslationSource.Instance}}" Grid.Row="0" Margin="0,0,0,15" Padding="10">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                    <Button Command="{Binding RegisterSupervisorCommand}" Content="{Binding [Admin_ManageUsers_AddSupervisor], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding RegisterStudentCommand}" Content="{Binding [Admin_ManageUsers_AddStudent], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding RegisterSupervisorCommand}" Content="{Binding [Admin_ManageUsers_AddSupervisor], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding RegisterStudentCommand}" Content="{Binding [Admin_ManageUsers_AddStudent], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2"/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding [Admin_ManageUsers_BulkImport], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
-                    <Button Command="{Binding ImportStudentsCommand}" Content="{Binding [Admin_ManageUsers_ImportStudents], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding ToggleStudentInfoCommand}" Content="{Binding [Admin_ManageUsers_Help], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,15,0" Padding="5,2" ToolTip="{Binding [Admin_ManageUsers_ImportStudentsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
+                    <Button Command="{Binding ImportStudentsCommand}" Content="{Binding [Admin_ManageUsers_ImportStudents], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding ToggleStudentInfoCommand}" Content="{Binding [Admin_ManageUsers_Help], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,15,0" Padding="5,2" ToolTip="{Binding [Admin_ManageUsers_ImportStudentsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
 
-                    <Button Command="{Binding ImportSupervisorsCommand}" Content="{Binding [Admin_ManageUsers_ImportSupervisors], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding ToggleSupervisorInfoCommand}" Content="{Binding [Admin_ManageUsers_Help], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2" ToolTip="{Binding [Admin_ManageUsers_ImportSupervisorsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
+                    <Button Command="{Binding ImportSupervisorsCommand}" Content="{Binding [Admin_ManageUsers_ImportSupervisors], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2"/>
+                    <Button Command="{Binding ToggleSupervisorInfoCommand}" Content="{Binding [Admin_ManageUsers_Help], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2" ToolTip="{Binding [Admin_ManageUsers_ImportSupervisorsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
@@ -340,9 +340,11 @@
                                     Command="{Binding DataContext.ViewUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                     Margin="0,0,0,10" Padding="5,8"/>
                                     
-                            <Button Content="{Binding [Admin_ManageUsers_DeleteUser], Source={x:Static loc:TranslationSource.Instance}}" 
-                                    Command="{Binding DataContext.DeleteUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                    Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515" 
+                            <Button Content="{Binding [Admin_ManageUsers_DeleteUser], Source={x:Static loc:TranslationSource.Instance}}"
+                                    Command="{Binding DataContext.DeleteUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
+                                    Cursor="Hand"
+                                    ToolTip="Permanently delete this user account"
                                     Margin="0,0,0,5" Padding="5,8"/>
                         </StackPanel>
                     </ScrollViewer>

@@ -13,7 +13,8 @@
     <Grid>
         <StackPanel>
             <TextBox Tag="{Binding [Issue_Description_Label], Source={x:Static loc:TranslationSource.Instance}}"
-                 Text="{Binding IssueDescription, UpdateSourceTrigger=PropertyChanged}" />
+                 Text="{Binding IssueDescription, UpdateSourceTrigger=PropertyChanged}"
+                 ToolTip="Describe the issue you are experiencing" />
 
             <ComboBox ItemsSource="{Binding IssueCategoryList}"
                   SelectedItem="{Binding SelectedIssueCategory, ValidatesOnDataErrors=True}"
@@ -33,7 +34,9 @@
             </ComboBox>
 
             <Button Command="{Binding AddIssueCommand}"
-                Content="{Binding [Issue_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}" />
+                Content="{Binding [Issue_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}"
+                IsDefault="True"
+                Cursor="Hand" />
         </StackPanel>
     </Grid>
 </UserControl>

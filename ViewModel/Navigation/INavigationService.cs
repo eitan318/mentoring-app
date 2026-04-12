@@ -1,7 +1,4 @@
-﻿using MentoringApp.ViewModel.Store;
-using MentoringApp.ViewModel.ViewModelHelper;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using MentoringApp.ViewModel.ViewModelHelper;
 
 namespace MentoringApp.ViewModel.Navigation
 {
@@ -13,9 +10,7 @@ namespace MentoringApp.ViewModel.Navigation
         Task NavigateToAsync<TViewModel>()
             where TViewModel : class, INavigatable;
 
-
         IDisposable UseContext(Action<INavigatable> contextSetter);
-
         Task GoBackAsync();
         bool CanGoBack();
     }

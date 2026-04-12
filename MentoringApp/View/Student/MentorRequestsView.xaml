@@ -17,6 +17,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -40,8 +41,22 @@
         <TextBlock Grid.Row="2" Text="Loading requests…" Foreground="#999"
                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8"/>
 
+        <!-- Empty state -->
+        <TextBlock Grid.Row="3" Text="No pending mentoring requests." FontSize="12" Foreground="Gray" Margin="0,8,0,0">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding PendingRequests.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
         <!-- Request list -->
-        <ScrollViewer Grid.Row="3">
+        <ScrollViewer Grid.Row="4">
             <ItemsControl ItemsSource="{Binding PendingRequests}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

@@ -97,7 +97,8 @@
                                     Background="#1976D2" Foreground="White" BorderThickness="0"
                                     Command="{Binding DataContext.ChooseMentorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     CommandParameter="{Binding}"
-                                    Cursor="Hand">
+                                    Cursor="Hand"
+                                    ToolTip="Select this mentor as your match (choice is final)">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">

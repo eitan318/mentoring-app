@@ -151,7 +151,7 @@
                     <Button DockPanel.Dock="Right"
                             Content="🛈"
                             Command="{Binding ShowPhaseInfoCommand}"
-                            ToolTip="Show phase information"
+                            ToolTip="Click for details about the current phase"
                             Background="Transparent" BorderThickness="0"
                             FontSize="13" Cursor="Hand"
                             VerticalAlignment="Top" Margin="8,0,0,0"/>
@@ -258,6 +258,18 @@
                         </Button.Style>
                     </Button>
                 </DockPanel>
+                <TextBlock Text="No pairs assigned yet." FontSize="12" Foreground="Gray" Margin="0,8,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PairsSupervised.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <ListView ItemsSource="{Binding PairsSupervised}"
                           ItemContainerStyle="{StaticResource PairListViewItemStyle}">
                     <ListView.ItemTemplate>
@@ -295,12 +307,14 @@
                     <RadioButton Content="Pending"
                                  Style="{StaticResource IssueTabStyle}"
                                  IsChecked="{Binding IsShowingPending, Mode=OneWay}"
-                                 Command="{Binding ShowPendingCommand}"/>
+                                 Command="{Binding ShowPendingCommand}"
+                                 ToolTip="Show unresolved issues"/>
                     <RadioButton Content="Resolved"
                                  Style="{StaticResource IssueTabStyle}"
                                  IsChecked="{Binding IsShowingResolved, Mode=OneWay}"
                                  Command="{Binding ShowResolvedCommand}"
-                                 Margin="4,0,0,0"/>
+                                 Margin="4,0,0,0"
+                                 ToolTip="Show resolved issues"/>
                 </StackPanel>
                 <!-- Context title -->
                 <TextBlock DockPanel.Dock="Right"
@@ -313,6 +327,40 @@
 
             <!-- ── Row 6: Issues list ── -->
             <Grid Grid.Row="6">
+                <TextBlock Text="No pending issues." FontSize="12" Foreground="Gray" Margin="0,8,0,0"
+                           VerticalAlignment="Top" Panel.ZIndex="1">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding FilteredPendingIssues.Count}" Value="0"/>
+                                        <Condition Binding="{Binding ShowResolvedIssues}" Value="False"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Text="No resolved issues." FontSize="12" Foreground="Gray" Margin="0,8,0,0"
+                           VerticalAlignment="Top" Panel.ZIndex="1">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding FilteredResolvedIssues.Count}" Value="0"/>
+                                        <Condition Binding="{Binding ShowResolvedIssues}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <ListView ItemsSource="{Binding FilteredPendingIssues}"
                           ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
                           ItemTemplate="{StaticResource IssueItemTemplate}">
