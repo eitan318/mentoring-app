@@ -10,10 +10,12 @@ namespace MentoringApp.Service
     public class WindowService : IWindowService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly IToastService _toastService;
 
-        public WindowService(IServiceProvider serviceProvider)
+        public WindowService(IServiceProvider serviceProvider, IToastService toastService)
         {
             _serviceProvider = serviceProvider;
+            _toastService = toastService;
         }
 
         public async Task ShowDialogAsync<TViewModel>() 
@@ -30,6 +32,16 @@ namespace MentoringApp.Service
             var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
             await vm.OnNavigatedToAsync(parameter);
             OpenWindow(vm);
+        }
+
+        public void ShowMessage(string message, string title)
+        {
+            _toastService.Info(message);
+        }
+
+        public async Task<bool> ShowConfirmAsync(string message, string title)
+        {
+            return await _toastService.ConfirmAsync(title, message);
         }
 
         private static void OpenWindow(INavigatable vm)

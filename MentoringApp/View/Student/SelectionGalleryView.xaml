@@ -5,14 +5,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
     mc:Ignorable="d"
-    d:DesignHeight="600" d:DesignWidth="700">
+    d:DesignHeight="600" d:DesignWidth="700"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -23,16 +25,16 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock FontSize="26" FontWeight="Bold" Text="⭐ Your Top Mentor Matches"/>
+            <TextBlock FontSize="26" FontWeight="Bold" Text="{Binding [Selection_Header], Source={x:Static loc:TranslationSource.Instance}}"/>
             <TextBlock Foreground="#666" FontSize="13" TextWrapping="Wrap"
-                       Text="Based on your learning interests, here are your top 3 most compatible mentors. Choose one to be paired instantly."/>
+                       Text="{Binding [Selection_Description], Source={x:Static loc:TranslationSource.Instance}}"/>
         </StackPanel>
 
         <!-- Already matched banner -->
         <Border Grid.Row="1" Visibility="{Binding AlreadyMatched, Converter={StaticResource BoolToVis}}"
                 Background="#E3F2FD" BorderBrush="#1976D2" BorderThickness="1"
                 CornerRadius="4" Padding="12,8" Margin="0,0,0,12">
-            <TextBlock Text="🎉 You are already matched! Check your dashboard." Foreground="#0D47A1" FontWeight="SemiBold"/>
+            <TextBlock Text="{Binding [Selection_AlreadyMatched], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#0D47A1" FontWeight="SemiBold"/>
         </Border>
 
         <!-- Status message -->
@@ -98,7 +100,7 @@
                                     Command="{Binding DataContext.ChooseMentorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     CommandParameter="{Binding}"
                                     Cursor="Hand"
-                                    ToolTip="Select this mentor as your match (choice is final)">
+                                    ToolTip="{Binding [Selection_Choose_Tooltip], Source={x:Static loc:TranslationSource.Instance}}">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
@@ -106,7 +108,7 @@
                                         </Border>
                                     </ControlTemplate>
                                 </Button.Template>
-                                <TextBlock Text="✓ Choose This Mentor"/>
+                                <TextBlock Text="{Binding [Selection_Choose_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
                             </Button>
                         </Grid>
                     </Border>
@@ -117,7 +119,7 @@
         <!-- Empty state -->
         <StackPanel Grid.Row="4" HorizontalAlignment="Center" Margin="0,20,0,0"
                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
-            <TextBlock Text="Loading recommendations…" Foreground="#999" FontSize="14"/>
+            <TextBlock Text="{Binding [Selection_Loading], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#999" FontSize="14"/>
         </StackPanel>
     </Grid>
 </UserControl>

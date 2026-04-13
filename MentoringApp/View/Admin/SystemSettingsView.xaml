@@ -6,7 +6,7 @@
     xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
-    <Grid Margin="20">
+    <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -15,8 +15,8 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="⚙ System Settings" FontSize="24" FontWeight="Bold"/>
-            <TextBlock Text="Define the participating grades and class numbers for this academic year."
+            <TextBlock Text="{Binding [SysSettings_Title], Source={x:Static loc:TranslationSource.Instance}}" FontSize="24" FontWeight="Bold"/>
+            <TextBlock Text="{Binding [SysSettings_Description], Source={x:Static loc:TranslationSource.Instance}}"
                        Foreground="Gray" Margin="0,4,0,0"/>
         </StackPanel>
 
@@ -27,12 +27,12 @@
                 CornerRadius="4" Padding="14,10" Margin="0,0,0,16">
             <DockPanel>
                 <Button DockPanel.Dock="Right"
-                        Content="✓ Continue to Dashboard"
+                        Content="{Binding [SysSettings_Continue_Button], Source={x:Static loc:TranslationSource.Instance}}"
                         Command="{Binding GoToDashboardCommand}"
                         IsEnabled="{Binding CanContinueToDashboard}"
                         Padding="14,6" Background="#388E3C" Foreground="White" BorderThickness="0"
                         Cursor="Hand"
-                        ToolTip="Continue to the main dashboard"
+                        ToolTip="{Binding [SysSettings_Continue_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
                         VerticalAlignment="Center">
                     <Button.Style>
                         <Style TargetType="Button">
@@ -55,9 +55,9 @@
                     </Button.Template>
                 </Button>
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Welcome! Before you can use the admin dashboard, please configure the participating school grades and classes."
+                    <TextBlock Text="{Binding [SysSettings_Welcome_Title], Source={x:Static loc:TranslationSource.Instance}}"
                                FontWeight="SemiBold" TextWrapping="Wrap"/>
-                    <TextBlock Text="Select grades (1–12) and add the class numbers for each. You can edit this at any time."
+                    <TextBlock Text="{Binding [SysSettings_Welcome_Subtitle], Source={x:Static loc:TranslationSource.Instance}}"
                                Foreground="#555" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap"/>
                 </StackPanel>
             </DockPanel>
@@ -72,10 +72,10 @@
 
             <!-- LEFT: Add new class -->
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Add Participating Class" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                <TextBlock Text="{Binding [SysSettings_AddClass_Header], Source={x:Static loc:TranslationSource.Instance}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
                 <Border BorderBrush="#DDD" BorderThickness="1" Padding="16" CornerRadius="6" Background="#FAFAFA">
                     <StackPanel>
-                        <TextBlock Text="Grade" FontWeight="Bold" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding [SysSettings_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,4"/>
                         <ComboBox ItemsSource="{Binding AvailableGrades}"
                                   SelectedItem="{Binding SelectedGrade}"
                                   Margin="0,0,0,12">
@@ -93,12 +93,12 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
 
-                        <TextBlock Text="Class Number" FontWeight="Bold" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding [SysSettings_ClassNumber_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,4"/>
                         <TextBox Text="{Binding ClassNumInput, UpdateSourceTrigger=PropertyChanged}"
                                  Margin="0,0,0,12"
-                                 Tag="e.g. 1, 2, 3 …"/>
+                                 Tag="{Binding [SysSettings_ClassNumber_Tag], Source={x:Static loc:TranslationSource.Instance}}"/>
 
-                        <Button Content="➕ Add Class"
+                        <Button Content="{Binding [SysSettings_AddClass_Button], Source={x:Static loc:TranslationSource.Instance}}"
                                 Command="{Binding AddClassCommand}"
                                 Padding="12,8" HorizontalAlignment="Left"
                                 Background="#1976D2" Foreground="White" BorderThickness="0"
@@ -118,8 +118,8 @@
             <!-- RIGHT: Current classes list -->
             <StackPanel Grid.Column="2">
                 <DockPanel Margin="0,0,0,12">
-                    <TextBlock Text="Participating Classes" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    <Button DockPanel.Dock="Right" Content="🗑 Remove Selected"
+                    <TextBlock Text="{Binding [SysSettings_ParticipatingClasses_Header], Source={x:Static loc:TranslationSource.Instance}}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button DockPanel.Dock="Right" Content="{Binding [SysSettings_RemoveSelected_Button], Source={x:Static loc:TranslationSource.Instance}}"
                             Command="{Binding DeleteClassCommand}"
                             HorizontalAlignment="Right"
                             Padding="8,4" Background="#D32F2F" Foreground="White" BorderThickness="0"
@@ -137,7 +137,7 @@
                 <ListBox ItemsSource="{Binding AllClasses}"
                          SelectedItem="{Binding SelectedClass}"
                          BorderBrush="#DDD" BorderThickness="1"
-                         MinHeight="200" MaxHeight="400">
+                         MinHeight="200" MaxHeight="350">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type model:SchoolClass}">
                             <StackPanel Orientation="Horizontal" Margin="4">
@@ -149,7 +149,7 @@
                                         </MultiBinding>
                                     </TextBlock.Text>
                                 </TextBlock>
-                                <TextBlock Text="– Class " Foreground="Gray"/>
+                                <TextBlock Text="{Binding [SysSettings_ClassSeparator], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray"/>
                                 <TextBlock Text="{Binding ClassNum}" FontWeight="Bold"/>
                             </StackPanel>
                         </DataTemplate>
@@ -157,7 +157,7 @@
                 </ListBox>
 
                 <TextBlock Margin="0,8,0,0" Foreground="#AAA" FontSize="11"
-                           Text="Tip: These classes are available for supervisor assignment in 'Manage Users'."/>
+                           Text="{Binding [SysSettings_Tip], Source={x:Static loc:TranslationSource.Instance}}"/>
             </StackPanel>
         </Grid>
     </Grid>

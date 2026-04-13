@@ -404,4 +404,80 @@ You may see new pairs appear in your list as students make their selections.</va
   <data name="DB_Category_BehavioralIssue" xml:space="preserve"><value>Behavioral Issue</value></data>
   <data name="DB_Category_GeneralHelp" xml:space="preserve"><value>General Help</value></data>
 
+  <!-- Browse Mentors View -->
+  <data name="Browse_NoMentors" xml:space="preserve"><value>No mentors are currently available.</value></data>
+
+  <!-- Mentor Requests View -->
+  <data name="MentorReq_NoPendingRequests" xml:space="preserve"><value>No pending mentoring requests.</value></data>
+
+  <!-- Selection Gallery View -->
+  <data name="Selection_Choose_Tooltip" xml:space="preserve"><value>Select this mentor as your match (choice is final)</value></data>
+
+  <!-- System Settings View -->
+  <data name="SysSettings_Continue_Tooltip" xml:space="preserve"><value>Continue to the main dashboard</value></data>
+
+  <!-- Admin Dashboard — stepper labels -->
+  <data name="Admin_Step_ImportUsers" xml:space="preserve"><value>Import Users</value></data>
+  <data name="Admin_Step_Registration" xml:space="preserve"><value>Registration</value></data>
+  <data name="Admin_Step_Selection" xml:space="preserve"><value>Selection</value></data>
+  <data name="Admin_Step_Complete" xml:space="preserve"><value>Complete</value></data>
+
+  <!-- Admin Dashboard — confirm / result messages -->
+  <data name="Admin_ConfirmAction_Title" xml:space="preserve"><value>Confirm Action</value></data>
+  <data name="Admin_ConfirmStartPhase2_Body" xml:space="preserve"><value>Are you sure you want to start Phase 2? This will end Phase 1 and cannot be undone.</value></data>
+  <data name="Admin_GeneratingScores_Message" xml:space="preserve"><value>Generating suitability scores and opening selection gallery…</value></data>
+  <data name="Admin_ScoresGenerated_Message" xml:space="preserve"><value>✓ Scores generated. Mentees can now pick from their top 3 matches.</value></data>
+  <data name="Admin_Phase2Failed_Message" xml:space="preserve"><value>✗ Failed to start Phase 2: {0}</value></data>
+  <data name="Admin_ConfirmAutoMatch_Body" xml:space="preserve"><value>Are you sure you want to run auto-match? This will algorithmically pair all remaining unmatched mentees and cannot be undone.</value></data>
+  <data name="Admin_RunningAutoMatch_Message" xml:space="preserve"><value>Running final algorithmic auto-match…</value></data>
+  <data name="Admin_FallbackAssigned_Text" xml:space="preserve"><value>{0} fallback pairs assigned.</value></data>
+  <data name="Admin_FallbackFailed_Text" xml:space="preserve"><value>Fallback step failed.</value></data>
+  <data name="Admin_ProcessComplete_Message" xml:space="preserve"><value>✓ Process complete. {0} algorithmic pairs created. {1}</value></data>
+  <data name="Admin_AutoMatchFailed_Message" xml:space="preserve"><value>✗ Auto-match failed: {0}</value></data>
+
+  <!-- Manage Pairs -->
+  <data name="ManagePairs_ConfirmSeparate_Title" xml:space="preserve"><value>Confirm Separate</value></data>
+  <data name="ManagePairs_ConfirmSeparate_Body" xml:space="preserve"><value>Are you sure you want to separate this pair? This action cannot be undone.</value></data>
+  <data name="ManagePairs_Separate_Tooltip" xml:space="preserve"><value>Permanently dissolve this mentoring pair</value></data>
+
+  <!-- Manage Users -->
+  <data name="ManageUsers_DeleteUser_Tooltip" xml:space="preserve"><value>Permanently delete this user account</value></data>
+  <data name="ManageUsers_DownloadComplete_Title" xml:space="preserve"><value>Download Complete</value></data>
+
+  <!-- Common -->
+  <data name="Common_Error_Title" xml:space="preserve"><value>Error</value></data>
+
+  <!-- Issue View -->
+  <data name="Issue_Resolve_Tooltip" xml:space="preserve"><value>Mark this issue as resolved</value></data>
+
+  <!-- Login View -->
+  <data name="Login_Step1" xml:space="preserve"><value>Step 1 of 2</value></data>
+  <data name="Login_Step2" xml:space="preserve"><value>Step 2 of 2</value></data>
+  <data name="Login_SendCode_Tooltip" xml:space="preserve"><value>Send verification code to your email</value></data>
+  <data name="Login_VerifyCode_Tooltip" xml:space="preserve"><value>Verify the code and sign in</value></data>
+
+  <!-- My Profile View — tooltips -->
+  <data name="Profile_EditProfile_Tooltip" xml:space="preserve"><value>Edit your profile</value></data>
+  <data name="Profile_SaveChanges_Tooltip" xml:space="preserve"><value>Save your changes</value></data>
+
+  <!-- Supervisor Dashboard View -->
+  <data name="Supervisor_NoPairs" xml:space="preserve"><value>No pairs assigned yet.</value></data>
+  <data name="Supervisor_NoPendingIssues" xml:space="preserve"><value>No pending issues.</value></data>
+  <data name="Supervisor_NoResolvedIssues" xml:space="preserve"><value>No resolved issues.</value></data>
+  <data name="Supervisor_SelectHint" xml:space="preserve"><value>Select a pair or an issue from the lists to view its details.</value></data>
+  <data name="Supervisor_ShowPending_Tooltip" xml:space="preserve"><value>Show unresolved issues</value></data>
+  <data name="Supervisor_ShowResolved_Tooltip" xml:space="preserve"><value>Show resolved issues</value></data>
+  <data name="Supervisor_RelatedPairName_Format" xml:space="preserve"><value>Originating from Pair: {0} &amp; {1}</value></data>
+
+  <!-- Student Dashboard — tab labels and status messages -->
+  <data name="Student_TabLabel_TopMatches" xml:space="preserve"><value>My Top Matches</value></data>
+  <data name="Student_TabLabel_MentoringRequests" xml:space="preserve"><value>Mentoring Requests</value></data>
+  <data name="Student_TabLabel_BrowseMentors" xml:space="preserve"><value>Browse Mentors</value></data>
+  <data name="Student_MatchedWith_Message" xml:space="preserve"><value>✓ You are now matched with {0}!</value></data>
+  <data name="Student_AcceptedPaired_Message" xml:space="preserve"><value>✓ Accepted! You are now paired with {0}.</value></data>
+  <data name="Student_RequestRejected_Message" xml:space="preserve"><value>Request from {0} rejected.</value></data>
+  <data name="Student_RequestWindowClosesIn" xml:space="preserve"><value>Request Window Closes In: {0}</value></data>
+  <data name="Student_RequestWindowClosed" xml:space="preserve"><value>Request Window Closed</value></data>
+  <data name="Student_RequestSent_Message" xml:space="preserve"><value>✓ Request sent to {0}! Waiting for their response.</value></data>
+
 </root>

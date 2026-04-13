@@ -186,7 +186,7 @@
                         Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}">
                 <TextBlock Text="{Binding ClassProgressInfo}" FontWeight="SemiBold" Margin="0,0,0,4"/>
                 <ProgressBar Minimum="0" Maximum="100" Value="{Binding ClassProgressPercent}" Height="10" Margin="0,0,0,8"/>
-                <TextBlock Text="Students with incomplete profiles:"
+                <TextBlock Text="{Binding [Supervisor_InactiveStudents_Header], Source={x:Static loc:TranslationSource.Instance}}"
                            FontWeight="SemiBold" Margin="0,0,0,4">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
@@ -243,7 +243,7 @@
                     <TextBlock FontSize="14" FontWeight="SemiBold"
                                Text="{Binding [Supervisor_ManagedPairs_Label], Source={x:Static loc:TranslationSource.Instance}}"
                                VerticalAlignment="Center"/>
-                    <Button HorizontalAlignment="Right" Content="Clear Selection"
+                    <Button HorizontalAlignment="Right" Content="{Binding [Supervisor_ClearSelection_Button], Source={x:Static loc:TranslationSource.Instance}}"
                             Background="Transparent" BorderThickness="0" Foreground="Blue"
                             Cursor="Hand" Command="{Binding SelectPairCommand}" CommandParameter="{x:Null}">
                         <Button.Style>
@@ -258,7 +258,7 @@
                         </Button.Style>
                     </Button>
                 </DockPanel>
-                <TextBlock Text="No pairs assigned yet." FontSize="12" Foreground="Gray" Margin="0,8,0,0">
+                <TextBlock Text="{Binding [Supervisor_NoPairs], Source={x:Static loc:TranslationSource.Instance}}" FontSize="12" Foreground="Gray" Margin="0,8,0,0">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -304,17 +304,17 @@
             <DockPanel Grid.Row="5" Margin="0,0,0,2">
                 <!-- Tab toggles -->
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Bottom">
-                    <RadioButton Content="Pending"
+                    <RadioButton Content="{Binding [Supervisor_IssuePending], Source={x:Static loc:TranslationSource.Instance}}"
                                  Style="{StaticResource IssueTabStyle}"
                                  IsChecked="{Binding IsShowingPending, Mode=OneWay}"
                                  Command="{Binding ShowPendingCommand}"
-                                 ToolTip="Show unresolved issues"/>
-                    <RadioButton Content="Resolved"
+                                 ToolTip="{Binding [Supervisor_ShowPending_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"/>
+                    <RadioButton Content="{Binding [Supervisor_IssueResolved], Source={x:Static loc:TranslationSource.Instance}}"
                                  Style="{StaticResource IssueTabStyle}"
                                  IsChecked="{Binding IsShowingResolved, Mode=OneWay}"
                                  Command="{Binding ShowResolvedCommand}"
                                  Margin="4,0,0,0"
-                                 ToolTip="Show resolved issues"/>
+                                 ToolTip="{Binding [Supervisor_ShowResolved_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"/>
                 </StackPanel>
                 <!-- Context title -->
                 <TextBlock DockPanel.Dock="Right"
@@ -327,7 +327,7 @@
 
             <!-- ── Row 6: Issues list ── -->
             <Grid Grid.Row="6">
-                <TextBlock Text="No pending issues." FontSize="12" Foreground="Gray" Margin="0,8,0,0"
+                <TextBlock Text="{Binding [Supervisor_NoPendingIssues], Source={x:Static loc:TranslationSource.Instance}}" FontSize="12" Foreground="Gray" Margin="0,8,0,0"
                            VerticalAlignment="Top" Panel.ZIndex="1">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
@@ -344,7 +344,7 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <TextBlock Text="No resolved issues." FontSize="12" Foreground="Gray" Margin="0,8,0,0"
+                <TextBlock Text="{Binding [Supervisor_NoResolvedIssues], Source={x:Static loc:TranslationSource.Instance}}" FontSize="12" Foreground="Gray" Margin="0,8,0,0"
                            VerticalAlignment="Top" Panel.ZIndex="1">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
@@ -385,7 +385,7 @@
         <!-- ── DETAIL PANE (RIGHT) ── -->
         <Border Grid.Column="1" BorderBrush="#DDD" BorderThickness="1" Padding="0">
             <Grid>
-                <TextBlock Text="Select a pair or an issue from the lists to view its details."
+                <TextBlock Text="{Binding [Supervisor_SelectHint], Source={x:Static loc:TranslationSource.Instance}}"
                            Foreground="#AAA" FontSize="14" HorizontalAlignment="Center"
                            VerticalAlignment="Center" FontWeight="Medium">
                     <TextBlock.Style>

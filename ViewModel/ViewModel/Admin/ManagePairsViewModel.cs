@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
@@ -24,6 +23,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         private readonly PairService _pairService;
         private readonly ReviewService _reviewService;
         private readonly IssueService _issueService;
+        private readonly IToastService _toastService;
+        private readonly ILocalizationService _loc;
 
         // ── All pairs (source of truth) ─────────────────────────────────────
         public ObservableCollection<Pair> AllPairs { get; set; } = [];
@@ -64,13 +65,17 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             INavigationService navigationService,
             PairService pairService,
             ReviewService reviewService,
-            IssueService issueService)
+            IssueService issueService,
+            IToastService toastService,
+            ILocalizationService loc)
         {
             _windowService     = windowService;
             _navigationService = navigationService;
             _pairService       = pairService;
             _reviewService     = reviewService;
             _issueService      = issueService;
+            _toastService      = toastService;
+            _loc               = loc;
         }
 
         public async Task OnNavigatedToAsync() => await RefreshPairs();
@@ -125,10 +130,7 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         private async Task Separate()
         {
             if (SelectedPair is null) return;
-            var confirm = MessageBox.Show(
-                "Are you sure you want to separate this pair? This action cannot be undone.",
-                "Confirm Separate", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (confirm != MessageBoxResult.Yes) return;
+            if (!await _toastService.ConfirmAsync(_loc.Get("ManagePairs_ConfirmSeparate_Title"), _loc.Get("ManagePairs_ConfirmSeparate_Body"))) return;
 
             await _pairService.SeparatePairAsync(SelectedPair.Id);
             await RefreshPairs();

@@ -5,14 +5,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
     mc:Ignorable="d"
-    d:DesignHeight="600" d:DesignWidth="700">
+    d:DesignHeight="600" d:DesignWidth="700"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -23,9 +25,9 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock FontSize="26" FontWeight="Bold" Text="📬 Mentoring Requests"/>
+            <TextBlock FontSize="26" FontWeight="Bold" Text="{Binding [MentorReq_Header], Source={x:Static loc:TranslationSource.Instance}}"/>
             <TextBlock Foreground="#666" FontSize="13"
-                       Text="Students who want you as their mentor. Review their profile and decide."/>
+                       Text="{Binding [MentorReq_Description], Source={x:Static loc:TranslationSource.Instance}}"/>
             <TextBlock Foreground="Red" FontSize="14" FontWeight="Bold" Margin="0,5,0,0"
                        Text="{Binding RequestWindowTimerDisplay}"/>
         </StackPanel>
@@ -38,11 +40,11 @@
         </Border>
 
         <!-- Loading indicator -->
-        <TextBlock Grid.Row="2" Text="Loading requests…" Foreground="#999"
+        <TextBlock Grid.Row="2" Text="{Binding [MentorReq_Loading], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#999"
                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8"/>
 
         <!-- Empty state -->
-        <TextBlock Grid.Row="3" Text="No pending mentoring requests." FontSize="12" Foreground="Gray" Margin="0,8,0,0">
+        <TextBlock Grid.Row="3" Text="{Binding [MentorReq_NoPendingRequests], Source={x:Static loc:TranslationSource.Instance}}" FontSize="12" Foreground="Gray" Margin="0,8,0,0">
             <TextBlock.Style>
                 <Style TargetType="TextBlock">
                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -85,7 +87,7 @@
                                 <StackPanel Grid.Row="0" Grid.Column="1">
                                     <TextBlock FontSize="15" FontWeight="SemiBold" Text="{Binding MenteeName}"/>
                                     <TextBlock Foreground="#555" FontSize="12" Margin="0,2,0,0">
-                                        <Run Text="📗 Wants to learn: "/>
+                                        <Run Text="{Binding [MentorReq_WantsToLearn_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
                                         <Run Text="{Binding MenteeSubjectName}" FontWeight="Medium"/>
                                     </TextBlock>
                                     <TextBlock Foreground="#888" FontSize="11" Margin="0,2,0,0"
@@ -105,7 +107,7 @@
                                                 </Border>
                                             </ControlTemplate>
                                         </Button.Template>
-                                        <TextBlock Text="✓ Accept"/>
+                                        <TextBlock Text="{Binding [MentorReq_Accept_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
                                     </Button>
                                     <Button Padding="14,7" FontWeight="SemiBold"
                                             Background="#C62828" Foreground="White" BorderThickness="0" Cursor="Hand"
@@ -118,7 +120,7 @@
                                                 </Border>
                                             </ControlTemplate>
                                         </Button.Template>
-                                        <TextBlock Text="✗ Decline"/>
+                                        <TextBlock Text="{Binding [MentorReq_Decline_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
                                     </Button>
                                 </StackPanel>
                             </Grid>

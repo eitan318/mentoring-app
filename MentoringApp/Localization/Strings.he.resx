@@ -404,4 +404,80 @@
   <data name="DB_Category_BehavioralIssue" xml:space="preserve"><value>בעיית התנהגות</value></data>
   <data name="DB_Category_GeneralHelp" xml:space="preserve"><value>עזרה כללית</value></data>
 
+  <!-- Browse Mentors View -->
+  <data name="Browse_NoMentors" xml:space="preserve"><value>אין מנטורים זמינים כרגע.</value></data>
+
+  <!-- Mentor Requests View -->
+  <data name="MentorReq_NoPendingRequests" xml:space="preserve"><value>אין בקשות חניכה ממתינות.</value></data>
+
+  <!-- Selection Gallery View -->
+  <data name="Selection_Choose_Tooltip" xml:space="preserve"><value>בחר מנטור זה כהתאמה שלך (הבחירה סופית)</value></data>
+
+  <!-- System Settings View -->
+  <data name="SysSettings_Continue_Tooltip" xml:space="preserve"><value>המשך ללוח הבקרה הראשי</value></data>
+
+  <!-- Admin Dashboard — stepper labels -->
+  <data name="Admin_Step_ImportUsers" xml:space="preserve"><value>ייבוא משתמשים</value></data>
+  <data name="Admin_Step_Registration" xml:space="preserve"><value>הרשמה</value></data>
+  <data name="Admin_Step_Selection" xml:space="preserve"><value>בחירה</value></data>
+  <data name="Admin_Step_Complete" xml:space="preserve"><value>הושלם</value></data>
+
+  <!-- Admin Dashboard — confirm / result messages -->
+  <data name="Admin_ConfirmAction_Title" xml:space="preserve"><value>אשר פעולה</value></data>
+  <data name="Admin_ConfirmStartPhase2_Body" xml:space="preserve"><value>האם אתה בטוח שברצונך להתחיל שלב 2? פעולה זו תסיים את שלב 1 ולא ניתן לבטלה.</value></data>
+  <data name="Admin_GeneratingScores_Message" xml:space="preserve"><value>מייצר ציוני התאמה ופותח את גלריית הבחירה…</value></data>
+  <data name="Admin_ScoresGenerated_Message" xml:space="preserve"><value>✓ ציונים נוצרו. חניכים יכולים כעת לבחור מ-3 ההתאמות הטובות ביותר.</value></data>
+  <data name="Admin_Phase2Failed_Message" xml:space="preserve"><value>✗ נכשל בהתחלת שלב 2: {0}</value></data>
+  <data name="Admin_ConfirmAutoMatch_Body" xml:space="preserve"><value>האם אתה בטוח שברצונך להפעיל התאמה אוטומטית? פעולה זו תזווג אלגוריתמית את כל החניכים שטרם הותאמו ולא ניתן לבטלה.</value></data>
+  <data name="Admin_RunningAutoMatch_Message" xml:space="preserve"><value>מפעיל התאמה אוטומטית אלגוריתמית סופית…</value></data>
+  <data name="Admin_FallbackAssigned_Text" xml:space="preserve"><value>{0} זוגות גיבוי הוקצו.</value></data>
+  <data name="Admin_FallbackFailed_Text" xml:space="preserve"><value>שלב הגיבוי נכשל.</value></data>
+  <data name="Admin_ProcessComplete_Message" xml:space="preserve"><value>✓ התהליך הושלם. {0} זוגות אלגוריתמיים נוצרו. {1}</value></data>
+  <data name="Admin_AutoMatchFailed_Message" xml:space="preserve"><value>✗ ההתאמה האוטומטית נכשלה: {0}</value></data>
+
+  <!-- Manage Pairs -->
+  <data name="ManagePairs_ConfirmSeparate_Title" xml:space="preserve"><value>אשר הפרדה</value></data>
+  <data name="ManagePairs_ConfirmSeparate_Body" xml:space="preserve"><value>האם אתה בטוח שברצונך להפריד זוג זה? פעולה זו לא ניתנת לביטול.</value></data>
+  <data name="ManagePairs_Separate_Tooltip" xml:space="preserve"><value>פרק לצמיתות את הזוג החונך הזה</value></data>
+
+  <!-- Manage Users -->
+  <data name="ManageUsers_DeleteUser_Tooltip" xml:space="preserve"><value>מחק לצמיתות את חשבון המשתמש</value></data>
+  <data name="ManageUsers_DownloadComplete_Title" xml:space="preserve"><value>ההורדה הושלמה</value></data>
+
+  <!-- Common -->
+  <data name="Common_Error_Title" xml:space="preserve"><value>שגיאה</value></data>
+
+  <!-- Issue View -->
+  <data name="Issue_Resolve_Tooltip" xml:space="preserve"><value>סמן בעיה זו כפתורה</value></data>
+
+  <!-- Login View -->
+  <data name="Login_Step1" xml:space="preserve"><value>שלב 1 מתוך 2</value></data>
+  <data name="Login_Step2" xml:space="preserve"><value>שלב 2 מתוך 2</value></data>
+  <data name="Login_SendCode_Tooltip" xml:space="preserve"><value>שלח קוד אימות לדואר האלקטרוני שלך</value></data>
+  <data name="Login_VerifyCode_Tooltip" xml:space="preserve"><value>אמת את הקוד והיכנס</value></data>
+
+  <!-- My Profile View — tooltips -->
+  <data name="Profile_EditProfile_Tooltip" xml:space="preserve"><value>ערוך את הפרופיל שלך</value></data>
+  <data name="Profile_SaveChanges_Tooltip" xml:space="preserve"><value>שמור את השינויים שלך</value></data>
+
+  <!-- Supervisor Dashboard View -->
+  <data name="Supervisor_NoPairs" xml:space="preserve"><value>לא הוקצו זוגות עדיין.</value></data>
+  <data name="Supervisor_NoPendingIssues" xml:space="preserve"><value>אין בעיות ממתינות.</value></data>
+  <data name="Supervisor_NoResolvedIssues" xml:space="preserve"><value>אין בעיות שנפתרו.</value></data>
+  <data name="Supervisor_SelectHint" xml:space="preserve"><value>בחר זוג או בעיה מהרשימות כדי לראות את הפרטים.</value></data>
+  <data name="Supervisor_ShowPending_Tooltip" xml:space="preserve"><value>הצג בעיות שלא נפתרו</value></data>
+  <data name="Supervisor_ShowResolved_Tooltip" xml:space="preserve"><value>הצג בעיות שנפתרו</value></data>
+  <data name="Supervisor_RelatedPairName_Format" xml:space="preserve"><value>מקור הזוג: {0} ו-{1}</value></data>
+
+  <!-- Student Dashboard — tab labels and status messages -->
+  <data name="Student_TabLabel_TopMatches" xml:space="preserve"><value>ההתאמות המובילות שלי</value></data>
+  <data name="Student_TabLabel_MentoringRequests" xml:space="preserve"><value>בקשות חניכה</value></data>
+  <data name="Student_TabLabel_BrowseMentors" xml:space="preserve"><value>עיין במנטורים</value></data>
+  <data name="Student_MatchedWith_Message" xml:space="preserve"><value>✓ אתה כעת מותאם עם {0}!</value></data>
+  <data name="Student_AcceptedPaired_Message" xml:space="preserve"><value>✓ התקבל! אתה כעת מזווג עם {0}.</value></data>
+  <data name="Student_RequestRejected_Message" xml:space="preserve"><value>הבקשה מ-{0} נדחתה.</value></data>
+  <data name="Student_RequestWindowClosesIn" xml:space="preserve"><value>חלון הבקשות נסגר בעוד: {0}</value></data>
+  <data name="Student_RequestWindowClosed" xml:space="preserve"><value>חלון הבקשות סגור</value></data>
+  <data name="Student_RequestSent_Message" xml:space="preserve"><value>✓ הבקשה נשלחה אל {0}! ממתין לתגובה.</value></data>
+
 </root>

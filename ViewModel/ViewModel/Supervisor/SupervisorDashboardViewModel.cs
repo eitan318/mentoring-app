@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MentoringApp.Model;
 using MentoringApp.Model.User;
 using MentoringApp.Service;
+using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
@@ -10,7 +11,6 @@ using MentoringApp.ViewModel.ViewModel.User;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Windows.Threading;
-using System.Windows;
 using System;
 
 namespace MentoringApp.ViewModel.ViewModel.Supervisor
@@ -35,6 +35,8 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
         protected readonly ReviewService _reviewService;
         protected readonly SettingsService _settingsService;
         private readonly UserStore _userStore;
+        private readonly IToastService _toastService;
+        private readonly ILocalizationService _loc;
 
         // Cached so we can reload data after returning from sub-pages
         private int _currentSupervisorId;
@@ -129,7 +131,9 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
             UserService userService,
             ReviewService reviewService,
             SettingsService settingsService,
-            UserStore userStore)
+            UserStore userStore,
+            IToastService toastService,
+            ILocalizationService loc)
         {
             _navigationService = navigationService;
             _pairService = pairService;
@@ -138,6 +142,8 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
             _reviewService = reviewService;
             _settingsService = settingsService;
             _userStore = userStore;
+            _toastService = toastService;
+            _loc = loc;
         }
 
         [RelayCommand]
@@ -150,7 +156,7 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
                 var pair = PairsSupervised.FirstOrDefault(p => p.Mentor.Id == issue.ReportedByUserId || p.Mentee.Id == issue.ReportedByUserId);
                 if (pair != null)
                 {
-                    vm.RelatedPairName = $"Originating from Pair: {pair.Mentor.UserName} & {pair.Mentee.UserName}";
+                    vm.RelatedPairName = _loc.Format("Supervisor_RelatedPairName_Format", pair.Mentor.UserName, pair.Mentee.UserName);
                 }
 
                 vm.OnCloseRequested = () => SelectedPaneContent = null;
@@ -271,37 +277,25 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
         }
 
         [RelayCommand]
-        private void ShowPhaseInfo()
+        private async Task ShowPhaseInfo()
         {
             if (_isProcessComplete)
             {
-                MessageBox.Show(
-                    "The matching process is complete. All students have been assigned a pair.\n\n" +
-                    "You can still manage issues and review pair activity from this dashboard.",
-                    "Matching Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                await _toastService.ShowInfoAsync(
+                    _loc.Get("Supervisor_PhaseComplete_Info_Title"),
+                    _loc.Get("Supervisor_PhaseComplete_Info_Body"));
             }
             else if (IsPhase1Active)
             {
-                MessageBox.Show(
-                    "Registration Phase\n\n" +
-                    "Students are logging in and completing their profiles.\n\n" +
-                    "Mentees can browse available mentors and send a direct pairing request. " +
-                    "If a mentor accepts, they become paired immediately.\n\n" +
-                    "Watch the inactive students list — students who haven't completed their profiles " +
-                    "will not appear in the matching pool.",
-                    "Registration Phase", MessageBoxButton.OK, MessageBoxImage.Information);
+                await _toastService.ShowInfoAsync(
+                    _loc.Get("Supervisor_Phase1Info_Title"),
+                    _loc.Get("Supervisor_Phase1Info_Body"));
             }
             else if (IsPhase2Active)
             {
-                MessageBox.Show(
-                    "Mentor Selection Phase\n\n" +
-                    "Each mentee who is still unmatched is shown their top algorithmically ranked " +
-                    "mentor suggestions and can choose one.\n\n" +
-                    "When the deadline passes (or the admin runs the auto-match manually), " +
-                    "any mentee who still hasn't chosen is paired automatically by the algorithm. " +
-                    "A fallback pass then handles any remaining edge cases.\n\n" +
-                    "You may see new pairs appear in your list as students make their selections.",
-                    "Mentor Selection Phase", MessageBoxButton.OK, MessageBoxImage.Information);
+                await _toastService.ShowInfoAsync(
+                    _loc.Get("Supervisor_Phase2Info_Title"),
+                    _loc.Get("Supervisor_Phase2Info_Body"));
             }
         }
 
@@ -322,8 +316,8 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
                 IsPhase1Active = false;
                 IsPhase2Active = false;
                 IsPhaseBannerVisible = true;
-                BannerTitle = "Matching Complete";
-                BannerSubtitle = "All students have been paired. No further action is required.";
+                BannerTitle = _loc.Get("Supervisor_BannerComplete_Title");
+                BannerSubtitle = _loc.Get("Supervisor_BannerComplete_Subtitle");
                 BannerTimer = string.Empty;
                 return;
             }
@@ -338,20 +332,19 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
             {
                 IsPhase1Active = true;
                 IsPhase2Active = false;
-                BannerTitle = "Registration Phase";
-                BannerSubtitle = "Students are registering and completing their profiles. " +
-                                 "Mentees may send direct pairing requests to mentors.";
+                BannerTitle = _loc.Get("Supervisor_BannerPhase1_Title");
+                BannerSubtitle = _loc.Get("Supervisor_BannerPhase1_Subtitle");
 
                 if (_tier1Deadline.HasValue)
                 {
                     var diff = _tier1Deadline.Value - DateTime.Now;
                     BannerTimer = diff.TotalSeconds > 0
-                        ? $"Registration closes in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s"
-                        : "Registration deadline reached — awaiting admin action";
+                        ? _loc.Format("Supervisor_BannerTimer_RegClosesIn", $"{diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s")
+                        : _loc.Get("Supervisor_BannerTimer_RegDeadlineReached");
                 }
                 else
                 {
-                    BannerTimer = "No deadline set";
+                    BannerTimer = _loc.Get("Supervisor_BannerTimer_NoDeadline");
                 }
             }
             // ── Phase 2: Mentor selection open ────────────────────────────────
@@ -362,20 +355,19 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
             {
                 IsPhase1Active = false;
                 IsPhase2Active = true;
-                BannerTitle = "Mentor Selection Phase";
-                BannerSubtitle = "Unmatched mentees are choosing from their top suggested mentors. " +
-                                 "Remaining unmatched students will be auto-paired at the deadline.";
+                BannerTitle = _loc.Get("Supervisor_BannerPhase2_Title");
+                BannerSubtitle = _loc.Get("Supervisor_BannerPhase2_Subtitle");
 
                 if (_tier3Deadline.HasValue)
                 {
                     var diff = _tier3Deadline.Value - DateTime.Now;
                     BannerTimer = diff.TotalSeconds > 0
-                        ? $"Auto-match runs in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s"
-                        : "Selection deadline reached — awaiting admin action";
+                        ? _loc.Format("Supervisor_BannerTimer_AutoMatchIn", $"{diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s")
+                        : _loc.Get("Supervisor_BannerTimer_SelectionDeadlineReached");
                 }
                 else
                 {
-                    BannerTimer = "No deadline set";
+                    BannerTimer = _loc.Get("Supervisor_BannerTimer_NoDeadline");
                 }
             }
         }

@@ -21,6 +21,7 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
     public partial class AdminDashboardViewModel : ObservableObject, INavigatable
     {
         private readonly INavigationService _navigationService;
+        private readonly IWindowService _windowService;
         private readonly UserService _userService;
         private readonly MatchingFlowService _matchingFlowService;
         private readonly SettingsService _settingsService;
@@ -36,6 +37,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
+        [NotifyPropertyChangedFor(nameof(IsImportStepActive))]
+        private bool _isUsersImported;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
         [NotifyPropertyChangedFor(nameof(IsPhase2Active))]
         private bool _isSelectionPhaseActive;
 
@@ -44,7 +50,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         [NotifyPropertyChangedFor(nameof(IsPhase2Active))]
         private bool _isProcessComplete;
 
-        public bool IsPhase1Active => !IsSelectionPhaseActive && !IsProcessComplete;
+        public bool IsImportStepActive => !IsUsersImported;
+        public bool IsPhase1Active => IsUsersImported && !IsSelectionPhaseActive && !IsProcessComplete;
         public bool IsPhase2Active => IsSelectionPhaseActive && !IsProcessComplete;
 
         // ── Phase Descriptions (short, shown inline) ──────────────────────────
@@ -74,6 +81,7 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
 
         public AdminDashboardViewModel(
             INavigationService navigationService,
+            IWindowService windowService,
             UserService userService,
             MatchingFlowService matchingFlowService,
             SettingsService settingsService,
@@ -81,6 +89,7 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             ILocalizationService loc)
         {
             _navigationService = navigationService;
+            _windowService = windowService;
             _userService = userService;
             _matchingFlowService = matchingFlowService;
             _settingsService = settingsService;
@@ -117,6 +126,7 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
                 return;
             }
 
+            IsUsersImported = await _settingsService.GetIsUsersImportedAsync();
             IsSelectionPhaseActive = await _settingsService.GetIsPhase1CompleteAsync();
             IsProcessComplete = await _settingsService.GetIsProcessCompleteAsync();
 
@@ -159,17 +169,25 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
                 await _settingsService.ClearPhase1DeadlineAsync();
         }
 
+        // ── Import Step ───────────────────────────────────────────────────────
+
+        [RelayCommand]
+        private async Task MarkUsersImported()
+        {
+            IsUsersImported = true;
+            await _settingsService.SetIsUsersImportedAsync(true);
+        }
+
         // ── Phase Action Commands ─────────────────────────────────────────────
 
         [RelayCommand]
         private async Task StartSelectionPhase()
         {
-            var confirm = MessageBox.Show(
-                "Are you sure you want to start Phase 2? This will end Phase 1 and cannot be undone.",
-                "Confirm Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (confirm != MessageBoxResult.Yes) return;
+            if (!await _windowService.ShowConfirmAsync(
+                _loc.Get("Admin_ConfirmStartPhase2_Body"),
+                _loc.Get("Admin_ConfirmAction_Title"))) return;
 
-            ShowResult("Generating suitability scores and opening selection gallery…");
+            ShowResult(_loc.Get("Admin_GeneratingScores_Message"));
 
             var result = await _matchingFlowService.GenerateScoreMatrixAsync();
             if (result.Success)
@@ -181,40 +199,39 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
                 ActiveDeadline = await _settingsService.GetPhase2DeadlineAsync();
                 DeadlineInput = DateTime.Now.AddDays(1);
 
-                ShowResult("✓ Scores generated. Mentees can now pick from their top 3 matches.");
+                ShowResult(_loc.Get("Admin_ScoresGenerated_Message"));
             }
             else
             {
-                ShowResult($"✗ Failed to start Phase 2: {result.ErrorMessage}");
+                ShowResult(_loc.Format("Admin_Phase2Failed_Message", result.ErrorMessage));
             }
         }
 
         [RelayCommand]
         private async Task RunAutoMatch()
         {
-            var confirm = MessageBox.Show(
-                "Are you sure you want to run auto-match? This will algorithmically pair all remaining unmatched mentees and cannot be undone.",
-                "Confirm Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (confirm != MessageBoxResult.Yes) return;
+            if (!await _windowService.ShowConfirmAsync(
+                _loc.Get("Admin_ConfirmAutoMatch_Body"),
+                _loc.Get("Admin_ConfirmAction_Title"))) return;
 
-            ShowResult("Running final algorithmic auto-match…");
+            ShowResult(_loc.Get("Admin_RunningAutoMatch_Message"));
 
             var result = await _matchingFlowService.RunAutoMatchAsync();
             if (result.Success)
             {
                 var fallback = await _matchingFlowService.RunFallbackMatchAsync();
                 string fallbackText = fallback.Success
-                    ? $"{fallback.Data} fallback pairs assigned."
-                    : "Fallback step failed.";
+                    ? _loc.Format("Admin_FallbackAssigned_Text", fallback.Data)
+                    : _loc.Get("Admin_FallbackFailed_Text");
 
                 IsProcessComplete = true;
                 await _settingsService.SetIsProcessCompleteAsync(true);
 
-                ShowResult($"✓ Process complete. {result.Data} algorithmic pairs created. {fallbackText}");
+                ShowResult(_loc.Format("Admin_ProcessComplete_Message", result.Data, fallbackText));
             }
             else
             {
-                ShowResult($"✗ Auto-match failed: {result.ErrorMessage}");
+                ShowResult(_loc.Format("Admin_AutoMatchFailed_Message", result.ErrorMessage));
             }
         }
 

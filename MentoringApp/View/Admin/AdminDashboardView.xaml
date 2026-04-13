@@ -39,24 +39,24 @@
                 <WrapPanel Orientation="Horizontal"
                            Visibility="{Binding IsDeadlineNotScheduled, Converter={StaticResource BoolToVis}}"
                            Margin="0,0,0,6">
-                    <TextBlock Text="Deadline:" VerticalAlignment="Center"
+                    <TextBlock Text="{Binding [Admin_Phase_Deadline_Label], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"
                                Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
                                Margin="0,0,8,0"/>
                     <DatePicker SelectedDate="{Binding DeadlineInput, Mode=TwoWay}" Margin="0,0,8,0"/>
-                    <Button Content="Set deadline" Padding="10,4"
+                    <Button Content="{Binding [Admin_Phase_SetDeadline_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="10,4"
                             Command="{Binding SaveDeadlineCommand}"/>
                 </WrapPanel>
 
                 <!-- Deadline active -->
                 <StackPanel Visibility="{Binding IsDeadlineScheduled, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="Time remaining"
+                    <TextBlock Text="{Binding [Admin_Phase_TimeRemaining_Label], Source={x:Static loc:TranslationSource.Instance}}"
                                Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
                                FontSize="11" Margin="0,0,0,2"/>
                     <WrapPanel Orientation="Horizontal" Margin="0,0,0,8">
                         <TextBlock Text="{Binding DeadlineTimeRemaining}"
                                    FontSize="26" FontWeight="Medium"
                                    Margin="0,0,16,0" VerticalAlignment="Center"/>
-                        <Button Content="Cancel deadline" Padding="10,4" VerticalAlignment="Center"
+                        <Button Content="{Binding [Admin_Phase_CancelDeadline_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="10,4" VerticalAlignment="Center"
                                 Command="{Binding CancelDeadlineCommand}"/>
                     </WrapPanel>
                 </StackPanel>
@@ -64,7 +64,7 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid Margin="16">
+    <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <!-- action buttons     -->
@@ -89,7 +89,7 @@
             <Button Margin="0,0,8,0" Padding="10,5"
                     Cursor="Hand"
                     Command="{Binding SystemSettingsCommand}"
-                    Content="⚙ System Settings"/>
+                    Content="{Binding [Admin_SystemSettings_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
         </StackPanel>
 
         <!-- ── Phase panel ── -->
@@ -103,13 +103,61 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Step 1 -->
+                    <!-- Step 1 — Import Users -->
                     <Border Grid.Column="0" Style="{StaticResource StepTab}">
-                        <Border.BorderThickness>
-                            <Thickness Right="1"/>
-                        </Border.BorderThickness>
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border Width="26" Height="26" CornerRadius="13"
+                                    HorizontalAlignment="Center" Margin="0,0,0,5">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderBrush" Value="#88000000"/>
+                                        <Setter Property="BorderThickness" Value="1.5"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsUsersImported}" Value="True">
+                                                <Setter Property="Background" Value="#88000000"/>
+                                                <Setter Property="BorderBrush" Value="#88000000"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="12" FontWeight="Medium">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="1"/>
+                                            <Setter Property="Foreground" Value="#88000000"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsUsersImported}" Value="True">
+                                                    <Setter Property="Text" Value="✓"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="{Binding [Admin_Step_ImportUsers], Source={x:Static loc:TranslationSource.Instance}}" HorizontalAlignment="Center" FontSize="12">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsImportStepActive}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                                <Setter Property="FontWeight" Value="Medium"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Step 2 — Registration -->
+                    <Border Grid.Column="1" Style="{StaticResource StepTab}">
                         <StackPanel HorizontalAlignment="Center">
                             <Border Width="26" Height="26" CornerRadius="13"
                                     HorizontalAlignment="Center" Margin="0,0,0,5">
@@ -134,7 +182,7 @@
                                            FontSize="12" FontWeight="Medium">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="1"/>
+                                            <Setter Property="Text" Value="2"/>
                                             <Setter Property="Foreground" Value="#88000000"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsSelectionPhaseActive}" Value="True">
@@ -150,7 +198,7 @@
                                     </TextBlock.Style>
                                 </TextBlock>
                             </Border>
-                            <TextBlock Text="Registration" HorizontalAlignment="Center" FontSize="12">
+                            <TextBlock Text="{Binding [Admin_Step_Registration], Source={x:Static loc:TranslationSource.Instance}}" HorizontalAlignment="Center" FontSize="12">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
@@ -170,8 +218,8 @@
                         </Border.Tag>
                     </Border>
 
-                    <!-- Step 2 -->
-                    <Border Grid.Column="1" Style="{StaticResource StepTab}">
+                    <!-- Step 3 — Selection -->
+                    <Border Grid.Column="2" Style="{StaticResource StepTab}">
                         <StackPanel HorizontalAlignment="Center">
                             <Border Width="26" Height="26" CornerRadius="13"
                                     HorizontalAlignment="Center" Margin="0,0,0,5">
@@ -195,7 +243,7 @@
                                            FontSize="12" FontWeight="Medium">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="2"/>
+                                            <Setter Property="Text" Value="3"/>
                                             <Setter Property="Foreground" Value="#44000000"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsPhase2Active}" Value="True">
@@ -210,7 +258,7 @@
                                     </TextBlock.Style>
                                 </TextBlock>
                             </Border>
-                            <TextBlock Text="Selection" HorizontalAlignment="Center" FontSize="12">
+                            <TextBlock Text="{Binding [Admin_Step_Selection], Source={x:Static loc:TranslationSource.Instance}}" HorizontalAlignment="Center" FontSize="12">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
@@ -226,8 +274,8 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Step 3 / Complete -->
-                    <Border Grid.Column="2" Style="{StaticResource StepTab}" BorderThickness="1,0,0,0">
+                    <!-- Step 4 — Complete -->
+                    <Border Grid.Column="3" Style="{StaticResource StepTab}" BorderThickness="1,0,0,0">
                         <StackPanel HorizontalAlignment="Center">
                             <Border Width="26" Height="26" CornerRadius="13"
                                     HorizontalAlignment="Center" Margin="0,0,0,5">
@@ -248,7 +296,7 @@
                                            FontSize="12" FontWeight="Medium">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="3"/>
+                                            <Setter Property="Text" Value="4"/>
                                             <Setter Property="Foreground" Value="#44000000"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsProcessComplete}" Value="True">
@@ -260,7 +308,7 @@
                                     </TextBlock.Style>
                                 </TextBlock>
                             </Border>
-                            <TextBlock Text="Complete" HorizontalAlignment="Center" FontSize="12">
+                            <TextBlock Text="{Binding [Admin_Step_Complete], Source={x:Static loc:TranslationSource.Instance}}" HorizontalAlignment="Center" FontSize="12">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
@@ -283,12 +331,15 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Rectangle Grid.Column="0" Fill="#CC000000"
-                               Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}"/>
+                               Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}"/>
                     <Rectangle Grid.Column="1" Fill="#CC000000"
-                               Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}"/>
+                               Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}"/>
                     <Rectangle Grid.Column="2" Fill="#CC000000"
+                               Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}"/>
+                    <Rectangle Grid.Column="3" Fill="#CC000000"
                                Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
                 </Grid>
 
@@ -304,6 +355,22 @@
                                    TextWrapping="Wrap" FontSize="13"/>
                     </Border>
 
+                    <!-- Step 1 — Import Users -->
+                    <StackPanel Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Step 1 — Import Users"
+                                   FontWeight="Medium" FontSize="13" Margin="0,0,0,4"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,12"
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                   Text="Before starting registration, add all student and supervisor accounts. Use the Excel import tool or register users manually through Manage Users."/>
+                        <Button Content="Go to Manage Users" Padding="10,5" Margin="0,0,0,12"
+                                Cursor="Hand" HorizontalAlignment="Left"
+                                Command="{Binding ManageUsersCommand}"/>
+                        <Separator Margin="0,0,0,10"/>
+                        <Button Content="✓ Users imported — begin registration"
+                                Padding="10,5" Cursor="Hand" HorizontalAlignment="Right"
+                                Command="{Binding MarkUsersImportedCommand}"/>
+                    </StackPanel>
+
                     <!-- Phase 1 -->
                     <StackPanel Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}">
                         <TextBlock Text="Phase 1 — Registration &amp; manual pairing"
@@ -315,7 +382,8 @@
                                         ContentTemplate="{StaticResource DeadlineTemplate}"/>
                         <Separator Margin="0,12,0,10"/>
                         <Button Content="▶ Start phase 2 now" Padding="10,5"
-                                HorizontalAlignment="Left"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
                                 Cursor="Hand"
                                 ToolTip="End Phase 1 and begin Phase 2 algorithmic matching. This cannot be undone."
                                 Command="{Binding StartSelectionPhaseCommand}"/>
@@ -332,7 +400,8 @@
                                         ContentTemplate="{StaticResource DeadlineTemplate}"/>
                         <Separator Margin="0,12,0,10"/>
                         <Button Content="▶ Run auto-match now" Padding="10,5"
-                                HorizontalAlignment="Left"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
                                 Cursor="Hand"
                                 ToolTip="Run the automatic matching algorithm for all unmatched mentees. This cannot be undone."
                                 Command="{Binding RunAutoMatchCommand}"/>

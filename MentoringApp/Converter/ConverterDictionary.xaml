@@ -8,4 +8,5 @@
     <conv:InverseBoolConverter x:Key="InverseBoolConverter" />
     <conv:StringToImageSourceConverter x:Key="StringToImage" />
     <loc:DbTranslationConverter x:Key="DbTranslation" />
+    <conv:LocalizedClassCountConverter x:Key="LocalizedClassCount" />
 </ResourceDictionary>

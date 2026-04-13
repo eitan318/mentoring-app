@@ -15,5 +15,8 @@ namespace MentoringApp.ViewModel.IService
 
         Task ShowDialogAsync<TViewModel, TParameter>(TParameter parameter)
             where TViewModel : class, INavigatable<TParameter>;
+
+        void ShowMessage(string message, string title);
+        Task<bool> ShowConfirmAsync(string message, string title);
     }
 }
