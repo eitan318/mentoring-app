@@ -89,7 +89,10 @@
   <data name="Admin_SupervisorHeader_Pairs" xml:space="preserve"><value>Pairs</value></data>
   <data name="Admin_SupervisorHeader_Pending" xml:space="preserve"><value>Pending</value></data>
   <data name="Admin_SupervisorHeader_Resolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="Admin_SupervisorHeader_FillProgress" xml:space="preserve"><value>Info Filled</value></data>
+  <data name="Admin_TotalFillProgress_Label" xml:space="preserve"><value>Overall student info fill:</value></data>
   <data name="Admin_Inspect_Button" xml:space="preserve"><value>Inspect</value></data>
+  <data name="Admin_NoClasses" xml:space="preserve"><value>None</value></data>
 
   <!-- Student Dashboard -->
   <data name="Student_YourMentee_Label" xml:space="preserve"><value>Your Mentee</value></data>
@@ -118,7 +121,7 @@
   <!-- Other Profile -->
   <data name="OtherProfile_Username_Label" xml:space="preserve"><value>Username</value></data>
   <data name="OtherProfile_Email_Label" xml:space="preserve"><value>Email Address</value></data>
-  <data name="OtherProfile_Grade_Label" xml:space="preserve"><value>Current Grade</value></data>
+  <data name="OtherProfile_Grade_Label" xml:space="preserve"><value>Grade &amp; Class</value></data>
   <data name="OtherProfile_MentoringDetails_Label" xml:space="preserve"><value>Mentoring Details</value></data>
 
   <!-- Add Issue -->
@@ -304,6 +307,8 @@ The system is currently processing matches based on compatibility. Please wait u
   <data name="Browse_Teaches_Label" xml:space="preserve"><value>📘 Teaches: </value></data>
   <data name="Browse_Grade_Label" xml:space="preserve"><value>🎓 Grade: </value></data>
   <data name="Browse_SendRequest_Button" xml:space="preserve"><value>Send Request</value></data>
+  <data name="Browse_CancelRequest_Button" xml:space="preserve"><value>Cancel Request</value></data>
+  <data name="Student_RequestCancelled_Message" xml:space="preserve"><value>✓ Request to {0} cancelled.</value></data>
 
   <!-- Mentor Requests -->
   <data name="MentorReq_Header" xml:space="preserve"><value>📬 Mentoring Requests</value></data>
@@ -386,6 +391,9 @@ You may see new pairs appear in your list as students make their selections.</va
   <data name="OtherProfile_None" xml:space="preserve"><value>None</value></data>
   <data name="OtherProfile_Teaching_Format" xml:space="preserve"><value>Teaching: {0}</value></data>
   <data name="OtherProfile_Learning_Format" xml:space="preserve"><value>Learning: {0}</value></data>
+
+  <!-- Grade + Class combined display: {0}=localized grade name, {1}=class number -->
+  <data name="GradeClass_Format" xml:space="preserve"><value>{0}, Class {1}</value></data>
 
   <!-- Database Dynamic Values -->
   <data name="DB_Grade_9th" xml:space="preserve"><value>9th Grade</value></data>

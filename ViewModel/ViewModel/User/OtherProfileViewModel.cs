@@ -21,6 +21,7 @@ namespace MentoringApp.ViewModel.ViewModel.User
         [ObservableProperty] private bool _isSupervisor;
         [ObservableProperty] private string _roleName = "";
         [ObservableProperty] private string _gradeName = "";
+        [ObservableProperty] private int _classNum;
         [ObservableProperty] private string _teachingSubject = "None";
         [ObservableProperty] private string _learningSubject = "None";
         [ObservableProperty] private string? _profilePicturePath;
@@ -59,7 +60,8 @@ namespace MentoringApp.ViewModel.ViewModel.User
                     { IsMentee: true }                 => "Student · Mentee",
                     _                                  => "Student"
                 };
-                GradeName = student.Grade?.Name ?? "N/A";
+                GradeName = student.Grade?.Name ?? "";
+                ClassNum = student.ClassNum;
                 PreferredMentorGenderDisplay = GenderHelper.GenderPreferenceToDisplay(student.PreferredMentorGender);
                 PreferredMenteeGenderDisplay = GenderHelper.GenderPreferenceToDisplay(student.PreferredMenteeGender);
 

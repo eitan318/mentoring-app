@@ -378,6 +378,22 @@
                         <TextBlock Text="{Binding Phase1Summary}" TextWrapping="Wrap"
                                    Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
                                    FontSize="13" Margin="0,0,0,12"/>
+
+                        <!-- Total fill progress -->
+                        <Border BorderThickness="0,0,0,0" Margin="0,0,0,12">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,4">
+                                    <TextBlock DockPanel.Dock="Left" FontSize="12" FontWeight="SemiBold"
+                                               Text="{Binding [Admin_TotalFillProgress_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                    <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="SemiBold"
+                                               Text="{Binding TotalFillLabel}" HorizontalAlignment="Right"/>
+                                </DockPanel>
+                                <ProgressBar Minimum="0" Maximum="100"
+                                             Value="{Binding TotalFillPercent}"
+                                             Height="12"/>
+                            </StackPanel>
+                        </Border>
+
                         <ContentControl Content="{Binding}"
                                         ContentTemplate="{StaticResource DeadlineTemplate}"/>
                         <Separator Margin="0,12,0,10"/>
@@ -420,27 +436,32 @@
         <Grid Grid.Row="2" Margin="0,0,0,4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" MinWidth="50"/>
+                <ColumnDefinition Width="Auto" MinWidth="55"/>
+                <ColumnDefinition Width="Auto" MinWidth="55"/>
+                <ColumnDefinition Width="Auto" MinWidth="55"/>
+                <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" FontSize="12" FontWeight="Medium"
                        Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
-                       Text="{Binding [Admin_SupervisorHeader_Name],    Source={x:Static loc:TranslationSource.Instance}}"/>
+                       Text="{Binding [Admin_SupervisorHeader_Name],         Source={x:Static loc:TranslationSource.Instance}}"/>
             <TextBlock Grid.Column="1" FontSize="12" FontWeight="Medium"
                        Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
-                       Text="{Binding [Admin_SupervisorHeader_Pairs],   Source={x:Static loc:TranslationSource.Instance}}"/>
+                       Text="{Binding [Admin_SupervisorHeader_Pairs],         Source={x:Static loc:TranslationSource.Instance}}"/>
             <TextBlock Grid.Column="2" FontSize="12" FontWeight="Medium"
                        Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
-                       Text="{Binding [Admin_SupervisorHeader_Pending], Source={x:Static loc:TranslationSource.Instance}}"/>
+                       Text="{Binding [Admin_SupervisorHeader_Pending],       Source={x:Static loc:TranslationSource.Instance}}"/>
             <TextBlock Grid.Column="3" FontSize="12" FontWeight="Medium"
                        Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
-                       Text="{Binding [Admin_SupervisorHeader_Resolved],Source={x:Static loc:TranslationSource.Instance}}"/>
+                       Text="{Binding [Admin_SupervisorHeader_Resolved],      Source={x:Static loc:TranslationSource.Instance}}"/>
             <TextBlock Grid.Column="4" FontSize="12" FontWeight="Medium"
                        Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
                        Text="Classes"/>
+            <TextBlock Grid.Column="5" FontSize="12" FontWeight="Medium"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                       Text="{Binding [Admin_SupervisorHeader_FillProgress],  Source={x:Static loc:TranslationSource.Instance}}"
+                       Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}"/>
         </Grid>
 
         <!-- ── Supervisors list ── -->
@@ -457,31 +478,79 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto" MinWidth="50"/>
+                            <ColumnDefinition Width="Auto" MinWidth="55"/>
+                            <ColumnDefinition Width="Auto" MinWidth="55"/>
+                            <ColumnDefinition Width="Auto" MinWidth="55"/>
+                            <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding UserName}"/>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding SupervisedPairsCount}"/>
                         <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#CC3300" Text="{Binding PendingIssues.Count}"/>
                         <TextBlock Grid.Column="3" VerticalAlignment="Center" Foreground="#227722" Text="{Binding ResolvedIssues.Count}"/>
-                        <TextBlock Grid.Column="4" VerticalAlignment="Center"
-                                   Text="{Binding AssignedClasses.Count}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
+                        <ItemsControl Grid.Column="4" VerticalAlignment="Center"
+                                      ItemsSource="{Binding AssignedClasses}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontSize="11" Margin="0,0,6,0">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                                <Binding Path="Grade.Name"/>
+                                                <Binding Path="ClassNum"/>
+                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.Style>
+                                <Style TargetType="ItemsControl">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding AssignedClasses.Count}" Value="0">
-                                            <Setter Property="Foreground" Value="#CC6600"/>
-                                            <Setter Property="FontStyle" Value="Italic"/>
-                                            <Setter Property="Text" Value="None"/>
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ItemsControl.Style>
+                        </ItemsControl>
+                        <TextBlock Grid.Column="4" VerticalAlignment="Center"
+                                   FontStyle="Italic" Foreground="#CC6600" FontSize="11"
+                                   Text="{Binding [Admin_NoClasses], Source={x:Static loc:TranslationSource.Instance}}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AssignedClasses.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
-                        <Button Grid.Column="5" Padding="8,3" FontSize="11"
+
+                        <!-- Fill progress column (Phase 1 only) -->
+                        <StackPanel Grid.Column="5" VerticalAlignment="Center" Margin="8,0"
+                                    Visibility="{Binding DataContext.IsPhase1Active, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource BoolToVis}}">
+                            <DockPanel Margin="0,0,0,2">
+                                <TextBlock DockPanel.Dock="Right" FontSize="10"
+                                           Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                           Text="{Binding FillProgressLabel}" Margin="4,0,0,0"/>
+                                <TextBlock FontSize="10"
+                                           Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                           Text="{Binding FillProgressPercent, StringFormat={}{0:F0}%}"/>
+                            </DockPanel>
+                            <ProgressBar Minimum="0" Maximum="100"
+                                         Value="{Binding FillProgressPercent, Mode=OneWay}"
+                                         Height="6" MinWidth="80"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="6" Padding="8,3" FontSize="11"
                                 Cursor="Hand"
                                 Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                 CommandParameter="{Binding}"

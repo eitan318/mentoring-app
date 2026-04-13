@@ -29,7 +29,15 @@
 
             <StackPanel Visibility="{Binding IsStudent, Converter={StaticResource BoolToVis}}">
                 <Label Content="{Binding [OtherProfile_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
-                <TextBlock Text="{Binding GradeName}" FontSize="16" Margin="5,0,0,15"/>
+                <TextBlock FontSize="16" Margin="5,0,0,15">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                            <Binding Path="GradeName"/>
+                            <Binding Path="ClassNum"/>
+                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
 
                 <Label Content="{Binding [OtherProfile_PreferredMentorGender_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
                 <TextBlock Text="{Binding PreferredMentorGenderDisplay}" FontSize="16" Margin="5,0,0,15"/>

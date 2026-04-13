@@ -6,12 +6,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
     xmlns:loc="clr-namespace:MentoringApp.Localization"
+    xmlns:conv="clr-namespace:MentoringApp.Converter"
     mc:Ignorable="d"
     d:DesignHeight="600" d:DesignWidth="700"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
     </UserControl.Resources>
 
     <Grid Margin="12">
@@ -86,16 +88,22 @@
                                         <Run Text="{Binding SubjectName}" FontWeight="Medium"/>
                                     </TextBlock>
                                     <TextBlock Foreground="#777" FontSize="12" Margin="0,2,0,0">
-                                        <Run Text="{Binding [Browse_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
-                                        <Run Text="{Binding GradeName}"/>
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                                <Binding Path="GradeName"/>
+                                                <Binding Path="ClassNum"/>
+                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
                                     </TextBlock>
                                 </StackPanel>
 
-                                <!-- Request button -->
+                                <!-- Send Request button (shown when no pending request) -->
                                 <Button Grid.Column="2" VerticalAlignment="Center"
                                         Padding="14,8" FontWeight="SemiBold"
                                         Background="#1976D2" Foreground="White"
                                         BorderThickness="0"
+                                        Visibility="{Binding HasPendingRequest, Converter={StaticResource InverseBoolToVis}}"
                                         Command="{Binding DataContext.SendRequestCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                         CommandParameter="{Binding}"
                                         Cursor="Hand">
@@ -107,6 +115,25 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                     <TextBlock Text="{Binding [Browse_SendRequest_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                </Button>
+
+                                <!-- Cancel Request button (shown when a pending request exists) -->
+                                <Button Grid.Column="2" VerticalAlignment="Center"
+                                        Padding="14,8" FontWeight="SemiBold"
+                                        Background="#D32F2F" Foreground="White"
+                                        BorderThickness="0"
+                                        Visibility="{Binding HasPendingRequest, Converter={StaticResource BoolToVis}}"
+                                        Command="{Binding DataContext.CancelRequestCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <TextBlock Text="{Binding [Browse_CancelRequest_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
                                 </Button>
                             </Grid>
                         </Border>

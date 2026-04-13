@@ -104,6 +104,7 @@ namespace MentoringApp
             await _settingsService.SetGlobalLanguageAsync("en");
             await _settingsService.ClearPhase1DeadlineAsync();
             await _settingsService.ClearPhase2DeadlineAsync();
+            await _settingsService.SetIsUsersImportedAsync(true);
             await _settingsService.SetIsPhase1CompleteAsync(false);
             await _settingsService.SetIsProcessCompleteAsync(false);
 
@@ -219,6 +220,43 @@ namespace MentoringApp
                     await _userService.CreateUserAsync(mentee);
                     mentees.Add(mentee);
                 }
+            }
+
+            // ── Step 6b: Unfilled students (registered but info not completed) ──
+            // 2 per class slot: one with no role, one with a role but missing subject.
+            // These show up in the supervisor's inactive-students list and drive the
+            // fill-progress bars visible in Phase 1 on the admin dashboard.
+            int unfilledIndex = 1;
+            foreach (var slot in classSlots)
+            {
+                // No role chosen yet
+                var noRole = new StudentModel
+                {
+                    Email = $"unfilled.norole{unfilledIndex}@mentoringapp.com",
+                    NationalId = $"9{unfilledIndex:D4}",
+                    UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
+                    Grade = new Grade { Id = slot.gradeId, Name = "", Num = 0 },
+                    ClassNum = slot.classNum,
+                    Gender = Pick(_genders),
+                    PhoneNumber = $"05{_rand.Next(10000000, 99999999)}"
+                };
+                await _userService.CreateUserAsync(noRole);
+                unfilledIndex++;
+
+                // Role chosen but no subject
+                var noSubject = new StudentModel
+                {
+                    Email = $"unfilled.nosubject{unfilledIndex}@mentoringapp.com",
+                    NationalId = $"9{unfilledIndex:D4}",
+                    UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
+                    Grade = new Grade { Id = slot.gradeId, Name = "", Num = 0 },
+                    ClassNum = slot.classNum,
+                    Gender = Pick(_genders),
+                    PhoneNumber = $"05{_rand.Next(10000000, 99999999)}",
+                    MentorProfile = new MentorProfile { SubjectToTeach = 0, MaxMentees = 1 }
+                };
+                await _userService.CreateUserAsync(noSubject);
+                unfilledIndex++;
             }
 
             // Dual-role student in Grade 9, Class 1 (covered by sup1)

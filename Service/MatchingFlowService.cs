@@ -154,6 +154,23 @@ namespace MentoringApp.Service
             return updated ? Result.Ok() : Result.Failure("Request not found.");
         }
 
+        public async Task<Result> CancelPairRequestAsync(int menteeId, int mentorId)
+        {
+            var requests = await _pairRequestRepo.GetByMenteeAsync(menteeId);
+            var pending = requests.FirstOrDefault(r => r.MentorId == mentorId && r.Status == "Pending");
+            if (pending == null)
+                return Result.Failure("No pending request found.");
+
+            bool updated = await _pairRequestRepo.UpdateStatusAsync(pending.Id, "Cancelled");
+            return updated ? Result.Ok() : Result.Failure("Failed to cancel request.");
+        }
+
+        public async Task<IEnumerable<PairRequestDto>> GetPendingRequestsForMenteeAsync(int menteeId)
+        {
+            var all = await _pairRequestRepo.GetByMenteeAsync(menteeId);
+            return all.Where(r => r.Status == "Pending");
+        }
+
         public async Task<IEnumerable<PairRequest>> GetPendingRequestsForMentorAsync(int mentorId)
         {
             var dtos = await _pairRequestRepo.GetByMentorAsync(mentorId);
