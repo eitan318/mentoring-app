@@ -10,13 +10,16 @@
     d:DesignWidth="800"
     mc:Ignorable="d"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
-    <Grid>
-        <StackPanel>
-            <TextBox Tag="{Binding [Issue_Description_Label], Source={x:Static loc:TranslationSource.Instance}}"
+    <Grid FocusManager.FocusedElement="{Binding ElementName=descriptionInput}">
+        <StackPanel Margin="20">
+            <TextBox x:Name="descriptionInput"
+                 Margin="0,0,0,10"
+                 Tag="{Binding [Issue_Description_Label], Source={x:Static loc:TranslationSource.Instance}}"
                  Text="{Binding IssueDescription, UpdateSourceTrigger=PropertyChanged}"
                  ToolTip="Describe the issue you are experiencing" />
 
-            <ComboBox ItemsSource="{Binding IssueCategoryList}"
+            <ComboBox Margin="0,0,0,10"
+                  ItemsSource="{Binding IssueCategoryList}"
                   SelectedItem="{Binding SelectedIssueCategory, ValidatesOnDataErrors=True}"
                   Tag="{Binding [Issue_Category_Label], Source={x:Static loc:TranslationSource.Instance}}">
                 <ComboBox.ItemTemplate>
@@ -33,7 +36,9 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <Button Command="{Binding AddIssueCommand}"
+            <Button Padding="10,6"
+                HorizontalAlignment="Right"
+                Command="{Binding AddIssueCommand}"
                 Content="{Binding [Issue_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}"
                 IsDefault="True"
                 Cursor="Hand" />

@@ -375,9 +375,9 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             if (string.IsNullOrEmpty(savePath)) return;
             var result = _excelImportService.GenerateTemplate(isSupervisor: true, savePath);
             if (result.Success)
-                MessageBox.Show("Template saved successfully.", "Download Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                _windowService.ShowMessage(_loc.Get("ManageUsers_TemplateSaved_Success"), _loc.Get("ManageUsers_DownloadComplete_Title"));
             else
-                MessageBox.Show($"Could not save template: {result.ErrorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _windowService.ShowMessage(_loc.Format("ManageUsers_TemplateSaved_Error", result.ErrorMessage ?? ""), _loc.Get("Common_Error_Title"));
         }
     }
 }

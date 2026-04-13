@@ -8,7 +8,7 @@
              mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="400"
              FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
-    <Grid Margin="30">
+    <Grid Margin="20">
         <StackPanel>
             <!--  Circular profile picture  -->
             <components:ProfilePictureControl Width="80" Height="80" HorizontalAlignment="Center" Margin="0,0,0,10" ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}" />
@@ -21,20 +21,20 @@
             <Label Content="{Binding [OtherProfile_Email_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
             <TextBlock Text="{Binding Email}" FontSize="16" Margin="5,0,0,15"/>
 
-            <Label Content="Phone Number" Foreground="Gray" FontSize="11"/>
+            <Label Content="{Binding [OtherProfile_PhoneNumber_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
             <TextBlock Text="{Binding PhoneNumber}" FontSize="16" Margin="5,0,0,15"/>
 
-            <Label Content="Gender" Foreground="Gray" FontSize="11"/>
+            <Label Content="{Binding [OtherProfile_Gender_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
             <TextBlock Text="{Binding GenderDisplay}" FontSize="16" Margin="5,0,0,15"/>
 
             <StackPanel Visibility="{Binding IsStudent, Converter={StaticResource BoolToVis}}">
                 <Label Content="{Binding [OtherProfile_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
                 <TextBlock Text="{Binding GradeName}" FontSize="16" Margin="5,0,0,15"/>
 
-                <Label Content="Preferred Mentor Gender" Foreground="Gray" FontSize="11"/>
+                <Label Content="{Binding [OtherProfile_PreferredMentorGender_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
                 <TextBlock Text="{Binding PreferredMentorGenderDisplay}" FontSize="16" Margin="5,0,0,15"/>
 
-                <Label Content="Preferred Mentee Gender" Foreground="Gray" FontSize="11"/>
+                <Label Content="{Binding [OtherProfile_PreferredMenteeGender_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
                 <TextBlock Text="{Binding PreferredMenteeGenderDisplay}" FontSize="16" Margin="5,0,0,15"/>
 
                 <Label Content="{Binding [OtherProfile_MentoringDetails_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>

@@ -10,7 +10,7 @@
     d:DesignWidth="800"
     mc:Ignorable="d"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
-    <Grid Margin="30">
+    <Grid Margin="20">
         <StackPanel>
             <TextBlock
                 FontSize="22"
@@ -55,11 +55,11 @@
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
                 <Button
-                    Width="120"
+                    Padding="10,6"
                     Margin="5"
                     Background="DarkGreen"
                     Cursor="Hand"
-                    ToolTip="Mark this issue as resolved"
+                    ToolTip="{Binding [Issue_Resolve_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
                     Command="{Binding ResolveIssueCommand}"
                     Content="{Binding [Issue_Resolve_Button], Source={x:Static loc:TranslationSource.Instance}}"
                     Foreground="White"

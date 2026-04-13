@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Threading;
 
 namespace MentoringApp.ViewModel.ViewModel.Student
@@ -56,6 +55,8 @@ namespace MentoringApp.ViewModel.ViewModel.Student
 
         private readonly INavigationService _navigationService;
         private readonly IWindowService _windowService;
+        private readonly IToastService _toastService;
+        private readonly ILocalizationService _loc;
         private readonly UserStore _userStore;
         private readonly PairService _pairService;
         private readonly IssueService _issueService;
@@ -68,6 +69,8 @@ namespace MentoringApp.ViewModel.ViewModel.Student
         public StudentDashboardViewModel(
             INavigationService navigationService,
             IWindowService windowService,
+            IToastService toastService,
+            ILocalizationService loc,
             UserStore userStore,
             PairService pairService,
             IssueService issueService,
@@ -78,6 +81,8 @@ namespace MentoringApp.ViewModel.ViewModel.Student
             MentorRequestsViewModel mentorRequestsVm)
         {
             _windowService = windowService;
+            _toastService = toastService;
+            _loc = loc;
             _navigationService = navigationService;
             _userStore = userStore;
             _pairService = pairService;
@@ -180,16 +185,16 @@ namespace MentoringApp.ViewModel.ViewModel.Student
         }
 
         [RelayCommand]
-        private void ShowPhaseInfo()
+        private async Task ShowPhaseInfo()
         {
             if (IsPhase1Active)
-                MessageBox.Show(
-                    "Phase 1: Mentee Enrollment.\nMentees should select and send requests to mentors. If you do not match by the deadline, you will be automatically matched in Phase 2.",
-                    "Phase 1 Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                await _toastService.ShowInfoAsync(
+                    _loc.Get("Student_Phase1Info_Title"),
+                    _loc.Get("Student_Phase1Info_Body"));
             else if (IsPhase2Active)
-                MessageBox.Show(
-                    "Phase 2: Algorithmic Matching.\nThe system is currently processing matches based on compatibility. Please wait until this phase completes.",
-                    "Phase 2 Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                await _toastService.ShowInfoAsync(
+                    _loc.Get("Student_Phase2Info_Title"),
+                    _loc.Get("Student_Phase2Info_Body"));
         }
 
         private void SetupTimer()
@@ -220,8 +225,8 @@ namespace MentoringApp.ViewModel.ViewModel.Student
             {
                 IsPhase1Active = true;
                 IsPhase2Active = false;
-                BannerTitle = "Phase 1: Mentee Matchmaking Window";
-                BannerSubtitle = "Please browse available mentors and send them requests.";
+                BannerTitle = _loc.Get("Student_BannerPhase1_Title");
+                BannerSubtitle = _loc.Get("Student_BannerPhase1_Subtitle");
                 BannerColor = "#E3F2FD";
                 BannerTextColor = "#1565C0";
 
@@ -229,20 +234,20 @@ namespace MentoringApp.ViewModel.ViewModel.Student
                 {
                     var diff = _tier1Deadline.Value - DateTime.Now;
                     BannerTimer = diff.TotalSeconds > 0
-                        ? $"Ends in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s"
-                        : "Deadline Reached (Awaiting system run)";
+                        ? _loc.Format("Student_BannerTimer_EndsIn", $"{diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s")
+                        : _loc.Get("Student_BannerTimer_DeadlineReached");
                 }
                 else
                 {
-                    BannerTimer = "Pending System Activation";
+                    BannerTimer = _loc.Get("Student_BannerTimer_PendingActivation");
                 }
             }
             else
             {
                 IsPhase1Active = false;
                 IsPhase2Active = true;
-                BannerTitle = "Phase 2: Algorithmic Fallback";
-                BannerSubtitle = "Any unmatched mentees will be automatically matched.";
+                BannerTitle = _loc.Get("Student_BannerPhase2_Title");
+                BannerSubtitle = _loc.Get("Student_BannerPhase2_Subtitle");
                 BannerColor = "#F3E5F5";
                 BannerTextColor = "#6A1B9A";
 
@@ -250,12 +255,12 @@ namespace MentoringApp.ViewModel.ViewModel.Student
                 {
                     var diff = _tier3Deadline.Value - DateTime.Now;
                     BannerTimer = diff.TotalSeconds > 0
-                        ? $"Runs in: {diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s"
-                        : "Deadline Reached (Awaiting system run)";
+                        ? _loc.Format("Student_BannerTimer_RunsIn", $"{diff.Days}d {diff.Hours:D2}h {diff.Minutes:D2}m {diff.Seconds:D2}s")
+                        : _loc.Get("Student_BannerTimer_DeadlineReached");
                 }
                 else
                 {
-                    BannerTimer = "Pending Algorithmic Run";
+                    BannerTimer = _loc.Get("Student_BannerTimer_PendingAlgorithm");
                 }
             }
         }
@@ -407,7 +412,8 @@ namespace MentoringApp.ViewModel.ViewModel.Student
 
     public partial class SelectionGalleryViewModel : ObservableObject, INavigatable
     {
-        public string TabLabel => "My Top Matches";
+        private readonly ILocalizationService _loc;
+        public string TabLabel => _loc.Get("Student_TabLabel_TopMatches");
 
         private readonly MatchingFlowService _matchingFlowService;
         private readonly UserStore _userStore;
@@ -422,11 +428,13 @@ namespace MentoringApp.ViewModel.ViewModel.Student
         public SelectionGalleryViewModel(
             MatchingFlowService matchingFlowService,
             UserStore userStore,
-            SettingsService settingsService)
+            SettingsService settingsService,
+            ILocalizationService loc)
         {
             _matchingFlowService = matchingFlowService;
             _userStore = userStore;
             _settingsService = settingsService;
+            _loc = loc;
         }
 
         public async Task OnNavigatedToAsync() => await LoadAsync();
@@ -458,7 +466,7 @@ namespace MentoringApp.ViewModel.ViewModel.Student
             if (result.Success)
             {
                 AlreadyMatched = true;
-                StatusMessage = $"✓ You are now matched with {recommendation.MentorName}!";
+                StatusMessage = _loc.Format("Student_MatchedWith_Message", recommendation.MentorName);
             }
             else
             {
@@ -473,7 +481,8 @@ namespace MentoringApp.ViewModel.ViewModel.Student
 
     public partial class MentorRequestsViewModel : ObservableObject, INavigatable
     {
-        public string TabLabel => "Mentoring Requests";
+        private readonly ILocalizationService _loc;
+        public string TabLabel => _loc.Get("Student_TabLabel_MentoringRequests");
 
         private readonly MatchingFlowService _matchingFlowService;
         private readonly UserStore _userStore;
@@ -492,11 +501,13 @@ namespace MentoringApp.ViewModel.ViewModel.Student
         public MentorRequestsViewModel(
             MatchingFlowService matchingFlowService,
             UserStore userStore,
-            SettingsService settingsService)
+            SettingsService settingsService,
+            ILocalizationService loc)
         {
             _matchingFlowService = matchingFlowService;
             _userStore = userStore;
             _settingsService = settingsService;
+            _loc = loc;
         }
 
         public async Task OnNavigatedToAsync() => await LoadAsync();
@@ -518,8 +529,8 @@ namespace MentoringApp.ViewModel.ViewModel.Student
             {
                 var diff = tier1Deadline.Value - DateTime.Now;
                 RequestWindowTimerDisplay = diff.TotalSeconds > 0
-                    ? $"Request Window Closes In: {diff.Days:D2}d : {diff.Hours:D2}h : {diff.Minutes:D2}m"
-                    : "Request Window Closed";
+                    ? _loc.Format("Student_RequestWindowClosesIn", $"{diff.Days:D2}d : {diff.Hours:D2}h : {diff.Minutes:D2}m")
+                    : _loc.Get("Student_RequestWindowClosed");
             }
 
             IsLoading = false;
@@ -530,7 +541,7 @@ namespace MentoringApp.ViewModel.ViewModel.Student
         {
             var result = await _matchingFlowService.AcceptPairRequestAsync(request.Id, AssignedSupervisorId);
             StatusMessage = result.Success
-                ? $"✓ Accepted! You are now paired with {request.MenteeName}."
+                ? _loc.Format("Student_AcceptedPaired_Message", request.MenteeName)
                 : $"✗ {result.ErrorMessage}";
             HasStatusMessage = true;
             await LoadAsync();
@@ -541,7 +552,7 @@ namespace MentoringApp.ViewModel.ViewModel.Student
         {
             var result = await _matchingFlowService.RejectPairRequestAsync(request.Id);
             StatusMessage = result.Success
-                ? $"Request from {request.MenteeName} rejected."
+                ? _loc.Format("Student_RequestRejected_Message", request.MenteeName)
                 : $"✗ {result.ErrorMessage}";
             HasStatusMessage = true;
             await LoadAsync();
@@ -553,7 +564,8 @@ namespace MentoringApp.ViewModel.ViewModel.Student
 
     public partial class BrowseMentorsViewModel : ObservableObject, INavigatable
     {
-        public string TabLabel => "Browse Mentors";
+        private readonly ILocalizationService _loc;
+        public string TabLabel => _loc.Get("Student_TabLabel_BrowseMentors");
 
         private readonly MatchingFlowService _matchingFlowService;
         private readonly UserStore _userStore;
@@ -567,11 +579,13 @@ namespace MentoringApp.ViewModel.ViewModel.Student
         public BrowseMentorsViewModel(
             MatchingFlowService matchingFlowService,
             UserStore userStore,
-            SubjectService subjectService)
+            SubjectService subjectService,
+            ILocalizationService loc)
         {
             _matchingFlowService = matchingFlowService;
             _userStore = userStore;
             _subjectService = subjectService;
+            _loc = loc;
         }
 
         public async Task OnNavigatedToAsync() => await LoadAsync();
@@ -614,7 +628,7 @@ namespace MentoringApp.ViewModel.ViewModel.Student
 
             var result = await _matchingFlowService.SendPairRequestAsync(currentUser.Id, card.MentorId);
             StatusMessage = result.Success
-                ? $"✓ Request sent to {card.MentorName}! Waiting for their response."
+                ? _loc.Format("Student_RequestSent_Message", card.MentorName)
                 : $"✗ {result.ErrorMessage}";
             HasStatusMessage = true;
 

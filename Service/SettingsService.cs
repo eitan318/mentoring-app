@@ -13,6 +13,7 @@ namespace MentoringApp.Service
         public const string IsPhase1CompleteKey = "IsPhase1Complete";
         public const string IsProcessCompleteKey = "IsProcessComplete";
         public const string IsSchoolConfiguredKey = "IsSchoolConfigured";
+        public const string IsUsersImportedKey = "IsUsersImported";
 
         public SettingsService(ISettingsRepo settingsRepo)
         {
@@ -93,5 +94,16 @@ namespace MentoringApp.Service
 
         public Task SetIsSchoolConfiguredAsync(bool value)
             => _settingsRepo.SetStringAsync(IsSchoolConfiguredKey, value.ToString());
+
+        // ── Users Imported ────────────────────────────────────────────────────
+
+        public async Task<bool> GetIsUsersImportedAsync()
+        {
+            string raw = await _settingsRepo.GetStringAsync(IsUsersImportedKey, "false");
+            return bool.TryParse(raw, out var b) && b;
+        }
+
+        public Task SetIsUsersImportedAsync(bool value)
+            => _settingsRepo.SetStringAsync(IsUsersImportedKey, value.ToString());
     }
 }

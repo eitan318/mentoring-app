@@ -11,7 +11,7 @@
     mc:Ignorable="d"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
-    <Grid Margin="20">
+    <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Action bar (Create Pair) -->
             <RowDefinition Height="*"/>    <!-- Main split content -->
@@ -187,7 +187,7 @@
                                     Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
                                     Cursor="Hand"
-                                    ToolTip="Permanently dissolve this mentoring pair"
+                                    ToolTip="{Binding [ManagePairs_Separate_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
                                     Padding="5,8"/>
                         </StackPanel>
                     </ScrollViewer>

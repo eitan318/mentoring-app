@@ -5,14 +5,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
     mc:Ignorable="d"
-    d:DesignHeight="600" d:DesignWidth="700">
+    d:DesignHeight="600" d:DesignWidth="700"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -22,9 +24,9 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock FontSize="26" FontWeight="Bold" Text="🔍 Browse Mentors"/>
+            <TextBlock FontSize="26" FontWeight="Bold" Text="{Binding [Browse_Header], Source={x:Static loc:TranslationSource.Instance}}"/>
             <TextBlock Foreground="#666" FontSize="13" TextWrapping="Wrap"
-                       Text="Browse available mentors below and send a request. Once a mentor accepts, you'll be paired."/>
+                       Text="{Binding [Browse_Description], Source={x:Static loc:TranslationSource.Instance}}"/>
         </StackPanel>
 
         <!-- Status message -->
@@ -35,11 +37,11 @@
         </Border>
 
         <!-- Loading indicator -->
-        <TextBlock Grid.Row="2" Text="Loading mentors…" Foreground="#999"
+        <TextBlock Grid.Row="2" Text="{Binding [Browse_Loading], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#999"
                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8"/>
 
         <!-- Empty state -->
-        <TextBlock x:Name="emptyMentors" Grid.Row="3" Text="No mentors are currently available."
+        <TextBlock x:Name="emptyMentors" Grid.Row="3" Text="{Binding [Browse_NoMentors], Source={x:Static loc:TranslationSource.Instance}}"
                    FontSize="12" Foreground="Gray" Margin="0,8,0,0">
             <TextBlock.Style>
                 <Style TargetType="TextBlock">
@@ -80,11 +82,11 @@
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding MentorName}"/>
                                     <TextBlock Foreground="#555" FontSize="12" Margin="0,2,0,0">
-                                        <Run Text="📘 Teaches: "/>
+                                        <Run Text="{Binding [Browse_Teaches_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
                                         <Run Text="{Binding SubjectName}" FontWeight="Medium"/>
                                     </TextBlock>
                                     <TextBlock Foreground="#777" FontSize="12" Margin="0,2,0,0">
-                                        <Run Text="🎓 Grade: "/>
+                                        <Run Text="{Binding [Browse_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
                                         <Run Text="{Binding GradeName}"/>
                                     </TextBlock>
                                 </StackPanel>
@@ -104,7 +106,7 @@
                                             </Border>
                                         </ControlTemplate>
                                     </Button.Template>
-                                    <TextBlock Text="Send Request"/>
+                                    <TextBlock Text="{Binding [Browse_SendRequest_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
                                 </Button>
                             </Grid>
                         </Border>

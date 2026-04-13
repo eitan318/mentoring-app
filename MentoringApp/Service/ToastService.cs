@@ -44,7 +44,7 @@ namespace MentoringApp.Service
     /// Singleton toast/modal service. ViewModels inject <see cref="IToastService"/>;
     /// the MainWindow overlay binds to <see cref="Instance"/> directly via code-behind.
     /// </summary>
-    public class ToastService : ObservableObject, IToastService
+    public partial class ToastService : ObservableObject, IToastService
     {
         public static ToastService Instance { get; } = new();
 
