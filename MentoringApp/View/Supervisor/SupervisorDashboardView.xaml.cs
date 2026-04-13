@@ -30,11 +30,11 @@ namespace MentoringApp.View.Supervisor
 
         private void OnPairItemClick(object sender, MouseButtonEventArgs e)
         {
-            if (sender is ListViewItem item && item.Content is Pair selectedPair)
+            if (sender is ListViewItem item && item.Content is PairProgressItem selectedItem)
             {
                 if (DataContext is SupervisorDashboardViewModel vm)
                 {
-                    vm.SelectPairCommand.Execute(selectedPair);
+                    vm.SelectPairCommand.Execute(selectedItem);
                 }
             }
         }

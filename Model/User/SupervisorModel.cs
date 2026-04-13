@@ -52,6 +52,13 @@ namespace MentoringApp.Model.User
 
         public int SupervisedPairsCount { get; set; }
 
+        // ── Student fill-progress (set by the admin dashboard at load time) ──
+        public int FilledStudentsCount { get; set; }
+        public int TotalStudentsCount { get; set; }
+        public double FillProgressPercent => TotalStudentsCount > 0
+            ? (double)FilledStudentsCount / TotalStudentsCount * 100 : 0;
+        public string FillProgressLabel => $"{FilledStudentsCount}/{TotalStudentsCount}";
+
         public IEnumerable<IssueModel> PendingIssues =>
             Issues?.Where(i => !i.IsResolved) ?? Enumerable.Empty<IssueModel>();
 

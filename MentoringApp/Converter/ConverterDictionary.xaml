@@ -9,4 +9,5 @@
     <conv:StringToImageSourceConverter x:Key="StringToImage" />
     <loc:DbTranslationConverter x:Key="DbTranslation" />
     <conv:LocalizedClassCountConverter x:Key="LocalizedClassCount" />
+    <conv:GradeClassDisplayConverter x:Key="GradeClassDisplay" />
 </ResourceDictionary>

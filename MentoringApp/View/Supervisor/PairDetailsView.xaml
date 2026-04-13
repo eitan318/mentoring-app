@@ -43,16 +43,13 @@
                                 <TextBlock Text="{Binding CurrentPair.Mentor.UserName}" FontWeight="Bold" FontSize="16"/>
                                 <TextBlock Text="{Binding CurrentPair.Mentor.Email}" Foreground="Gray" FontSize="12" Margin="0,2,0,0"/>
                                 <TextBlock FontSize="12" Foreground="DarkGray" Margin="0,2,0,0">
-                                    <Run Text="{Binding [Admin_ManagePair_Grade], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
-                                    <Run Text=" " />
-                                    <Run>
-                                        <Run.Text>
-                                            <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
-                                                <Binding Path="CurrentPair.Mentor.Grade.Name" />
-                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                            </MultiBinding>
-                                        </Run.Text>
-                                    </Run>
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                            <Binding Path="CurrentPair.Mentor.Grade.Name"/>
+                                            <Binding Path="CurrentPair.Mentor.ClassNum"/>
+                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -72,16 +69,13 @@
                                 <TextBlock Text="{Binding CurrentPair.Mentee.UserName}" FontWeight="Bold" FontSize="16"/>
                                 <TextBlock Text="{Binding CurrentPair.Mentee.Email}" Foreground="Gray" FontSize="12" Margin="0,2,0,0"/>
                                 <TextBlock FontSize="12" Foreground="DarkGray" Margin="0,2,0,0">
-                                    <Run Text="{Binding [Admin_ManagePair_Grade], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
-                                    <Run Text=" " />
-                                    <Run>
-                                        <Run.Text>
-                                            <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
-                                                <Binding Path="CurrentPair.Mentee.Grade.Name" />
-                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                            </MultiBinding>
-                                        </Run.Text>
-                                    </Run>
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                            <Binding Path="CurrentPair.Mentee.Grade.Name"/>
+                                            <Binding Path="CurrentPair.Mentee.ClassNum"/>
+                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -97,7 +91,7 @@
                             <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}"/>
                         </TextBlock>
                     </DockPanel>
-                    <ProgressBar Height="10" Minimum="0" Maximum="100" Value="{Binding HoursProgress}" ToolTip="Meeting hours progress toward the required goal"/>
+                    <ProgressBar Height="10" Minimum="0" Maximum="100" Value="{Binding HoursProgress, Mode=OneWay}" ToolTip="Meeting hours progress toward the required goal"/>
                 </StackPanel>
             </StackPanel>
         </Border>

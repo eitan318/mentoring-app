@@ -600,6 +600,14 @@ namespace MentoringApp.ViewModel.ViewModel.Student
             var subjects = (await _subjectService.GetAllSubjectsAsync()).Data ?? [];
             var subjectMap = subjects.ToDictionary(s => s.Id, s => s.Name);
 
+            var pendingMentorIds = new HashSet<int>();
+            if (currentUser != null)
+            {
+                var pendingRequests = await _matchingFlowService.GetPendingRequestsForMenteeAsync(currentUser.Id);
+                foreach (var req in pendingRequests)
+                    pendingMentorIds.Add(req.MentorId);
+            }
+
             foreach (var mentor in availableMentors.Where(m => m.Id != currentUser?.Id))
             {
                 string subjectName = mentor.MentorProfile != null &&
@@ -613,7 +621,9 @@ namespace MentoringApp.ViewModel.ViewModel.Student
                     ProfilePicturePath = mentor.ProfilePicturePath,
                     Gender = mentor.Gender,
                     SubjectName = subjectName,
-                    GradeName = mentor.Grade.Name
+                    GradeName = mentor.Grade.Name,
+                    ClassNum = mentor.ClassNum,
+                    HasPendingRequest = pendingMentorIds.Contains(mentor.Id)
                 });
             }
 
@@ -633,17 +643,35 @@ namespace MentoringApp.ViewModel.ViewModel.Student
             HasStatusMessage = true;
 
             if (result.Success)
-                await LoadAsync();
+                card.HasPendingRequest = true;
+        }
+
+        [RelayCommand]
+        private async Task CancelRequest(MentorCard card)
+        {
+            var currentUser = _userStore.User as StudentModel;
+            if (currentUser == null) return;
+
+            var result = await _matchingFlowService.CancelPairRequestAsync(currentUser.Id, card.MentorId);
+            StatusMessage = result.Success
+                ? _loc.Format("Student_RequestCancelled_Message", card.MentorName)
+                : $"✗ {result.ErrorMessage}";
+            HasStatusMessage = true;
+
+            if (result.Success)
+                card.HasPendingRequest = false;
         }
     }
 
-    public class MentorCard
+    public partial class MentorCard : ObservableObject
     {
         public int MentorId { get; set; }
         public string MentorName { get; set; } = string.Empty;
         public string SubjectName { get; set; } = string.Empty;
         public string GradeName { get; set; } = string.Empty;
+        public int ClassNum { get; set; }
         public string ProfilePicturePath { get; set; } = string.Empty;
         public Gender Gender { get; set; } = Gender.PreferNoAnswer;
+        [ObservableProperty] private bool _hasPendingRequest;
     }
 }

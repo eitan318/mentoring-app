@@ -132,7 +132,7 @@
                                 </TextBlock>
                             </DockPanel>
                             <ProgressBar Height="10" Margin="0,0,0,4" Minimum="0" Maximum="100"
-                                         Value="{Binding HoursProgress}" />
+                                         Value="{Binding HoursProgress, Mode=OneWay}" />
                         </StackPanel>
 
                         <UniformGrid DockPanel.Dock="Bottom" Columns="2" Margin="0,8,0,0">
@@ -190,7 +190,7 @@
                                 </TextBlock>
                             </DockPanel>
                             <ProgressBar Height="10" Margin="0,0,0,4" Minimum="0" Maximum="100"
-                                         Value="{Binding HoursProgress}" />
+                                         Value="{Binding HoursProgress, Mode=OneWay}" />
                         </StackPanel>
 
                         <Button DockPanel.Dock="Bottom" Margin="0,8,0,0"
@@ -279,7 +279,15 @@
                                                     <TextBlock FontSize="11" Foreground="Gray">
                                                         <Run Text="{Binding SubjectName}" />
                                                         <Run Text="·" />
-                                                        <Run Text="{Binding GradeName}" />
+                                                        <Run>
+                                                            <Run.Text>
+                                                                <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                                                    <Binding Path="GradeName"/>
+                                                                    <Binding Path="ClassNum"/>
+                                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                                </MultiBinding>
+                                                            </Run.Text>
+                                                        </Run>
                                                     </TextBlock>
                                                 </StackPanel>
                                             </DockPanel>

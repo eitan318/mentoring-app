@@ -77,6 +77,10 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
 
         public ObservableCollection<SupervisorModel> SupervisorsListPreview { get; } = new();
 
+        // ── Total fill progress (Phase 1 only) ────────────────────────────────
+        [ObservableProperty] private double _totalFillPercent;
+        [ObservableProperty] private string _totalFillLabel = string.Empty;
+
         // ── Constructor ───────────────────────────────────────────────────────
 
         public AdminDashboardViewModel(
@@ -137,9 +141,33 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             if (ActiveDeadline.HasValue) DeadlineInput = ActiveDeadline;
 
             var allUsers = await _userService.GetAllUsersAsync();
+            var allStudents = allUsers.OfType<StudentModel>().ToList();
+
             SupervisorsListPreview.Clear();
+            int globalFilled = 0, globalTotal = 0;
+
             foreach (var supervisor in allUsers.OfType<SupervisorModel>())
+            {
+                var assignedSlots = supervisor.AssignedClasses
+                    .Select(c => (gradeId: c.Grade.Id, classNum: c.ClassNum))
+                    .ToHashSet();
+
+                var myStudents = allStudents
+                    .Where(s => s.Grade != null && assignedSlots.Contains((s.Grade.Id, s.ClassNum)))
+                    .ToList();
+
+                int filled = myStudents.Count(s => IsStudentInfoFilled(s));
+                supervisor.FilledStudentsCount = filled;
+                supervisor.TotalStudentsCount = myStudents.Count;
+
+                globalFilled += filled;
+                globalTotal  += myStudents.Count;
+
                 SupervisorsListPreview.Add(supervisor);
+            }
+
+            TotalFillPercent = globalTotal > 0 ? (double)globalFilled / globalTotal * 100 : 0;
+            TotalFillLabel = $"{globalFilled}/{globalTotal} ({(int)TotalFillPercent}%)";
         }
 
         // ── Shared Deadline Commands ──────────────────────────────────────────
@@ -268,6 +296,19 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         {
             OperationResult = message;
             HasOperationResult = true;
+        }
+
+        /// <summary>
+        /// Returns true when a student has fully filled their info:
+        /// valid grade, non-zero class, chosen a role, and set a subject for that role.
+        /// </summary>
+        internal static bool IsStudentInfoFilled(StudentModel s)
+        {
+            if (s.Grade == null || s.Grade.Id == 0 || s.ClassNum <= 0) return false;
+            if (!s.IsMentor && !s.IsMentee) return false;
+            if (s.IsMentor && (s.MentorProfile?.SubjectToTeach ?? 0) <= 0) return false;
+            if (s.IsMentee && (s.MenteeProfile?.SubjectToLearn ?? 0) <= 0) return false;
+            return true;
         }
     }
 }

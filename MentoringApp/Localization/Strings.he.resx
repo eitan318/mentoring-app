@@ -89,7 +89,10 @@
   <data name="Admin_SupervisorHeader_Pairs" xml:space="preserve"><value>זוגות</value></data>
   <data name="Admin_SupervisorHeader_Pending" xml:space="preserve"><value>ממתינות</value></data>
   <data name="Admin_SupervisorHeader_Resolved" xml:space="preserve"><value>טופלו</value></data>
+  <data name="Admin_SupervisorHeader_FillProgress" xml:space="preserve"><value>מילאו פרטים</value></data>
+  <data name="Admin_TotalFillProgress_Label" xml:space="preserve"><value>סך כל מילוי פרטי תלמידים:</value></data>
   <data name="Admin_Inspect_Button" xml:space="preserve"><value>בדיקה</value></data>
+  <data name="Admin_NoClasses" xml:space="preserve"><value>אין</value></data>
 
   <!-- Student Dashboard -->
   <data name="Student_YourMentee_Label" xml:space="preserve"><value>המתאמן שלך</value></data>
@@ -118,7 +121,7 @@
   <!-- Other Profile -->
   <data name="OtherProfile_Username_Label" xml:space="preserve"><value>שם משתמש</value></data>
   <data name="OtherProfile_Email_Label" xml:space="preserve"><value>כתובת אימייל</value></data>
-  <data name="OtherProfile_Grade_Label" xml:space="preserve"><value>כיתה נוכחית</value></data>
+  <data name="OtherProfile_Grade_Label" xml:space="preserve"><value>כיתה ומספר</value></data>
   <data name="OtherProfile_MentoringDetails_Label" xml:space="preserve"><value>פרטי מנטורינג</value></data>
 
   <!-- Add Issue -->
@@ -304,6 +307,8 @@
   <data name="Browse_Teaches_Label" xml:space="preserve"><value>📘 מלמד: </value></data>
   <data name="Browse_Grade_Label" xml:space="preserve"><value>🎓 שכבה: </value></data>
   <data name="Browse_SendRequest_Button" xml:space="preserve"><value>שלח בקשה</value></data>
+  <data name="Browse_CancelRequest_Button" xml:space="preserve"><value>בטל בקשה</value></data>
+  <data name="Student_RequestCancelled_Message" xml:space="preserve"><value>✓ הבקשה אל {0} בוטלה.</value></data>
 
   <!-- Mentor Requests -->
   <data name="MentorReq_Header" xml:space="preserve"><value>📬 בקשות חניכה</value></data>
@@ -386,6 +391,9 @@
   <data name="OtherProfile_None" xml:space="preserve"><value>אין</value></data>
   <data name="OtherProfile_Teaching_Format" xml:space="preserve"><value>מלמד: {0}</value></data>
   <data name="OtherProfile_Learning_Format" xml:space="preserve"><value>לומד: {0}</value></data>
+
+  <!-- Grade + Class combined display: {0}=localized grade name, {1}=class number -->
+  <data name="GradeClass_Format" xml:space="preserve"><value>{0} {1}</value></data>
 
   <!-- Database Dynamic Values -->
   <data name="DB_Grade_9th" xml:space="preserve"><value>כיתה ט'</value></data>

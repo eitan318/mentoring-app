@@ -274,27 +274,46 @@
                           ItemContainerStyle="{StaticResource PairListViewItemStyle}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <DockPanel Margin="5" LastChildFill="True">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <components:ProfilePictureControl Width="28" Height="28" Margin="0,0,6,0"
+                            <StackPanel Margin="5,4">
+                                <!-- Names + tier tag -->
+                                <DockPanel LastChildFill="False">
+                                    <components:ProfilePictureControl Width="26" Height="26" Margin="0,0,5,0"
                                         VerticalAlignment="Center" ImagePath="{Binding Mentor.ProfilePicturePath}"
                                         Gender="{Binding Mentor.Gender}"/>
-                                    <TextBlock FontWeight="Bold"
+                                    <TextBlock FontWeight="Bold" VerticalAlignment="Center"
                                                Text="{Binding [Supervisor_MentorPrefix], Source={x:Static loc:TranslationSource.Instance}}"/>
-                                    <TextBlock Margin="0,0,12,0" Text="{Binding Mentor.UserName}"/>
+                                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="{Binding Mentor.UserName}"/>
 
-                                    <components:ProfilePictureControl Width="28" Height="28" Margin="0,0,6,0"
+                                    <components:ProfilePictureControl Width="26" Height="26" Margin="0,0,5,0"
                                         VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}"
                                         Gender="{Binding Mentee.Gender}"/>
-                                    <TextBlock FontWeight="Bold"
+                                    <TextBlock FontWeight="Bold" VerticalAlignment="Center"
                                                Text="{Binding [Supervisor_MenteePrefix], Source={x:Static loc:TranslationSource.Instance}}"/>
-                                    <TextBlock Text="{Binding Mentee.UserName}"/>
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding Mentee.UserName}"/>
 
-                                    <Border Margin="10,0,0,0" BorderBrush="#AAAAAA" BorderThickness="1" Padding="4,1">
+                                    <Border Margin="8,0,0,0" BorderBrush="#AAAAAA" BorderThickness="1" Padding="4,1"
+                                            VerticalAlignment="Center">
                                         <TextBlock FontSize="10" Text="{Binding MatchTier}"/>
                                     </Border>
-                                </StackPanel>
-                            </DockPanel>
+                                </DockPanel>
+
+                                <!-- Meeting progress -->
+                                <Grid Margin="0,4,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ProgressBar Grid.Column="0"
+                                                 Height="5" VerticalAlignment="Center"
+                                                 Minimum="0" Maximum="100"
+                                                 Value="{Binding HoursProgress, Mode=OneWay}"
+                                                 Foreground="#4CAF50" Background="#E0E0E0"/>
+                                    <TextBlock Grid.Column="1"
+                                               Margin="8,0,0,0" FontSize="10" Foreground="#777"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding ProgressText}"/>
+                                </Grid>
+                            </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

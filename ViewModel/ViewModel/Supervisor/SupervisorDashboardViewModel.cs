@@ -7,6 +7,7 @@ using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
+using MentoringApp.ViewModel.ViewModel.Admin;
 using MentoringApp.ViewModel.ViewModel.User;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -44,7 +45,7 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
         [ObservableProperty] private SupervisorModel? _selectedSupervisor;
 
         
-        [ObservableProperty] private ObservableCollection<Pair> _pairsSupervised = [];
+        [ObservableProperty] private ObservableCollection<PairProgressItem> _pairsSupervised = [];
         
         [ObservableProperty] private ObservableCollection<StudentModel> _inactiveStudents = [];
         [ObservableProperty] private string _classProgressInfo = string.Empty;
@@ -153,10 +154,10 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
             {
                 var vm = new IssueViewModel(_navigationService, _issueService);
 
-                var pair = PairsSupervised.FirstOrDefault(p => p.Mentor.Id == issue.ReportedByUserId || p.Mentee.Id == issue.ReportedByUserId);
-                if (pair != null)
+                var item = PairsSupervised.FirstOrDefault(p => p.Mentor.Id == issue.ReportedByUserId || p.Mentee.Id == issue.ReportedByUserId);
+                if (item != null)
                 {
-                    vm.RelatedPairName = _loc.Format("Supervisor_RelatedPairName_Format", pair.Mentor.UserName, pair.Mentee.UserName);
+                    vm.RelatedPairName = _loc.Format("Supervisor_RelatedPairName_Format", item.Mentor.UserName, item.Mentee.UserName);
                 }
 
                 vm.OnCloseRequested = () => SelectedPaneContent = null;
@@ -171,20 +172,20 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
         }
 
         [RelayCommand]
-        private async Task SelectPair(Pair? pair)
+        private async Task SelectPair(PairProgressItem? item)
         {
-            IssueFilterPair = pair;
+            IssueFilterPair = item?.Pair;
 
-            if (pair != null)
+            if (item != null)
             {
                 var vm = new PairDetailsViewModel(_pairService, _issueService, _reviewService, _settingsService)
                 {
                     ShowIssues = false
                 };
-                await vm.OnNavigatedToAsync(pair.Id);
+                await vm.OnNavigatedToAsync(item.Id);
                 SelectedPaneContent = vm;
             }
-            else 
+            else
             {
                  SelectedPaneContent = null;
             }
@@ -199,10 +200,24 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
 
             if (pairsResult.Success)
             {
-                PairsSupervised = new ObservableCollection<Pair>(pairsResult.Data ?? []);
+                var pairs = pairsResult.Data ?? [];
+                double requiredHours = await _settingsService.GetMeetingHoursBarrierAsync();
 
-                var warnings = PairsSupervised
+                var reviewTasks = pairs.Select(pair =>
+                    _reviewService.GetReviewsByPairAsync(pair.Id).ContinueWith(t =>
+                        (pair, hours: t.Result.Success ? t.Result.Data?.Sum(r => r.AmountOfHours) ?? 0 : 0)));
+
+                var reviewResults = await Task.WhenAll(reviewTasks);
+                var progressItems = reviewResults
+                    .Select(r => new PairProgressItem(r.pair, r.hours, requiredHours))
+                    .ToList();
+
+                PairsSupervised = new ObservableCollection<PairProgressItem>(
+                    progressItems.OrderBy(p => p.TotalMeetingHours));
+
+                var warnings = progressItems
                     .Where(p => p.IsProfileIncomplete || p.MatchTier == MatchTier.FallbackRandom)
+                    .Select(p => p.Pair)
                     .ToList();
                 IncompleteProfilePairs = new ObservableCollection<Pair>(warnings);
                 IncompleteProfileCount = warnings.Count;
@@ -225,13 +240,7 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
                 .ToList();
 
             int totalStudents = myStudents.Count;
-            var inactive = myStudents.Where(s =>
-            {
-                if (s.Grade == null || s.Grade.Id == 0 || s.ClassNum <= 0) return true;
-                if (s.IsMentor  && s.MentorProfile?.SubjectToTeach <= 0) return true;
-                if (s.IsMentee  && s.MenteeProfile?.SubjectToLearn <= 0) return true;
-                return false;
-            }).ToList();
+            var inactive = myStudents.Where(s => !AdminDashboardViewModel.IsStudentInfoFilled(s)).ToList();
 
             InactiveStudents = new ObservableCollection<StudentModel>(inactive);
 

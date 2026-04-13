@@ -41,8 +41,9 @@ namespace MentoringApp.Service
         public async Task<Result<IEnumerable<IssueModel>>> GetIssuesByUserAsync(int userId)
         {
             var dtos = await _issueRepo.GetByReporterAsync(userId);
-            var categories = await _issueCategoryRepo.GetAllAsync();
-            var models = IssueMapper.ToModels(dtos, IssueCategoryMapper.ToModels(categories));
+            var categoryDtos = await _issueCategoryRepo.GetAllAsync();
+            var categories = IssueCategoryMapper.ToModels(categoryDtos).ToList();
+            var models = IssueMapper.ToModels(dtos, categories).ToList(); // materialize here
 
             return Result<IEnumerable<IssueModel>>.Ok(models);
         }
@@ -88,8 +89,8 @@ namespace MentoringApp.Service
         private async Task<IEnumerable<IssueModel>> MapDtosToIssuesAsync(IEnumerable<IssueDto> dtos)
         {
             var categoryDtos = await _issueCategoryRepo.GetAllAsync();
-            var categorys = IssueCategoryMapper.ToModels(categoryDtos);
-            return IssueMapper.ToModels(dtos, categorys);
+            var categories = IssueCategoryMapper.ToModels(categoryDtos).ToList();
+            return IssueMapper.ToModels(dtos, categories).ToList(); // materialize — prevents lazy eval on UI thread
         }
 
         private async Task<IssueModel?> MapDtoToIssueAsync(IssueDto dto)
