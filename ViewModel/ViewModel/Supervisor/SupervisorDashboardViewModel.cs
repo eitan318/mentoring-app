@@ -160,10 +160,15 @@ namespace MentoringApp.ViewModel.ViewModel.Supervisor
                     vm.RelatedPairName = _loc.Format("Supervisor_RelatedPairName_Format", item.Mentor.UserName, item.Mentee.UserName);
                 }
 
+                vm.ForwardingsupervisorId = _currentSupervisorId;
                 vm.OnCloseRequested = () => SelectedPaneContent = null;
-                vm.OnIssueResolved = () => 
+                vm.OnIssueResolved = () =>
                 {
                     SelectedPaneContent = null;
+                    _ = LoadSupervisorDataAsync(_currentSupervisorId);
+                };
+                vm.OnIssueForwarded = () =>
+                {
                     _ = LoadSupervisorDataAsync(_currentSupervisorId);
                 };
                 await vm.OnNavigatedToAsync(issue.Id);

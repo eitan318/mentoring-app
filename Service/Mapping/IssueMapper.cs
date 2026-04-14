@@ -16,7 +16,8 @@ namespace MentoringApp.Service.Mapping
             return new IssueModel(dto.Description, category, dto.IsResolved != 0, dto.ReportedByUserId)
             {
                 Id = dto.Id,
-                CreationDate = DateTime.Parse(dto.CreationDate)
+                CreationDate = DateTime.Parse(dto.CreationDate),
+                ForwardedBySupervisorId = dto.ForwardedBySupervisorId
             };
         }
 

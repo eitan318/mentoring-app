@@ -50,10 +50,42 @@
                     TextWrapping="Wrap" />
             </StackPanel>
 
+            <!-- Forwarded badge -->
+            <Border Margin="0,12,0,0" Background="#FFF3E0" BorderBrush="#FFB300" BorderThickness="1"
+                    CornerRadius="4" Padding="10,6" HorizontalAlignment="Left"
+                    Visibility="{Binding CurrentIssue.IsForwardedToAdmin, Converter={StaticResource BoolToVis}}">
+                <TextBlock FontSize="12" Foreground="#E65100"
+                           Text="{Binding [Issue_ForwardedBadge], Source={x:Static loc:TranslationSource.Instance}}"/>
+            </Border>
+
             <StackPanel
                 Margin="0,20,0,0"
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
+                <Button
+                    Padding="10,6"
+                    Margin="5"
+                    Background="#1565C0"
+                    Foreground="White"
+                    Cursor="Hand"
+                    ToolTip="{Binding [Issue_Forward_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
+                    Command="{Binding ForwardToAdminCommand}"
+                    Content="{Binding [Issue_Forward_Button], Source={x:Static loc:TranslationSource.Instance}}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding CanForward}" Value="True"/>
+                                        <Condition Binding="{Binding CurrentIssue.IsForwardedToAdmin}" Value="False"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <Button
                     Padding="10,6"
                     Margin="5"

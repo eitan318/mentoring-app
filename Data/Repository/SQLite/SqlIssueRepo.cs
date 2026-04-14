@@ -16,14 +16,14 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<IssueDto>> GetAllAsync()
         {
             var rows = await _db.QueryAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues");
+                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues");
             return rows.Select(MapToDto).ToList();
         }
 
         public async Task<IssueDto?> GetByIdAsync(int id)
         {
             var row = await _db.QuerySingleAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues WHERE Id = @Id",
+                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE Id = @Id",
                 new { Id = id });
             return row == null ? null : MapToDto(row);
         }
@@ -31,7 +31,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<IssueDto>> GetByReporterAsync(int userId)
         {
             var rows = await _db.QueryAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues WHERE ReportedByUserId = @UserId",
+                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE ReportedByUserId = @UserId",
                 new { UserId = userId });
             return rows.Select(MapToDto).ToList();
         }
@@ -49,7 +49,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 return Enumerable.Empty<IssueDto>();
 
             var allIssues = await _db.QueryAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate FROM Issues");
+                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues");
 
             return allIssues
                 .Where(i => studentIds.Contains(i.ReportedByUserId))
@@ -96,6 +96,28 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
+        public async Task<bool> ForwardAsync(int issueId, int supervisorId)
+        {
+            try
+            {
+                int affected = await _db.ExecuteAsync(
+                    "UPDATE Issues SET ForwardedBySupervisorId = @SupervisorId WHERE Id = @Id",
+                    new { Id = issueId, SupervisorId = supervisorId });
+                return affected > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<IEnumerable<IssueDto>> GetForwardedAsync()
+        {
+            var rows = await _db.QueryAsync<IssueRow>(
+                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE ForwardedBySupervisorId IS NOT NULL");
+            return rows.Select(MapToDto).ToList();
+        }
+
         private static IssueDto MapToDto(IssueRow row) => new IssueDto
         {
             Id = row.Id,
@@ -103,7 +125,8 @@ namespace MentoringApp.Data.Acess.SQLite
             CategoryId = row.CategoryId,
             ReportedByUserId = row.ReportedByUserId,
             IsResolved = row.IsResolved,
-            CreationDate = row.CreationDate
+            CreationDate = row.CreationDate,
+            ForwardedBySupervisorId = row.ForwardedBySupervisorId
         };
 
         private class IssueRow
@@ -114,6 +137,7 @@ namespace MentoringApp.Data.Acess.SQLite
             public int ReportedByUserId { get; set; }
             public int IsResolved { get; set; }
             public string CreationDate { get; set; } = string.Empty;
+            public int? ForwardedBySupervisorId { get; set; }
         }
 
 

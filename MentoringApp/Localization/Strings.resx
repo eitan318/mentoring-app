@@ -93,6 +93,9 @@
   <data name="Admin_TotalFillProgress_Label" xml:space="preserve"><value>Overall student info fill:</value></data>
   <data name="Admin_Inspect_Button" xml:space="preserve"><value>Inspect</value></data>
   <data name="Admin_NoClasses" xml:space="preserve"><value>None</value></data>
+  <data name="Admin_ForwardedIssues_Header" xml:space="preserve"><value>Forwarded Issues</value></data>
+  <data name="Admin_ForwardedIssues_SelectHint" xml:space="preserve"><value>Select an issue to review</value></data>
+  <data name="Admin_ForwardedIssues_Empty" xml:space="preserve"><value>No forwarded issues</value></data>
 
   <!-- Student Dashboard -->
   <data name="Student_YourMentee_Label" xml:space="preserve"><value>Your Mentee</value></data>
@@ -442,6 +445,8 @@ You may see new pairs appear in your list as students make their selections.</va
   <data name="Admin_FallbackFailed_Text" xml:space="preserve"><value>Fallback step failed.</value></data>
   <data name="Admin_ProcessComplete_Message" xml:space="preserve"><value>✓ Process complete. {0} algorithmic pairs created. {1}</value></data>
   <data name="Admin_AutoMatchFailed_Message" xml:space="preserve"><value>✗ Auto-match failed: {0}</value></data>
+  <data name="Admin_EmailNotification_Failed_Title" xml:space="preserve"><value>Email Notification Failed</value></data>
+  <data name="Admin_EmailNotification_Failed_Body" xml:space="preserve"><value>Some notification emails could not be sent. Check your email settings.</value></data>
 
   <!-- Manage Pairs -->
   <data name="ManagePairs_ConfirmSeparate_Title" xml:space="preserve"><value>Confirm Separate</value></data>

@@ -7,6 +7,7 @@ using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModel.Supervisor;
+using MentoringApp.ViewModel.ViewModel.User;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 
@@ -25,6 +26,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         private readonly UserService _userService;
         private readonly MatchingFlowService _matchingFlowService;
         private readonly SettingsService _settingsService;
+        private readonly IssueService _issueService;
+        private readonly NotificationService _notificationService;
         private readonly IToastService _toastService;
         private readonly ILocalizationService _loc;
         private readonly DispatcherTimer _uiUpdateTimer;
@@ -77,6 +80,20 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
 
         public ObservableCollection<SupervisorModel> SupervisorsListPreview { get; } = new();
 
+        // ── Forwarded Issues ──────────────────────────────────────────────────
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasForwardedIssues))]
+        private ObservableCollection<IssueModel> _forwardedIssues = [];
+
+        public bool HasForwardedIssues => ForwardedIssues.Count > 0;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasSelectedForwardedIssuePane))]
+        private object? _selectedForwardedIssuePane;
+
+        public bool HasSelectedForwardedIssuePane => SelectedForwardedIssuePane != null;
+
         // ── Total fill progress (Phase 1 only) ────────────────────────────────
         [ObservableProperty] private double _totalFillPercent;
         [ObservableProperty] private string _totalFillLabel = string.Empty;
@@ -89,6 +106,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             UserService userService,
             MatchingFlowService matchingFlowService,
             SettingsService settingsService,
+            IssueService issueService,
+            NotificationService notificationService,
             IToastService toastService,
             ILocalizationService loc)
         {
@@ -97,6 +116,8 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
             _userService = userService;
             _matchingFlowService = matchingFlowService;
             _settingsService = settingsService;
+            _issueService = issueService;
+            _notificationService = notificationService;
             _toastService = toastService;
             _loc = loc;
 
@@ -168,6 +189,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
 
             TotalFillPercent = globalTotal > 0 ? (double)globalFilled / globalTotal * 100 : 0;
             TotalFillLabel = $"{globalFilled}/{globalTotal} ({(int)TotalFillPercent}%)";
+
+            var forwardedResult = await _issueService.GetForwardedIssuesAsync();
+            ForwardedIssues = forwardedResult.Success
+                ? new ObservableCollection<IssueModel>(forwardedResult.Data ?? [])
+                : [];
         }
 
         // ── Shared Deadline Commands ──────────────────────────────────────────
@@ -204,6 +230,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
         {
             IsUsersImported = true;
             await _settingsService.SetIsUsersImportedAsync(true);
+            bool phase1Sent = await _notificationService.SendPhase1StartedAsync();
+            if (!phase1Sent)
+                await _toastService.ShowInfoAsync(
+                    _loc.Get("Admin_EmailNotification_Failed_Title"),
+                    _loc.Get("Admin_EmailNotification_Failed_Body"));
         }
 
         // ── Phase Action Commands ─────────────────────────────────────────────
@@ -227,6 +258,11 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
                 ActiveDeadline = await _settingsService.GetPhase2DeadlineAsync();
                 DeadlineInput = DateTime.Now.AddDays(1);
 
+                bool phase2Sent = await _notificationService.SendPhase2StartedAsync();
+                if (!phase2Sent)
+                    await _toastService.ShowInfoAsync(
+                        _loc.Get("Admin_EmailNotification_Failed_Title"),
+                        _loc.Get("Admin_EmailNotification_Failed_Body"));
                 ShowResult(_loc.Get("Admin_ScoresGenerated_Message"));
             }
             else
@@ -278,6 +314,21 @@ namespace MentoringApp.ViewModel.ViewModel.Admin
                 _loc.Get("Admin_Phase2Info_Body"));
 
         // ── Navigation Commands ───────────────────────────────────────────────
+
+        [RelayCommand]
+        private async Task SelectForwardedIssue(IssueModel? issue)
+        {
+            if (issue == null) { SelectedForwardedIssuePane = null; return; }
+            var vm = new IssueViewModel(_navigationService, _issueService);
+            vm.OnCloseRequested = () => SelectedForwardedIssuePane = null;
+            vm.OnIssueResolved = () =>
+            {
+                SelectedForwardedIssuePane = null;
+                _ = LoadDataAsync();
+            };
+            await vm.OnNavigatedToAsync(issue.Id);
+            SelectedForwardedIssuePane = vm;
+        }
 
         [RelayCommand] private async Task ManageUsers() => await _navigationService.NavigateToAsync<ManageUsersViewModel>();
         [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();

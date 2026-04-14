@@ -73,6 +73,8 @@ namespace MentoringApp.Data.Interfaces
         Task<IEnumerable<IssueDto>> GetBySupervisorAsync(int supervisorId);
         Task<bool> CreateAsync(string description, int categoryId, int reportedByUserId);
         Task<bool> ResolveAsync(int issueId);
+        Task<bool> ForwardAsync(int issueId, int supervisorId);
+        Task<IEnumerable<IssueDto>> GetForwardedAsync();
     }
 
     public interface IIssueCategoryRepo
