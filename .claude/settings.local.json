@@ -11,7 +11,11 @@
       "Bash(wc:*)",
       "Bash(find:*)",
       "Bash(grep -v \"\\\\\\\\\\(obj\\\\\\\\|bin\\\\\\\\\\)\")",
-      "Bash(grep -n \"SupervisorId\\\\|MentorId\\\\|MenteeId\\\\|class PairDto\" \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\Data\\\\DTO\"/*.cs)"
+      "Bash(grep -n \"SupervisorId\\\\|MentorId\\\\|MenteeId\\\\|class PairDto\" \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\Data\\\\DTO\"/*.cs)",
+      "Bash(grep -E \"\\\\.\\(sln|md|json\\)$\")",
+      "Bash(dotnet new webapi:*)",
+      "Bash(dotnet add:*)",
+      "Bash(xargs ls *)"
     ]
   }
 }

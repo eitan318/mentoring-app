@@ -2,12 +2,24 @@ using MentoringApp.Data.Acess.SQLite;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using MentoringApp.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.Data.DI
 {
     public static class DataDependencyInjection
     {
+        /// <summary>
+        /// Entry point for the API host. Dispatches to the appropriate data backend
+        /// based on the "DataProvider" config key. Task 3 will add Postgres support here.
+        /// </summary>
+        public static IServiceCollection AddDataLayer(this IServiceCollection services, IConfiguration configuration)
+        {
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? "Data Source=../Data/Resources/Database/mentoring.db";
+            return services.AddSqlDataRepositories(connectionString);
+        }
+
         /// <summary>
         /// Registers raw SQLite repositories (no Entity Framework).
         /// </summary>
