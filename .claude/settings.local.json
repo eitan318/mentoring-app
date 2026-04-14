@@ -10,7 +10,8 @@
       "Bash(dotnet test:*)",
       "Bash(wc:*)",
       "Bash(find:*)",
-      "Bash(grep -v \"\\\\\\\\\\(obj\\\\\\\\|bin\\\\\\\\\\)\")"
+      "Bash(grep -v \"\\\\\\\\\\(obj\\\\\\\\|bin\\\\\\\\\\)\")",
+      "Bash(grep -n \"SupervisorId\\\\|MentorId\\\\|MenteeId\\\\|class PairDto\" \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\Data\\\\DTO\"/*.cs)"
     ]
   }
 }

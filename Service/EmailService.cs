@@ -10,6 +10,8 @@ namespace MentoringApp.Service
         private readonly string _fromEmail;
         private readonly string _fromPassword;
 
+        private const int MaxAttempts = 3;
+
         public EmailService(string smtpHost, int smtpPort, string fromEmail, string fromPassword)
         {
             _smtpHost = smtpHost;
@@ -20,19 +22,36 @@ namespace MentoringApp.Service
 
         public async Task<bool> SendEmailAsync(string to, string subject, string htmlBody)
         {
-            try
+            for (int attempt = 1; attempt <= MaxAttempts; attempt++)
             {
-                using var client = new SmtpClient(_smtpHost, _smtpPort)
+                try
                 {
-                    Credentials = new NetworkCredential(_fromEmail, _fromPassword),
-                    EnableSsl = true
-                };
+                    using var client = new SmtpClient(_smtpHost, _smtpPort)
+                    {
+                        Credentials = new NetworkCredential(_fromEmail, _fromPassword),
+                        EnableSsl = true
+                    };
 
-                var message = new MailMessage(_fromEmail, to, subject, htmlBody) { IsBodyHtml = true };
-                await client.SendMailAsync(message);
-                return true;
+                    var message = new MailMessage(_fromEmail, to, subject, htmlBody) { IsBodyHtml = true };
+                    await client.SendMailAsync(message);
+                    return true;
+                }
+                catch (SmtpException ex) when (IsTransient(ex) && attempt < MaxAttempts)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt))); // 2s, 4s
+                }
+                catch
+                {
+                    return false;
+                }
             }
-            catch { return false; }
+            return false;
         }
+
+        /// <summary>
+        /// SMTP 4xx codes indicate a temporary server-side problem — safe to retry.
+        /// </summary>
+        private static bool IsTransient(SmtpException ex) =>
+            (int)ex.StatusCode >= 400 && (int)ex.StatusCode < 500;
     }
 }

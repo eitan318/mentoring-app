@@ -141,8 +141,10 @@ namespace MentoringApp.Data.Acess.SQLite
                     ReportedByUserId INTEGER NOT NULL,
                     IsResolved INTEGER NOT NULL DEFAULT 0,
                     CreationDate TEXT NOT NULL,
+                    ForwardedBySupervisorId INTEGER NULL,
                     FOREIGN KEY (ReportedByUserId) REFERENCES Users(Id) ON DELETE CASCADE,
-                    FOREIGN KEY (CategoryId) REFERENCES IssueCategories(Id)
+                    FOREIGN KEY (CategoryId) REFERENCES IssueCategories(Id),
+                    FOREIGN KEY (ForwardedBySupervisorId) REFERENCES Users(Id)
                 );
 
                 CREATE TABLE Reviews (

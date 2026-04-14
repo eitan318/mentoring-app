@@ -9,7 +9,7 @@ namespace MentoringApp.Converter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool boolValue = (bool)value;
+            bool boolValue = value is bool b && b;
             return boolValue ? Visibility.Collapsed : Visibility.Visible;
         }
 

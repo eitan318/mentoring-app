@@ -11,10 +11,12 @@ namespace MentoringApp.Model
     {
         public required int Id { get; set; }
         public required string Description { get; set; }
-        public required IssueCategoryModel Category { get; set; } 
+        public required IssueCategoryModel Category { get; set; }
         public int ReportedByUserId { get; set; }
         public DateTime CreationDate { get; set; }
         public bool IsResolved { get; set; }
+        public int? ForwardedBySupervisorId { get; set; }
+        public bool IsForwardedToAdmin => ForwardedBySupervisorId.HasValue;
 
         public IssueModel() { }
 

@@ -93,6 +93,9 @@
   <data name="Admin_TotalFillProgress_Label" xml:space="preserve"><value>סך כל מילוי פרטי תלמידים:</value></data>
   <data name="Admin_Inspect_Button" xml:space="preserve"><value>בדיקה</value></data>
   <data name="Admin_NoClasses" xml:space="preserve"><value>אין</value></data>
+  <data name="Admin_ForwardedIssues_Header" xml:space="preserve"><value>בעיות שהועברו</value></data>
+  <data name="Admin_ForwardedIssues_SelectHint" xml:space="preserve"><value>בחר בעיה לבדיקה</value></data>
+  <data name="Admin_ForwardedIssues_Empty" xml:space="preserve"><value>אין בעיות שהועברו</value></data>
 
   <!-- Student Dashboard -->
   <data name="Student_YourMentee_Label" xml:space="preserve"><value>המתאמן שלך</value></data>
@@ -442,6 +445,8 @@
   <data name="Admin_FallbackFailed_Text" xml:space="preserve"><value>שלב הגיבוי נכשל.</value></data>
   <data name="Admin_ProcessComplete_Message" xml:space="preserve"><value>✓ התהליך הושלם. {0} זוגות אלגוריתמיים נוצרו. {1}</value></data>
   <data name="Admin_AutoMatchFailed_Message" xml:space="preserve"><value>✗ ההתאמה האוטומטית נכשלה: {0}</value></data>
+  <data name="Admin_EmailNotification_Failed_Title" xml:space="preserve"><value>שגיאה בשליחת דואר</value></data>
+  <data name="Admin_EmailNotification_Failed_Body" xml:space="preserve"><value>חלק מהודעות הדואר לא נשלחו. בדוק את הגדרות הדואר.</value></data>
 
   <!-- Manage Pairs -->
   <data name="ManagePairs_ConfirmSeparate_Title" xml:space="preserve"><value>אשר הפרדה</value></data>
