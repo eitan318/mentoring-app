@@ -28,15 +28,19 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<SupervisorStatsDto>> GetSupervisorStatisticsAsync()
         {
             const string sql = @"
-                SELECT 
-                    u.Id, 
-                    u.Name AS UserName,
-                    (SELECT COUNT(*) 
-                        FROM Issues i 
-                        JOIN Pairs p ON i.PairId = p.Id 
-                        WHERE p.SupervisorId = u.Id AND i.Status = 'Pending') AS PendingIssuesCount,
-                    (SELECT COUNT(*) 
-                        FROM Pairs p 
+                SELECT
+                    u.Id,
+                    u.UserName,
+                    (SELECT COUNT(*)
+                        FROM Issues i
+                        WHERE i.ReportedByUserId IN (
+                            SELECT MentorId FROM Pairs WHERE SupervisorId = u.Id
+                            UNION
+                            SELECT MenteeId FROM Pairs WHERE SupervisorId = u.Id
+                        )
+                        AND i.IsResolved = 0) AS PendingIssuesCount,
+                    (SELECT COUNT(*)
+                        FROM Pairs p
                         WHERE p.SupervisorId = u.Id) AS PairsCount
                 FROM Users u
                 INNER JOIN UserSupervisors us ON u.Id = us.UserId";

@@ -1,0 +1,78 @@
+@inherits LayoutComponentBase
+@inject IAuthService Auth
+@inject LayoutStateService LayoutState
+@inject NavigationManager Nav
+@implements IDisposable
+
+<div dir="@_dir" lang="@_lang" class="app-shell">
+    <nav class="sidebar">
+        <div class="nav-brand">MentoringApp</div>
+
+        @if (Auth.IsAuthenticated)
+        {
+            @if (Auth.Role == "Admin")
+            {
+                <NavLink class="nav-item" href="/admin">Dashboard</NavLink>
+                <NavLink class="nav-item" href="/admin/matching">Matching Pipeline</NavLink>
+            }
+            else if (Auth.Role == "Supervisor")
+            {
+                <NavLink class="nav-item" href="/supervisor">Dashboard</NavLink>
+            }
+            else if (Auth.Role == "Student")
+            {
+                <NavLink class="nav-item" href="/student/profile">Profile</NavLink>
+                <NavLink class="nav-item" href="/student/matching">Matching</NavLink>
+                <NavLink class="nav-item" href="/student/reviews">Reviews</NavLink>
+            }
+
+            <NavLink class="nav-item" href="/issues">Issues</NavLink>
+
+            <div class="nav-footer">
+                <button class="btn-link" @onclick="ToggleLanguage">
+                    @(_lang == "he" ? "English" : "עברית")
+                </button>
+                <button class="btn-link" @onclick="LogoutAsync">Logout</button>
+            </div>
+        }
+    </nav>
+
+    <main class="content">
+        @Body
+    </main>
+</div>
+
+@code {
+    private string _dir = "ltr";
+    private string _lang = "en";
+
+    protected override void OnInitialized()
+    {
+        _lang = LayoutState.Language;
+        _dir = _lang == "he" ? "rtl" : "ltr";
+        LayoutState.OnChange += OnLayoutChanged;
+    }
+
+    private void OnLayoutChanged()
+    {
+        _lang = LayoutState.Language;
+        _dir = _lang == "he" ? "rtl" : "ltr";
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleLanguage()
+    {
+        LayoutState.Language = _lang == "he" ? "en" : "he";
+    }
+
+    private async Task LogoutAsync()
+    {
+        await Auth.LogoutAsync();
+        Nav.NavigateTo("/login");
+    }
+
+    public void Dispose()
+    {
+        LayoutState.OnChange -= OnLayoutChanged;
+    }
+}

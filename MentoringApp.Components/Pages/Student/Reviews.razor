@@ -1,0 +1,102 @@
+@page "/student/reviews"
+@inject IAuthService Auth
+@inject PairApiClient PairApi
+@inject ReviewApiClient ReviewApi
+@inject NavigationManager Nav
+
+<h2>Reviews</h2>
+
+@if (_loading)
+{
+    <p>Loading...</p>
+}
+else if (_pair is null)
+{
+    <div class="card">
+        <p>You are not paired yet. Reviews will be available once you have been matched with a partner.</p>
+    </div>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(_error)) { <div class="alert alert-error">@_error</div> }
+
+    <section>
+        <h4>Submit a Review</h4>
+        <div class="form-group">
+            <label>Content</label>
+            <textarea @bind="_newContent" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Hours</label>
+            <input type="number" step="0.5" @bind="_newHours" />
+        </div>
+        @if (!string.IsNullOrEmpty(_submitMsg)) { <span class="msg">@_submitMsg</span> }
+        <button class="btn btn-primary" @onclick="SubmitReviewAsync">Submit</button>
+    </section>
+
+    <section>
+        <h4>Review Timeline</h4>
+        @if (!_reviews.Any())
+        {
+            <p>No reviews yet.</p>
+        }
+        else
+        {
+            <div class="timeline">
+                @foreach (var r in _reviews.OrderByDescending(r => r.Date))
+                {
+                    <div class="timeline-item">
+                        <div class="timeline-date">@r.Date</div>
+                        <div class="timeline-content">@r.Content</div>
+                        <div class="timeline-meta">@r.AmountOfHours h — by user @r.AuthorUserId</div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+}
+
+@code {
+    private PairResponse? _pair;
+    private IEnumerable<ReviewResponse> _reviews = [];
+    private bool _loading = true;
+    private string _error = string.Empty;
+    private string _newContent = string.Empty;
+    private double _newHours;
+    private string _submitMsg = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.UserId is null) { Nav.NavigateTo("/login"); return; }
+
+        _loading = true;
+        try
+        {
+            try { _pair = await PairApi.GetByMenteeAsync(Auth.UserId.Value); }
+            catch { _pair = null; }
+
+            if (_pair is not null)
+                _reviews = await ReviewApi.GetByPairAsync(_pair.Id);
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private async Task SubmitReviewAsync()
+    {
+        _submitMsg = string.Empty;
+        if (string.IsNullOrWhiteSpace(_newContent)) { _submitMsg = "Content is required."; return; }
+        if (_newHours <= 0) { _submitMsg = "Hours must be greater than 0."; return; }
+
+        try
+        {
+            await ReviewApi.CreateAsync(new CreateReviewRequest(
+                _newContent, DateTime.UtcNow, _pair!.Id, Auth.UserId!.Value, _newHours));
+            _newContent = string.Empty;
+            _newHours = 0;
+            _submitMsg = "Review submitted.";
+            _reviews = await ReviewApi.GetByPairAsync(_pair.Id);
+        }
+        catch (Exception ex) { _submitMsg = ex.Message; }
+    }
+}

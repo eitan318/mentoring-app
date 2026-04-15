@@ -1,4 +1,5 @@
 using MentoringApp.Api.Helpers;
+using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
 
 namespace MentoringApp.Api.Endpoints;
@@ -12,44 +13,44 @@ public static class IssueEndpoints
             .RequireAuthorization();
 
         // GET /api/issues — Admin
-        group.MapGet("/", async (IssueService issueService) =>
+        group.MapGet("/", async (IIssueRepo issueRepo) =>
         {
-            var result = await issueService.GetAllIssuesAsync();
-            return result.ToHttp();
+            var dtos = await issueRepo.GetAllAsync();
+            return Results.Ok(dtos);
         })
         .RequireAuthorization("AdminOnly")
         .WithOpenApi();
 
         // GET /api/issues/forwarded — Admin (before /{id} to avoid conflict)
-        group.MapGet("/forwarded", async (IssueService issueService) =>
+        group.MapGet("/forwarded", async (IIssueRepo issueRepo) =>
         {
-            var result = await issueService.GetForwardedIssuesAsync();
-            return result.ToHttp();
+            var dtos = await issueRepo.GetForwardedAsync();
+            return Results.Ok(dtos);
         })
         .RequireAuthorization("AdminOnly")
         .WithOpenApi();
 
         // GET /api/issues/categories
-        group.MapGet("/categories", async (IssueService issueService) =>
+        group.MapGet("/categories", async (IIssueCategoryRepo categoryRepo) =>
         {
-            var result = await issueService.GetCategoriesAsync();
-            return result.ToHttp();
+            var dtos = await categoryRepo.GetAllAsync();
+            return Results.Ok(dtos);
         })
         .WithOpenApi();
 
         // GET /api/issues/by-user/{userId}
-        group.MapGet("/by-user/{userId:int}", async (int userId, IssueService issueService) =>
+        group.MapGet("/by-user/{userId:int}", async (int userId, IIssueRepo issueRepo) =>
         {
-            var result = await issueService.GetIssuesByUserAsync(userId);
-            return result.ToHttp();
+            var dtos = await issueRepo.GetByReporterAsync(userId);
+            return Results.Ok(dtos);
         })
         .WithOpenApi();
 
         // GET /api/issues/by-supervisor/{supervisorId}
-        group.MapGet("/by-supervisor/{supervisorId:int}", async (int supervisorId, IssueService issueService) =>
+        group.MapGet("/by-supervisor/{supervisorId:int}", async (int supervisorId, IIssueRepo issueRepo) =>
         {
-            var result = await issueService.GetIssuesBySupervisorAsync(supervisorId);
-            return result.ToHttp();
+            var dtos = await issueRepo.GetBySupervisorAsync(supervisorId);
+            return Results.Ok(dtos);
         })
         .WithOpenApi();
 

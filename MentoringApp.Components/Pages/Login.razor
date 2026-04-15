@@ -1,0 +1,117 @@
+@page "/login"
+@inject IAuthService Auth
+@inject NavigationManager Nav
+
+<div class="login-container">
+    <h2>Login</h2>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-error">@_error</div>
+    }
+
+    @if (!_codeSent)
+    {
+        <div class="form-group">
+            <label>National ID</label>
+            <input type="text" @bind="_nationalId" placeholder="National ID" />
+        </div>
+
+        <button class="btn btn-primary" @onclick="HandleSendCode" disabled="@_loading">
+            @(_loading ? "Sending..." : "Send Verification Code")
+        </button>
+    }
+    else
+    {
+        <p class="info-text">A verification code has been sent to your email.</p>
+
+        <div class="form-group">
+            <label>Verification Code</label>
+            <input type="text" @bind="_code" placeholder="Enter code" />
+        </div>
+
+        <button class="btn btn-primary" @onclick="HandleLogin" disabled="@_loading">
+            @(_loading ? "Logging in..." : "Login")
+        </button>
+
+        <button class="btn btn-link" @onclick="Reset">Back</button>
+    }
+</div>
+
+@code {
+    private string _nationalId = string.Empty;
+    private string _code = string.Empty;
+    private string _error = string.Empty;
+    private bool _loading;
+    private bool _codeSent;
+
+    protected override void OnInitialized()
+    {
+        if (Auth.IsAuthenticated)
+            RedirectByRole();
+    }
+
+    private async Task HandleSendCode()
+    {
+        _error = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(_nationalId))
+        {
+            _error = "National ID is required.";
+            return;
+        }
+
+        _loading = true;
+        var error = await Auth.SendCodeAsync(_nationalId);
+        _loading = false;
+
+        if (error is not null)
+        {
+            _error = error;
+            return;
+        }
+
+        _codeSent = true;
+    }
+
+    private async Task HandleLogin()
+    {
+        _error = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(_code))
+        {
+            _error = "Verification code is required.";
+            return;
+        }
+
+        _loading = true;
+        var ok = await Auth.LoginAsync(_nationalId, _code);
+        _loading = false;
+
+        if (!ok)
+        {
+            _error = "Invalid or expired code. Please try again.";
+            return;
+        }
+
+        RedirectByRole();
+    }
+
+    private void Reset()
+    {
+        _codeSent = false;
+        _code = string.Empty;
+        _error = string.Empty;
+    }
+
+    private void RedirectByRole()
+    {
+        var dest = Auth.Role switch
+        {
+            "Admin" => "/admin",
+            "Supervisor" => "/supervisor",
+            _ => "/student/profile"
+        };
+        Nav.NavigateTo(dest);
+    }
+}

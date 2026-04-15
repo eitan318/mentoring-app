@@ -15,7 +15,25 @@
       "Bash(grep -E \"\\\\.\\(sln|md|json\\)$\")",
       "Bash(dotnet new webapi:*)",
       "Bash(dotnet add:*)",
-      "Bash(xargs ls *)"
+      "Bash(xargs ls *)",
+      "Bash(powershell *)",
+      "Bash(dotnet run *)",
+      "Bash(echo \"API PID: $!\")",
+      "Bash(echo \"Web PID: $!\")",
+      "mcp__playwright__browser_navigate",
+      "Bash(npx playwright *)",
+      "Bash(curl *)",
+      "Bash(sqlite3 *)",
+      "Bash(dotnet script *)",
+      "Bash(dotnet tool *)",
+      "Bash(python3 -c \"import sqlite3; conn = sqlite3.connect\\('Data/Resources/Database/mentoring.db'\\); print\\(conn.execute\\('SELECT * FROM VerificationCodes'\\).fetchall\\(\\)\\)\")",
+      "Bash(grep *)",
+      "Bash(taskkill /F /IM \"MentoringApp.Api.exe\")",
+      "Bash(taskkill /F /IM \"MentoringApp.Web.exe\")",
+      "Bash(pkill -f \"MentoringApp.Api\")",
+      "Bash(pkill -f \"MentoringApp.Web\")",
+      "Bash(ls *)",
+      "Bash(git rm *)"
     ]
   }
 }
