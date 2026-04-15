@@ -1,0 +1,208 @@
+@page "/student/profile"
+@inject IAuthService Auth
+@inject UserApiClient UserApi
+@inject ReferenceApiClient RefApi
+@inject NavigationManager Nav
+
+<h2>My Profile</h2>
+
+@if (_loading)
+{
+    <p>Loading profile...</p>
+}
+else if (_user is null)
+{
+    <p>Could not load profile.</p>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(_globalMsg)) { <div class="alert">@_globalMsg</div> }
+
+    <!-- Base Info -->
+    <section class="profile-section">
+        <h4>Basic Information</h4>
+        <div class="form-group"><label>Username</label><input @bind="_baseUserName" /></div>
+        <div class="form-group"><label>Email</label><input @bind="_baseEmail" /></div>
+        <div class="form-group"><label>National ID</label><input @bind="_baseNationalId" /></div>
+        <div class="form-group"><label>Phone</label><input @bind="_basePhone" /></div>
+        <div class="form-group">
+            <label>Gender</label>
+            <select @bind="_baseGender">
+                <option value="0">Male</option>
+                <option value="1">Female</option>
+            </select>
+        </div>
+        @if (!string.IsNullOrEmpty(_baseMsg)) { <span class="msg">@_baseMsg</span> }
+        <button class="btn btn-primary" @onclick="SaveBaseInfoAsync">Save</button>
+    </section>
+
+    <!-- Grade & Class -->
+    <section class="profile-section">
+        <h4>Grade & Class</h4>
+        <div class="form-group">
+            <label>Grade</label>
+            <select @bind="_gradeId">
+                @foreach (var g in _grades)
+                {
+                    <option value="@g.Id">@g.Name</option>
+                }
+            </select>
+        </div>
+        <div class="form-group"><label>Class Number</label><input type="number" @bind="_classNum" /></div>
+        @if (!string.IsNullOrEmpty(_gradeMsg)) { <span class="msg">@_gradeMsg</span> }
+        <button class="btn btn-primary" @onclick="SaveGradeClassAsync">Save</button>
+    </section>
+
+    <!-- Gender Preferences -->
+    <section class="profile-section">
+        <h4>Gender Preferences</h4>
+        <div class="form-group">
+            <label>Preferred Mentor Gender</label>
+            <select @bind="_prefMentorGender">
+                <option value="0">Male</option>
+                <option value="1">Female</option>
+                <option value="2">No preference</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Preferred Mentee Gender</label>
+            <select @bind="_prefMenteeGender">
+                <option value="0">Male</option>
+                <option value="1">Female</option>
+                <option value="2">No preference</option>
+            </select>
+        </div>
+        @if (!string.IsNullOrEmpty(_prefMsg)) { <span class="msg">@_prefMsg</span> }
+        <button class="btn btn-primary" @onclick="SavePreferencesAsync">Save</button>
+    </section>
+
+    <!-- Mentor Profile (conditional) -->
+    @if (_user.MentorSubjectId.HasValue || true)
+    {
+        <section class="profile-section">
+            <h4>Mentor Profile</h4>
+            <div class="form-group">
+                <label>Subject to Teach</label>
+                <select @bind="_mentorSubjectId">
+                    @foreach (var s in _subjects)
+                    {
+                        <option value="@s.Id">@s.Name</option>
+                    }
+                </select>
+            </div>
+            @if (!string.IsNullOrEmpty(_mentorMsg)) { <span class="msg">@_mentorMsg</span> }
+            <button class="btn btn-primary" @onclick="SaveMentorProfileAsync">Save</button>
+        </section>
+    }
+}
+
+@code {
+    private UserResponse? _user;
+    private bool _loading = true;
+    private string _globalMsg = string.Empty;
+
+    private string _baseUserName = string.Empty;
+    private string _baseEmail = string.Empty;
+    private string _baseNationalId = string.Empty;
+    private string? _basePhone;
+    private int _baseGender;
+    private string _baseMsg = string.Empty;
+
+    private int _gradeId;
+    private int _classNum;
+    private string _gradeMsg = string.Empty;
+
+    private int _prefMentorGender = 2;
+    private int _prefMenteeGender = 2;
+    private string _prefMsg = string.Empty;
+
+    private int _mentorSubjectId;
+    private string _mentorMsg = string.Empty;
+
+    private IEnumerable<GradeResponse> _grades = [];
+    private IEnumerable<SubjectResponse> _subjects = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.UserId is null) { Nav.NavigateTo("/login"); return; }
+
+        await Task.WhenAll(LoadUserAsync(), LoadReferenceAsync());
+    }
+
+    private async Task LoadUserAsync()
+    {
+        _loading = true;
+        try
+        {
+            _user = await UserApi.GetByIdAsync(Auth.UserId!.Value);
+            _baseUserName = _user.UserName;
+            _baseEmail = _user.Email;
+            _baseNationalId = _user.NationalId;
+            _basePhone = _user.PhoneNumber;
+            _baseGender = _user.Gender;
+            _gradeId = _user.GradeId ?? 0;
+            _classNum = _user.ClassNum ?? 0;
+            _prefMentorGender = _user.PreferredMentorGender ?? 2;
+            _prefMenteeGender = _user.PreferredMenteeGender ?? 2;
+            _mentorSubjectId = _user.MentorSubjectId ?? 0;
+        }
+        catch (Exception ex) { _globalMsg = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private async Task LoadReferenceAsync()
+    {
+        try
+        {
+            _grades = await RefApi.GetGradesAsync();
+            _subjects = await RefApi.GetSubjectsAsync();
+        }
+        catch { /* non-critical */ }
+    }
+
+    private async Task SaveBaseInfoAsync()
+    {
+        _baseMsg = string.Empty;
+        try
+        {
+            await UserApi.UpdateBaseInfoAsync(Auth.UserId!.Value,
+                new UpdateBaseInfoRequest(_baseUserName, _baseEmail, _baseNationalId, _basePhone, _baseGender));
+            _baseMsg = "Saved.";
+        }
+        catch (Exception ex) { _baseMsg = ex.Message; }
+    }
+
+    private async Task SaveGradeClassAsync()
+    {
+        _gradeMsg = string.Empty;
+        try
+        {
+            await UserApi.UpdateGradeClassAsync(Auth.UserId!.Value, new UpdateGradeClassRequest(_gradeId, _classNum));
+            _gradeMsg = "Saved.";
+        }
+        catch (Exception ex) { _gradeMsg = ex.Message; }
+    }
+
+    private async Task SavePreferencesAsync()
+    {
+        _prefMsg = string.Empty;
+        try
+        {
+            await UserApi.UpdateGenderPreferencesAsync(Auth.UserId!.Value,
+                new UpdateGenderPreferencesRequest(_prefMentorGender, _prefMenteeGender));
+            _prefMsg = "Saved.";
+        }
+        catch (Exception ex) { _prefMsg = ex.Message; }
+    }
+
+    private async Task SaveMentorProfileAsync()
+    {
+        _mentorMsg = string.Empty;
+        try
+        {
+            await UserApi.UpdateMentorProfileAsync(Auth.UserId!.Value, new UpdateMentorProfileRequest(_mentorSubjectId));
+            _mentorMsg = "Saved.";
+        }
+        catch (Exception ex) { _mentorMsg = ex.Message; }
+    }
+}

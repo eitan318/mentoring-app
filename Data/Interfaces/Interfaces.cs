@@ -36,6 +36,7 @@ namespace MentoringApp.Data.Interfaces
     {
         Task<bool> SaveAsync(int userId, string code, DateTime creationDate);
         Task<int?> GetUserIdByCodeAsync(string code);
+        Task<string?> GetCodeByUserIdAsync(int userId);
         Task<bool> DeleteAsync(int userId);
     }
 

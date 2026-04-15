@@ -45,6 +45,14 @@ namespace MentoringApp.Data.Acess.SQLite
             return Task.FromResult(result);
         }
 
+        public Task<string?> GetCodeByUserIdAsync(int userId)
+        {
+            var row = _db.QuerySingle<UserCodeRow>(
+                "SELECT Code FROM VerificationCodes WHERE UserId = @UserId",
+                new { UserId = userId });
+            return Task.FromResult(row?.Code);
+        }
+
         public Task<bool> DeleteAsync(int userId)
         {
             try
@@ -63,6 +71,11 @@ namespace MentoringApp.Data.Acess.SQLite
         private class CodeRow
         {
             public int UserId { get; set; }
+        }
+
+        private class UserCodeRow
+        {
+            public string Code { get; set; } = string.Empty;
         }
     }
 }

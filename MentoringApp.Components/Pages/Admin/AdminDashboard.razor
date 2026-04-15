@@ -1,0 +1,151 @@
+@page "/admin"
+@inject IAuthService Auth
+@inject UserApiClient UserApi
+@inject NavigationManager Nav
+
+<h2>Admin Dashboard</h2>
+
+@if (_loading)
+{
+    <p>Loading users...</p>
+}
+else
+{
+    <div class="toolbar">
+        <input type="text" placeholder="Search by name or ID..." @bind="_search" @bind:event="oninput" />
+        <button class="btn btn-primary" @onclick="() => _showCreateForm = !_showCreateForm">
+            @(_showCreateForm ? "Cancel" : "+ New User")
+        </button>
+    </div>
+
+    @if (_showCreateForm)
+    {
+        <div class="create-form">
+            <h4>Create User</h4>
+            <input placeholder="Username" @bind="_newUser.UserName" />
+            <input placeholder="Email" @bind="_newUser.Email" />
+            <input placeholder="National ID" @bind="_newUser.NationalId" />
+            <input placeholder="Phone" @bind="_newUser.PhoneNumber" />
+            <select @bind="_newUser.Role">
+                <option value="Student">Student</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Admin">Admin</option>
+            </select>
+            @if (!string.IsNullOrEmpty(_createError))
+            {
+                <span class="error">@_createError</span>
+            }
+            <button class="btn btn-primary" @onclick="CreateUserAsync">Create</button>
+        </div>
+    }
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th><th>Name</th><th>Email</th><th>National ID</th><th>Role</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in FilteredUsers)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.UserName</td>
+                    <td>@u.Email</td>
+                    <td>@u.NationalId</td>
+                    <td>@u.Role</td>
+                    <td>
+                        @if (_confirmDeleteId == u.Id)
+                        {
+                            <span>Sure? </span>
+                            <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDeleteAsync(u.Id)">Yes</button>
+                            <button class="btn btn-sm" @onclick="() => _confirmDeleteId = null">No</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => _confirmDeleteId = u.Id">Delete</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-error">@_error</div>
+}
+
+@code {
+    private IEnumerable<UserResponse> _users = [];
+    private string _search = string.Empty;
+    private bool _loading = true;
+    private bool _showCreateForm;
+    private string _error = string.Empty;
+    private string _createError = string.Empty;
+    private int? _confirmDeleteId;
+
+    private CreateUserState _newUser = new();
+
+    private IEnumerable<UserResponse> FilteredUsers =>
+        string.IsNullOrWhiteSpace(_search)
+            ? _users
+            : _users.Where(u =>
+                u.UserName.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                u.NationalId.Contains(_search, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.Role != "Admin") { Nav.NavigateTo("/login"); return; }
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        _loading = true;
+        try { _users = await UserApi.GetAllAsync(); }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private async Task CreateUserAsync()
+    {
+        _createError = string.Empty;
+        if (string.IsNullOrWhiteSpace(_newUser.UserName) || string.IsNullOrWhiteSpace(_newUser.Email) ||
+            string.IsNullOrWhiteSpace(_newUser.NationalId))
+        {
+            _createError = "Username, email, and National ID are required.";
+            return;
+        }
+        try
+        {
+            await UserApi.CreateAsync(new CreateUserRequest(
+                _newUser.UserName, _newUser.Email, _newUser.NationalId, _newUser.PhoneNumber, 0, _newUser.Role));
+            _showCreateForm = false;
+            _newUser = new();
+            await LoadUsersAsync();
+        }
+        catch (Exception ex) { _createError = ex.Message; }
+    }
+
+    private async Task ConfirmDeleteAsync(int id)
+    {
+        _confirmDeleteId = null;
+        try
+        {
+            await UserApi.DeleteAsync(id);
+            await LoadUsersAsync();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private class CreateUserState
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string NationalId { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
+        public string Role { get; set; } = "Student";
+    }
+}

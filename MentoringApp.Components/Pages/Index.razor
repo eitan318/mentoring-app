@@ -1,0 +1,23 @@
+@page "/"
+@inject NavigationManager Nav
+@inject IAuthService Auth
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (Auth.IsAuthenticated)
+        {
+            var dest = Auth.Role switch
+            {
+                "Admin" => "/admin",
+                "Supervisor" => "/supervisor",
+                _ => "/student/profile"
+            };
+            Nav.NavigateTo(dest);
+        }
+        else
+        {
+            Nav.NavigateTo("/login");
+        }
+    }
+}

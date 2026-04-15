@@ -1,4 +1,5 @@
 using MentoringApp.Api.Helpers;
+using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
 
 namespace MentoringApp.Api.Endpoints;
@@ -12,18 +13,18 @@ public static class ReviewEndpoints
             .RequireAuthorization();
 
         // GET /api/reviews/by-pair/{pairId}
-        group.MapGet("/by-pair/{pairId:int}", async (int pairId, ReviewService reviewService) =>
+        group.MapGet("/by-pair/{pairId:int}", async (int pairId, IReviewRepo reviewRepo) =>
         {
-            var result = await reviewService.GetReviewsByPairAsync(pairId);
-            return result.ToHttp();
+            var dtos = await reviewRepo.GetByPairAsync(pairId);
+            return Results.Ok(dtos);
         })
         .WithOpenApi();
 
         // GET /api/reviews/by-author/{userId}
-        group.MapGet("/by-author/{userId:int}", async (int userId, ReviewService reviewService) =>
+        group.MapGet("/by-author/{userId:int}", async (int userId, IReviewRepo reviewRepo) =>
         {
-            var result = await reviewService.GetReviewsByAuthorAsync(userId);
-            return result.ToHttp();
+            var dtos = await reviewRepo.GetByAuthorAsync(userId);
+            return Results.Ok(dtos);
         })
         .WithOpenApi();
 

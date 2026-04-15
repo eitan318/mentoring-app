@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace MentoringApp.Data.DTO
@@ -54,6 +55,7 @@ namespace MentoringApp.Data.DTO
         public DateTime? VerificationCodeCreated { get; set; }
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum UserRoleType { Student, Admin, Supervisor }
 
 }

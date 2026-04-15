@@ -191,5 +191,5 @@ git_stats/*
 StyleCop.Cache
 bin
 obj
-wwwroot/lib
+**/wwwroot/lib
 .env
