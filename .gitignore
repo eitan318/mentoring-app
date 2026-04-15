@@ -193,3 +193,4 @@ bin
 obj
 **/wwwroot/lib
 .env
+*_wpftmp.csproj
