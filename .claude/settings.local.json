@@ -33,7 +33,13 @@
       "Bash(pkill -f \"MentoringApp.Api\")",
       "Bash(pkill -f \"MentoringApp.Web\")",
       "Bash(ls *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)",
+      "Bash(python -m json.tool)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill *)",
+      "Bash(cmd *)"
     ]
   }
 }

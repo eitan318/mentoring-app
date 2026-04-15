@@ -48,11 +48,14 @@ namespace MentoringApp
         {
             // Set to true during development to wipe and re-seed the database on every launch.
             // Must be false in production — data loss will occur if left enabled.
-            bool recreateInitialDb = true;
+            bool recreateInitialDb = false;
             base.OnStartup(e);
 
             if (recreateInitialDb)
             {
+                // Wipe any persisted session so the fresh DB isn't bypassed on the next launch.
+                _serviceProvider.GetRequiredService<SessionService>().ClearSession();
+
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbRepo>();
