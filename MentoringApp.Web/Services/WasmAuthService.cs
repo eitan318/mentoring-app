@@ -1,24 +1,40 @@
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
 using MentoringApp.Components.Auth;
+using Microsoft.JSInterop;
 
 namespace MentoringApp.Web.Services;
 
-public class WasmAuthService(AuthApiClient authClient) : IAuthService
+/// <summary>
+/// Scoped auth service. Delegates state storage to the singleton <see cref="AuthState"/>
+/// so that <c>BearerTokenHandler</c> (resolved by IHttpClientFactory) always shares
+/// the same token regardless of DI scope.
+/// </summary>
+public class WasmAuthService(AuthApiClient authClient, IJSRuntime js, AuthState state) : IAuthService
 {
-    private string? _token;
-    private string? _role;
-    private int? _userId;
-    private string? _language;
+    private const string StorageKey = "mentoring_jwt";
 
-    public string? Token => _token;
-    public bool IsAuthenticated => _token is not null;
-    public string? Role => _role;
-    public int? UserId => _userId;
-    public string? Language => _language;
+    public string? Token => state.Token;
+    public bool IsAuthenticated => state.IsAuthenticated;
+    public string? Role => state.Role;
+    public int? UserId => state.UserId;
+    public string? Language => state.Language;
+
+    public async Task InitAsync()
+    {
+        try
+        {
+            var stored = await js.InvokeAsync<string?>("localStorage.getItem", StorageKey);
+            if (!string.IsNullOrEmpty(stored))
+                Apply(stored);
+        }
+        catch
+        {
+            // JS interop not yet available — ignore
+        }
+    }
 
     public async Task<string?> SendCodeAsync(string nationalId)
     {
@@ -27,10 +43,7 @@ public class WasmAuthService(AuthApiClient authClient) : IAuthService
             await authClient.SendCodeAsync(new SendCodeRequest(nationalId));
             return null;
         }
-        catch (Exception ex)
-        {
-            return ex.Message;
-        }
+        catch (Exception ex) { return ex.Message; }
     }
 
     public async Task<bool> LoginAsync(string nationalId, string code)
@@ -38,33 +51,30 @@ public class WasmAuthService(AuthApiClient authClient) : IAuthService
         try
         {
             var response = await authClient.LoginAsync(new LoginRequest(nationalId, code));
-            _token = response.Token;
-            ParseClaims(response.Token);
+            Apply(response.Token);
+            await js.InvokeVoidAsync("localStorage.setItem", StorageKey, response.Token);
             return true;
         }
-        catch
-        {
-            return false;
-        }
+        catch { return false; }
     }
 
-    public Task LogoutAsync()
+    public async Task LogoutAsync()
     {
-        _token = null;
-        _role = null;
-        _userId = null;
-        _language = null;
-        return Task.CompletedTask;
+        state.Token = null;
+        state.Role = null;
+        state.UserId = null;
+        state.Language = null;
+        try { await js.InvokeVoidAsync("localStorage.removeItem", StorageKey); }
+        catch { /* ignore */ }
     }
 
-    private void ParseClaims(string jwt)
+    private void Apply(string jwt)
     {
-        // JWT is three base64url sections separated by '.'
+        state.Token = jwt;
         var parts = jwt.Split('.');
         if (parts.Length != 3) return;
 
         var payload = parts[1];
-        // base64url → base64 padding
         var padded = payload.Replace('-', '+').Replace('_', '/');
         switch (padded.Length % 4)
         {
@@ -76,13 +86,13 @@ public class WasmAuthService(AuthApiClient authClient) : IAuthService
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        _role = root.TryGetProperty("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", out var roleProp)
+        state.Role = root.TryGetProperty("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", out var roleProp)
             ? roleProp.GetString()
             : root.TryGetProperty("role", out var rp) ? rp.GetString() : null;
 
         if (root.TryGetProperty("sub", out var sub) && int.TryParse(sub.GetString(), out var id))
-            _userId = id;
+            state.UserId = id;
 
-        _language = root.TryGetProperty("language", out var lang) ? lang.GetString() : "en";
+        state.Language = root.TryGetProperty("language", out var lang) ? lang.GetString() : "en";
     }
 }

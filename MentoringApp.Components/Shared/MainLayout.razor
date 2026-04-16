@@ -13,6 +13,7 @@
             @if (Auth.Role == "Admin")
             {
                 <NavLink class="nav-item" href="/admin">Dashboard</NavLink>
+                <NavLink class="nav-item" href="/admin/pairs">Pairs</NavLink>
                 <NavLink class="nav-item" href="/admin/matching">Matching Pipeline</NavLink>
             }
             else if (Auth.Role == "Supervisor")
@@ -38,19 +39,29 @@
     </nav>
 
     <main class="content">
-        @Body
+        @if (_initialized)
+        {
+            @Body
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
     </main>
 </div>
 
 @code {
     private string _dir = "ltr";
     private string _lang = "en";
+    private bool _initialized;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _lang = LayoutState.Language;
+        await Auth.InitAsync();
+        _lang = Auth.Language ?? LayoutState.Language;
         _dir = _lang == "he" ? "rtl" : "ltr";
         LayoutState.OnChange += OnLayoutChanged;
+        _initialized = true;
     }
 
     private void OnLayoutChanged()

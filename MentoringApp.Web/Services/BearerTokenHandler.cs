@@ -3,14 +3,20 @@ using MentoringApp.Components.Auth;
 
 namespace MentoringApp.Web.Services;
 
-public class BearerTokenHandler(IAuthService authService) : DelegatingHandler
+/// <summary>
+/// Attaches the Bearer token to every outgoing API request.
+/// Injects the singleton <see cref="AuthState"/> directly — not the scoped
+/// <see cref="IAuthService"/> — to avoid DI captive-dependency issues with
+/// IHttpClientFactory-managed handler lifetimes.
+/// </summary>
+public class BearerTokenHandler(AuthState state) : DelegatingHandler
 {
-    protected override async Task<HttpResponseMessage> SendAsync(
+    protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken ct)
     {
-        if (authService.Token is not null)
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authService.Token);
+        if (state.Token is not null)
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", state.Token);
 
-        return await base.SendAsync(request, ct);
+        return base.SendAsync(request, ct);
     }
 }

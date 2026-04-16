@@ -1,0 +1,227 @@
+@page "/admin/users"
+@inject IAuthService Auth
+@inject UserApiClient UserApi
+@inject NavigationManager Nav
+
+<h2>Manage Users</h2>
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+<div class="row g-0" style="height: calc(100vh - 140px); min-height: 500px;">
+
+    @* ── Left panel: list ── *@
+    <div class="col-4 border-end d-flex flex-column" style="overflow:hidden">
+        <div class="p-2 border-bottom">
+            <div class="d-flex gap-2 mb-2">
+                <input class="form-control form-control-sm" type="text"
+                       placeholder="Search by name..." @bind="_search" @bind:event="oninput" />
+                <button class="btn btn-primary btn-sm text-nowrap"
+                        @onclick="() => _showCreateForm = !_showCreateForm">
+                    @(_showCreateForm ? "Cancel" : "+ New")
+                </button>
+            </div>
+            <select class="form-select form-select-sm" @bind="_roleFilter">
+                <option value="">All Roles</option>
+                <option value="Student">Student</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Admin">Admin</option>
+            </select>
+        </div>
+
+        <div style="overflow-y:auto; flex:1">
+            @if (_loading)
+            {
+                <p class="p-2 text-muted">Loading...</p>
+            }
+            else if (!FilteredUsers.Any())
+            {
+                <p class="p-2 text-muted">No users found.</p>
+            }
+            else
+            {
+                @foreach (var u in FilteredUsers)
+                {
+                    <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom user-list-item @(_selected?.Id == u.Id ? "bg-primary text-white" : "")"
+                         style="cursor:pointer"
+                         @onclick="() => _selected = u">
+                        <div style="flex:1; min-width:0">
+                            <div class="fw-semibold text-truncate">@u.UserName</div>
+                            <div class="small @(_selected?.Id == u.Id ? "text-white-50" : "text-muted")">@u.Email</div>
+                        </div>
+                        <span class="badge @RoleBadgeClass(u.Role) flex-shrink-0">@u.Role</span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    @* ── Right panel: detail / create form ── *@
+    <div class="col-8 p-4" style="overflow-y:auto">
+
+        @if (_showCreateForm)
+        {
+            <div class="card" style="max-width:460px">
+                <div class="card-header fw-semibold">Create User</div>
+                <div class="card-body">
+                    <div class="mb-2"><input class="form-control" placeholder="Username" @bind="_newUser.UserName" /></div>
+                    <div class="mb-2"><input class="form-control" placeholder="Email" @bind="_newUser.Email" /></div>
+                    <div class="mb-2"><input class="form-control" placeholder="National ID" @bind="_newUser.NationalId" /></div>
+                    <div class="mb-2"><input class="form-control" placeholder="Phone (optional)" @bind="_newUser.PhoneNumber" /></div>
+                    <div class="mb-3">
+                        <select class="form-select" @bind="_newUser.Role">
+                            <option value="Student">Student</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    @if (!string.IsNullOrEmpty(_createError))
+                    {
+                        <div class="alert alert-danger py-1 small">@_createError</div>
+                    }
+                    <button class="btn btn-primary w-100" @onclick="CreateUserAsync">Create</button>
+                </div>
+            </div>
+        }
+        else if (_selected is not null)
+        {
+            <div style="max-width:500px">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold"
+                         style="width:56px;height:56px;font-size:1.4rem;flex-shrink:0">
+                        @(_selected.UserName.Length > 0 ? _selected.UserName[0].ToString().ToUpper() : "?")
+                    </div>
+                    <div>
+                        <h4 class="mb-0">@_selected.UserName</h4>
+                        <span class="badge @RoleBadgeClass(_selected.Role)">@_selected.Role</span>
+                    </div>
+                </div>
+
+                <dl class="row">
+                    <dt class="col-4">Email</dt>
+                    <dd class="col-8">@_selected.Email</dd>
+
+                    <dt class="col-4">National ID</dt>
+                    <dd class="col-8 font-monospace">@_selected.NationalId</dd>
+
+                    <dt class="col-4">Phone</dt>
+                    <dd class="col-8">@(_selected.PhoneNumber ?? "—")</dd>
+
+                    <dt class="col-4">Gender</dt>
+                    <dd class="col-8">@GenderLabel(_selected.Gender)</dd>
+
+                    @if (_selected.GradeId.HasValue)
+                    {
+                        <dt class="col-4">Grade / Class</dt>
+                        <dd class="col-8">Grade @_selected.GradeId — Class @_selected.ClassNum</dd>
+                    }
+                </dl>
+
+                <div class="d-flex gap-2 mt-3">
+                    @if (_confirmDeleteId == _selected.Id)
+                    {
+                        <span class="align-self-center">Delete this user?</span>
+                        <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDeleteAsync(_selected.Id)">Yes, Delete</button>
+                        <button class="btn btn-secondary btn-sm" @onclick="() => _confirmDeleteId = null">Cancel</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-danger btn-sm" @onclick="() => _confirmDeleteId = _selected.Id">Delete User</button>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-muted d-flex align-items-center justify-content-center h-100">
+                <p>Select a user from the list to view details.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private IEnumerable<UserResponse> _users = [];
+    private UserResponse? _selected;
+    private string _search = string.Empty;
+    private string _roleFilter = string.Empty;
+    private bool _loading = true;
+    private bool _showCreateForm;
+    private string _error = string.Empty;
+    private string _createError = string.Empty;
+    private int? _confirmDeleteId;
+    private CreateUserState _newUser = new();
+
+    private IEnumerable<UserResponse> FilteredUsers =>
+        _users.Where(u =>
+            (string.IsNullOrWhiteSpace(_search) ||
+             u.UserName.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+             u.Email.Contains(_search, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(_roleFilter) || u.Role == _roleFilter));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.Role != "Admin") { Nav.NavigateTo("/login"); return; }
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        _loading = true;
+        _selected = null;
+        try { _users = await UserApi.GetAllAsync(); }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private async Task CreateUserAsync()
+    {
+        _createError = string.Empty;
+        if (string.IsNullOrWhiteSpace(_newUser.UserName) || string.IsNullOrWhiteSpace(_newUser.Email) ||
+            string.IsNullOrWhiteSpace(_newUser.NationalId))
+        {
+            _createError = "Username, email, and National ID are required.";
+            return;
+        }
+        try
+        {
+            await UserApi.CreateAsync(new CreateUserRequest(
+                _newUser.UserName, _newUser.Email, _newUser.NationalId, _newUser.PhoneNumber, 0, _newUser.Role));
+            _showCreateForm = false;
+            _newUser = new();
+            await LoadUsersAsync();
+        }
+        catch (Exception ex) { _createError = ex.Message; }
+    }
+
+    private async Task ConfirmDeleteAsync(int id)
+    {
+        _confirmDeleteId = null;
+        try
+        {
+            await UserApi.DeleteAsync(id);
+            await LoadUsersAsync();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private static string RoleBadgeClass(string role) => role switch
+    {
+        "Admin" => "bg-danger",
+        "Supervisor" => "bg-primary",
+        _ => "bg-secondary"
+    };
+
+    private static string GenderLabel(int g) => g switch { 1 => "Male", 2 => "Female", _ => "—" };
+
+    private class CreateUserState
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string NationalId { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
+        public string Role { get; set; } = "Student";
+    }
+}
