@@ -1,151 +1,180 @@
 @page "/admin"
 @inject IAuthService Auth
 @inject UserApiClient UserApi
+@inject IssueApiClient IssueApi
 @inject NavigationManager Nav
 
 <h2>Admin Dashboard</h2>
 
-@if (_loading)
-{
-    <p>Loading users...</p>
-}
-else
-{
-    <div class="toolbar">
-        <input type="text" placeholder="Search by name or ID..." @bind="_search" @bind:event="oninput" />
-        <button class="btn btn-primary" @onclick="() => _showCreateForm = !_showCreateForm">
-            @(_showCreateForm ? "Cancel" : "+ New User")
-        </button>
-    </div>
-
-    @if (_showCreateForm)
-    {
-        <div class="create-form">
-            <h4>Create User</h4>
-            <input placeholder="Username" @bind="_newUser.UserName" />
-            <input placeholder="Email" @bind="_newUser.Email" />
-            <input placeholder="National ID" @bind="_newUser.NationalId" />
-            <input placeholder="Phone" @bind="_newUser.PhoneNumber" />
-            <select @bind="_newUser.Role">
-                <option value="Student">Student</option>
-                <option value="Supervisor">Supervisor</option>
-                <option value="Admin">Admin</option>
-            </select>
-            @if (!string.IsNullOrEmpty(_createError))
-            {
-                <span class="error">@_createError</span>
-            }
-            <button class="btn btn-primary" @onclick="CreateUserAsync">Create</button>
-        </div>
-    }
-
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>ID</th><th>Name</th><th>Email</th><th>National ID</th><th>Role</th><th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var u in FilteredUsers)
-            {
-                <tr>
-                    <td>@u.Id</td>
-                    <td>@u.UserName</td>
-                    <td>@u.Email</td>
-                    <td>@u.NationalId</td>
-                    <td>@u.Role</td>
-                    <td>
-                        @if (_confirmDeleteId == u.Id)
-                        {
-                            <span>Sure? </span>
-                            <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDeleteAsync(u.Id)">Yes</button>
-                            <button class="btn btn-sm" @onclick="() => _confirmDeleteId = null">No</button>
-                        }
-                        else
-                        {
-                            <button class="btn btn-danger btn-sm" @onclick="() => _confirmDeleteId = u.Id">Delete</button>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-
 @if (!string.IsNullOrEmpty(_error))
 {
-    <div class="alert alert-error">@_error</div>
+    <div class="alert alert-danger">@_error</div>
 }
 
+@* ── Quick-action cards ── *@
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm card-action" @onclick='() => Nav.NavigateTo("/admin/users")' style="cursor:pointer">
+            <div class="card-body text-center">
+                <div class="fs-2 mb-2">👥</div>
+                <h5 class="card-title">Manage Users</h5>
+                <p class="card-text text-muted small">Add, view and delete user accounts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm card-action" @onclick='() => Nav.NavigateTo("/admin/pairs")' style="cursor:pointer">
+            <div class="card-body text-center">
+                <div class="fs-2 mb-2">🔗</div>
+                <h5 class="card-title">Manage Pairs</h5>
+                <p class="card-text text-muted small">View, create and separate mentor–mentee pairs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm card-action" @onclick='() => Nav.NavigateTo("/admin/settings")' style="cursor:pointer">
+            <div class="card-body text-center">
+                <div class="fs-2 mb-2">⚙️</div>
+                <h5 class="card-title">System Settings</h5>
+                <p class="card-text text-muted small">Grades, classes and system configuration</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ── Supervisor Overview ── *@
+<div class="mb-4">
+    <h4>Supervisor Overview</h4>
+    @if (_loadingStats)
+    {
+        <p>Loading supervisor stats...</p>
+    }
+    else if (!_supervisorStats.Any())
+    {
+        <p class="text-muted">No supervisors found.</p>
+    }
+    else
+    {
+        <table class="table table-sm table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th><th>Name</th><th>Pairs</th><th>Pending Issues</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in _supervisorStats)
+                {
+                    <tr>
+                        <td>@s.Id</td>
+                        <td>@s.UserName</td>
+                        <td>@s.PairsCount</td>
+                        <td>
+                            @if (s.PendingIssuesCount > 0)
+                            {
+                                <span class="badge bg-warning text-dark">@s.PendingIssuesCount</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">0</span>
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm"
+                                    @onclick="() => Nav.NavigateTo($\"/admin/supervisor/{s.Id}\")">
+                                Inspect
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@* ── Forwarded Issues ── *@
+<div class="mb-4">
+    <h4>Forwarded Issues</h4>
+    @if (_loadingForwarded)
+    {
+        <p>Loading forwarded issues...</p>
+    }
+    else if (!_forwardedIssues.Any())
+    {
+        <p class="text-muted">No forwarded issues.</p>
+    }
+    else
+    {
+        <table class="table table-sm table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th><th>Description</th><th>Category</th><th>Reported By</th><th>Date</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var issue in _forwardedIssues)
+                {
+                    <tr>
+                        <td>@issue.Id</td>
+                        <td>@issue.Description</td>
+                        <td>@issue.CategoryId</td>
+                        <td>@issue.ReportedByUserId</td>
+                        <td>@issue.CreationDate</td>
+                        <td>
+                            @if (issue.IsResolved == 0)
+                            {
+                                <button class="btn btn-success btn-sm" @onclick="() => ResolveIssueAsync(issue.Id)">
+                                    Resolve
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Resolved</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
 @code {
-    private IEnumerable<UserResponse> _users = [];
-    private string _search = string.Empty;
-    private bool _loading = true;
-    private bool _showCreateForm;
+    private IEnumerable<SupervisorStatsResponse> _supervisorStats = [];
+    private IEnumerable<IssueResponse> _forwardedIssues = [];
+
+    private bool _loadingStats = true;
+    private bool _loadingForwarded = true;
     private string _error = string.Empty;
-    private string _createError = string.Empty;
-    private int? _confirmDeleteId;
-
-    private CreateUserState _newUser = new();
-
-    private IEnumerable<UserResponse> FilteredUsers =>
-        string.IsNullOrWhiteSpace(_search)
-            ? _users
-            : _users.Where(u =>
-                u.UserName.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
-                u.NationalId.Contains(_search, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
         if (Auth.Role != "Admin") { Nav.NavigateTo("/login"); return; }
-        await LoadUsersAsync();
+        await Task.WhenAll(LoadSupervisorStatsAsync(), LoadForwardedIssuesAsync());
     }
 
-    private async Task LoadUsersAsync()
+    private async Task LoadSupervisorStatsAsync()
     {
-        _loading = true;
-        try { _users = await UserApi.GetAllAsync(); }
+        _loadingStats = true;
+        try { _supervisorStats = await UserApi.GetSupervisorStatsAsync(); }
         catch (Exception ex) { _error = ex.Message; }
-        finally { _loading = false; }
+        finally { _loadingStats = false; }
     }
 
-    private async Task CreateUserAsync()
+    private async Task LoadForwardedIssuesAsync()
     {
-        _createError = string.Empty;
-        if (string.IsNullOrWhiteSpace(_newUser.UserName) || string.IsNullOrWhiteSpace(_newUser.Email) ||
-            string.IsNullOrWhiteSpace(_newUser.NationalId))
-        {
-            _createError = "Username, email, and National ID are required.";
-            return;
-        }
+        _loadingForwarded = true;
+        try { _forwardedIssues = await IssueApi.GetForwardedAsync(); }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loadingForwarded = false; }
+    }
+
+    private async Task ResolveIssueAsync(int id)
+    {
         try
         {
-            await UserApi.CreateAsync(new CreateUserRequest(
-                _newUser.UserName, _newUser.Email, _newUser.NationalId, _newUser.PhoneNumber, 0, _newUser.Role));
-            _showCreateForm = false;
-            _newUser = new();
-            await LoadUsersAsync();
-        }
-        catch (Exception ex) { _createError = ex.Message; }
-    }
-
-    private async Task ConfirmDeleteAsync(int id)
-    {
-        _confirmDeleteId = null;
-        try
-        {
-            await UserApi.DeleteAsync(id);
-            await LoadUsersAsync();
+            await IssueApi.ResolveAsync(id);
+            await LoadForwardedIssuesAsync();
         }
         catch (Exception ex) { _error = ex.Message; }
-    }
-
-    private class CreateUserState
-    {
-        public string UserName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string NationalId { get; set; } = string.Empty;
-        public string? PhoneNumber { get; set; }
-        public string Role { get; set; } = "Student";
     }
 }

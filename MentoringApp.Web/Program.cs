@@ -13,7 +13,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
     ?? throw new InvalidOperationException("ApiBaseUrl is not configured.");
 
-// Auth & layout services
+// AuthState is a plain singleton — no JS interop, safe for IHttpClientFactory handler scope.
+// WasmAuthService (Scoped) writes to it; BearerTokenHandler (Scoped) reads from it.
+builder.Services.AddSingleton<AuthState>();
 builder.Services.AddScoped<WasmAuthService>();
 builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<WasmAuthService>());
 builder.Services.AddScoped<BearerTokenHandler>();

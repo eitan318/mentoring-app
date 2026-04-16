@@ -39,7 +39,10 @@
       "Bash(python -m json.tool)",
       "Bash(netstat -ano)",
       "Bash(taskkill *)",
-      "Bash(cmd *)"
+      "Bash(cmd *)",
+      "Bash(dotnet new *)",
+      "Bash(pwsh MentoringApp.E2eTests/bin/Debug/net9.0/playwright.ps1 install chromium)",
+      "Bash(dotnet clean *)"
     ]
   }
 }
