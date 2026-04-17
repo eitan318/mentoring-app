@@ -44,7 +44,10 @@
       "Bash(pwsh MentoringApp.E2eTests/bin/Debug/net9.0/playwright.ps1 install chromium)",
       "Bash(dotnet clean *)",
       "Bash(git mv *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)"
     ]
   }
 }

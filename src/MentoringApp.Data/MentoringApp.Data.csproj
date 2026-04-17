@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Model\MentoringApp.Model.csproj" />
+    <ProjectReference Include="..\MentoringApp.Model\MentoringApp.Model.csproj" />
   </ItemGroup>
 
 </Project>
