@@ -3,7 +3,7 @@ using MentoringApp.Model;
 using MentoringApp.Model.User;
 using Xunit;
 
-namespace MentoringApp.Tests
+namespace MentoringApp.Tests.Model
 {
     public class SupervisorModelTests
     {

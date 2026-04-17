@@ -42,7 +42,9 @@
       "Bash(cmd *)",
       "Bash(dotnet new *)",
       "Bash(pwsh MentoringApp.E2eTests/bin/Debug/net9.0/playwright.ps1 install chromium)",
-      "Bash(dotnet clean *)"
+      "Bash(dotnet clean *)",
+      "Bash(git mv *)",
+      "Bash(git add *)"
     ]
   }
 }

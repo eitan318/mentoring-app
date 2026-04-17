@@ -7,7 +7,7 @@ using MentoringApp.Service;
 using Moq;
 using Xunit;
 
-namespace MentoringApp.Tests
+namespace MentoringApp.Tests.Service
 {
     /// <summary>
     /// Unit tests for <see cref="MatchingFlowService"/>.

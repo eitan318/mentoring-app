@@ -14,41 +14,45 @@ public static class AuthHelper
 {
     private static readonly HttpClient Http = new() { BaseAddress = new Uri(TestConfig.ApiBaseUrl) };
     private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
-    private static readonly SemaphoreSlim Lock = new(1, 1);
-    private static string? _cachedAdminToken;
 
-    public static async Task<string> GetAdminTokenAsync()
+    // Per-role token caches so parallel test classes don't race each other.
+    private static readonly SemaphoreSlim GlobalLock = new(1, 1);
+    private static readonly Dictionary<string, string> TokenCache = new();
+
+    public static Task<string> GetAdminTokenAsync()      => GetOrFetchAsync(TestConfig.AdminNationalId);
+    public static Task<string> GetSupervisorTokenAsync() => GetOrFetchAsync(TestConfig.SupervisorNationalId);
+    public static Task<string> GetStudentTokenAsync()    => GetOrFetchAsync(TestConfig.StudentNationalId);
+
+    private static async Task<string> GetOrFetchAsync(string nationalId)
     {
-        if (_cachedAdminToken is not null)
-            return _cachedAdminToken;
+        if (TokenCache.TryGetValue(nationalId, out var cached)) return cached;
 
-        await Lock.WaitAsync();
+        await GlobalLock.WaitAsync();
         try
         {
-            // Double-checked locking
-            if (_cachedAdminToken is not null)
-                return _cachedAdminToken;
-
-            _cachedAdminToken = await FetchTokenAsync();
-            return _cachedAdminToken;
+            if (TokenCache.TryGetValue(nationalId, out cached)) return cached;
+            var token = await FetchTokenAsync(nationalId);
+            TokenCache[nationalId] = token;
+            return token;
         }
         finally
         {
-            Lock.Release();
+            GlobalLock.Release();
         }
     }
 
-    private static async Task<string> FetchTokenAsync()
+    private static async Task<string> FetchTokenAsync(string nationalId)
     {
         // Step 1: request a verification code
         var codeResp = await Http.PostAsJsonAsync("/api/auth/send-code",
-            new { nationalId = TestConfig.AdminNationalId }, JsonOpts);
+            new { nationalId }, JsonOpts);
         codeResp.EnsureSuccessStatusCode();
 
         var codeJson = await codeResp.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(codeJson))
             throw new InvalidOperationException(
-                "API returned empty body for send-code — ensure ASPNETCORE_ENVIRONMENT=Development and the admin user exists.");
+                $"API returned empty body for send-code (nationalId={nationalId}). " +
+                "Ensure ASPNETCORE_ENVIRONMENT=Development and the user exists in the seed.");
 
         var codeBody = JsonSerializer.Deserialize<SendCodeResponse>(codeJson, JsonOpts);
         var code = codeBody?.DevCode
@@ -56,7 +60,7 @@ public static class AuthHelper
 
         // Step 2: exchange code for token
         var loginResp = await Http.PostAsJsonAsync("/api/auth/login",
-            new { nationalId = TestConfig.AdminNationalId, password = code }, JsonOpts);
+            new { nationalId, password = code }, JsonOpts);
         loginResp.EnsureSuccessStatusCode();
 
         var loginBody = await loginResp.Content.ReadFromJsonAsync<LoginResponse>(JsonOpts);
