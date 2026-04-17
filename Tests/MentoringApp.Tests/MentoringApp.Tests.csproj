@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -24,10 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ViewModel\MentoringApp.ViewModel.csproj" />
-    <ProjectReference Include="..\Service\MentoringApp.Service.csproj" />
-    <ProjectReference Include="..\Data\MentoringApp.Data.csproj" />
-    <ProjectReference Include="..\Model\MentoringApp.Model.csproj" />
+    <ProjectReference Include="..\..\src\MentoringApp.Service\MentoringApp.Service.csproj" />
+    <ProjectReference Include="..\..\src\MentoringApp.Model\MentoringApp.Model.csproj" />
+    <ProjectReference Include="..\..\src\MentoringApp.Data\MentoringApp.Data.csproj" />
   </ItemGroup>
 
 </Project>

@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Data\MentoringApp.Data.csproj" />
-    <ProjectReference Include="..\Model\MentoringApp.Model.csproj" />
+    <ProjectReference Include="..\MentoringApp.Data\MentoringApp.Data.csproj" />
+    <ProjectReference Include="..\MentoringApp.Model\MentoringApp.Model.csproj" />
   </ItemGroup>
 
 </Project>

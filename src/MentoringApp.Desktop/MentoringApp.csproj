@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -17,9 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Data\MentoringApp.Data.csproj" />
-    <ProjectReference Include="..\Service\MentoringApp.Service.csproj" />
-    <ProjectReference Include="..\ViewModel\MentoringApp.ViewModel.csproj" />
+    <ProjectReference Include="..\MentoringApp.Data\MentoringApp.Data.csproj" />
+    <ProjectReference Include="..\MentoringApp.Service\MentoringApp.Service.csproj" />
+    <ProjectReference Include="..\MentoringApp.ViewModel\MentoringApp.ViewModel.csproj" />
   </ItemGroup>
 
   <ItemGroup>
