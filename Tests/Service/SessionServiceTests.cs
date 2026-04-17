@@ -3,7 +3,7 @@ using MentoringApp.Service;
 using System.Text.Json;
 using Xunit;
 
-namespace MentoringApp.Tests
+namespace MentoringApp.Tests.Service
 {
     public class SessionServiceTests : IDisposable
     {

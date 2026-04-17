@@ -2,7 +2,7 @@ using FluentAssertions;
 using MentoringApp.Model;
 using Xunit;
 
-namespace MentoringApp.Tests
+namespace MentoringApp.Tests.Model
 {
     public class AvailabilitySlotTests
     {

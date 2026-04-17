@@ -2,7 +2,7 @@ using FluentAssertions;
 using MentoringApp.Service;
 using Xunit;
 
-namespace MentoringApp.Tests
+namespace MentoringApp.Tests.Service
 {
     public class ResultTests
     {

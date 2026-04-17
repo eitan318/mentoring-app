@@ -4,7 +4,7 @@ using MentoringApp.Model;
 using MentoringApp.Service.Mapping;
 using Xunit;
 
-namespace MentoringApp.Tests
+namespace MentoringApp.Tests.Data
 {
     public class IssueMapperTests
     {

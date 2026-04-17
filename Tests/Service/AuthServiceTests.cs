@@ -8,7 +8,7 @@ using MentoringApp.Service.Validation;
 using Moq;
 using Xunit;
 
-namespace MentoringApp.Tests
+namespace MentoringApp.Tests.Service
 {
     public class AuthServiceTests
     {

@@ -4,7 +4,7 @@ using MentoringApp.Model.User;
 using MentoringApp.Model.User.StudentProfiles;
 using Xunit;
 
-namespace MentoringApp.Tests
+namespace MentoringApp.Tests.Model
 {
     public class StudentModelTests
     {

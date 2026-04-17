@@ -2,7 +2,7 @@ using MentoringApp.E2eTests.Helpers;
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 
-namespace MentoringApp.E2eTests.Tests;
+namespace MentoringApp.E2eTests.Tests.Auth;
 
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
