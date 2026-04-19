@@ -23,7 +23,7 @@ namespace MentoringApp.Data.Acess.SQLite
             catch { return false; }
         }
 
-        public async Task<IEnumerable<PairRequestDto>> GetByMentorAsync(int mentorId)
+        public async Task<IEnumerable<PairRequestDao>> GetByMentorAsync(int mentorId)
         {
             var rows = await _db.QueryAsync<RequestRow>(
                 "SELECT Id, MenteeId, MentorId, Status, Tier, CreatedAt FROM PairRequests WHERE MentorId = @MentorId AND Status = 'Pending'",
@@ -31,7 +31,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return rows.Select(MapToDto).ToList();
         }
 
-        public async Task<IEnumerable<PairRequestDto>> GetByMenteeAsync(int menteeId)
+        public async Task<IEnumerable<PairRequestDao>> GetByMenteeAsync(int menteeId)
         {
             var rows = await _db.QueryAsync<RequestRow>(
                 "SELECT Id, MenteeId, MentorId, Status, Tier, CreatedAt FROM PairRequests WHERE MenteeId = @MenteeId",
@@ -63,7 +63,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return row != null && row.Count > 0;
         }
 
-        private static PairRequestDto MapToDto(RequestRow row) => new PairRequestDto
+        private static PairRequestDao MapToDto(RequestRow row) => new PairRequestDao
         {
             Id = row.Id,
             MenteeId = row.MenteeId,

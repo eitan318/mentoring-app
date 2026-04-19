@@ -112,7 +112,7 @@ namespace MentoringApp.Service
             var allUsers = await _userService.GetAllUsersAsync();
             var mentorIds = allUsers.OfType<StudentModel>().Where(s => s.IsMentor).Select(s => s.Id);
 
-            PairRequestDto? req = null;
+            PairRequestDao? req = null;
             foreach (var mentorId in mentorIds)
             {
                 var reqs = await _pairRequestRepo.GetByMentorAsync(mentorId);
@@ -165,7 +165,7 @@ namespace MentoringApp.Service
             return updated ? Result.Ok() : Result.Failure("Failed to cancel request.");
         }
 
-        public async Task<IEnumerable<PairRequestDto>> GetPendingRequestsForMenteeAsync(int menteeId)
+        public async Task<IEnumerable<PairRequestDao>> GetPendingRequestsForMenteeAsync(int menteeId)
         {
             var all = await _pairRequestRepo.GetByMenteeAsync(menteeId);
             return all.Where(r => r.Status == "Pending");
@@ -214,13 +214,13 @@ namespace MentoringApp.Service
             if (!mentees.Any() || !mentors.Any())
                 return Result.Failure("No unmatched users found to build score matrix.");
 
-            var scores = new List<MatchScoreDto>();
+            var scores = new List<MatchScoreDao>();
 
             foreach (var mentee in mentees)
             {
                 foreach (var mentor in mentors)
                 {
-                    scores.Add(new MatchScoreDto
+                    scores.Add(new MatchScoreDao
                     {
                         MenteeId = mentee.Id,
                         MentorId = mentor.Id,

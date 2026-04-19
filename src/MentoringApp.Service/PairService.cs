@@ -7,7 +7,7 @@ namespace MentoringApp.Service
 {
     /// <summary>
     /// CRUD and query operations for mentor–mentee pairs.
-    /// Hydrates <see cref="Pair"/> models from <see cref="PairDto"/>s by loading both
+    /// Hydrates <see cref="Pair"/> models from <see cref="PairDao"/>s by loading both
     /// mentor and mentee as <see cref="StudentModel"/> instances via <see cref="UserService"/>.
     /// Returns <c>null</c> from <see cref="MapDtoToPairAsync"/> if either user fails to load,
     /// so callers should check <see cref="Result{T}.Success"/> before using the data.
@@ -96,7 +96,7 @@ namespace MentoringApp.Service
             return deleted ? Result.Ok() : Result.Failure("Pair not found or could not be deleted.");
         }
 
-        private async Task<Pair?> MapDtoToPairAsync(PairDto dto)
+        private async Task<Pair?> MapDtoToPairAsync(PairDao dto)
         {
             var mentorResult = await _userService.GetUserByIdAsync(dto.MentorId);
             var menteeResult = await _userService.GetUserByIdAsync(dto.MenteeId);

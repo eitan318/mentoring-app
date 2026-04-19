@@ -1,5 +1,5 @@
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
-using MentoringApp.Data.DTO;
+using MentoringApp.Data.Dao.User;
 using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Data.Acess.SQLite
@@ -10,13 +10,13 @@ namespace MentoringApp.Data.Acess.SQLite
 
         public SqlSchoolClassRepo(ISQLiteConnectionService db) => _db = db;
 
-        public async Task<IEnumerable<SchoolClassDto>> GetAllAsync()
+        public async Task<IEnumerable<SchoolClassDao>> GetAllAsync()
         {
             const string sql = "SELECT Id, GradeId, ClassNum FROM SchoolClasses ORDER BY GradeId, ClassNum";
-            return await _db.QueryAsync<SchoolClassDto>(sql);
+            return await _db.QueryAsync<SchoolClassDao>(sql);
         }
 
-        public async Task<IEnumerable<SchoolClassDto>> GetBySupervisorAsync(int supervisorId)
+        public async Task<IEnumerable<SchoolClassDao>> GetBySupervisorAsync(int supervisorId)
         {
             const string sql = @"
                 SELECT sc.Id, sc.GradeId, sc.ClassNum
@@ -24,7 +24,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 INNER JOIN SupervisorClasses svc ON svc.SchoolClassId = sc.Id
                 WHERE svc.SupervisorId = @supervisorId
                 ORDER BY sc.GradeId, sc.ClassNum";
-            return await _db.QueryAsync<SchoolClassDto>(sql, new { supervisorId });
+            return await _db.QueryAsync<SchoolClassDao>(sql, new { supervisorId });
         }
 
         public async Task<bool> AddAsync(int gradeId, int classNum)

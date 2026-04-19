@@ -89,8 +89,8 @@ namespace MentoringApp.Tests.Service
         {
             var dtos = new[]
             {
-                new ReviewDto { Id = 1, Content = "Session 1", Date = "2024-03-01T10:00:00", PairId = 5, AuthorUserId = 2, AmountOfHours = 1.0 },
-                new ReviewDto { Id = 2, Content = "Session 2", Date = "2024-03-08T10:00:00", PairId = 5, AuthorUserId = 2, AmountOfHours = 2.0 }
+                new ReviewDao { Id = 1, Content = "Session 1", Date = "2024-03-01T10:00:00", PairId = 5, AuthorUserId = 2, AmountOfHours = 1.0 },
+                new ReviewDao { Id = 2, Content = "Session 2", Date = "2024-03-08T10:00:00", PairId = 5, AuthorUserId = 2, AmountOfHours = 2.0 }
             };
 
             var reviewRepo = new Mock<IReviewRepo>();
@@ -109,7 +109,7 @@ namespace MentoringApp.Tests.Service
         public async Task GetReviewsByPair_ReturnsEmpty_WhenNoneExist()
         {
             var reviewRepo = new Mock<IReviewRepo>();
-            reviewRepo.Setup(r => r.GetByPairAsync(99)).ReturnsAsync(Array.Empty<ReviewDto>());
+            reviewRepo.Setup(r => r.GetByPairAsync(99)).ReturnsAsync(Array.Empty<ReviewDao>());
 
             var sut = new ReviewService(reviewRepo.Object);
 
@@ -126,7 +126,7 @@ namespace MentoringApp.Tests.Service
         {
             var dtos = new[]
             {
-                new ReviewDto { Id = 3, Content = "My review", Date = "2024-04-01T09:00:00", PairId = 1, AuthorUserId = 7, AmountOfHours = 0.5 }
+                new ReviewDao { Id = 3, Content = "My review", Date = "2024-04-01T09:00:00", PairId = 1, AuthorUserId = 7, AmountOfHours = 0.5 }
             };
 
             var reviewRepo = new Mock<IReviewRepo>();

@@ -7,23 +7,11 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace MentoringApp.Data.DTO
+namespace MentoringApp.Data.Dao
 {
 
-    public class GradeDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public int Num { get; set; }
-    }
 
-    public class SchoolClassDto
-    {
-        public int Id { get; set; }
-        public int GradeId { get; set; }
-        public int ClassNum { get; set; }
-    }
-    public class UserDto
+    public class UserDao
     {
         // Core Identity
         public int Id { get; set; }

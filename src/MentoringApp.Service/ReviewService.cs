@@ -38,7 +38,7 @@ namespace MentoringApp.Service
             return created ? Result.Ok() : Result.Failure("Failed to save review.");
         }
 
-        private static Review MapDtoToReview(ReviewDto dto) =>
+        private static Review MapDtoToReview(ReviewDao dto) =>
             new Review(dto.Content, DateTime.Parse(dto.Date), dto.AmountOfHours)
             {
                 Id = dto.Id

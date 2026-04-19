@@ -1,6 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
-    public class SubjectDto
+    public class SubjectDao
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

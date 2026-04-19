@@ -1,4 +1,5 @@
 using FluentAssertions;
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
@@ -20,15 +21,15 @@ namespace MentoringApp.Tests.Service
             Mock<IIssueCategoryRepo> categoryRepo)
         {
             var userRepo = new Mock<IUserRepo>();
-            userRepo.Setup(r => r.GetAllUserDtosAsync()).ReturnsAsync(Array.Empty<UserDto>());
+            userRepo.Setup(r => r.GetAllUserDtosAsync()).ReturnsAsync(Array.Empty<UserDao>());
 
             var gradeRepo = new Mock<IGradeRepo>();
-            gradeRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((GradeDto?)null);
-            gradeRepo.Setup(r => r.GetAllGradesAsync()).ReturnsAsync(Array.Empty<GradeDto>());
+            gradeRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((GradeDao?)null);
+            gradeRepo.Setup(r => r.GetAllGradesAsync()).ReturnsAsync(Array.Empty<GradeDao>());
 
             var pairRepo = new Mock<IPairRepo>();
-            pairRepo.Setup(r => r.GetByMentorIdAsync(It.IsAny<int>())).ReturnsAsync((PairDto?)null);
-            pairRepo.Setup(r => r.GetByMenteeIdAsync(It.IsAny<int>())).ReturnsAsync((PairDto?)null);
+            pairRepo.Setup(r => r.GetByMentorIdAsync(It.IsAny<int>())).ReturnsAsync((PairDao?)null);
+            pairRepo.Setup(r => r.GetByMenteeIdAsync(It.IsAny<int>())).ReturnsAsync((PairDao?)null);
 
             var userService = new UserService(
                 userRepo.Object, gradeRepo.Object,
@@ -152,7 +153,7 @@ namespace MentoringApp.Tests.Service
             var issueRepo = new Mock<IIssueRepo>();
             issueRepo.Setup(r => r.ForwardAsync(issueId, supervisorId)).ReturnsAsync(true);
             issueRepo.Setup(r => r.GetByIdAsync(issueId))
-                     .ReturnsAsync(new IssueDto { Id = issueId, Description = "Test", CategoryId = 1, ReportedByUserId = 3 });
+                     .ReturnsAsync(new IssueDao { Id = issueId, Description = "Test", CategoryId = 1, ReportedByUserId = 3 });
 
             var categoryRepo = new Mock<IIssueCategoryRepo>();
             categoryRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(MakeCategoryDto());
@@ -171,7 +172,7 @@ namespace MentoringApp.Tests.Service
         public async Task GetIssuesByUser_ReturnsEmpty_WhenNoIssuesExist()
         {
             var issueRepo = new Mock<IIssueRepo>();
-            issueRepo.Setup(r => r.GetByReporterAsync(7)).ReturnsAsync(Array.Empty<IssueDto>());
+            issueRepo.Setup(r => r.GetByReporterAsync(7)).ReturnsAsync(Array.Empty<IssueDao>());
 
             var categoryRepo = new Mock<IIssueCategoryRepo>();
             categoryRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(Array.Empty<IssueCategoryDto>());

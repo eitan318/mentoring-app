@@ -1,6 +1,6 @@
 using System;
 using System.IO.IsolatedStorage;
-using MentoringApp.Data.DTO;
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 using MentoringApp.Model.User;
@@ -81,11 +81,11 @@ namespace MentoringApp.Service
         }
 
         /// <summary>
-        /// Converts a flat <see cref="UserDto"/> into the appropriate domain model subtype
+        /// Converts a flat <see cref="UserDao"/> into the appropriate domain model subtype
         /// (<see cref="AdminModel"/>, <see cref="SupervisorModel"/>, or <see cref="StudentModel"/>),
         /// eagerly loading related data (grade, issues, classes) via additional async queries.
         /// </summary>
-        private async Task<UserModel> MapDtoToUserAsync(UserDto dto)
+        private async Task<UserModel> MapDtoToUserAsync(UserDao dto)
         {
             UserModel user;
 
@@ -100,7 +100,7 @@ namespace MentoringApp.Service
                     if (dto.GradeId.HasValue && dto.GradeId.Value > 0)
                     {
                         var supGradeDto = await _gradeRepo.GetByIdAsync(dto.GradeId.Value) 
-                                        ?? new GradeDto { Id = dto.GradeId.Value, Name = "Unknown", Num = 0 };
+                                        ?? new GradeDao { Id = dto.GradeId.Value, Name = "Unknown", Num = 0 };
                         supervisor.Grade = new Grade { Id = supGradeDto.Id, Name = supGradeDto.Name, Num = supGradeDto.Num };
                     }
                     supervisor.ClassNum = dto.ClassNum ?? 0;
@@ -131,7 +131,7 @@ namespace MentoringApp.Service
 
                 case UserRoleType.Student:
                     var gradeDto = await _gradeRepo.GetByIdAsync(dto.GradeId ?? 0)
-                                ?? new GradeDto { Id = 0, Name = "Unknown", Num = 0 };
+                                ?? new GradeDao { Id = 0, Name = "Unknown", Num = 0 };
 
                     var student = new StudentModel(dto.Id, dto.Email, dto.UserName, dto.NationalId, new Grade { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num });
                     student.ClassNum = dto.ClassNum ?? 0;

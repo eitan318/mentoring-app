@@ -110,14 +110,14 @@ namespace MentoringApp.Service
                 return Result<IEnumerable<IssueModel>>.Failure($"Error retrieving supervised issues: {ex.Message}");
             }
         }
-        private async Task<IEnumerable<IssueModel>> MapDtosToIssuesAsync(IEnumerable<IssueDto> dtos)
+        private async Task<IEnumerable<IssueModel>> MapDtosToIssuesAsync(IEnumerable<IssueDao> dtos)
         {
             var categoryDtos = await _issueCategoryRepo.GetAllAsync();
             var categories = IssueCategoryMapper.ToModels(categoryDtos).ToList();
             return IssueMapper.ToModels(dtos, categories).ToList(); // materialize — prevents lazy eval on UI thread
         }
 
-        private async Task<IssueModel?> MapDtoToIssueAsync(IssueDto dto)
+        private async Task<IssueModel?> MapDtoToIssueAsync(IssueDao dto)
         {
             var categoryDto = await _issueCategoryRepo.GetByIdAsync(dto.CategoryId);
             var category = IssueCategoryMapper.ToModel(categoryDto);

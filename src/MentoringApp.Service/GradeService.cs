@@ -1,4 +1,4 @@
-﻿using MentoringApp.Data.DTO;
+﻿using MentoringApp.Data.Dao.User;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ namespace MentoringApp.Service
         {
             try
             {
-                IEnumerable<GradeDto> dtos = await _gradeRepo.GetAllGradesAsync();
+                IEnumerable<GradeDao> dtos = await _gradeRepo.GetAllGradesAsync();
 
                 if (dtos == null || !dtos.Any())
                 {

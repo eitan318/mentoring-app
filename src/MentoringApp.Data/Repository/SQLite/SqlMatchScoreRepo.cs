@@ -10,7 +10,7 @@ namespace MentoringApp.Data.Acess.SQLite
 
         public SqlMatchScoreRepo(ISQLiteConnectionService db) => _db = db;
 
-        public async Task BulkInsertAsync(IEnumerable<MatchScoreDto> scores)
+        public async Task BulkInsertAsync(IEnumerable<MatchScoreDao> scores)
         {
             foreach (var score in scores)
             {
@@ -20,7 +20,7 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
-        public async Task<IEnumerable<MatchScoreDto>> GetTopForMenteeAsync(int menteeId, int limit = 3)
+        public async Task<IEnumerable<MatchScoreDao>> GetTopForMenteeAsync(int menteeId, int limit = 3)
         {
             var rows = await _db.QueryAsync<ScoreRow>(
                 "SELECT Id, MenteeId, MentorId, ScorePercent FROM MatchScores WHERE MenteeId = @MenteeId ORDER BY ScorePercent DESC LIMIT @Limit",
@@ -28,7 +28,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return rows.Select(MapToDto).ToList();
         }
 
-        public async Task<IEnumerable<MatchScoreDto>> GetAllAsync()
+        public async Task<IEnumerable<MatchScoreDao>> GetAllAsync()
         {
             var rows = await _db.QueryAsync<ScoreRow>("SELECT Id, MenteeId, MentorId, ScorePercent FROM MatchScores ORDER BY ScorePercent DESC");
             return rows.Select(MapToDto).ToList();
@@ -39,7 +39,7 @@ namespace MentoringApp.Data.Acess.SQLite
             await _db.ExecuteAsync("DELETE FROM MatchScores", null);
         }
 
-        private static MatchScoreDto MapToDto(ScoreRow row) => new MatchScoreDto
+        private static MatchScoreDao MapToDto(ScoreRow row) => new MatchScoreDao
         {
             Id = row.Id,
             MenteeId = row.MenteeId,

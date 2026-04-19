@@ -21,6 +21,34 @@ namespace MentoringApp
         private readonly IServiceProvider _serviceProvider;
         private readonly IConfiguration _configuration;
 
+        private static string ResolveConnectionStringPath(string connectionString)
+        {
+            const string prefix = "Data Source=";
+
+            string path = connectionString;
+            if (connectionString.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                path = connectionString.Substring(prefix.Length).Trim();
+            }
+
+            // Remove optional surrounding quotes
+            if ((path.StartsWith("\"") && path.EndsWith("\"")) || (path.StartsWith("'") && path.EndsWith("'")))
+                path = path.Substring(1, path.Length - 2);
+
+            string resolved;
+            if (System.IO.Path.IsPathRooted(path))
+            {
+                resolved = System.IO.Path.GetFullPath(path);
+            }
+            else
+            {
+                // Resolve relative to the application base directory
+                resolved = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, path));
+            }
+
+            return $"Data Source={resolved}";
+        }
+
         public App()
         {
             _configuration = new ConfigurationBuilder()
@@ -35,9 +63,12 @@ namespace MentoringApp
                 throw new Exception("No connection string provided in config");
             }
 
+            // Resolve any relative database path in the connection string to an absolute path
+            // so SQLite can open the file regardless of the working directory.
+            string resolvedConnectionString = ResolveConnectionStringPath(connectionString);
 
             services.AddViewModels();
-            services.AddDataRepositories(connectionString);
+            services.AddDataRepositories(resolvedConnectionString);
             services.AddServices(_configuration);
             services.AddView();
 
@@ -48,7 +79,7 @@ namespace MentoringApp
         {
             // Set to true during development to wipe and re-seed the database on every launch.
             // Must be false in production — data loss will occur if left enabled.
-            bool recreateInitialDb = false;
+            bool recreateInitialDb = true;
             base.OnStartup(e);
 
             if (recreateInitialDb)
