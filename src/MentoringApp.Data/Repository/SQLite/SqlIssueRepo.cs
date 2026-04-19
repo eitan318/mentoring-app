@@ -13,14 +13,14 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public async Task<IEnumerable<IssueDto>> GetAllAsync()
+        public async Task<IEnumerable<IssueDao>> GetAllAsync()
         {
             var rows = await _db.QueryAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues");
             return rows.Select(MapToDto).ToList();
         }
 
-        public async Task<IssueDto?> GetByIdAsync(int id)
+        public async Task<IssueDao?> GetByIdAsync(int id)
         {
             var row = await _db.QuerySingleAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE Id = @Id",
@@ -28,7 +28,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return row == null ? null : MapToDto(row);
         }
 
-        public async Task<IEnumerable<IssueDto>> GetByReporterAsync(int userId)
+        public async Task<IEnumerable<IssueDao>> GetByReporterAsync(int userId)
         {
             var rows = await _db.QueryAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE ReportedByUserId = @UserId",
@@ -36,7 +36,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return rows.Select(MapToDto).ToList();
         }
 
-        public async Task<IEnumerable<IssueDto>> GetBySupervisorAsync(int supervisorId)
+        public async Task<IEnumerable<IssueDao>> GetBySupervisorAsync(int supervisorId)
         {
             var studentRows = await _db.QueryAsync<StudentIdRow>(
                 @"SELECT MentorId AS UserId FROM Pairs WHERE SupervisorId = @SupervisorId
@@ -46,7 +46,7 @@ namespace MentoringApp.Data.Acess.SQLite
 
             var studentIds = studentRows.Select(r => r.UserId).Distinct().ToList();
             if (!studentIds.Any())
-                return Enumerable.Empty<IssueDto>();
+                return Enumerable.Empty<IssueDao>();
 
             var allIssues = await _db.QueryAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues");
@@ -111,14 +111,14 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
-        public async Task<IEnumerable<IssueDto>> GetForwardedAsync()
+        public async Task<IEnumerable<IssueDao>> GetForwardedAsync()
         {
             var rows = await _db.QueryAsync<IssueRow>(
                 "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE ForwardedBySupervisorId IS NOT NULL");
             return rows.Select(MapToDto).ToList();
         }
 
-        private static IssueDto MapToDto(IssueRow row) => new IssueDto
+        private static IssueDao MapToDto(IssueRow row) => new IssueDao
         {
             Id = row.Id,
             Description = row.Description,

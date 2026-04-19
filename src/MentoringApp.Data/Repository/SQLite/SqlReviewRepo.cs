@@ -13,7 +13,7 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public async Task<IEnumerable<ReviewDto>> GetByPairAsync(int pairId)
+        public async Task<IEnumerable<ReviewDao>> GetByPairAsync(int pairId)
         {
             var rows = await _db.QueryAsync<ReviewRow>(
                 "SELECT Id, PairId, AuthorUserId, Content, Date, AmountOfHours FROM Reviews WHERE PairId = @PairId",
@@ -21,7 +21,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return rows.Select(MapToDto).ToList();
         }
 
-        public async Task<IEnumerable<ReviewDto>> GetByAuthorAsync(int authorUserId)
+        public async Task<IEnumerable<ReviewDao>> GetByAuthorAsync(int authorUserId)
         {
             var rows = await _db.QueryAsync<ReviewRow>(
                 "SELECT Id, PairId, AuthorUserId, Content, Date, AmountOfHours FROM Reviews WHERE AuthorUserId = @AuthorUserId",
@@ -52,7 +52,7 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
-        private static ReviewDto MapToDto(ReviewRow row) => new ReviewDto
+        private static ReviewDao MapToDto(ReviewRow row) => new ReviewDao
         {
             Id = row.Id,
             PairId = row.PairId,

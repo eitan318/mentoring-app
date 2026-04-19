@@ -1,6 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
-    public class MatchScoreDto
+    public class MatchScoreDao
     {
         public int Id { get; set; }
         public int MenteeId { get; set; }

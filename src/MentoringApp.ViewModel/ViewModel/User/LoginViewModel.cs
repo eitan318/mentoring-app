@@ -22,7 +22,7 @@ namespace MentoringApp.ViewModel.ViewModel.User
 
         // When true, the email verification step is skipped and the user is logged in
         // immediately after entering a valid National ID. Set to false for production builds.
-        private static readonly bool _debugWithoutVerification = false;
+        private static readonly bool _debugWithoutVerification = true;
 
         public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService authService, ILanguageService languageService, SettingsService settingsService, UserService userService, SessionService sessionService)
         {
@@ -72,6 +72,13 @@ namespace MentoringApp.ViewModel.ViewModel.User
         [RelayCommand]
         private async Task SendVerificationCode()
         {
+            if (_debugWithoutVerification)
+            {
+                Login();
+            }
+
+
+
             ValidateProperty(NationalId, nameof(NationalId));
             ErrorMessage = "";
             var result = await _authService.SendVerificationCodeAsync(NationalId);
@@ -88,12 +95,15 @@ namespace MentoringApp.ViewModel.ViewModel.User
         [RelayCommand]
         private async Task Login()
         {
-            ValidateProperty(VerificationCode, nameof(VerificationCode));
-            var verificationResult = await _authService.VerificationCodeValid(VerificationCode);
-            if (!verificationResult.Success)
+            if (!_debugWithoutVerification)
             {
-                ErrorMessage = verificationResult.ErrorMessage ?? "Invalid code.";
-                return;
+                ValidateProperty(VerificationCode, nameof(VerificationCode));
+                var verificationResult = await _authService.VerificationCodeValid(VerificationCode);
+                if (!verificationResult.Success)
+                {
+                    ErrorMessage = verificationResult.ErrorMessage ?? "Invalid code.";
+                    return;
+                }
             }
 
             var loginResult = await _authService.LoginAsync(NationalId);

@@ -5,6 +5,7 @@ using Microsoft.Data.Sqlite;
 using MentoringApp.Data.DTO;
 using System.Text.RegularExpressions;
 using MentoringApp.Model.User;
+using MentoringApp.Data.Dao;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -14,7 +15,7 @@ namespace MentoringApp.Data.Acess.SQLite
     /// Users are stored in a vertical partition: a shared <c>Users</c> table holds identity data,
     /// while <c>UserStudents</c>, <c>UserMentors</c>, <c>UserMentees</c>, <c>UserSupervisors</c>,
     /// and <c>UserAdmins</c> hold role-specific columns.
-    /// <see cref="MapToFullDtoAsync"/> assembles a complete <see cref="UserDto"/> from these tables.
+    /// <see cref="MapToFullDtoAsync"/> assembles a complete <see cref="UserDao"/> from these tables.
     /// </summary>
     internal class SqlUserRepo : IUserRepo
     {
@@ -25,7 +26,7 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public async Task<IEnumerable<SupervisorStatsDto>> GetSupervisorStatisticsAsync()
+        public async Task<IEnumerable<SupervisorStatsDao>> GetSupervisorStatisticsAsync()
         {
             const string sql = @"
                 SELECT
@@ -45,7 +46,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 FROM Users u
                 INNER JOIN UserSupervisors us ON u.Id = us.UserId";
 
-            return await _db.QueryAsync<SupervisorStatsDto>(sql);
+            return await _db.QueryAsync<SupervisorStatsDao>(sql);
         }
 
 
@@ -182,7 +183,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return role;
         }
 
-        public async Task<UserDto?> GetUserDtoByNationalIdAsync(string nationalId)
+        public async Task<UserDao?> GetUserDtoByNationalIdAsync(string nationalId)
         {
             var userRow = await _db.QuerySingleAsync<UserRow>(
                 "SELECT * FROM Users WHERE NationalId = @NationalId",
@@ -193,7 +194,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return await MapToFullDtoAsync(userRow);
         }
 
-        public async Task<UserDto?> GetUserDtoByIdAsync(int userId)
+        public async Task<UserDao?> GetUserDtoByIdAsync(int userId)
         {
             var userRow = await _db.QuerySingleAsync<UserRow>(
                 "SELECT * FROM Users WHERE Id = @Id",
@@ -204,7 +205,7 @@ namespace MentoringApp.Data.Acess.SQLite
             return await MapToFullDtoAsync(userRow);
         }
 
-        private async Task<UserDto> MapToFullDtoAsync(UserRow userRow)
+        private async Task<UserDao> MapToFullDtoAsync(UserRow userRow)
         {
             var userId = userRow.Id;
 
@@ -216,7 +217,7 @@ namespace MentoringApp.Data.Acess.SQLite
 
             UserRoleType roleType = await DetermineRoleAsync(userId);
 
-            return new UserDto
+            return new UserDao
             {
                 Id = userRow.Id,
                 UserName = userRow.UserName,
@@ -241,10 +242,10 @@ namespace MentoringApp.Data.Acess.SQLite
 
         /// <summary>
         /// Bulk-loads all role tables up front into dictionaries to avoid N+1 queries,
-        /// then projects each user row into a <see cref="UserDto"/> in parallel.
+        /// then projects each user row into a <see cref="UserDao"/> in parallel.
         /// Role determination still requires two async checks per user (IsAdmin / IsSupervisor).
         /// </summary>
-        public async Task<IEnumerable<UserDto>> GetAllUserDtosAsync()
+        public async Task<IEnumerable<UserDao>> GetAllUserDtosAsync()
         {
             var users = await _db.QueryAsync<UserRow>("SELECT * FROM Users");
 
@@ -261,7 +262,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 students.TryGetValue(u.Id, out var studentRow);
                 mentors.TryGetValue(u.Id, out var mentorRow);
                 mentees.TryGetValue(u.Id, out var menteeRow);
-                return new UserDto
+                return new UserDao
                 {
                     Id = u.Id,
                     UserName = u.UserName,

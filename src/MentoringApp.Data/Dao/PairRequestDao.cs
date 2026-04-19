@@ -1,6 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
-    public class PairRequestDto
+    public class PairRequestDao
     {
         public int Id { get; set; }
         public int MenteeId { get; set; }

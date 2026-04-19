@@ -1,6 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
-    public class ReviewDto
+    public class ReviewDao
     {
         public int Id { get; set; }
         public int PairId { get; set; }

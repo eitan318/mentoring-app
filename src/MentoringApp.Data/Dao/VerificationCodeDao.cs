@@ -1,6 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
-    public class VerificationCodeDto
+    public class VerificationCodeDao
     {
         public int UserId { get; set; }
         public string Code { get; set; } = string.Empty;

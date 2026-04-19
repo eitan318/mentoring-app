@@ -20,7 +20,7 @@ namespace MentoringApp.Service
             return Result<IEnumerable<Subject>>.Ok(subjects);
         }
 
-        private static Subject MapDtoToSubject(SubjectDto dto) =>
+        private static Subject MapDtoToSubject(SubjectDao dto) =>
             new Subject { Id = dto.Id, Name = dto.Name };
     }
 }

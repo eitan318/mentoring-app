@@ -1,4 +1,4 @@
-using MentoringApp.Data.DTO;
+using MentoringApp.Data.Dao.User;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 
@@ -65,7 +65,7 @@ namespace MentoringApp.Service
             return Result.Ok();
         }
 
-        private SchoolClass? Map(SchoolClassDto dto, Dictionary<int, GradeDto> grades)
+        private SchoolClass? Map(SchoolClassDao dto, Dictionary<int, GradeDao> grades)
         {
             if (!grades.TryGetValue(dto.GradeId, out var g)) return null;
             return new SchoolClass

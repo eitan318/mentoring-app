@@ -11,7 +11,7 @@ namespace MentoringApp.Service.Mapping
 { 
     public static class IssueMapper
     {
-        public static IssueModel ToModel(IssueDto dto, IssueCategoryModel category)
+        public static IssueModel ToModel(IssueDao dto, IssueCategoryModel category)
         {
             return new IssueModel(dto.Description, category, dto.IsResolved != 0, dto.ReportedByUserId)
             {
@@ -21,7 +21,7 @@ namespace MentoringApp.Service.Mapping
             };
         }
 
-        public static IEnumerable<IssueModel> ToModels(IEnumerable<IssueDto> dtos, IEnumerable<IssueCategoryModel> categories)
+        public static IEnumerable<IssueModel> ToModels(IEnumerable<IssueDao> dtos, IEnumerable<IssueCategoryModel> categories)
         {
             return dtos.Select(dto =>
             {

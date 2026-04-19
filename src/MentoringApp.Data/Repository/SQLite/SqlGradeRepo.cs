@@ -1,7 +1,7 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using MentoringApp.Model;
-using MentoringApp.Data.DTO;
+using MentoringApp.Data.Dao.User;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
@@ -13,16 +13,16 @@ namespace MentoringApp.Data.Acess.SQLite
         {
             _db = db;
         }
-        public async Task<GradeDto?> GetByIdAsync(int id)
+        public async Task<GradeDao?> GetByIdAsync(int id)
         {
-            return await _db.QuerySingleAsync<GradeDto>(
+            return await _db.QuerySingleAsync<GradeDao>(
                 "SELECT Id, Name, Num FROM Grades WHERE Id = @Id",
                 new { Id = id });
         }
 
-        public async Task<IEnumerable<GradeDto>> GetAllGradesAsync()
+        public async Task<IEnumerable<GradeDao>> GetAllGradesAsync()
         {
-            return await _db.QueryAsync<GradeDto>("SELECT Id, Name, Num FROM Grades");
+            return await _db.QueryAsync<GradeDao>("SELECT Id, Name, Num FROM Grades");
         }
 
         private class GradeRow

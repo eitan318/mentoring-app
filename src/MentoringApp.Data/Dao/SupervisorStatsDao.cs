@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Data.DTO
 {
-    public class SupervisorStatsDto
+    public class SupervisorStatsDao
     {
         public int Id { get; set; }
         public string UserName { get; set; }

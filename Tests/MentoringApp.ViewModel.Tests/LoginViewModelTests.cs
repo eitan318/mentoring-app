@@ -1,5 +1,5 @@
 using FluentAssertions;
-using MentoringApp.Data.DTO;
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model.User;
 using MentoringApp.Service;
@@ -26,9 +26,9 @@ namespace MentoringApp.ViewModel.Tests
         {
             var gradeRepo = new Mock<IGradeRepo>();
             gradeRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-                     .ReturnsAsync((GradeDto?)null);
+                     .ReturnsAsync((GradeDao?)null);
             gradeRepo.Setup(r => r.GetAllGradesAsync())
-                     .ReturnsAsync(Array.Empty<GradeDto>());
+                     .ReturnsAsync(Array.Empty<GradeDao>());
 
             return new UserService(
                 userRepo.Object,
@@ -51,8 +51,8 @@ namespace MentoringApp.ViewModel.Tests
                 new EmailService("localhost", 25, "test@test.com", "pwd"));
         }
 
-        private static UserDto MakeAdminDto(int id = 1, string nationalId = "123456789") =>
-            new UserDto
+        private static UserDao MakeAdminDto(int id = 1, string nationalId = "123456789") =>
+            new UserDao
             {
                 Id = id,
                 UserName = "Test User",
@@ -118,7 +118,7 @@ namespace MentoringApp.ViewModel.Tests
         {
             var userRepo = new Mock<IUserRepo>();
             userRepo.Setup(r => r.GetUserDtoByNationalIdAsync(It.IsAny<string>()))
-                    .ReturnsAsync((UserDto?)null);
+                    .ReturnsAsync((UserDao?)null);
 
             var vm = BuildViewModel(userRepo, new Mock<IVerificationCodeRepo>(),
                 new Mock<INavigationService>(), new Mock<ILanguageService>());
@@ -136,7 +136,7 @@ namespace MentoringApp.ViewModel.Tests
             // Any failure path (user not found, repo error, etc.) must NOT flip WasCodeSent.
             var userRepo = new Mock<IUserRepo>();
             userRepo.Setup(r => r.GetUserDtoByNationalIdAsync(It.IsAny<string>()))
-                    .ReturnsAsync((UserDto?)null);
+                    .ReturnsAsync((UserDao?)null);
 
             var vm = BuildViewModel(userRepo, new Mock<IVerificationCodeRepo>(),
                 new Mock<INavigationService>(), new Mock<ILanguageService>());

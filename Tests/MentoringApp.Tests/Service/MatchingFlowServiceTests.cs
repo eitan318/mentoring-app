@@ -1,4 +1,5 @@
 using FluentAssertions;
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
@@ -36,17 +37,17 @@ namespace MentoringApp.Tests.Service
         {
             // Default loose stubs so callers don't need to set everything up.
             _gradeRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-                      .ReturnsAsync(new GradeDto { Id = 1, Name = "Grade 10", Num = 10 });
+                      .ReturnsAsync(new GradeDao { Id = 1, Name = "Grade 10", Num = 10 });
             _gradeRepo.Setup(r => r.GetAllGradesAsync())
-                      .ReturnsAsync(new List<GradeDto>());
+                      .ReturnsAsync(new List<GradeDao>());
             _issueRepo.Setup(r => r.GetAllAsync())
-                      .ReturnsAsync(new List<IssueDto>());
+                      .ReturnsAsync(new List<IssueDao>());
             _issueCategoryRepo.Setup(r => r.GetAllAsync())
                               .ReturnsAsync(new List<IssueCategoryDto>());
             _schoolClassRepo.Setup(r => r.GetBySupervisorAsync(It.IsAny<int>()))
-                            .ReturnsAsync(new List<SchoolClassDto>());
+                            .ReturnsAsync(new List<SchoolClassDao>());
             _subjectRepo.Setup(r => r.GetAllSubjectsAsync())
-                        .ReturnsAsync(new List<SubjectDto>());
+                        .ReturnsAsync(new List<SubjectDao>());
         }
 
         // ── Factory helpers ──────────────────────────────────────────────────
@@ -83,10 +84,10 @@ namespace MentoringApp.Tests.Service
         }
 
         /// <summary>
-        /// Creates a minimal <see cref="UserDto"/> representing a mentor student.
+        /// Creates a minimal <see cref="UserDao"/> representing a mentor student.
         /// </summary>
-        private static UserDto MakeMentorDto(int id, int maxMentees = 2, int mentorSubjectId = 1) =>
-            new UserDto
+        private static UserDao MakeMentorDto(int id, int maxMentees = 2, int mentorSubjectId = 1) =>
+            new UserDao
             {
                 Id = id,
                 UserName = $"Mentor{id}",
@@ -102,10 +103,10 @@ namespace MentoringApp.Tests.Service
             };
 
         /// <summary>
-        /// Creates a minimal <see cref="UserDto"/> representing a mentee student.
+        /// Creates a minimal <see cref="UserDao"/> representing a mentee student.
         /// </summary>
-        private static UserDto MakeMenteeDto(int id, int menteeSubjectId = 1) =>
-            new UserDto
+        private static UserDao MakeMenteeDto(int id, int menteeSubjectId = 1) =>
+            new UserDao
             {
                 Id = id,
                 UserName = $"Mentee{id}",
@@ -148,9 +149,9 @@ namespace MentoringApp.Tests.Service
                      .ReturnsAsync(new List<int>());
             // Mentor already has 1 mentee; MaxMentees = 1
             _pairRepo.Setup(r => r.GetAllAsync())
-                     .ReturnsAsync(new List<PairDto>
+                     .ReturnsAsync(new List<PairDao>
                      {
-                         new PairDto { Id = 1, MentorId = mentorId, MenteeId = 99, SupervisorId = 1 }
+                         new PairDao { Id = 1, MentorId = mentorId, MenteeId = 99, SupervisorId = 1 }
                      });
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId))
                      .ReturnsAsync(MakeMentorDto(mentorId, maxMentees: 1));
@@ -170,7 +171,7 @@ namespace MentoringApp.Tests.Service
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync())
                      .ReturnsAsync(new List<int>());
             _pairRepo.Setup(r => r.GetAllAsync())
-                     .ReturnsAsync(new List<PairDto>());
+                     .ReturnsAsync(new List<PairDao>());
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId))
                      .ReturnsAsync(MakeMentorDto(mentorId, maxMentees: 3));
             _pairRequestRepo.Setup(r => r.ExistsAsync(menteeId, mentorId))
@@ -191,7 +192,7 @@ namespace MentoringApp.Tests.Service
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync())
                      .ReturnsAsync(new List<int>());
             _pairRepo.Setup(r => r.GetAllAsync())
-                     .ReturnsAsync(new List<PairDto>());
+                     .ReturnsAsync(new List<PairDao>());
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId))
                      .ReturnsAsync(MakeMentorDto(mentorId, maxMentees: 3));
             _pairRequestRepo.Setup(r => r.ExistsAsync(menteeId, mentorId))
@@ -214,7 +215,7 @@ namespace MentoringApp.Tests.Service
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync())
                      .ReturnsAsync(new List<int>());
             _pairRepo.Setup(r => r.GetAllAsync())
-                     .ReturnsAsync(new List<PairDto>());
+                     .ReturnsAsync(new List<PairDao>());
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId))
                      .ReturnsAsync(MakeMentorDto(mentorId, maxMentees: 3));
             _pairRequestRepo.Setup(r => r.ExistsAsync(menteeId, mentorId))
@@ -268,11 +269,11 @@ namespace MentoringApp.Tests.Service
         {
             // Return no users at all → GetAvailableMenteesAsync returns empty
             _userRepo.Setup(r => r.GetAllUserDtosAsync())
-                     .ReturnsAsync(new List<UserDto>());
+                     .ReturnsAsync(new List<UserDao>());
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync())
                      .ReturnsAsync(new List<int>());
             _pairRepo.Setup(r => r.GetAllAsync())
-                     .ReturnsAsync(new List<PairDto>());
+                     .ReturnsAsync(new List<PairDao>());
 
             var result = await BuildService().RunAutoMatchAsync();
 
@@ -286,11 +287,11 @@ namespace MentoringApp.Tests.Service
             // Only mentees, no mentors
             var menteeDto = MakeMenteeDto(10);
             _userRepo.Setup(r => r.GetAllUserDtosAsync())
-                     .ReturnsAsync(new List<UserDto> { menteeDto });
+                     .ReturnsAsync(new List<UserDao> { menteeDto });
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync())
                      .ReturnsAsync(new List<int>());
             _pairRepo.Setup(r => r.GetAllAsync())
-                     .ReturnsAsync(new List<PairDto>());
+                     .ReturnsAsync(new List<PairDao>());
 
             var result = await BuildService().RunAutoMatchAsync();
 
@@ -308,7 +309,7 @@ namespace MentoringApp.Tests.Service
             var menteeDto = MakeMenteeDto(menteeId, menteeSubjectId: 1);
             var mentorDto = MakeMentorDto(mentorId, maxMentees: 2, mentorSubjectId: 1);
             // Supervisor needed for SupervisorAssignmentService fallback
-            var supervisorDto = new UserDto
+            var supervisorDto = new UserDao
             {
                 Id = supervisorId,
                 UserName = "Supervisor1",
@@ -321,7 +322,7 @@ namespace MentoringApp.Tests.Service
             };
 
             _userRepo.Setup(r => r.GetAllUserDtosAsync())
-                     .ReturnsAsync(new List<UserDto> { menteeDto, mentorDto, supervisorDto });
+                     .ReturnsAsync(new List<UserDao> { menteeDto, mentorDto, supervisorDto });
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(menteeId)).ReturnsAsync(menteeDto);
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId)).ReturnsAsync(mentorDto);
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(supervisorDto);
@@ -329,14 +330,14 @@ namespace MentoringApp.Tests.Service
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync())
                      .ReturnsAsync(new List<int>());
             _pairRepo.Setup(r => r.GetAllAsync())
-                     .ReturnsAsync(new List<PairDto>());
+                     .ReturnsAsync(new List<PairDao>());
             _pairRepo.Setup(r => r.GetBySupervisorIdAsync(supervisorId))
-                     .ReturnsAsync(new List<PairDto>());
+                     .ReturnsAsync(new List<PairDao>());
 
             _matchScoreRepo.Setup(r => r.GetAllAsync())
-                           .ReturnsAsync(new List<MatchScoreDto>
+                           .ReturnsAsync(new List<MatchScoreDao>
                            {
-                               new MatchScoreDto { Id = 1, MenteeId = menteeId, MentorId = mentorId, ScorePercent = 80 }
+                               new MatchScoreDao { Id = 1, MenteeId = menteeId, MentorId = mentorId, ScorePercent = 80 }
                            });
 
             _pairRepo.Setup(r => r.CreateWithTierAsync(It.IsAny<int>(), mentorId, menteeId, (int)MatchTier.AutoMatch, false))
@@ -361,7 +362,7 @@ namespace MentoringApp.Tests.Service
             var menteeDto  = MakeMenteeDto(menteeId);
             var mentorDto1 = MakeMentorDto(mentorId1, maxMentees: 2);
             var mentorDto2 = MakeMentorDto(mentorId2, maxMentees: 2);
-            var supervisorDto = new UserDto
+            var supervisorDto = new UserDao
             {
                 Id = supervisorId, UserName = "Supervisor1",
                 Email = "sup@test.com", NationalId = "S0001",
@@ -370,22 +371,22 @@ namespace MentoringApp.Tests.Service
             };
 
             _userRepo.Setup(r => r.GetAllUserDtosAsync())
-                     .ReturnsAsync(new List<UserDto> { menteeDto, mentorDto1, mentorDto2, supervisorDto });
+                     .ReturnsAsync(new List<UserDao> { menteeDto, mentorDto1, mentorDto2, supervisorDto });
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(menteeId)).ReturnsAsync(menteeDto);
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId1)).ReturnsAsync(mentorDto1);
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId2)).ReturnsAsync(mentorDto2);
             _userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(supervisorDto);
 
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync()).ReturnsAsync(new List<int>());
-            _pairRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<PairDto>());
-            _pairRepo.Setup(r => r.GetBySupervisorIdAsync(supervisorId)).ReturnsAsync(new List<PairDto>());
+            _pairRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<PairDao>());
+            _pairRepo.Setup(r => r.GetBySupervisorIdAsync(supervisorId)).ReturnsAsync(new List<PairDao>());
 
             // Higher score first (sorted descending)
             _matchScoreRepo.Setup(r => r.GetAllAsync())
-                           .ReturnsAsync(new List<MatchScoreDto>
+                           .ReturnsAsync(new List<MatchScoreDao>
                            {
-                               new MatchScoreDto { Id = 1, MenteeId = menteeId, MentorId = mentorId1, ScorePercent = 90 },
-                               new MatchScoreDto { Id = 2, MenteeId = menteeId, MentorId = mentorId2, ScorePercent = 60 }
+                               new MatchScoreDao { Id = 1, MenteeId = menteeId, MentorId = mentorId1, ScorePercent = 90 },
+                               new MatchScoreDao { Id = 2, MenteeId = menteeId, MentorId = mentorId2, ScorePercent = 60 }
                            });
 
             _pairRepo.Setup(r => r.CreateWithTierAsync(It.IsAny<int>(), mentorId1, menteeId, (int)MatchTier.AutoMatch, false))
@@ -409,9 +410,9 @@ namespace MentoringApp.Tests.Service
         {
             // No users available → both lists empty
             _userRepo.Setup(r => r.GetAllUserDtosAsync())
-                     .ReturnsAsync(new List<UserDto>());
+                     .ReturnsAsync(new List<UserDao>());
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync()).ReturnsAsync(new List<int>());
-            _pairRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<PairDto>());
+            _pairRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<PairDao>());
             _matchScoreRepo.Setup(r => r.ClearAllAsync()).Returns(Task.CompletedTask);
 
             var result = await BuildService().GenerateScoreMatrixAsync();
@@ -430,19 +431,19 @@ namespace MentoringApp.Tests.Service
             var mentorDto = MakeMentorDto(mentorId, maxMentees: 2, mentorSubjectId: 1);
 
             _userRepo.Setup(r => r.GetAllUserDtosAsync())
-                     .ReturnsAsync(new List<UserDto> { menteeDto, mentorDto });
+                     .ReturnsAsync(new List<UserDao> { menteeDto, mentorDto });
             _pairRepo.Setup(r => r.GetMatchedMenteeIdsAsync()).ReturnsAsync(new List<int>());
-            _pairRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<PairDto>());
+            _pairRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<PairDao>());
 
             _matchScoreRepo.Setup(r => r.ClearAllAsync()).Returns(Task.CompletedTask);
-            _matchScoreRepo.Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<MatchScoreDto>>()))
+            _matchScoreRepo.Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<MatchScoreDao>>()))
                            .Returns(Task.CompletedTask);
 
             var result = await BuildService().GenerateScoreMatrixAsync();
 
             result.Success.Should().BeTrue();
             _matchScoreRepo.Verify(r => r.ClearAllAsync(), Times.Once);
-            _matchScoreRepo.Verify(r => r.BulkInsertAsync(It.Is<IEnumerable<MatchScoreDto>>(
+            _matchScoreRepo.Verify(r => r.BulkInsertAsync(It.Is<IEnumerable<MatchScoreDao>>(
                 scores => scores.Any(s => s.MenteeId == menteeId && s.MentorId == mentorId))), Times.Once);
         }
     }

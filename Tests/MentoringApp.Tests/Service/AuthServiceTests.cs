@@ -1,4 +1,5 @@
 using FluentAssertions;
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
@@ -23,13 +24,13 @@ namespace MentoringApp.Tests.Service
         {
             var gradeRepo = new Mock<IGradeRepo>();
             gradeRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-                     .ReturnsAsync((GradeDto?)null);
+                     .ReturnsAsync((GradeDao?)null);
             gradeRepo.Setup(r => r.GetAllGradesAsync())
-                     .ReturnsAsync(Array.Empty<GradeDto>());
+                     .ReturnsAsync(Array.Empty<GradeDao>());
 
             var issueRepo = new Mock<IIssueRepo>();
             issueRepo.Setup(r => r.GetAllAsync())
-                     .ReturnsAsync(Array.Empty<IssueDto>());
+                     .ReturnsAsync(Array.Empty<IssueDao>());
 
             var issueCategoryRepo = new Mock<IIssueCategoryRepo>();
             issueCategoryRepo.Setup(r => r.GetAllAsync())
@@ -37,11 +38,11 @@ namespace MentoringApp.Tests.Service
 
             var pairRepo = new Mock<IPairRepo>();
             pairRepo.Setup(r => r.GetBySupervisorIdAsync(It.IsAny<int>()))
-                    .ReturnsAsync(Array.Empty<PairDto>());
+                    .ReturnsAsync(Array.Empty<PairDao>());
 
             var schoolClassRepo = new Mock<ISchoolClassRepo>();
             schoolClassRepo.Setup(r => r.GetBySupervisorAsync(It.IsAny<int>()))
-                           .ReturnsAsync(Array.Empty<SchoolClassDto>());
+                           .ReturnsAsync(Array.Empty<SchoolClassDao>());
 
             return new UserService(
                 userRepoMock.Object,
@@ -70,8 +71,8 @@ namespace MentoringApp.Tests.Service
         }
 
         /// <summary>Minimal valid AdminDto so MapDtoToUserAsync succeeds.</summary>
-        private static UserDto MakeAdminDto(int id = 1, string nationalId = "123456789") =>
-            new UserDto
+        private static UserDao MakeAdminDto(int id = 1, string nationalId = "123456789") =>
+            new UserDao
             {
                 Id = id,
                 UserName = "TestUser",
@@ -114,7 +115,7 @@ namespace MentoringApp.Tests.Service
         {
             var userRepo = new Mock<IUserRepo>();
             userRepo.Setup(r => r.GetUserDtoByNationalIdAsync(It.IsAny<string>()))
-                    .ReturnsAsync((UserDto?)null);
+                    .ReturnsAsync((UserDao?)null);
 
             var verificationRepo = new Mock<IVerificationCodeRepo>();
             var sut = BuildAuthService(userRepo, verificationRepo);
@@ -303,7 +304,7 @@ namespace MentoringApp.Tests.Service
             var userRepo = new Mock<IUserRepo>();
             // No user found by national ID → user is new
             userRepo.Setup(r => r.GetUserDtoByNationalIdAsync("123456789"))
-                    .ReturnsAsync((UserDto?)null);
+                    .ReturnsAsync((UserDao?)null);
             userRepo.Setup(r => r.CreateUserAsync(It.IsAny<UserModel>()))
                     .ReturnsAsync(true);
 
@@ -323,7 +324,7 @@ namespace MentoringApp.Tests.Service
         {
             var userRepo = new Mock<IUserRepo>();
             userRepo.Setup(r => r.GetUserDtoByNationalIdAsync("123456789"))
-                    .ReturnsAsync((UserDto?)null);
+                    .ReturnsAsync((UserDao?)null);
             userRepo.Setup(r => r.CreateUserAsync(It.IsAny<UserModel>()))
                     .ReturnsAsync(false);
 

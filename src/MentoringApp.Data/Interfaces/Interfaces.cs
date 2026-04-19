@@ -1,3 +1,4 @@
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.DTO;
 using MentoringApp.Model;
 using MentoringApp.Model.User;
@@ -12,10 +13,10 @@ namespace MentoringApp.Data.Interfaces
     public interface IUserRepo
     {
         Task<bool> CreateUserAsync(UserModel user);
-        Task<IEnumerable<UserDto>> GetAllUserDtosAsync();
-        Task<UserDto?> GetUserDtoByNationalIdAsync(string nationalId);
-        Task<UserDto?> GetUserDtoByIdAsync(int userId);
-        Task<IEnumerable<SupervisorStatsDto>> GetSupervisorStatisticsAsync();
+        Task<IEnumerable<UserDao>> GetAllUserDtosAsync();
+        Task<UserDao?> GetUserDtoByNationalIdAsync(string nationalId);
+        Task<UserDao?> GetUserDtoByIdAsync(int userId);
+        Task<IEnumerable<SupervisorStatsDao>> GetSupervisorStatisticsAsync();
         
 
         Task<bool> DeleteUserAsync(int userId);
@@ -42,11 +43,11 @@ namespace MentoringApp.Data.Interfaces
 
     public interface IPairRepo
     {
-        Task<IEnumerable<PairDto>> GetAllAsync();
-        Task<PairDto?> GetByIdAsync(int id);
-        Task<PairDto?> GetByMentorIdAsync(int mentorId);
-        Task<PairDto?> GetByMenteeIdAsync(int menteeId);
-        Task<IEnumerable<PairDto>> GetBySupervisorIdAsync(int supervisorId);
+        Task<IEnumerable<PairDao>> GetAllAsync();
+        Task<PairDao?> GetByIdAsync(int id);
+        Task<PairDao?> GetByMentorIdAsync(int mentorId);
+        Task<PairDao?> GetByMenteeIdAsync(int menteeId);
+        Task<IEnumerable<PairDao>> GetBySupervisorIdAsync(int supervisorId);
 
         /// <summary>Admin/legacy create – no tier tracking.</summary>
         Task<bool> CreateAsync(int supervisorId, int mentorId, int menteeId);
@@ -63,19 +64,19 @@ namespace MentoringApp.Data.Interfaces
         Task<IEnumerable<int>> GetMatchedMenteeIdsAsync();
 
         /// <summary>Returns all pairs flagged as profile-incomplete (Tier 5).</summary>
-        Task<IEnumerable<PairDto>> GetProfileIncompleteAsync();
+        Task<IEnumerable<PairDao>> GetProfileIncompleteAsync();
     }
 
     public interface IIssueRepo
     {
-        Task<IEnumerable<IssueDto>> GetAllAsync();
-        Task<IssueDto?> GetByIdAsync(int id);
-        Task<IEnumerable<IssueDto>> GetByReporterAsync(int userId);
-        Task<IEnumerable<IssueDto>> GetBySupervisorAsync(int supervisorId);
+        Task<IEnumerable<IssueDao>> GetAllAsync();
+        Task<IssueDao?> GetByIdAsync(int id);
+        Task<IEnumerable<IssueDao>> GetByReporterAsync(int userId);
+        Task<IEnumerable<IssueDao>> GetBySupervisorAsync(int supervisorId);
         Task<bool> CreateAsync(string description, int categoryId, int reportedByUserId);
         Task<bool> ResolveAsync(int issueId);
         Task<bool> ForwardAsync(int issueId, int supervisorId);
-        Task<IEnumerable<IssueDto>> GetForwardedAsync();
+        Task<IEnumerable<IssueDao>> GetForwardedAsync();
     }
 
     public interface IIssueCategoryRepo
@@ -86,8 +87,8 @@ namespace MentoringApp.Data.Interfaces
 
     public interface IReviewRepo
     {
-        Task<IEnumerable<ReviewDto>> GetByPairAsync(int pairId);
-        Task<IEnumerable<ReviewDto>> GetByAuthorAsync(int authorUserId);
+        Task<IEnumerable<ReviewDao>> GetByPairAsync(int pairId);
+        Task<IEnumerable<ReviewDao>> GetByAuthorAsync(int authorUserId);
         Task<bool> CreateAsync(string content, DateTime date, int pairId, int authorUserId, double amountOfHours);
     }
 
@@ -101,14 +102,14 @@ namespace MentoringApp.Data.Interfaces
 
     public interface ISubjectRepo
     {
-        Task<IEnumerable<SubjectDto>> GetAllSubjectsAsync();
+        Task<IEnumerable<SubjectDao>> GetAllSubjectsAsync();
     }
 
     public interface IGradeRepo
     {
-        Task<GradeDto?> GetByIdAsync(int id);
+        Task<GradeDao?> GetByIdAsync(int id);
 
-        Task<IEnumerable<GradeDto>> GetAllGradesAsync();
+        Task<IEnumerable<GradeDao>> GetAllGradesAsync();
 
     }
 
@@ -116,8 +117,8 @@ namespace MentoringApp.Data.Interfaces
     public interface IPairRequestRepo
     {
         Task<bool> CreateAsync(int menteeId, int mentorId, int tier);
-        Task<IEnumerable<PairRequestDto>> GetByMentorAsync(int mentorId);
-        Task<IEnumerable<PairRequestDto>> GetByMenteeAsync(int menteeId);
+        Task<IEnumerable<PairRequestDao>> GetByMentorAsync(int mentorId);
+        Task<IEnumerable<PairRequestDao>> GetByMenteeAsync(int menteeId);
         Task<bool> UpdateStatusAsync(int requestId, string status);
         /// <summary>Cancels any pending requests that involve either user (after a pair is formed).</summary>
         Task CancelPendingForUsersAsync(int menteeId, int mentorId);
@@ -127,16 +128,16 @@ namespace MentoringApp.Data.Interfaces
     // ── NEW: match score repo ─────────────────────────────────────────────────
     public interface IMatchScoreRepo
     {
-        Task BulkInsertAsync(IEnumerable<MatchScoreDto> scores);
-        Task<IEnumerable<MatchScoreDto>> GetTopForMenteeAsync(int menteeId, int limit = 3);
-        Task<IEnumerable<MatchScoreDto>> GetAllAsync();
+        Task BulkInsertAsync(IEnumerable<MatchScoreDao> scores);
+        Task<IEnumerable<MatchScoreDao>> GetTopForMenteeAsync(int menteeId, int limit = 3);
+        Task<IEnumerable<MatchScoreDao>> GetAllAsync();
         Task ClearAllAsync();
     }
     // ── School Class repo ─────────────────────────────────────────────────
     public interface ISchoolClassRepo
     {
-        Task<IEnumerable<SchoolClassDto>> GetAllAsync();
-        Task<IEnumerable<SchoolClassDto>> GetBySupervisorAsync(int supervisorId);
+        Task<IEnumerable<SchoolClassDao>> GetAllAsync();
+        Task<IEnumerable<SchoolClassDao>> GetBySupervisorAsync(int supervisorId);
         Task<bool> AddAsync(int gradeId, int classNum);
         Task<bool> DeleteAsync(int schoolClassId);
         /// <summary>Replaces all class assignments for a supervisor atomically.</summary>

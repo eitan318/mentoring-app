@@ -1,4 +1,5 @@
 using FluentAssertions;
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
@@ -18,8 +19,8 @@ namespace MentoringApp.Tests.Service
         {
             var gradeRepo = new Mock<IGradeRepo>();
             gradeRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-                     .ReturnsAsync(new GradeDto { Id = 1, Name = "Grade 9", Num = 9 });
-            gradeRepo.Setup(r => r.GetAllGradesAsync()).ReturnsAsync(Array.Empty<GradeDto>());
+                     .ReturnsAsync(new GradeDao { Id = 1, Name = "Grade 9", Num = 9 });
+            gradeRepo.Setup(r => r.GetAllGradesAsync()).ReturnsAsync(Array.Empty<GradeDao>());
 
             return new UserService(
                 userRepo.Object,
@@ -30,14 +31,14 @@ namespace MentoringApp.Tests.Service
                 new Mock<ISchoolClassRepo>().Object);
         }
 
-        private static UserDto MakeSupervisorDto(int id) =>
-            new UserDto { Id = id, UserName = $"Sup{id}", Email = $"s{id}@test.com", NationalId = $"S{id}", Role = UserRoleType.Supervisor, GradeId = 1, ClassNum = 1, Gender = 1 };
+        private static UserDao MakeSupervisorDto(int id) =>
+            new UserDao { Id = id, UserName = $"Sup{id}", Email = $"s{id}@test.com", NationalId = $"S{id}", Role = UserRoleType.Supervisor, GradeId = 1, ClassNum = 1, Gender = 1 };
 
-        private static UserDto MakeMentorDto(int id) =>
-            new UserDto { Id = id, UserName = $"Mentor{id}", Email = $"m{id}@test.com", NationalId = $"M{id}", Role = UserRoleType.Student, GradeId = 1, ClassNum = 1, Gender = 1, MentorSubjectId = 1 };
+        private static UserDao MakeMentorDto(int id) =>
+            new UserDao { Id = id, UserName = $"Mentor{id}", Email = $"m{id}@test.com", NationalId = $"M{id}", Role = UserRoleType.Student, GradeId = 1, ClassNum = 1, Gender = 1, MentorSubjectId = 1 };
 
-        private static UserDto MakeMenteeDto(int id) =>
-            new UserDto { Id = id, UserName = $"Mentee{id}", Email = $"e{id}@test.com", NationalId = $"E{id}", Role = UserRoleType.Student, GradeId = 1, ClassNum = 1, Gender = 2, MenteeSubjectId = 1 };
+        private static UserDao MakeMenteeDto(int id) =>
+            new UserDao { Id = id, UserName = $"Mentee{id}", Email = $"e{id}@test.com", NationalId = $"E{id}", Role = UserRoleType.Student, GradeId = 1, ClassNum = 1, Gender = 2, MenteeSubjectId = 1 };
 
         // ── CreatePairAsync ────────────────────────────────────────────────────
 
@@ -45,7 +46,7 @@ namespace MentoringApp.Tests.Service
         public async Task CreatePair_Fails_WhenSupervisorNotFound()
         {
             var userRepo = new Mock<IUserRepo>();
-            userRepo.Setup(r => r.GetUserDtoByIdAsync(It.IsAny<int>())).ReturnsAsync((UserDto?)null);
+            userRepo.Setup(r => r.GetUserDtoByIdAsync(It.IsAny<int>())).ReturnsAsync((UserDao?)null);
             var pairRepo = new Mock<IPairRepo>();
 
             var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
@@ -194,7 +195,7 @@ namespace MentoringApp.Tests.Service
         public async Task GetPairById_Fails_WhenPairNotFound()
         {
             var pairRepo = new Mock<IPairRepo>();
-            pairRepo.Setup(r => r.GetByIdAsync(7)).ReturnsAsync((PairDto?)null);
+            pairRepo.Setup(r => r.GetByIdAsync(7)).ReturnsAsync((PairDao?)null);
 
             var sut = new PairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
 
@@ -209,7 +210,7 @@ namespace MentoringApp.Tests.Service
         {
             const int pairId = 1, mentorId = 2, menteeId = 3, supervisorId = 4;
 
-            var pairDto = new PairDto { Id = pairId, MentorId = mentorId, MenteeId = menteeId, SupervisorId = supervisorId };
+            var pairDto = new PairDao { Id = pairId, MentorId = mentorId, MenteeId = menteeId, SupervisorId = supervisorId };
 
             var userRepo = new Mock<IUserRepo>();
             userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId)).ReturnsAsync(MakeMentorDto(mentorId));
