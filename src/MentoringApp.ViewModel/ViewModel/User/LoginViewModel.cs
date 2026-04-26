@@ -1,132 +1,151 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MentoringApp.ApiClient.Clients;
+using MentoringApp.ApiClient.Models;
+using MentoringApp.ViewModel.Auth;
+using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Navigation;
+using MentoringApp.ViewModel.Service;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
-using System.ComponentModel.DataAnnotations;
-using MentoringApp.ViewModel.Navigation;
-using MentoringApp.Service;
-using MentoringApp.ViewModel.IService;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Json;
 
-namespace MentoringApp.ViewModel.ViewModel.User
+namespace MentoringApp.ViewModel.ViewModel.User;
+
+public partial class LoginViewModel : ObservableValidator, INavigatable
 {
-    public partial class LoginViewModel : ObservableValidator, INavigatable
+    private readonly AuthApiClient _authClient;
+    private readonly UserApiClient _userClient;
+    private readonly INavigationService _navigationService;
+    private readonly UserStore _userStore;
+    private readonly ILanguageService _languageService;
+    private readonly SessionService _sessionService;
+    private readonly AuthTokenStore _authTokenStore;
+
+    // In debug mode verification code step is skipped.
+    private static readonly bool _debugWithoutVerification = true;
+
+    public LoginViewModel(
+        AuthApiClient authClient,
+        UserApiClient userClient,
+        INavigationService navigationService,
+        UserStore userStore,
+        ILanguageService languageService,
+        SessionService sessionService,
+        AuthTokenStore authTokenStore)
     {
-        private readonly AuthService _authService;
-        private readonly INavigationService _navigationService;
-        private readonly UserStore _userStore;
-        private readonly ILanguageService _languageService;
-        private readonly SettingsService _settingsService;
-        private readonly UserService _userService;
-        private readonly SessionService _sessionService;
+        _authClient = authClient;
+        _userClient = userClient;
+        _navigationService = navigationService;
+        _userStore = userStore;
+        _languageService = languageService;
+        _sessionService = sessionService;
+        _authTokenStore = authTokenStore;
+    }
 
-        // When true, the email verification step is skipped and the user is logged in
-        // immediately after entering a valid National ID. Set to false for production builds.
-        private static readonly bool _debugWithoutVerification = true;
+    public ObservableCollection<string> AvailableLanguages { get; } = ["en", "he"];
 
-        public LoginViewModel(UserStore userStore, INavigationService navigationService, AuthService authService, ILanguageService languageService, SettingsService settingsService, UserService userService, SessionService sessionService)
+    [ObservableProperty] private string _selectedLanguage = "en";
+    private bool _languageChangedOnLogin;
+
+    partial void OnSelectedLanguageChanged(string value)
+    {
+        _languageChangedOnLogin = true;
+        _languageService.ApplyLanguage(value);
+    }
+
+    public Task OnNavigatedToAsync()
+    {
+        _languageChangedOnLogin = false;
+        SelectedLanguage = "en";
+        _languageService.ApplyLanguage("en");
+        return Task.CompletedTask;
+    }
+
+    [ObservableProperty] private bool _wasCodeSent;
+
+    [ObservableProperty]
+    [Required(ErrorMessage = "National ID is required")]
+    private string _nationalId = "";
+
+    [Required(ErrorMessage = "Code is required")]
+    [ObservableProperty] private string _verificationCode = "";
+    [ObservableProperty] private string _errorMessage = "";
+
+    [RelayCommand]
+    private async Task SendVerificationCode()
+    {
+        ValidateProperty(NationalId, nameof(NationalId));
+        ErrorMessage = "";
+        try
         {
-            _userStore = userStore;
-            _authService = authService;
-            _navigationService = navigationService;
-            _languageService = languageService;
-            _settingsService = settingsService;
-            _userService = userService;
-            _sessionService = sessionService;
-        }
-
-        // Language selection
-        public ObservableCollection<string> AvailableLanguages { get; } = ["en", "he"];
-
-        [ObservableProperty] private string _selectedLanguage = "en";
-
-        private bool _languageChangedOnLogin;
-
-        partial void OnSelectedLanguageChanged(string value)
-        {
-            _languageChangedOnLogin = true;
-            _languageService.ApplyLanguage(value);
-        }
-
-        public Task OnNavigatedToAsync()
-        {
-            // Reset language choice flag and default to English every time the login screen is opened
-            _languageChangedOnLogin = false;
-            
-            SelectedLanguage = "en";
-            _languageService.ApplyLanguage("en");
-
-            return Task.CompletedTask;
-        }
-
-        [ObservableProperty] private bool _wasCodeSent;
-
-        [ObservableProperty]
-        [Required(ErrorMessage = "National ID is required")]
-        private string _nationalId = "";
-
-        [Required(ErrorMessage = "Code is required")]
-        [ObservableProperty] private string _verificationCode = "";
-        [ObservableProperty] private string _errorMessage = "";
-
-        [RelayCommand]
-        private async Task SendVerificationCode()
-        {
-            if (_debugWithoutVerification)
+            var response = await _authClient.SendCodeAsync(new SendCodeRequest(NationalId));
+            if (_debugWithoutVerification && response.DevCode is not null)
             {
-                Login();
-            }
-
-
-
-            ValidateProperty(NationalId, nameof(NationalId));
-            ErrorMessage = "";
-            var result = await _authService.SendVerificationCodeAsync(NationalId);
-
-            if (!result.Success)
-            {
-                ErrorMessage = result.ErrorMessage ?? "Failed to send code.";
+                VerificationCode = response.DevCode;
+                await Login();
                 return;
             }
-
             WasCodeSent = true;
         }
-
-        [RelayCommand]
-        private async Task Login()
+        catch (Exception ex)
         {
-            if (!_debugWithoutVerification)
-            {
-                ValidateProperty(VerificationCode, nameof(VerificationCode));
-                var verificationResult = await _authService.VerificationCodeValid(VerificationCode);
-                if (!verificationResult.Success)
-                {
-                    ErrorMessage = verificationResult.ErrorMessage ?? "Invalid code.";
-                    return;
-                }
-            }
+            ErrorMessage = ex.Message;
+        }
+    }
 
-            var loginResult = await _authService.LoginAsync(NationalId);
-            if (!loginResult.Success)
+    [RelayCommand]
+    private async Task Login()
+    {
+        ErrorMessage = "";
+        try
+        {
+            var response = await _authClient.LoginAsync(new LoginRequest(NationalId, VerificationCode));
+
+            // Decode claims from JWT (no library needed — just base64 the payload)
+            var claims = DecodeJwtPayload(response.Token);
+            claims.TryGetValue("sub", out var subVal);
+            claims.TryGetValue("role", out var roleVal);
+            claims.TryGetValue("language", out var langVal);
+
+            if (!int.TryParse(subVal?.ToString(), out int userId))
             {
-                ErrorMessage = loginResult.ErrorMessage ?? "Login failed.";
+                ErrorMessage = "Failed to parse user ID from token.";
                 return;
             }
 
-            var user = loginResult.Data;
-            if (user != null)
-            {
-                // If user explicitly changed language on login screen, apply it to their profile.
-                if (_languageChangedOnLogin && user.Language != SelectedLanguage)
-                {
-                    user.Language = SelectedLanguage;
-                    _ = _userService.UpdateLanguageAsync(user.Id, SelectedLanguage);
-                }
+            _authTokenStore.Token = response.Token;
+            _authTokenStore.UserId = userId;
+            _authTokenStore.Role = roleVal?.ToString();
+            _authTokenStore.Language = langVal?.ToString();
 
-                _sessionService.SaveSession(user.Id);
-                _userStore.User = user;
-                await _navigationService.NavigateToAsync<AuthenticatedDashboardViewModel>();
-            }
+            var user = await _userClient.GetByIdAsync(userId);
+            if (user == null) { ErrorMessage = "User not found."; return; }
+
+            if (_languageChangedOnLogin && user.Language != SelectedLanguage)
+                await _userClient.UpdateLanguageAsync(user.Id, new UpdateLanguageRequest(SelectedLanguage));
+
+            _sessionService.SaveSession(user.Id, response.Token);
+            _userStore.User = user;
+
+            await _navigationService.NavigateToAsync<AuthenticatedDashboardViewModel>();
         }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private static Dictionary<string, object?> DecodeJwtPayload(string token)
+    {
+        var parts = token.Split('.');
+        if (parts.Length != 3) return new();
+        var payload = parts[1].PadRight(parts[1].Length + (4 - parts[1].Length % 4) % 4, '=')
+                               .Replace('-', '+').Replace('_', '/');
+        var json = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
+        return JsonSerializer.Deserialize<Dictionary<string, object?>>(json) ?? new();
     }
 }

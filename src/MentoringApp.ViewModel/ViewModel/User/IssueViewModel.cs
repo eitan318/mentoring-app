@@ -1,75 +1,71 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Model;
-using MentoringApp.Service;
+using MentoringApp.ApiClient.Clients;
+using MentoringApp.ApiClient.Models;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 
-namespace MentoringApp.ViewModel.ViewModel.User
+namespace MentoringApp.ViewModel.ViewModel.User;
+
+public partial class IssueViewModel : ObservableObject, INavigatable<int>
 {
-    public partial class IssueViewModel : ObservableObject, INavigatable<int>
+    [ObservableProperty] private IssueResponse? _currentIssue;
+    [ObservableProperty] private string? _relatedPairName;
+
+    private readonly INavigationService _navigationService;
+    private readonly IssueApiClient _issueClient;
+
+    public int? ForwardingsupervisorId { get; set; }
+    public bool CanForward => ForwardingsupervisorId.HasValue;
+
+    public Action? OnCloseRequested { get; set; }
+    public Action? OnIssueResolved { get; set; }
+    public Action? OnIssueForwarded { get; set; }
+
+    public IssueViewModel(INavigationService navigationService, IssueApiClient issueClient)
     {
-        [ObservableProperty] private IssueModel _currentIssue;
-        [ObservableProperty] private string? _relatedPairName;
+        _navigationService = navigationService;
+        _issueClient = issueClient;
+    }
 
-        private readonly INavigationService _navigationService;
-        private readonly IssueService _issueService;
+    public virtual async Task OnNavigatedToAsync(int issueId)
+    {
+        CurrentIssue = await _issueClient.GetByIdAsync(issueId);
+    }
 
-        /// <summary>Set to the supervisor's user ID to enable the "Forward to Admin" button.</summary>
-        public int? ForwardingsupervisorId { get; set; }
-        public bool CanForward => ForwardingsupervisorId.HasValue;
+    [RelayCommand]
+    private async Task Back()
+    {
+        if (OnCloseRequested != null)
+            OnCloseRequested.Invoke();
+        else
+            await _navigationService.GoBackAsync();
+    }
 
-        public Action? OnCloseRequested { get; set; }
-        public Action? OnIssueResolved { get; set; }
-        public Action? OnIssueForwarded { get; set; }
-
-        public IssueViewModel(INavigationService navigationService, IssueService issueService)
+    [RelayCommand]
+    private async Task ResolveIssue()
+    {
+        if (CurrentIssue == null || CurrentIssue.IsResolvedBool) return;
+        try
         {
-            _navigationService = navigationService;
-            _issueService = issueService;
+            await _issueClient.ResolveAsync(CurrentIssue.Id);
+            OnIssueResolved?.Invoke();
+            if (OnIssueResolved == null) await _navigationService.GoBackAsync();
         }
+        catch { }
+    }
 
-        public virtual async Task OnNavigatedToAsync(int issueId)
+    [RelayCommand]
+    private async Task ForwardToAdmin()
+    {
+        if (CurrentIssue == null || !CanForward || CurrentIssue.IsForwardedToAdmin) return;
+        try
         {
-            CurrentIssue = (await _issueService.GetIssueByIdAsync(issueId)).Data;
+            await _issueClient.ForwardAsync(CurrentIssue.Id, new ForwardIssueRequest(ForwardingsupervisorId!.Value));
+            CurrentIssue = await _issueClient.GetByIdAsync(CurrentIssue.Id);
+            OnPropertyChanged(nameof(CurrentIssue));
+            OnIssueForwarded?.Invoke();
         }
-
-        [RelayCommand]
-        private async Task Back()
-        {
-            if (OnCloseRequested != null)
-                OnCloseRequested.Invoke();
-            else
-                await _navigationService.GoBackAsync();
-        }
-
-        [RelayCommand]
-        private async Task ResolveIssue()
-        {
-            if (CurrentIssue != null && !CurrentIssue.IsResolved)
-            {
-                var result = await _issueService.ResolveIssueAsync(CurrentIssue.Id);
-                if (result.Success)
-                {
-                    if (OnIssueResolved != null)
-                        OnIssueResolved.Invoke();
-                    else
-                        await _navigationService.GoBackAsync();
-                }
-            }
-        }
-
-        [RelayCommand]
-        private async Task ForwardToAdmin()
-        {
-            if (CurrentIssue == null || !CanForward || CurrentIssue.IsForwardedToAdmin) return;
-            var result = await _issueService.ForwardIssueAsync(CurrentIssue.Id, ForwardingsupervisorId!.Value);
-            if (result.Success)
-            {
-                CurrentIssue.ForwardedBySupervisorId = ForwardingsupervisorId;
-                OnPropertyChanged(nameof(CurrentIssue));
-                OnIssueForwarded?.Invoke();
-            }
-        }
+        catch { }
     }
 }

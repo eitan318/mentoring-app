@@ -43,7 +43,7 @@ namespace MentoringApp.Tests.Service
             _issueRepo.Setup(r => r.GetAllAsync())
                       .ReturnsAsync(new List<IssueDao>());
             _issueCategoryRepo.Setup(r => r.GetAllAsync())
-                              .ReturnsAsync(new List<IssueCategoryDto>());
+                              .ReturnsAsync(new List<IssueCategoryDao>());
             _schoolClassRepo.Setup(r => r.GetBySupervisorAsync(It.IsAny<int>()))
                             .ReturnsAsync(new List<SchoolClassDao>());
             _subjectRepo.Setup(r => r.GetAllSubjectsAsync())

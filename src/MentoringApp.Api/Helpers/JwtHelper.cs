@@ -22,7 +22,7 @@ public static class JwtHelper
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Name, user.UserName),
-            new Claim(ClaimTypes.Role, role),
+            new Claim("role", role),
             new Claim("language", user.Language),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };

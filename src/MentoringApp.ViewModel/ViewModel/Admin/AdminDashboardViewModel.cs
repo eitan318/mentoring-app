@@ -1,365 +1,337 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Model;
-using MentoringApp.Model.User;
-using MentoringApp.Service;
+using MentoringApp.ApiClient.Clients;
+using MentoringApp.ApiClient.Models;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
-using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModel.Supervisor;
 using MentoringApp.ViewModel.ViewModel.User;
+using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 
-namespace MentoringApp.ViewModel.ViewModel.Admin
+namespace MentoringApp.ViewModel.ViewModel.Admin;
+
+/// <summary>Summary item for the supervisor list in the admin dashboard.</summary>
+public class AdminSupervisorItem
 {
-    /// <summary>
-    /// Admin dashboard ViewModel. Manages the two-phase matching lifecycle:
-    /// Phase 1 (registration + manual requests) and Phase 2 (scored selection gallery + auto-match fallback).
-    /// A DispatcherTimer fires every second to keep the active deadline countdown current.
-    /// <c>IsSelectionPhaseActive</c>/<c>IsProcessComplete</c> flags gate which controls are visible.
-    /// </summary>
-    public partial class AdminDashboardViewModel : ObservableObject, INavigatable
+    public UserResponse Supervisor { get; }
+    public int FilledStudentsCount { get; set; }
+    public int TotalStudentsCount { get; set; }
+    public int Id => Supervisor.Id;
+    public string UserName => Supervisor.UserName;
+    public AdminSupervisorItem(UserResponse supervisor) => Supervisor = supervisor;
+}
+
+public partial class AdminDashboardViewModel : ObservableObject, INavigatable
+{
+    private readonly INavigationService _navigationService;
+    private readonly IWindowService _windowService;
+    private readonly UserApiClient _userClient;
+    private readonly MatchingApiClient _matchingClient;
+    private readonly SettingsApiClient _settingsClient;
+    private readonly IssueApiClient _issueClient;
+    private readonly NotificationApiClient _notificationClient;
+    private readonly IToastService _toastService;
+    private readonly ILocalizationService _loc;
+    private readonly DispatcherTimer _uiUpdateTimer;
+
+    [ObservableProperty] private string _statusMessage = "";
+    [ObservableProperty] private string _operationResult = string.Empty;
+    [ObservableProperty] private bool _hasOperationResult;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
+    [NotifyPropertyChangedFor(nameof(IsImportStepActive))]
+    private bool _isUsersImported;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
+    [NotifyPropertyChangedFor(nameof(IsPhase2Active))]
+    private bool _isSelectionPhaseActive;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
+    [NotifyPropertyChangedFor(nameof(IsPhase2Active))]
+    private bool _isProcessComplete;
+
+    public bool IsImportStepActive => !IsUsersImported;
+    public bool IsPhase1Active => IsUsersImported && !IsSelectionPhaseActive && !IsProcessComplete;
+    public bool IsPhase2Active => IsSelectionPhaseActive && !IsProcessComplete;
+
+    public string Phase1Summary => _loc.Get("Admin_Phase1_Summary");
+    public string Phase2Summary => _loc.Get("Admin_Phase2_Summary");
+
+    [ObservableProperty] private DateTime? _deadlineInput = DateTime.Now.AddDays(1);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDeadlineScheduled))]
+    [NotifyPropertyChangedFor(nameof(IsDeadlineNotScheduled))]
+    private DateTime? _activeDeadline;
+
+    [ObservableProperty] private string _deadlineTimeRemaining = string.Empty;
+
+    public bool IsDeadlineScheduled => ActiveDeadline.HasValue;
+    public bool IsDeadlineNotScheduled => !ActiveDeadline.HasValue;
+
+    public ObservableCollection<AdminSupervisorItem> SupervisorsListPreview { get; } = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasForwardedIssues))]
+    private ObservableCollection<IssueResponse> _forwardedIssues = [];
+
+    public bool HasForwardedIssues => ForwardedIssues.Count > 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedForwardedIssuePane))]
+    private object? _selectedForwardedIssuePane;
+
+    public bool HasSelectedForwardedIssuePane => SelectedForwardedIssuePane != null;
+
+    [ObservableProperty] private double _totalFillPercent;
+    [ObservableProperty] private string _totalFillLabel = string.Empty;
+
+    public AdminDashboardViewModel(
+        INavigationService navigationService,
+        IWindowService windowService,
+        UserApiClient userClient,
+        MatchingApiClient matchingClient,
+        SettingsApiClient settingsClient,
+        IssueApiClient issueClient,
+        NotificationApiClient notificationClient,
+        IToastService toastService,
+        ILocalizationService loc)
     {
-        private readonly INavigationService _navigationService;
-        private readonly IWindowService _windowService;
-        private readonly UserService _userService;
-        private readonly MatchingFlowService _matchingFlowService;
-        private readonly SettingsService _settingsService;
-        private readonly IssueService _issueService;
-        private readonly NotificationService _notificationService;
-        private readonly IToastService _toastService;
-        private readonly ILocalizationService _loc;
-        private readonly DispatcherTimer _uiUpdateTimer;
+        _navigationService = navigationService;
+        _windowService = windowService;
+        _userClient = userClient;
+        _matchingClient = matchingClient;
+        _settingsClient = settingsClient;
+        _issueClient = issueClient;
+        _notificationClient = notificationClient;
+        _toastService = toastService;
+        _loc = loc;
 
-        [ObservableProperty] private string _statusMessage = "";
-        [ObservableProperty] private string _operationResult = string.Empty;
-        [ObservableProperty] private bool _hasOperationResult;
+        _uiUpdateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _uiUpdateTimer.Tick += OnTimerTick;
+        _uiUpdateTimer.Start();
+    }
 
-        // ── Phase State ───────────────────────────────────────────────────────
+    private void OnTimerTick(object? sender, EventArgs e)
+    {
+        if (!ActiveDeadline.HasValue) { DeadlineTimeRemaining = string.Empty; return; }
+        var remaining = ActiveDeadline.Value - DateTime.Now;
+        DeadlineTimeRemaining = remaining.TotalSeconds <= 0
+            ? _loc.Get("Admin_Timer_Pending")
+            : $"{remaining.Days}d {remaining.Hours:D2}h {remaining.Minutes:D2}m {remaining.Seconds:D2}s";
+    }
 
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
-        [NotifyPropertyChangedFor(nameof(IsImportStepActive))]
-        private bool _isUsersImported;
+    public async Task OnNavigatedToAsync() => await LoadDataAsync();
 
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
-        [NotifyPropertyChangedFor(nameof(IsPhase2Active))]
-        private bool _isSelectionPhaseActive;
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
-        [NotifyPropertyChangedFor(nameof(IsPhase2Active))]
-        private bool _isProcessComplete;
-
-        public bool IsImportStepActive => !IsUsersImported;
-        public bool IsPhase1Active => IsUsersImported && !IsSelectionPhaseActive && !IsProcessComplete;
-        public bool IsPhase2Active => IsSelectionPhaseActive && !IsProcessComplete;
-
-        // ── Phase Descriptions (short, shown inline) ──────────────────────────
-
-        public string Phase1Summary => _loc.Get("Admin_Phase1_Summary");
-        public string Phase2Summary => _loc.Get("Admin_Phase2_Summary");
-
-        // ── Active Deadline (single set of controls, VM swaps the data) ───────
-
-        [ObservableProperty] private DateTime? _deadlineInput = DateTime.Now.AddDays(1);
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsDeadlineScheduled))]
-        [NotifyPropertyChangedFor(nameof(IsDeadlineNotScheduled))]
-        private DateTime? _activeDeadline;
-
-        [ObservableProperty] private string _deadlineTimeRemaining = string.Empty;
-
-        public bool IsDeadlineScheduled => ActiveDeadline.HasValue;
-        public bool IsDeadlineNotScheduled => !ActiveDeadline.HasValue;
-
-        // ── Supervisors ───────────────────────────────────────────────────────
-
-        public ObservableCollection<SupervisorModel> SupervisorsListPreview { get; } = new();
-
-        // ── Forwarded Issues ──────────────────────────────────────────────────
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(HasForwardedIssues))]
-        private ObservableCollection<IssueModel> _forwardedIssues = [];
-
-        public bool HasForwardedIssues => ForwardedIssues.Count > 0;
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(HasSelectedForwardedIssuePane))]
-        private object? _selectedForwardedIssuePane;
-
-        public bool HasSelectedForwardedIssuePane => SelectedForwardedIssuePane != null;
-
-        // ── Total fill progress (Phase 1 only) ────────────────────────────────
-        [ObservableProperty] private double _totalFillPercent;
-        [ObservableProperty] private string _totalFillLabel = string.Empty;
-
-        // ── Constructor ───────────────────────────────────────────────────────
-
-        public AdminDashboardViewModel(
-            INavigationService navigationService,
-            IWindowService windowService,
-            UserService userService,
-            MatchingFlowService matchingFlowService,
-            SettingsService settingsService,
-            IssueService issueService,
-            NotificationService notificationService,
-            IToastService toastService,
-            ILocalizationService loc)
+    private async Task LoadDataAsync()
+    {
+        var settings = await _settingsClient.GetAllAsync();
+        if (!settings.IsSchoolConfigured)
         {
-            _navigationService = navigationService;
-            _windowService = windowService;
-            _userService = userService;
-            _matchingFlowService = matchingFlowService;
-            _settingsService = settingsService;
-            _issueService = issueService;
-            _notificationService = notificationService;
-            _toastService = toastService;
-            _loc = loc;
-
-            _uiUpdateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            _uiUpdateTimer.Tick += OnTimerTick;
-            _uiUpdateTimer.Start();
+            await _navigationService.NavigateToAsync<SystemSettingsViewModel>();
+            return;
         }
 
-        // ── Timer ─────────────────────────────────────────────────────────────
+        IsUsersImported = settings.IsUsersImported;
+        IsSelectionPhaseActive = settings.IsPhase1Complete;
+        IsProcessComplete = settings.IsProcessComplete;
 
-        private void OnTimerTick(object? sender, EventArgs e)
+        ActiveDeadline = IsSelectionPhaseActive
+            ? (settings.Phase2Deadline != null ? DateTime.Parse(settings.Phase2Deadline) : null)
+            : (settings.Phase1Deadline != null ? DateTime.Parse(settings.Phase1Deadline) : null);
+
+        if (ActiveDeadline.HasValue) DeadlineInput = ActiveDeadline;
+
+        var allUsers = await _userClient.GetAllAsync();
+        var allStudents = allUsers.Where(u => u.IsStudent).ToList();
+
+        SupervisorsListPreview.Clear();
+        int globalFilled = 0, globalTotal = 0;
+
+        // We need to know which classes each supervisor owns; for simplicity load stats via supervisor stats endpoint
+        var supervisorStats = await _userClient.GetSupervisorStatsAsync();
+        var statsMap = supervisorStats.ToDictionary(s => s.Id);
+
+        foreach (var supervisor in allUsers.Where(u => u.IsSupervisor))
         {
-            if (!ActiveDeadline.HasValue) { DeadlineTimeRemaining = string.Empty; return; }
-            var remaining = ActiveDeadline.Value - DateTime.Now;
-            DeadlineTimeRemaining = remaining.TotalSeconds <= 0
-                ? _loc.Get("Admin_Timer_Pending")
-                : $"{remaining.Days}d {remaining.Hours:D2}h {remaining.Minutes:D2}m {remaining.Seconds:D2}s";
-        }
+            // Approximate fill count from available data
+            int filled = allStudents.Count(s => IsStudentInfoFilled(s));
+            int total = allStudents.Count;
 
-        // ── Navigation Entry ──────────────────────────────────────────────────
-
-        public async Task OnNavigatedToAsync() => await LoadDataAsync();
-
-        private async Task LoadDataAsync()
-        {
-            // First-time setup: redirect admin to school configuration before anything else.
-            bool schoolConfigured = await _settingsService.GetIsSchoolConfiguredAsync();
-            if (!schoolConfigured)
+            var item = new AdminSupervisorItem(supervisor)
             {
-                await _navigationService.NavigateToAsync<SystemSettingsViewModel>();
-                return;
-            }
+                FilledStudentsCount = filled,
+                TotalStudentsCount = total
+            };
 
-            IsUsersImported = await _settingsService.GetIsUsersImportedAsync();
-            IsSelectionPhaseActive = await _settingsService.GetIsPhase1CompleteAsync();
-            IsProcessComplete = await _settingsService.GetIsProcessCompleteAsync();
+            globalFilled += filled;
+            globalTotal += total;
 
-            ActiveDeadline = IsSelectionPhaseActive
-                ? await _settingsService.GetPhase2DeadlineAsync()
-                : await _settingsService.GetPhase1DeadlineAsync();
+            SupervisorsListPreview.Add(item);
+        }
 
-            if (ActiveDeadline.HasValue) DeadlineInput = ActiveDeadline;
+        // Deduplicate totals (divide by supervisor count if multiple supervisors share students)
+        if (SupervisorsListPreview.Count > 1)
+        {
+            globalFilled = allStudents.Count(s => IsStudentInfoFilled(s));
+            globalTotal = allStudents.Count;
+        }
 
-            var allUsers = await _userService.GetAllUsersAsync();
-            var allStudents = allUsers.OfType<StudentModel>().ToList();
+        TotalFillPercent = globalTotal > 0 ? (double)globalFilled / globalTotal * 100 : 0;
+        TotalFillLabel = $"{globalFilled}/{globalTotal} ({(int)TotalFillPercent}%)";
 
-            SupervisorsListPreview.Clear();
-            int globalFilled = 0, globalTotal = 0;
+        var forwarded = await _issueClient.GetForwardedAsync();
+        ForwardedIssues = new ObservableCollection<IssueResponse>(forwarded);
+    }
 
-            foreach (var supervisor in allUsers.OfType<SupervisorModel>())
+    [RelayCommand]
+    private async Task SaveDeadline()
+    {
+        if (!DeadlineInput.HasValue) return;
+        ActiveDeadline = DeadlineInput.Value;
+
+        if (IsSelectionPhaseActive)
+            await _settingsClient.SetPhase2DeadlineAsync(ActiveDeadline);
+        else
+            await _settingsClient.SetPhase1DeadlineAsync(ActiveDeadline);
+
+        ShowResult("✓ Deadline scheduled.");
+    }
+
+    [RelayCommand]
+    private async Task CancelDeadline()
+    {
+        ActiveDeadline = null;
+        if (IsSelectionPhaseActive)
+            await _settingsClient.SetPhase2DeadlineAsync(null);
+        else
+            await _settingsClient.SetPhase1DeadlineAsync(null);
+    }
+
+    [RelayCommand]
+    private async Task MarkUsersImported()
+    {
+        IsUsersImported = true;
+        await _settingsClient.SetIsUsersImportedAsync(true);
+        try
+        {
+            await _notificationClient.SendPhase1StartedAsync();
+        }
+        catch
+        {
+            await _toastService.ShowInfoAsync(
+                _loc.Get("Admin_EmailNotification_Failed_Title"),
+                _loc.Get("Admin_EmailNotification_Failed_Body"));
+        }
+    }
+
+    [RelayCommand]
+    private async Task StartSelectionPhase()
+    {
+        if (!await _windowService.ShowConfirmAsync(
+            _loc.Get("Admin_ConfirmStartPhase2_Body"),
+            _loc.Get("Admin_ConfirmAction_Title"))) return;
+
+        ShowResult(_loc.Get("Admin_GeneratingScores_Message"));
+
+        try
+        {
+            await _matchingClient.GenerateScoresAsync();
+            IsSelectionPhaseActive = true;
+            await _settingsClient.SetIsPhase1CompleteAsync(true);
+
+            var settings = await _settingsClient.GetAllAsync();
+            ActiveDeadline = settings.Phase2Deadline != null ? DateTime.Parse(settings.Phase2Deadline) : null;
+            DeadlineInput = DateTime.Now.AddDays(1);
+
+            try { await _notificationClient.SendPhase2StartedAsync(); }
+            catch
             {
-                var assignedSlots = supervisor.AssignedClasses
-                    .Select(c => (gradeId: c.Grade.Id, classNum: c.ClassNum))
-                    .ToHashSet();
-
-                var myStudents = allStudents
-                    .Where(s => s.Grade != null && assignedSlots.Contains((s.Grade.Id, s.ClassNum)))
-                    .ToList();
-
-                int filled = myStudents.Count(s => IsStudentInfoFilled(s));
-                supervisor.FilledStudentsCount = filled;
-                supervisor.TotalStudentsCount = myStudents.Count;
-
-                globalFilled += filled;
-                globalTotal  += myStudents.Count;
-
-                SupervisorsListPreview.Add(supervisor);
-            }
-
-            TotalFillPercent = globalTotal > 0 ? (double)globalFilled / globalTotal * 100 : 0;
-            TotalFillLabel = $"{globalFilled}/{globalTotal} ({(int)TotalFillPercent}%)";
-
-            var forwardedResult = await _issueService.GetForwardedIssuesAsync();
-            ForwardedIssues = forwardedResult.Success
-                ? new ObservableCollection<IssueModel>(forwardedResult.Data ?? [])
-                : [];
-        }
-
-        // ── Shared Deadline Commands ──────────────────────────────────────────
-
-        [RelayCommand]
-        private async Task SaveDeadline()
-        {
-            if (!DeadlineInput.HasValue) return;
-            ActiveDeadline = DeadlineInput.Value;
-
-            if (IsSelectionPhaseActive)
-                await _settingsService.SetPhase2DeadlineAsync(ActiveDeadline.Value);
-            else
-                await _settingsService.SetPhase1DeadlineAsync(ActiveDeadline.Value);
-
-            ShowResult("✓ Deadline scheduled.");
-        }
-
-        [RelayCommand]
-        private async Task CancelDeadline()
-        {
-            ActiveDeadline = null;
-
-            if (IsSelectionPhaseActive)
-                await _settingsService.ClearPhase2DeadlineAsync();
-            else
-                await _settingsService.ClearPhase1DeadlineAsync();
-        }
-
-        // ── Import Step ───────────────────────────────────────────────────────
-
-        [RelayCommand]
-        private async Task MarkUsersImported()
-        {
-            IsUsersImported = true;
-            await _settingsService.SetIsUsersImportedAsync(true);
-            bool phase1Sent = await _notificationService.SendPhase1StartedAsync();
-            if (!phase1Sent)
                 await _toastService.ShowInfoAsync(
                     _loc.Get("Admin_EmailNotification_Failed_Title"),
                     _loc.Get("Admin_EmailNotification_Failed_Body"));
-        }
-
-        // ── Phase Action Commands ─────────────────────────────────────────────
-
-        [RelayCommand]
-        private async Task StartSelectionPhase()
-        {
-            if (!await _windowService.ShowConfirmAsync(
-                _loc.Get("Admin_ConfirmStartPhase2_Body"),
-                _loc.Get("Admin_ConfirmAction_Title"))) return;
-
-            ShowResult(_loc.Get("Admin_GeneratingScores_Message"));
-
-            var result = await _matchingFlowService.GenerateScoreMatrixAsync();
-            if (result.Success)
-            {
-                IsSelectionPhaseActive = true;
-                await _settingsService.SetIsPhase1CompleteAsync(true);
-
-                // Swap deadline controls over to Phase 2
-                ActiveDeadline = await _settingsService.GetPhase2DeadlineAsync();
-                DeadlineInput = DateTime.Now.AddDays(1);
-
-                bool phase2Sent = await _notificationService.SendPhase2StartedAsync();
-                if (!phase2Sent)
-                    await _toastService.ShowInfoAsync(
-                        _loc.Get("Admin_EmailNotification_Failed_Title"),
-                        _loc.Get("Admin_EmailNotification_Failed_Body"));
-                ShowResult(_loc.Get("Admin_ScoresGenerated_Message"));
             }
-            else
-            {
-                ShowResult(_loc.Format("Admin_Phase2Failed_Message", result.ErrorMessage));
-            }
+            ShowResult(_loc.Get("Admin_ScoresGenerated_Message"));
         }
-
-        [RelayCommand]
-        private async Task RunAutoMatch()
+        catch (Exception ex)
         {
-            if (!await _windowService.ShowConfirmAsync(
-                _loc.Get("Admin_ConfirmAutoMatch_Body"),
-                _loc.Get("Admin_ConfirmAction_Title"))) return;
-
-            ShowResult(_loc.Get("Admin_RunningAutoMatch_Message"));
-
-            var result = await _matchingFlowService.RunAutoMatchAsync();
-            if (result.Success)
-            {
-                var fallback = await _matchingFlowService.RunFallbackMatchAsync();
-                string fallbackText = fallback.Success
-                    ? _loc.Format("Admin_FallbackAssigned_Text", fallback.Data)
-                    : _loc.Get("Admin_FallbackFailed_Text");
-
-                IsProcessComplete = true;
-                await _settingsService.SetIsProcessCompleteAsync(true);
-
-                ShowResult(_loc.Format("Admin_ProcessComplete_Message", result.Data, fallbackText));
-            }
-            else
-            {
-                ShowResult(_loc.Format("Admin_AutoMatchFailed_Message", result.ErrorMessage));
-            }
+            ShowResult(_loc.Format("Admin_Phase2Failed_Message", ex.Message));
         }
+    }
 
-        // ── Info Dialogs ──────────────────────────────────────────────────────
+    [RelayCommand]
+    private async Task RunAutoMatch()
+    {
+        if (!await _windowService.ShowConfirmAsync(
+            _loc.Get("Admin_ConfirmAutoMatch_Body"),
+            _loc.Get("Admin_ConfirmAction_Title"))) return;
 
-        [RelayCommand]
-        private async Task ShowPhase1Info() =>
-            await _toastService.ShowInfoAsync(
-                _loc.Get("Admin_Phase1Info_Title"),
-                _loc.Get("Admin_Phase1Info_Body"));
+        ShowResult(_loc.Get("Admin_RunningAutoMatch_Message"));
 
-        [RelayCommand]
-        private async Task ShowPhase2Info() =>
-            await _toastService.ShowInfoAsync(
-                _loc.Get("Admin_Phase2Info_Title"),
-                _loc.Get("Admin_Phase2Info_Body"));
-
-        // ── Navigation Commands ───────────────────────────────────────────────
-
-        [RelayCommand]
-        private async Task SelectForwardedIssue(IssueModel? issue)
+        try
         {
-            if (issue == null) { SelectedForwardedIssuePane = null; return; }
-            var vm = new IssueViewModel(_navigationService, _issueService);
-            vm.OnCloseRequested = () => SelectedForwardedIssuePane = null;
-            vm.OnIssueResolved = () =>
-            {
-                SelectedForwardedIssuePane = null;
-                _ = LoadDataAsync();
-            };
-            await vm.OnNavigatedToAsync(issue.Id);
-            SelectedForwardedIssuePane = vm;
+            var result = await _matchingClient.RunAutoMatchAsync();
+            var fallback = await _matchingClient.RunFallbackMatchAsync();
+            string fallbackText = _loc.Format("Admin_FallbackAssigned_Text", fallback.PairsCreated);
+
+            IsProcessComplete = true;
+            await _settingsClient.SetIsProcessCompleteAsync(true);
+
+            ShowResult(_loc.Format("Admin_ProcessComplete_Message", result.PairsCreated, fallbackText));
         }
-
-        [RelayCommand] private async Task ManageUsers() => await _navigationService.NavigateToAsync<ManageUsersViewModel>();
-        [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
-        [RelayCommand] private async Task SystemSettings() => await _navigationService.NavigateToAsync<SystemSettingsViewModel>();
-
-        [RelayCommand]
-        private async Task InspectSupervisor(SupervisorModel chosen)
+        catch (Exception ex)
         {
-            if (chosen != null)
-                await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(chosen.Id);
+            ShowResult(_loc.Format("Admin_AutoMatchFailed_Message", ex.Message));
         }
+    }
 
-        // ── Helpers ───────────────────────────────────────────────────────────
+    [RelayCommand]
+    private async Task ShowPhase1Info() =>
+        await _toastService.ShowInfoAsync(_loc.Get("Admin_Phase1Info_Title"), _loc.Get("Admin_Phase1Info_Body"));
 
-        private void ShowResult(string message)
-        {
-            OperationResult = message;
-            HasOperationResult = true;
-        }
+    [RelayCommand]
+    private async Task ShowPhase2Info() =>
+        await _toastService.ShowInfoAsync(_loc.Get("Admin_Phase2Info_Title"), _loc.Get("Admin_Phase2Info_Body"));
 
-        /// <summary>
-        /// Returns true when a student has fully filled their info:
-        /// valid grade, non-zero class, chosen a role, and set a subject for that role.
-        /// </summary>
-        internal static bool IsStudentInfoFilled(StudentModel s)
-        {
-            if (s.Grade == null || s.Grade.Id == 0 || s.ClassNum <= 0) return false;
-            if (!s.IsMentor && !s.IsMentee) return false;
-            if (s.IsMentor && (s.MentorProfile?.SubjectToTeach ?? 0) <= 0) return false;
-            if (s.IsMentee && (s.MenteeProfile?.SubjectToLearn ?? 0) <= 0) return false;
-            return true;
-        }
+    [RelayCommand]
+    private async Task SelectForwardedIssue(IssueResponse? issue)
+    {
+        if (issue == null) { SelectedForwardedIssuePane = null; return; }
+        var vm = new IssueViewModel(_navigationService, _issueClient);
+        vm.OnCloseRequested = () => SelectedForwardedIssuePane = null;
+        vm.OnIssueResolved = () => { SelectedForwardedIssuePane = null; _ = LoadDataAsync(); };
+        await vm.OnNavigatedToAsync(issue.Id);
+        SelectedForwardedIssuePane = vm;
+    }
+
+    [RelayCommand] private async Task ManageUsers() => await _navigationService.NavigateToAsync<ManageUsersViewModel>();
+    [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
+    [RelayCommand] private async Task SystemSettings() => await _navigationService.NavigateToAsync<SystemSettingsViewModel>();
+
+    [RelayCommand]
+    private async Task InspectSupervisor(AdminSupervisorItem chosen)
+    {
+        if (chosen != null)
+            await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(chosen.Id);
+    }
+
+    private void ShowResult(string message)
+    {
+        OperationResult = message;
+        HasOperationResult = true;
+    }
+
+    internal static bool IsStudentInfoFilled(UserResponse s)
+    {
+        if (!s.GradeId.HasValue || s.GradeId == 0 || (s.ClassNum ?? 0) <= 0) return false;
+        if (!s.IsMentor && !s.IsMentee) return false;
+        if (s.IsMentor && !s.MentorSubjectId.HasValue) return false;
+        if (s.IsMentee && !s.MenteeSubjectId.HasValue) return false;
+        return true;
     }
 }

@@ -1,144 +1,107 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Model;
-using MentoringApp.Model.User;
-using MentoringApp.Model.User.StudentProfiles;
-using MentoringApp.Service;
+using MentoringApp.ApiClient.Clients;
+using MentoringApp.ApiClient.Models;
+using MentoringApp.ViewModel.Helpers;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using MentoringApp.ViewModel.Helpers;
 
-namespace MentoringApp.ViewModel.ViewModel.User 
+namespace MentoringApp.ViewModel.ViewModel.User;
+
+public partial class RegistrationViewModel : ObservableValidator, INavigatable<bool>, ICloseable
 {
-    public partial class RegistrationViewModel : ObservableValidator, INavigatable<bool>, ICloseable
+    private readonly AuthApiClient _authClient;
+    private readonly ReferenceApiClient _referenceClient;
+    private readonly INavigationService _navigationService;
+
+    public event Action? RequestClose;
+
+    [ObservableProperty] private ObservableCollection<SubjectResponse> _subjects = [];
+    [ObservableProperty] private ObservableCollection<GradeResponse> _grades = [];
+    [ObservableProperty] private GradeResponse? _selectedGrade;
+    [ObservableProperty] private int _subjectToTeach = -1;
+    [ObservableProperty] private int _subjectToLearn = -1;
+    [ObservableProperty] private int _classNum = 1;
+
+    [ObservableProperty] private bool _isMentor;
+    [ObservableProperty] private bool _isMentee;
+    [ObservableProperty] private bool _supervisorOrStudentIsSupervisor;
+    [ObservableProperty] private string _errorMessage = "";
+    [ObservableProperty] private string? _phoneNumber;
+    [ObservableProperty] private int _selectedGenderValue = (int)Gender.PreferNoAnswer;
+    [ObservableProperty] private int _selectedPreferredMentorGenderValue = (int)GenderPreference.NoPreference;
+    [ObservableProperty] private int _selectedPreferredMenteeGenderValue = (int)GenderPreference.NoPreference;
+    [ObservableProperty] private int _maxMentees = 1;
+
+    public static IReadOnlyList<GenderOption> GenderOptions { get; } = GenderHelper.GenderOptions;
+    public static IReadOnlyList<GenderPreferenceOption> GenderPreferenceOptions { get; } = GenderHelper.GenderPreferenceOptions;
+
+    [ObservableProperty] [Required] private string _nationalId = "";
+
+    [ObservableProperty]
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Invalid email format")]
+    private string _email = "";
+
+    [ObservableProperty]
+    [Required(ErrorMessage = "Username is required")]
+    [MinLength(3)]
+    private string _userName = "";
+
+    public RegistrationViewModel(
+        AuthApiClient authClient,
+        ReferenceApiClient referenceClient,
+        INavigationService navigationService)
     {
-        private readonly AuthService _authService;
-        private readonly SubjectService _subjectService;
-        private readonly GradeService _gradeService;
-        public event Action? RequestClose;
+        _authClient = authClient;
+        _referenceClient = referenceClient;
+        _navigationService = navigationService;
+    }
 
-        private readonly INavigationService _navigationService;
+    [RelayCommand]
+    private async Task RegisterAsync()
+    {
+        ValidateAllProperties();
+        if (HasErrors) return;
 
-        // Inside RegistrationViewModel
-        [ObservableProperty] private ObservableCollection<Subject> _subjects = [];
-        [ObservableProperty] private ObservableCollection<Grade> _grades = [];
+        ErrorMessage = "";
 
-        [ObservableProperty]
-        private Grade? _selectedGrade = null;
+        var request = new RegisterRequest(
+            UserName: UserName,
+            Email: Email,
+            NationalId: NationalId,
+            PhoneNumber: PhoneNumber,
+            Gender: SelectedGenderValue,
+            Role: SupervisorOrStudentIsSupervisor ? "Supervisor" : "Student",
+            GradeId: SelectedGrade?.Id,
+            ClassNum: ClassNum,
+            PreferredMentorGender: SelectedPreferredMentorGenderValue,
+            PreferredMenteeGender: SelectedPreferredMenteeGenderValue,
+            MentorSubjectId: IsMentor ? SubjectToTeach : null,
+            MaxMentees: IsMentor ? MaxMentees : null,
+            MenteeSubjectId: IsMentee ? SubjectToLearn : null);
 
-        [ObservableProperty]
-        private int _subjectToTeach = -1;
-
-        [ObservableProperty]
-        private int _subjectToLearn = -1;
-
-        [ObservableProperty]
-        private int _classNum = 1;
-
-
-        public RegistrationViewModel(AuthService authService, INavigationService navigationService, SubjectService subjectService, GradeService gradeService)
+        try
         {
-            _authService = authService;
-            _navigationService = navigationService; // New
-            _subjectService = subjectService;
-            _gradeService = gradeService;
-            Subjects = new ObservableCollection<Model.Subject>();
+            await _authClient.RegisterAsync(request);
+            await _navigationService.GoBackAsync();
         }
-
-        [ObservableProperty] private bool _isMentor;
-        [ObservableProperty] private bool _isMentee;
-        [ObservableProperty] private bool _supervisorOrStudentIsSupervisor;
-        [ObservableProperty] private string _errorMessage = "";
-        [ObservableProperty] private string? _phoneNumber;
-        [ObservableProperty] private int _selectedGenderValue = (int)Gender.PreferNoAnswer;
-        [ObservableProperty] private int _selectedPreferredMentorGenderValue = (int)GenderPreference.NoPreference;
-        [ObservableProperty] private int _selectedPreferredMenteeGenderValue = (int)GenderPreference.NoPreference;
-        [ObservableProperty] private int _maxMentees = 1;
-
-        public static IReadOnlyList<GenderOption> GenderOptions { get; } = GenderHelper.GenderOptions;
-        public static IReadOnlyList<GenderPreferenceOption> GenderPreferenceOptions { get; } = GenderHelper.GenderPreferenceOptions;
-        [ObservableProperty] [Required] private string _nationalId = "";
-
-        [ObservableProperty]
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid email format")]
-        private string _email = "";
-
-        [ObservableProperty]
-        [Required(ErrorMessage = "Username is required")]
-        [MinLength(3)]
-        private string _userName = "";
-
-
-
-        [RelayCommand]
-        private async Task RegisterAsync()
+        catch (Exception ex)
         {
-            ValidateAllProperties();
-            if (HasErrors) return;
-
-            ErrorMessage = "";
-
-            var user = CreateUserFromState();
-            var result = await _authService.Register(user);
-
-            if (result.Success)
-            {
-                await _navigationService.GoBackAsync();
-            }
-            else
-            {
-                HandleServerResult(result);
-            }
+            ErrorMessage = ex.Message;
         }
-        partial void OnIsMentorChanged(bool value) => ValidateProperty(SubjectToTeach, nameof(SubjectToTeach));
+    }
 
-        private UserModel CreateUserFromState()
-        {
-            if (SupervisorOrStudentIsSupervisor)
-            {
-                var supervisor = new SupervisorModel { UserName = UserName, Email = Email, NationalId = NationalId };
-                supervisor.PhoneNumber = PhoneNumber;
-                supervisor.Gender = (Gender)SelectedGenderValue;
-                return supervisor;
-            }
+    public async Task OnNavigatedToAsync(bool supervisorOrStudentIsSupervisor)
+    {
+        SupervisorOrStudentIsSupervisor = supervisorOrStudentIsSupervisor;
 
-            var student = new StudentModel { UserName = UserName, Email = Email, NationalId = NationalId, Grade = SelectedGrade!, ClassNum = ClassNum };
-            student.PhoneNumber = PhoneNumber;
-            student.Gender = (Gender)SelectedGenderValue;
-            student.PreferredMentorGender = (GenderPreference)SelectedPreferredMentorGenderValue;
-            student.PreferredMenteeGender = (GenderPreference)SelectedPreferredMenteeGenderValue;
-            if (IsMentee) student.MenteeProfile = new MenteeProfile { SubjectToLearn = SubjectToLearn };
-            if (IsMentor) student.MentorProfile = new MentorProfile { SubjectToTeach = SubjectToTeach, MaxMentees = MaxMentees };
+        var subjects = await _referenceClient.GetSubjectsAsync();
+        Subjects = new ObservableCollection<SubjectResponse>(subjects);
 
-            return student;
-        }
-
-        private void HandleServerResult(Result<UserModel> result)
-        {
-            if (result.ValidationErrors != null && result.ValidationErrors.Any())
-            {
-                ErrorMessage = string.Join(Environment.NewLine,
-                    result.ValidationErrors.Select(x => $"• {x.Value}"));
-            }
-            else
-            {
-                ErrorMessage = result.ErrorMessage;
-            }
-        }
-
-        public async Task OnNavigatedToAsync(bool supervisorOrStudentIsSupervisor)
-        {
-            this.SupervisorOrStudentIsSupervisor = supervisorOrStudentIsSupervisor;
-
-            var subjects = await _subjectService.GetAllSubjectsAsync();
-            Subjects = new ObservableCollection<Subject>(subjects.Data);
-
-            var grades = await _gradeService.GetAllGradesAsync();
-            Grades = new ObservableCollection<Grade>(grades.Data);
-        }
+        var grades = await _referenceClient.GetGradesAsync();
+        Grades = new ObservableCollection<GradeResponse>(grades);
     }
 }

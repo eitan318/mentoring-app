@@ -1,7 +1,7 @@
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 using MentoringApp.Model;
-using MentoringApp.Data.Dao.User;
+using MentoringApp.Data.Dao;
 
 namespace MentoringApp.Data.Acess.SQLite
 {

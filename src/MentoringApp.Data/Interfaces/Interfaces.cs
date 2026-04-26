@@ -28,6 +28,7 @@ namespace MentoringApp.Data.Interfaces
         Task UpdateSupervisorClassesAsync(int supervisorId, IEnumerable<int> schoolClassIds);
 
         Task UpsertMentorProfileAsync(int userId, int subjectId);
+        Task UpsertMenteeProfileAsync(int userId, int subjectId);
 
         Task<bool> UpdateProfilePictureAsync(int userId, string? path);
         Task<bool> UpdateLanguageAsync(int userId, string language);
@@ -81,8 +82,8 @@ namespace MentoringApp.Data.Interfaces
 
     public interface IIssueCategoryRepo
     {
-        Task<IEnumerable<IssueCategoryDto>> GetAllAsync();
-        Task<IssueCategoryDto?> GetByIdAsync(int categoryId);
+        Task<IEnumerable<IssueCategoryDao>> GetAllAsync();
+        Task<IssueCategoryDao?> GetByIdAsync(int categoryId);
     }
 
     public interface IReviewRepo
@@ -142,5 +143,7 @@ namespace MentoringApp.Data.Interfaces
         Task<bool> DeleteAsync(int schoolClassId);
         /// <summary>Replaces all class assignments for a supervisor atomically.</summary>
         Task SetSupervisorClassesAsync(int supervisorId, IEnumerable<int> schoolClassIds);
+        /// <summary>Returns the ID of the supervisor responsible for the student's class, or null if not found.</summary>
+        Task<int?> GetSupervisorIdForStudentAsync(int studentId);
     }
 }

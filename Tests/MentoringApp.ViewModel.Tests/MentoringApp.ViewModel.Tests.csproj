@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MentoringApp.ViewModel\MentoringApp.ViewModel.csproj" />
+    <ProjectReference Include="..\..\src\MentoringApp.ApiClient\MentoringApp.ApiClient.csproj" />
     <ProjectReference Include="..\..\src\MentoringApp.Service\MentoringApp.Service.csproj" />
     <ProjectReference Include="..\..\src\MentoringApp.Data\MentoringApp.Data.csproj" />
     <ProjectReference Include="..\..\src\MentoringApp.Model\MentoringApp.Model.csproj" />

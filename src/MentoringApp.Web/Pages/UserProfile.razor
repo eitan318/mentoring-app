@@ -1,0 +1,128 @@
+@page "/user/{Id:int}"
+@inject AuthStateService Auth
+@inject NavigationManager Nav
+@inject UserApiClient Users
+@inject ReferenceApiClient Reference
+
+<PageTitle>Profile – MentoringApp</PageTitle>
+
+@if (!Auth.IsAuthenticated)
+{
+    <p>Redirecting…</p>
+}
+else if (_loading)
+{
+    <div class="empty-state"><div class="loading-spinner"></div></div>
+}
+else if (_user is null)
+{
+    <p class="error-msg">User not found.</p>
+}
+else
+{
+
+    <div class="card" style="margin-bottom:1rem">
+        <div class="flex items-center gap-2" style="margin-bottom:1rem">
+            <div class="peer-avatar" style="width:64px;height:64px;font-size:1.5rem;flex-shrink:0">
+                @_user.UserName[0].ToString().ToUpper()
+            </div>
+            <div>
+                <h2 style="margin-bottom:.25rem">@_user.UserName</h2>
+                <div class="flex gap-2" style="flex-wrap:wrap">
+                    <span class="badge badge-accepted">@_user.Role</span>
+                    @if (_user.IsMentor) { <span class="badge badge-pending">Mentor</span> }
+                    @if (_user.IsMentee) { <span class="badge badge-pending">Mentee</span> }
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-info-grid">
+            <div class="profile-info-row">
+                <span class="profile-info-label">Email</span>
+                <span>@_user.Email</span>
+            </div>
+            @if (!string.IsNullOrEmpty(_user.PhoneNumber))
+            {
+                <div class="profile-info-row">
+                    <span class="profile-info-label">Phone</span>
+                    <span>@_user.PhoneNumber</span>
+                </div>
+            }
+            <div class="profile-info-row">
+                <span class="profile-info-label">Gender</span>
+                <span>@GenderLabel(_user.Gender)</span>
+            </div>
+            @if (_user.GradeId.HasValue)
+            {
+                <div class="profile-info-row">
+                    <span class="profile-info-label">Grade / Class</span>
+                    <span>@GradeName(_user.GradeId.Value) / @_user.ClassNum</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (_user.IsMentor && _user.MentorSubjectId.HasValue)
+    {
+        <div class="card" style="margin-bottom:1rem">
+            <p class="card-title">Mentor Profile</p>
+            <div class="profile-info-row">
+                <span class="profile-info-label">Teaching</span>
+                <span style="color:#2E7D32;font-weight:500">@SubjectName(_user.MentorSubjectId.Value)</span>
+            </div>
+            @if (_user.MaxMentees.HasValue)
+            {
+                <div class="profile-info-row">
+                    <span class="profile-info-label">Max Mentees</span>
+                    <span>@_user.MaxMentees</span>
+                </div>
+            }
+        </div>
+    }
+
+    @if (_user.IsMentee && _user.MenteeSubjectId.HasValue)
+    {
+        <div class="card" style="margin-bottom:1rem">
+            <p class="card-title">Learning Profile</p>
+            <div class="profile-info-row">
+                <span class="profile-info-label">Learning</span>
+                <span style="color:#1565C0;font-weight:500">@SubjectName(_user.MenteeSubjectId.Value)</span>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private UserResponse? _user;
+    private Dictionary<int, string> _subjects = new();
+    private Dictionary<int, string> _grades = new();
+    private bool _loading = true;
+
+    protected override void OnInitialized()
+    {
+        if (!Auth.IsAuthenticated) Nav.NavigateTo("/login", replace: true);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated) return;
+        try
+        {
+            var userTask = Users.GetByIdAsync(Id);
+            var subjectsTask = Reference.GetSubjectsAsync();
+            var gradesTask = Reference.GetGradesAsync();
+            await Task.WhenAll(userTask, subjectsTask, gradesTask);
+            _user = userTask.Result;
+            _subjects = subjectsTask.Result.ToDictionary(s => s.Id, s => s.Name);
+            _grades = gradesTask.Result.ToDictionary(g => g.Id, g => g.Name);
+        }
+        catch { }
+        finally { _loading = false; }
+    }
+
+    private string GenderLabel(int g) => g switch { 1 => "Male", 2 => "Female", _ => "Not specified" };
+    private string SubjectName(int id) => _subjects.TryGetValue(id, out var n) ? n : $"#{id}";
+    private string GradeName(int id) => _grades.TryGetValue(id, out var n) ? n : $"Grade {id}";
+}

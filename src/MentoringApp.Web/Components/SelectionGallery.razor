@@ -1,0 +1,85 @@
+@inject MatchingApiClient Matching
+@inject ReferenceApiClient Reference
+
+<div>
+    @if (_loading)
+    {
+        <div class="empty-state"><div class="loading-spinner"></div></div>
+    }
+    else if (_picked)
+    {
+        <div class="phase-note phase-note-blue">
+            <strong>Selection submitted!</strong> Waiting for your supervisor to confirm the pairing.
+        </div>
+    }
+    else if (!_recommendations.Any())
+    {
+        <div class="empty-state">
+            <h3>No recommendations yet</h3>
+            <p>Your administrator hasn't generated match recommendations yet. Check back soon.</p>
+        </div>
+    }
+    else
+    {
+        <h2 style="margin-bottom:.25rem">Your Top Mentor Matches</h2>
+        <p class="text-muted text-sm" style="margin-bottom:1.25rem">Select the mentor you'd like to be paired with. Your supervisor will confirm the pairing.</p>
+
+        @foreach (var rec in _recommendations)
+        {
+            <div class="rec-card">
+                <div class="peer-avatar" style="width:56px;height:56px;font-size:1.25rem;flex-shrink:0">
+                    @rec.MentorName[0].ToString().ToUpper()
+                </div>
+                <div class="rec-info">
+                    <h3>@rec.MentorName</h3>
+                    <p style="color:#2E7D32;font-weight:500;margin-bottom:.4rem">@rec.MentorSubjectName</p>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill" style="width:@ScoreWidth(rec.ScorePercent)"></div>
+                    </div>
+                    <span class="score-label">@rec.ScorePercent.ToString("F0")% match</span>
+                </div>
+                <button class="btn btn-primary" @onclick="() => Pick(rec)" disabled="@_busy">Choose</button>
+            </div>
+        }
+    }
+
+    @if (!string.IsNullOrEmpty(_error)) { <p class="error-msg mt-4">@_error</p> }
+</div>
+
+@code {
+    [Parameter] public int MenteeId { get; set; }
+
+    private List<MatchRecommendationResponse> _recommendations = new();
+    private bool _loading = true, _busy, _picked;
+    private string _error = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _recommendations = (await Matching.GetRecommendationsAsync(MenteeId)).ToList();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private static string ScoreWidth(double pct) =>
+        $"{(int)Math.Min(100, Math.Round(pct))}%";
+
+    private async Task Pick(MatchRecommendationResponse rec)
+    {
+        _busy = true; _error = "";
+        try
+        {
+            var supervisorId = await Reference.GetSupervisorIdForStudentAsync(MenteeId);
+            if (!supervisorId.HasValue)
+            { _error = "Could not determine your supervisor. Please contact your administrator."; return; }
+
+            await Matching.GalleryPickAsync(new GalleryPickRequest(MenteeId, rec.MentorId, supervisorId.Value));
+            _picked = true;
+            _recommendations.Clear();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _busy = false; }
+    }
+}

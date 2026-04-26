@@ -24,7 +24,10 @@ public static class MatchingEndpoints
                 m.Gender,
                 SubjectToTeach = m.MentorProfile?.SubjectToTeach,
                 MaxMentees = m.MentorProfile?.MaxMentees,
-                m.ProfilePicturePath
+                m.ProfilePicturePath,
+                GradeId = m.Grade?.Id,
+                GradeName = m.Grade?.Name,
+                ClassNum = m.ClassNum
             }));
         })
         .WithOpenApi();

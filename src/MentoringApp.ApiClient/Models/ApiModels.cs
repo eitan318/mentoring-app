@@ -2,8 +2,16 @@ namespace MentoringApp.ApiClient.Models;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 public record SendCodeRequest(string NationalId);
+public record SendCodeResponse(string? DevCode);
 public record LoginRequest(string NationalId, string Password);
 public record LoginResponse(string Token, DateTime ExpiresAt);
+public record RegisterRequest(
+    string UserName, string Email, string NationalId, string? PhoneNumber,
+    int Gender, string Role,
+    int? GradeId, int? ClassNum,
+    int? PreferredMentorGender, int? PreferredMenteeGender,
+    int? MentorSubjectId, int? MaxMentees,
+    int? MenteeSubjectId);
 
 // ── Users ─────────────────────────────────────────────────────────────────────
 public record UserResponse(
@@ -22,7 +30,14 @@ public record UserResponse(
     int? PreferredMenteeGender,
     int? MentorSubjectId,
     int? MaxMentees,
-    int? MenteeSubjectId);
+    int? MenteeSubjectId)
+{
+    public bool IsMentor => MentorSubjectId.HasValue;
+    public bool IsMentee => MenteeSubjectId.HasValue;
+    public bool IsStudent => Role.Equals("Student", StringComparison.OrdinalIgnoreCase);
+    public bool IsAdmin => Role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+    public bool IsSupervisor => Role.Equals("Supervisor", StringComparison.OrdinalIgnoreCase);
+}
 
 public record SupervisorStatsResponse(int Id, string UserName, int PendingIssuesCount, int PairsCount);
 
@@ -45,6 +60,8 @@ public record UpdateLanguageRequest(string Language);
 public record UpdateGradeClassRequest(int GradeId, int ClassNum);
 public record UpdateGenderPreferencesRequest(int PreferredMentorGender, int PreferredMenteeGender);
 public record UpdateMentorProfileRequest(int SubjectId);
+public record UpdateMenteeProfileRequest(int SubjectId);
+public record UpdateSupervisorClassesRequest(IEnumerable<int> ClassIds);
 
 // ── Pairs ─────────────────────────────────────────────────────────────────────
 public record PairResponse(
@@ -66,7 +83,10 @@ public record AvailableMentorResponse(
     int Gender,
     int? SubjectToTeach,
     int? MaxMentees,
-    string? ProfilePicturePath);
+    string? ProfilePicturePath,
+    int? GradeId,
+    string? GradeName,
+    int? ClassNum);
 
 public record AvailableMenteeResponse(
     int Id,
@@ -84,7 +104,12 @@ public record PairRequestResponse(
     int MentorId,
     string Status,
     int Tier,
-    string CreatedAt);
+    string CreatedAt,
+    string MenteeName,
+    string MentorName,
+    string MenteeProfilePicturePath,
+    int MenteeGender,
+    string MenteeSubjectName);
 
 public record AcceptRequestBody(int SupervisorId);
 
@@ -110,7 +135,11 @@ public record IssueResponse(
     int ReportedByUserId,
     int IsResolved,
     string CreationDate,
-    int? ForwardedBySupervisorId);
+    int? ForwardedBySupervisorId)
+{
+    public bool IsResolvedBool => IsResolved != 0;
+    public bool IsForwardedToAdmin => ForwardedBySupervisorId.HasValue;
+}
 
 public record IssueCategoryResponse(int Id, string Name);
 public record CreateIssueRequest(string Description, int CategoryId, int ReportedByUserId);
@@ -136,3 +165,17 @@ public record CreateReviewRequest(
 public record SubjectResponse(int Id, string Name);
 public record GradeResponse(int Id, string Name, int Num);
 public record SchoolClassResponse(int Id, int GradeId, int ClassNum);
+public record AddSchoolClassRequest(int GradeId, int ClassNum);
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+public record SettingsResponse(
+    string? Phase1Deadline,
+    string? Phase2Deadline,
+    bool IsPhase1Complete,
+    bool IsProcessComplete,
+    bool IsSchoolConfigured,
+    bool IsUsersImported,
+    double MeetingHoursBarrier);
+
+public record DeadlineRequest(DateTime? Deadline);
+public record BoolSettingRequest(bool Value);

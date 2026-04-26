@@ -1,4 +1,4 @@
-﻿using MentoringApp.Data.Dao.User;
+﻿using MentoringApp.Data.Dao;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 using System.Collections.Generic;

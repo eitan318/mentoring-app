@@ -7,6 +7,9 @@ public class IssueApiClient(HttpClient http) : ApiClientBase(http)
     public Task<IEnumerable<IssueResponse>> GetAllAsync() =>
         GetAsync<IEnumerable<IssueResponse>>("/api/issues");
 
+    public Task<IssueResponse> GetByIdAsync(int id) =>
+        GetAsync<IssueResponse>($"/api/issues/{id}");
+
     public Task<IEnumerable<IssueResponse>> GetByUserAsync(int userId) =>
         GetAsync<IEnumerable<IssueResponse>>($"/api/issues/by-user/{userId}");
 

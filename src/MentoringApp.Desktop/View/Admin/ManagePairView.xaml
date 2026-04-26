@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
+    xmlns:vmAdmin="clr-namespace:MentoringApp.ViewModel.ViewModel.Admin;assembly=MentoringApp.ViewModel"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
     xmlns:loc="clr-namespace:MentoringApp.Localization"
     d:DesignHeight="600" d:DesignWidth="800"
@@ -47,24 +47,12 @@
                          SelectedItem="{Binding SelectedPair}"
                          HorizontalContentAlignment="Stretch">
                     <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type model:Pair}">
+                        <DataTemplate DataType="{x:Type vmAdmin:PairDisplayItem}">
                             <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10">
                                 <StackPanel Orientation="Horizontal">
-                                    <!-- Mentor -->
-                                    <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0"
-                                                                      VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"
-                                                                      Gender="{Binding Mentor.Gender}"/>
-                                    <TextBlock VerticalAlignment="Center" FontWeight="Bold" Text="{Binding Mentor.UserName}" Margin="0,0,6,0"/>
-
+                                    <TextBlock VerticalAlignment="Center" FontWeight="Bold" Text="{Binding MentorName}" Margin="0,0,6,0"/>
                                     <TextBlock VerticalAlignment="Center" Text="→" Foreground="Gray" Margin="0,0,6,0"/>
-
-                                    <!-- Mentee -->
-                                    <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,6,0"
-                                                                      VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"
-                                                                      Gender="{Binding Mentee.Gender}"/>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding Mentee.UserName}"/>
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding MenteeName}"/>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>

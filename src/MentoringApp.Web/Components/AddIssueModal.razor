@@ -1,0 +1,64 @@
+@inject IssueApiClient IssueClient
+
+<div class="modal-overlay">
+    <div class="modal">
+        <h2>Report an Issue</h2>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select @bind="_categoryId" class="form-select">
+                <option value="">Select category…</option>
+                @foreach (var cat in _categories)
+                {
+                    <option value="@cat.Id">@cat.Name</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea @bind="_description" class="form-input" rows="4"
+                      placeholder="Describe the issue in detail (min. 5 characters)…"
+                      style="resize:vertical"></textarea>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_error)) { <p class="error-msg">@_error</p> }
+
+        <div class="modal-actions">
+            <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+            <button class="btn btn-primary" @onclick="Submit" disabled="@_loading">
+                @(_loading ? "Submitting…" : "Submit")
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+
+    private string _description = "", _categoryId = "", _error = "";
+    private bool _loading;
+    private List<IssueCategoryResponse> _categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try { _categories = (await IssueClient.GetCategoriesAsync()).ToList(); }
+        catch { }
+    }
+
+    private async Task Submit()
+    {
+        if (string.IsNullOrEmpty(_categoryId)) { _error = "Please select a category."; return; }
+        if (_description.Length < 5) { _error = "Description must be at least 5 characters."; return; }
+        _loading = true; _error = "";
+        try
+        {
+            await IssueClient.CreateAsync(new CreateIssueRequest(_description, int.Parse(_categoryId), UserId));
+            await OnClose.InvokeAsync(true);
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private Task Cancel() => OnClose.InvokeAsync(false);
+}

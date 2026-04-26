@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:model="clr-namespace:MentoringApp.Model.User;assembly=MentoringApp.Model"
+             xmlns:apiModel="clr-namespace:MentoringApp.ApiClient.Models;assembly=MentoringApp.ApiClient"
              xmlns:components="clr-namespace:MentoringApp.View.Components"
              xmlns:loc="clr-namespace:MentoringApp.Localization"
              mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="700"
@@ -157,69 +157,25 @@
                          SelectedItem="{Binding SelectedUser}"
                          HorizontalContentAlignment="Stretch">
                     <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <ContentControl Content="{Binding}">
-                                <ContentControl.Resources>
-                                    <!-- Supervisor row: shows assigned class count as a hint -->
-                                    <DataTemplate DataType="{x:Type model:SupervisorModel}">
-                                        <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <components:ProfilePictureControl Grid.Column="0"
-                                                    Width="40" Height="40" Margin="0,0,10,0"
-                                                    VerticalAlignment="Center"
-                                                    ImagePath="{Binding ProfilePicturePath}"
-                                                    Gender="{Binding Gender}"/>
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding UserName}" FontWeight="Bold" FontSize="15"/>
-                                                    <TextBlock Text="{Binding Email}" Foreground="Gray" FontSize="12"/>
-                                                    <TextBlock FontSize="11" Margin="0,1,0,0">
-                                                        <TextBlock.Text>
-                                                            <MultiBinding Converter="{StaticResource LocalizedClassCount}">
-                                                                <Binding Path="AssignedClasses.Count"/>
-                                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
-                                                            </MultiBinding>
-                                                        </TextBlock.Text>
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="Gray"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding AssignedClasses.Count}" Value="0">
-                                                                        <Setter Property="Foreground" Value="#CC6600"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                    <!-- Default row for all other user types -->
-                                    <DataTemplate DataType="{x:Type model:UserModel}">
-                                        <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <components:ProfilePictureControl Grid.Column="0"
-                                                    Width="40" Height="40" Margin="0,0,10,0"
-                                                    VerticalAlignment="Center"
-                                                    ImagePath="{Binding ProfilePicturePath}"
-                                                    Gender="{Binding Gender}"/>
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding UserName}" FontWeight="Bold" FontSize="15"/>
-                                                    <TextBlock Text="{Binding Email}" Foreground="Gray" FontSize="12"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ContentControl.Resources>
-                            </ContentControl>
+                        <DataTemplate DataType="{x:Type apiModel:UserResponse}">
+                            <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <components:ProfilePictureControl Grid.Column="0"
+                                        Width="40" Height="40" Margin="0,0,10,0"
+                                        VerticalAlignment="Center"
+                                        ImagePath="{Binding ProfilePicturePath}"
+                                        Gender="{Binding Gender}"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding UserName}" FontWeight="Bold" FontSize="15"/>
+                                        <TextBlock Text="{Binding Email}" Foreground="Gray" FontSize="12"/>
+                                        <TextBlock Text="{Binding Role}" Foreground="Gray" FontSize="11" Margin="0,1,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

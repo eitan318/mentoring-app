@@ -1,0 +1,128 @@
+@inject MatchingApiClient Matching
+@inject ReferenceApiClient Reference
+
+<div>
+    @if (_loading)
+    {
+        <div class="empty-state"><div class="loading-spinner"></div></div>
+    }
+    else if (!_mentors.Any())
+    {
+        <div class="empty-state">
+            <h3>No mentors available</h3>
+            <p>There are currently no mentors available for Phase 1 matching.</p>
+        </div>
+    }
+    else
+    {
+        <h2>Available Mentors</h2>
+        <p class="text-muted text-sm mb-4">Browse available mentors and send pairing requests.</p>
+        <div class="mentor-grid">
+            @foreach (var mentor in _mentors)
+            {
+                var hasPending = _myRequestMentorIds.Contains(mentor.Id);
+                <div class="mentor-card">
+                    <div class="avatar">
+                        @if (!string.IsNullOrEmpty(mentor.ProfilePicturePath))
+                        {
+                            <img src="@mentor.ProfilePicturePath" alt="@mentor.UserName" />
+                        }
+                        else
+                        {
+                            @mentor.UserName[0].ToString().ToUpper()
+                        }
+                    </div>
+                    <h3>@mentor.UserName</h3>
+                    <p class="meta">
+                        @SubjectName(mentor.SubjectToTeach)
+                        @if (!string.IsNullOrEmpty(mentor.GradeName)) { <span> · @mentor.GradeName</span> }
+                        @if (mentor.ClassNum.HasValue) { <span> / @mentor.ClassNum</span> }
+                    </p>
+                    @if (hasPending)
+                    {
+                        <button class="btn btn-secondary btn-sm btn-full" @onclick="() => CancelRequest(mentor.Id)" disabled="@_busy">
+                            Cancel Request
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary btn-sm btn-full" @onclick="() => SendRequest(mentor.Id)" disabled="@_busy">
+                            Send Request
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(_error)) { <p class="error-msg mt-4">@_error</p> }
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+
+    private List<AvailableMentorResponse> _mentors = new();
+    private HashSet<int> _myRequestMentorIds = new();
+    private Dictionary<int, int> _requestIdByMentorId = new();
+    private Dictionary<int, string> _subjectNames = new();
+    private bool _loading = true, _busy;
+    private string _error = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true; _error = "";
+        try
+        {
+            var mentorsTask = Matching.GetAvailableMentorsAsync();
+            var requestsTask = Matching.GetRequestsForMenteeAsync(UserId);
+            var subjectsTask = Reference.GetSubjectsAsync();
+            await Task.WhenAll(mentorsTask, requestsTask, subjectsTask);
+
+            _mentors = mentorsTask.Result.ToList();
+            _subjectNames = subjectsTask.Result.ToDictionary(s => s.Id, s => s.Name);
+
+            _myRequestMentorIds.Clear();
+            _requestIdByMentorId.Clear();
+            foreach (var req in requestsTask.Result.Where(r => r.Status == "Pending"))
+            {
+                _myRequestMentorIds.Add(req.MentorId);
+                _requestIdByMentorId[req.MentorId] = req.Id;
+            }
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private async Task SendRequest(int mentorId)
+    {
+        _busy = true; _error = "";
+        try
+        {
+            await Matching.SendPairRequestAsync(new SendPairRequestBody(UserId, mentorId));
+            await Load();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _busy = false; }
+    }
+
+    private async Task CancelRequest(int mentorId)
+    {
+        if (!_requestIdByMentorId.TryGetValue(mentorId, out var requestId)) return;
+        _busy = true; _error = "";
+        try
+        {
+            await Matching.CancelRequestAsync(requestId);
+            await Load();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _busy = false; }
+    }
+
+    private string SubjectName(int? subjectId) =>
+        subjectId.HasValue && _subjectNames.TryGetValue(subjectId.Value, out var name) ? name : "";
+}
