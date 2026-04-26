@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MentoringApp.Service\MentoringApp.Service.csproj" />
+    <ProjectReference Include="..\MentoringApp.ApiClient\MentoringApp.ApiClient.csproj" />
   </ItemGroup>
 
 </Project>

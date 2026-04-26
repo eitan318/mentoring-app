@@ -1,139 +1,140 @@
-using System.Collections.ObjectModel;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Model;
-using MentoringApp.Service;
+using MentoringApp.ApiClient.Clients;
+using MentoringApp.ApiClient.Models;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
-using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModel.Supervisor;
+using MentoringApp.ViewModel.ViewModelHelper;
+using System.Collections.ObjectModel;
 
-namespace MentoringApp.ViewModel.ViewModel.Admin
+namespace MentoringApp.ViewModel.ViewModel.Admin;
+
+public partial class ManagePairsViewModel : ObservableObject, INavigatable
 {
-    /// <summary>
-    /// Admin pair management ViewModel. Displays all pairs with search filtering.
-    /// Selecting a pair eagerly loads its review count and unresolved issue count
-    /// for display in the sidebar before navigating to the full <see cref="PairDetailsViewModel"/>.
-    /// </summary>
-    public partial class ManagePairsViewModel : ObservableObject, INavigatable
+    private readonly IWindowService _windowService;
+    private readonly INavigationService _navigationService;
+    private readonly PairApiClient _pairClient;
+    private readonly ReviewApiClient _reviewClient;
+    private readonly IssueApiClient _issueClient;
+    private readonly UserApiClient _userClient;
+    private readonly IToastService _toastService;
+    private readonly ILocalizationService _loc;
+
+    // User name cache for display
+    private Dictionary<int, string> _userNames = new();
+
+    public ObservableCollection<PairDisplayItem> AllPairs { get; set; } = [];
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SeparateCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SelectPairCommand))]
+    private PairDisplayItem? _selectedPair;
+
+    [ObservableProperty] private int _selectedPairReviewCount;
+    [ObservableProperty] private int _selectedPairActiveIssueCount;
+    [ObservableProperty] private bool _isLoadingDetails;
+
+    private bool HasSelectedPair => SelectedPair != null;
+
+    [ObservableProperty] private string _searchText = string.Empty;
+
+    public IEnumerable<PairDisplayItem> FilteredPairs
     {
-        private readonly IWindowService _windowService;
-        private readonly INavigationService _navigationService;
-        private readonly PairService _pairService;
-        private readonly ReviewService _reviewService;
-        private readonly IssueService _issueService;
-        private readonly IToastService _toastService;
-        private readonly ILocalizationService _loc;
-
-        // ── All pairs (source of truth) ─────────────────────────────────────
-        public ObservableCollection<Pair> AllPairs { get; set; } = [];
-
-        // ── Selected pair (drives the sidebar) ─────────────────────────────
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(SeparateCommand))]
-        [NotifyCanExecuteChangedFor(nameof(SelectPairCommand))]
-        private Pair? _selectedPair;
-
-        [ObservableProperty] private int _selectedPairReviewCount;
-        [ObservableProperty] private int _selectedPairActiveIssueCount;
-        [ObservableProperty] private bool _isLoadingDetails;
-
-        private bool HasSelectedPair => SelectedPair != null;
-
-        // ── Search ──────────────────────────────────────────────────────────
-        [ObservableProperty] private string _searchText = string.Empty;
-
-        public System.Collections.Generic.IEnumerable<Pair> FilteredPairs
+        get
         {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(SearchText))
-                    return AllPairs;
-
-                return AllPairs.Where(p =>
-                    p.Mentor.UserName.Contains(SearchText, System.StringComparison.OrdinalIgnoreCase) ||
-                    p.Mentee.UserName.Contains(SearchText, System.StringComparison.OrdinalIgnoreCase));
-            }
+            if (string.IsNullOrWhiteSpace(SearchText)) return AllPairs;
+            return AllPairs.Where(p =>
+                p.MentorName.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                p.MenteeName.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
         }
+    }
 
-        partial void OnSearchTextChanged(string v) => OnPropertyChanged(nameof(FilteredPairs));
+    partial void OnSearchTextChanged(string v) => OnPropertyChanged(nameof(FilteredPairs));
 
-        // ── Constructor ─────────────────────────────────────────────────────
-        public ManagePairsViewModel(
-            IWindowService windowService,
-            INavigationService navigationService,
-            PairService pairService,
-            ReviewService reviewService,
-            IssueService issueService,
-            IToastService toastService,
-            ILocalizationService loc)
-        {
-            _windowService     = windowService;
-            _navigationService = navigationService;
-            _pairService       = pairService;
-            _reviewService     = reviewService;
-            _issueService      = issueService;
-            _toastService      = toastService;
-            _loc               = loc;
-        }
+    public ManagePairsViewModel(
+        IWindowService windowService,
+        INavigationService navigationService,
+        PairApiClient pairClient,
+        ReviewApiClient reviewClient,
+        IssueApiClient issueClient,
+        UserApiClient userClient,
+        IToastService toastService,
+        ILocalizationService loc)
+    {
+        _windowService = windowService;
+        _navigationService = navigationService;
+        _pairClient = pairClient;
+        _reviewClient = reviewClient;
+        _issueClient = issueClient;
+        _userClient = userClient;
+        _toastService = toastService;
+        _loc = loc;
+    }
 
-        public async Task OnNavigatedToAsync() => await RefreshPairs();
+    public async Task OnNavigatedToAsync() => await RefreshPairs();
 
-        private async Task RefreshPairs()
-        {
-            var res = await _pairService.GetAllPairsAsync();
-            AllPairs = new ObservableCollection<Pair>(res.Data ?? []);
-            SelectedPair = null;
-            OnPropertyChanged(nameof(FilteredPairs));
-        }
+    private async Task RefreshPairs()
+    {
+        var users = await _userClient.GetAllAsync();
+        _userNames = users.ToDictionary(u => u.Id, u => u.UserName);
 
-        async partial void OnSelectedPairChanged(Pair? value)
-        {
-            if (value == null) return;
+        var pairs = await _pairClient.GetAllAsync();
+        AllPairs = new ObservableCollection<PairDisplayItem>(pairs.Select(p => new PairDisplayItem(p, _userNames)));
+        SelectedPair = null;
+        OnPropertyChanged(nameof(FilteredPairs));
+    }
 
-            IsLoadingDetails = true;
-            SelectedPairReviewCount = 0;
-            SelectedPairActiveIssueCount = 0;
+    async partial void OnSelectedPairChanged(PairDisplayItem? value)
+    {
+        if (value == null) return;
 
-            // Load reviews
-            var revRes = await _reviewService.GetReviewsByPairAsync(value.Id);
-            if (revRes.Success && revRes.Data != null)
-                SelectedPairReviewCount = revRes.Data.Count();
+        IsLoadingDetails = true;
+        SelectedPairReviewCount = 0;
+        SelectedPairActiveIssueCount = 0;
 
-            // Load active issues (unresolved) for mentor and mentee
-            int issueCount = 0;
-            var mentorIssues = await _issueService.GetIssuesByUserAsync(value.Mentor.Id);
-            if (mentorIssues.Success && mentorIssues.Data != null)
-                issueCount += mentorIssues.Data.Count(i => !i.IsResolved);
+        var reviews = await _reviewClient.GetByPairAsync(value.Id);
+        SelectedPairReviewCount = reviews.Count();
 
-            var menteeIssues = await _issueService.GetIssuesByUserAsync(value.Mentee.Id);
-            if (menteeIssues.Success && menteeIssues.Data != null)
-                issueCount += menteeIssues.Data.Count(i => !i.IsResolved);
+        var mentorIssues = await _issueClient.GetByUserAsync(value.MentorId);
+        var menteeIssues = await _issueClient.GetByUserAsync(value.MenteeId);
+        SelectedPairActiveIssueCount = mentorIssues.Count(i => !i.IsResolvedBool) + menteeIssues.Count(i => !i.IsResolvedBool);
 
-            SelectedPairActiveIssueCount = issueCount;
-            IsLoadingDetails = false;
-        }
+        IsLoadingDetails = false;
+    }
 
-        // ── Commands ────────────────────────────────────────────────────────
-        [RelayCommand]
-        private void CreatePair() => _navigationService.NavigateToAsync<CreatePairViewModel>();
+    [RelayCommand] private void CreatePair() => _navigationService.NavigateToAsync<CreatePairViewModel>();
 
-        [RelayCommand(CanExecute = nameof(HasSelectedPair))]
-        private async Task SelectPair()
-        {
-            if (SelectedPair != null)
-                await _navigationService.NavigateToAsync<PairDetailsViewModel, int>(SelectedPair.Id);
-        }
+    [RelayCommand(CanExecute = nameof(HasSelectedPair))]
+    private async Task SelectPair()
+    {
+        if (SelectedPair != null)
+            await _navigationService.NavigateToAsync<PairDetailsViewModel, int>(SelectedPair.Id);
+    }
 
-        [RelayCommand(CanExecute = nameof(HasSelectedPair))]
-        private async Task Separate()
-        {
-            if (SelectedPair is null) return;
-            if (!await _toastService.ConfirmAsync(_loc.Get("ManagePairs_ConfirmSeparate_Title"), _loc.Get("ManagePairs_ConfirmSeparate_Body"))) return;
+    [RelayCommand(CanExecute = nameof(HasSelectedPair))]
+    private async Task Separate()
+    {
+        if (SelectedPair is null) return;
+        if (!await _toastService.ConfirmAsync(_loc.Get("ManagePairs_ConfirmSeparate_Title"), _loc.Get("ManagePairs_ConfirmSeparate_Body"))) return;
+        await _pairClient.DeleteAsync(SelectedPair.Id);
+        await RefreshPairs();
+    }
+}
 
-            await _pairService.SeparatePairAsync(SelectedPair.Id);
-            await RefreshPairs();
-        }
+public class PairDisplayItem
+{
+    public PairResponse Pair { get; }
+    public int Id => Pair.Id;
+    public int MentorId => Pair.MentorId;
+    public int MenteeId => Pair.MenteeId;
+    public string MentorName { get; }
+    public string MenteeName { get; }
+
+    public PairDisplayItem(PairResponse pair, Dictionary<int, string> userNames)
+    {
+        Pair = pair;
+        userNames.TryGetValue(pair.MentorId, out var mn); MentorName = mn ?? $"User {pair.MentorId}";
+        userNames.TryGetValue(pair.MenteeId, out var men); MenteeName = men ?? $"User {pair.MenteeId}";
     }
 }

@@ -1,73 +1,61 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Model;
-using MentoringApp.Service;
-using MentoringApp.ViewModel.IService;
+using MentoringApp.ApiClient.Clients;
+using MentoringApp.ApiClient.Models;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 
-namespace MentoringApp.ViewModel.ViewModel.Supervisor
+namespace MentoringApp.ViewModel.ViewModel.Supervisor;
+
+public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
 {
-    public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
+    private readonly PairApiClient _pairClient;
+    private readonly IssueApiClient _issueClient;
+    private readonly ReviewApiClient _reviewClient;
+    private readonly SettingsApiClient _settingsClient;
+
+    [ObservableProperty] private PairResponse? _currentPair;
+    [ObservableProperty] private string _mentorName = "";
+    [ObservableProperty] private string _menteeName = "";
+    [ObservableProperty] private ObservableCollection<IssueResponse> _pairIssues = new();
+    [ObservableProperty] private ObservableCollection<ReviewResponse> _pairReviews = new();
+    [ObservableProperty] private double _totalMeetingHours;
+    [ObservableProperty] private double _requiredMeetingHours = 10;
+    [ObservableProperty] private double _hoursProgress;
+    [ObservableProperty] private bool _showIssues = true;
+
+    public PairDetailsViewModel(
+        PairApiClient pairClient,
+        IssueApiClient issueClient,
+        ReviewApiClient reviewClient,
+        SettingsApiClient settingsClient)
     {
-        private readonly PairService _pairService;
-        private readonly IssueService _issueService;
-        private readonly ReviewService _reviewService;
-        private readonly SettingsService _settingsService;
+        _pairClient = pairClient;
+        _issueClient = issueClient;
+        _reviewClient = reviewClient;
+        _settingsClient = settingsClient;
+    }
 
-        [ObservableProperty] private Pair? _currentPair;
-        [ObservableProperty] private ObservableCollection<IssueModel> _pairIssues = new();
-        [ObservableProperty] private ObservableCollection<Review> _pairReviews = new();
-        [ObservableProperty] private double _totalMeetingHours;
-        [ObservableProperty] private double _requiredMeetingHours = 10;
-        [ObservableProperty] private double _hoursProgress;  // 0-100 for ProgressBar
-        [ObservableProperty] private bool _showIssues = true;
+    public async Task OnNavigatedToAsync(int pairId)
+    {
+        CurrentPair = await _pairClient.GetByIdAsync(pairId);
 
-        public PairDetailsViewModel(PairService pairService, IssueService issueService, ReviewService reviewService, SettingsService settingsService)
+        var reviews = await _reviewClient.GetByPairAsync(pairId);
+        PairReviews = new ObservableCollection<ReviewResponse>(reviews);
+
+        var settings = await _settingsClient.GetAllAsync();
+        RequiredMeetingHours = settings.MeetingHoursBarrier;
+        TotalMeetingHours = PairReviews.Sum(r => r.AmountOfHours);
+        HoursProgress = RequiredMeetingHours > 0
+            ? Math.Min(100, (TotalMeetingHours / RequiredMeetingHours) * 100) : 0;
+
+        if (CurrentPair != null)
         {
-            _pairService = pairService;
-            _issueService = issueService;
-            _reviewService = reviewService;
-            _settingsService = settingsService;
+            var mentorIssues = await _issueClient.GetByUserAsync(CurrentPair.MentorId);
+            var menteeIssues = await _issueClient.GetByUserAsync(CurrentPair.MenteeId);
+            var allIssues = mentorIssues.Concat(menteeIssues)
+                .GroupBy(i => i.Id).Select(g => g.First())
+                .OrderByDescending(i => i.CreationDate);
+            PairIssues = new ObservableCollection<IssueResponse>(allIssues);
         }
-
-        public async Task OnNavigatedToAsync(int pairId)
-        {
-            var pairResult = await _pairService.GetPairById(pairId);
-            if (pairResult.Success && pairResult.Data != null)
-            {
-                CurrentPair = pairResult.Data;
-            }
-
-            var reviewsResult = await _reviewService.GetReviewsByPairAsync(pairId);
-            if (reviewsResult.Success && reviewsResult.Data != null)
-            {
-                PairReviews = new ObservableCollection<Review>(reviewsResult.Data);
-            }
-
-            // Calculate meeting hours progress
-            RequiredMeetingHours = await _settingsService.GetMeetingHoursBarrierAsync();
-            TotalMeetingHours = PairReviews.Sum(r => r.AmountOfHours);
-            HoursProgress = RequiredMeetingHours > 0
-                ? Math.Min(100, (TotalMeetingHours / RequiredMeetingHours) * 100)
-                : 0;
-
-            if (CurrentPair != null)
-            {
-                var allIssues = new List<IssueModel>();
-                
-                var mentorIssues = await _issueService.GetIssuesByUserAsync(CurrentPair.Mentor.Id);
-                if (mentorIssues.Success && mentorIssues.Data != null)
-                    allIssues.AddRange(mentorIssues.Data);
-
-                var menteeIssues = await _issueService.GetIssuesByUserAsync(CurrentPair.Mentee.Id);
-                if (menteeIssues.Success && menteeIssues.Data != null)
-                    allIssues.AddRange(menteeIssues.Data);
-                
-                var distinctIssues = allIssues.GroupBy(i => i.Id).Select(g => g.First());
-                PairIssues = new ObservableCollection<IssueModel>(distinctIssues.OrderByDescending(i => i.CreationDate));
-            }
-        }
-
     }
 }

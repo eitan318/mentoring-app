@@ -1,0 +1,21 @@
+@inject AuthStateService Auth
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<nav class="navbar">
+    <span class="brand">MentoringApp</span>
+    <div class="nav-links">
+        <NavLink href="/dashboard" Match="NavLinkMatch.Prefix">Dashboard</NavLink>
+        <NavLink href="/profile" Match="NavLinkMatch.Prefix">Profile</NavLink>
+        <NavLink href="/issues" Match="NavLinkMatch.Prefix">Issues</NavLink>
+        <button class="btn btn-secondary btn-sm" @onclick="Logout">Logout</button>
+    </div>
+</nav>
+
+@code {
+    private async Task Logout()
+    {
+        await Auth.PersistLogoutAsync(JS);
+        Nav.NavigateTo("/login");
+    }
+}

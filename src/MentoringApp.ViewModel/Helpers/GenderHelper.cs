@@ -1,5 +1,3 @@
-using MentoringApp.Model.User;
-
 namespace MentoringApp.ViewModel.Helpers
 {
     public class GenderOption
@@ -31,7 +29,7 @@ namespace MentoringApp.ViewModel.Helpers
             new GenderPreferenceOption { Value = (int)GenderPreference.NoPreference, Display = "No Preference" },
         };
 
-        public static string GenderToDisplay(Gender gender) => gender switch
+        public static string GenderToDisplay(int gender) => (Gender)gender switch
         {
             Gender.Male           => "Male",
             Gender.Female         => "Female",
@@ -40,7 +38,7 @@ namespace MentoringApp.ViewModel.Helpers
             _                     => "Unknown"
         };
 
-        public static string GenderPreferenceToDisplay(GenderPreference pref) => pref switch
+        public static string GenderPreferenceToDisplay(int pref) => (GenderPreference)pref switch
         {
             GenderPreference.Male         => "Male",
             GenderPreference.Female       => "Female",

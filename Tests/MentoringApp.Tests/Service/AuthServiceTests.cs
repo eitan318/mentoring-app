@@ -34,7 +34,7 @@ namespace MentoringApp.Tests.Service
 
             var issueCategoryRepo = new Mock<IIssueCategoryRepo>();
             issueCategoryRepo.Setup(r => r.GetAllAsync())
-                             .ReturnsAsync(Array.Empty<IssueCategoryDto>());
+                             .ReturnsAsync(Array.Empty<IssueCategoryDao>());
 
             var pairRepo = new Mock<IPairRepo>();
             pairRepo.Setup(r => r.GetBySupervisorIdAsync(It.IsAny<int>()))

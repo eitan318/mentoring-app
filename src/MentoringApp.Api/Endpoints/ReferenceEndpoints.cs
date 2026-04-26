@@ -1,4 +1,5 @@
 using MentoringApp.Api.Helpers;
+using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
 
 namespace MentoringApp.Api.Endpoints;
@@ -42,5 +43,35 @@ public static class ReferenceEndpoints
             return result.ToHttp();
         })
         .WithOpenApi();
+
+        // GET /api/reference/supervisor-for-student/{studentId}
+        group.MapGet("/supervisor-for-student/{studentId:int}", async (int studentId, ISchoolClassRepo classRepo) =>
+        {
+            var supervisorId = await classRepo.GetSupervisorIdForStudentAsync(studentId);
+            return supervisorId.HasValue
+                ? Results.Ok(new { supervisorId = supervisorId.Value })
+                : Results.NotFound(new { error = "No supervisor found for this student's class." });
+        })
+        .WithOpenApi();
+
+        // POST /api/reference/school-classes
+        group.MapPost("/school-classes", async (AddSchoolClassBody req, SchoolClassService schoolClassService) =>
+        {
+            var result = await schoolClassService.AddClassAsync(req.GradeId, req.ClassNum);
+            return result.Success ? Results.StatusCode(201) : Results.BadRequest(new { error = result.ErrorMessage });
+        })
+        .RequireAuthorization("AdminOnly")
+        .WithOpenApi();
+
+        // DELETE /api/reference/school-classes/{id}
+        group.MapDelete("/school-classes/{id:int}", async (int id, SchoolClassService schoolClassService) =>
+        {
+            var result = await schoolClassService.DeleteClassAsync(id);
+            return result.Success ? Results.NoContent() : Results.NotFound();
+        })
+        .RequireAuthorization("AdminOnly")
+        .WithOpenApi();
     }
 }
+
+record AddSchoolClassBody(int GradeId, int ClassNum);

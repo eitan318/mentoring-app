@@ -1,65 +1,56 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MentoringApp.Model;
-using MentoringApp.Service;
+using MentoringApp.ApiClient.Clients;
+using MentoringApp.ApiClient.Models;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace MentoringApp.ViewModel.ViewModel.Student
+namespace MentoringApp.ViewModel.ViewModel.Student;
+
+public partial class AddIssueViewModel : ObservableValidator, INavigatable<IEnumerable<IssueCategoryResponse>>, ICloseable
 {
-    public partial class AddIssueViewModel : ObservableValidator, INavigatable<IEnumerable<IssueCategoryModel>>, ICloseable 
+    [ObservableProperty] private ObservableCollection<IssueCategoryResponse> _issueCategoryList = [];
+
+    [ObservableProperty]
+    [Required(ErrorMessage = "You must select a category")]
+    private IssueCategoryResponse? _selectedIssueCategory;
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [Required(ErrorMessage = "Please describe the issue.")]
+    [MinLength(5, ErrorMessage = "Description is too short.")]
+    private string _issueDescription = string.Empty;
+
+    private readonly IssueApiClient _issueClient;
+    private readonly INavigationService _navigationService;
+    private readonly UserStore _userStore;
+
+    public event Action? RequestClose;
+
+    public AddIssueViewModel(IssueApiClient issueClient, UserStore userStore, INavigationService navigationService)
     {
-        // Data for the View
-        [ObservableProperty] private ObservableCollection<IssueCategoryModel> _issueCategoryList;
+        _issueClient = issueClient;
+        _userStore = userStore;
+        _navigationService = navigationService;
+    }
 
-        [ObservableProperty] 
-        [Required(ErrorMessage = "You must select a category")]
-        private IssueCategoryModel? _selectedIssueCategory;
-        
-        [ObservableProperty] 
-        [NotifyDataErrorInfo]
-        [Required(ErrorMessage = "Please describe the issue.")]
-        [MinLength(5, ErrorMessage = "Description is too short.")]
-        private string _issueDescription = string.Empty;
+    public Task OnNavigatedToAsync(IEnumerable<IssueCategoryResponse> categories)
+    {
+        IssueCategoryList = [.. categories];
+        return Task.CompletedTask;
+    }
 
-        private readonly IssueService _issueService;
-        private readonly INavigationService _navigationService;
-        private readonly UserStore _userStore;
+    [RelayCommand]
+    private async Task AddIssue()
+    {
+        ValidateAllProperties();
+        if (HasErrors || SelectedIssueCategory == null || _userStore.User == null) return;
 
-        public event Action? RequestClose;
-
-        public AddIssueViewModel(IssueService issueService, UserStore userStore, INavigationService navigationService)
-        {
-            _issueService = issueService;
-            _userStore = userStore;
-            _navigationService = navigationService;
-            _issueCategoryList = [];
-        }
-    
-        public Task OnNavigatedToAsync(IEnumerable<IssueCategoryModel> categories)
-        {
-            IssueCategoryList = [.. categories];
-            return Task.CompletedTask;
-        }
-
-        [RelayCommand]
-        private async Task AddIssue()
-        {
-            ValidateAllProperties();
-
-            if (HasErrors || SelectedIssueCategory == null)
-                return;
-
-            if (_userStore.User != null)
-            {
-                await _issueService.CreateIssueAsync(IssueDescription, SelectedIssueCategory.Id, _userStore.User.Id);
-            }
-
-            RequestClose?.Invoke();
-            _navigationService.GoBackAsync();
-        }
+        await _issueClient.CreateAsync(new CreateIssueRequest(IssueDescription, SelectedIssueCategory.Id, _userStore.User.Id));
+        RequestClose?.Invoke();
+        _navigationService.GoBackAsync();
     }
 }

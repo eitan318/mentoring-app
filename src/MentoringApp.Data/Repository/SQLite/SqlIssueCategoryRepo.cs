@@ -1,4 +1,5 @@
 ﻿using MentoringApp.Data.Acess.SQLite.ConnectionsService;
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.DTO;
 using MentoringApp.Data.Interfaces;
 
@@ -13,18 +14,18 @@ namespace MentoringApp.Data.Acess.SQLite
             _db = db;
         }
 
-        public async Task<IEnumerable<IssueCategoryDto>> GetAllAsync()
+        public async Task<IEnumerable<IssueCategoryDao>> GetAllAsync()
         {
             var rows = await _db.QueryAsync<CategoryRow>("SELECT Id, Name FROM IssueCategories");
-            return rows.Select(r => new IssueCategoryDto { Id = r.Id, Name = r.Name }).ToList();
+            return rows.Select(r => new IssueCategoryDao { Id = r.Id, Name = r.Name }).ToList();
         }
 
-        public async Task<IssueCategoryDto?> GetByIdAsync(int categoryId)
+        public async Task<IssueCategoryDao?> GetByIdAsync(int categoryId)
         {
             var row = await _db.QuerySingleAsync<CategoryRow>(
                 "SELECT Id, Name FROM IssueCategories WHERE Id = @Id",
                 new { Id = categoryId });
-            return row == null ? null : new IssueCategoryDto { Id = row.Id, Name = row.Name };
+            return row == null ? null : new IssueCategoryDao { Id = row.Id, Name = row.Name };
         }
 
 

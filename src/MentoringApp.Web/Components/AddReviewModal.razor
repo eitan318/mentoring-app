@@ -1,0 +1,53 @@
+@inject ReviewApiClient ReviewClient
+
+<div class="modal-overlay">
+    <div class="modal">
+        <h2>Add Meeting Review</h2>
+
+        <div class="form-group">
+            <label>Content</label>
+            <textarea @bind="_content" class="form-input" rows="4"
+                      placeholder="Describe what you covered in this meeting (min. 10 characters)…"
+                      style="resize:vertical"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Meeting Hours</label>
+            <input @bind="_hours" class="form-input" type="number" min="0.1" max="24" step="0.5" placeholder="e.g. 1.5" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(_error)) { <p class="error-msg">@_error</p> }
+
+        <div class="modal-actions">
+            <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+            <button class="btn btn-primary" @onclick="Submit" disabled="@_loading">
+                @(_loading ? "Saving…" : "Save Review")
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int PairId { get; set; }
+    [Parameter] public int AuthorUserId { get; set; }
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+
+    private string _content = "", _error = "";
+    private double _hours = 1.0;
+    private bool _loading;
+
+    private async Task Submit()
+    {
+        if (_content.Length < 10) { _error = "Content must be at least 10 characters."; return; }
+        if (_hours <= 0 || _hours > 24) { _error = "Hours must be between 0.1 and 24."; return; }
+        _loading = true; _error = "";
+        try
+        {
+            await ReviewClient.CreateAsync(new CreateReviewRequest(_content, DateTime.UtcNow, PairId, AuthorUserId, _hours));
+            await OnClose.InvokeAsync(true);
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private Task Cancel() => OnClose.InvokeAsync(false);
+}

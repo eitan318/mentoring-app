@@ -3,6 +3,7 @@ using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
 using MentoringApp.Model.User;
 using MentoringApp.Service;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MentoringApp.Api.Endpoints;
 
@@ -112,6 +113,87 @@ public static class UserEndpoints
             return Results.Ok();
         })
         .WithOpenApi();
+
+        // PUT /api/users/{id}/mentee-profile
+        group.MapPut("/{id:int}/mentee-profile", async (int id, UpdateMenteeProfileRequest req, IUserRepo userRepo) =>
+        {
+            await userRepo.UpsertMenteeProfileAsync(id, req.SubjectId);
+            return Results.Ok();
+        })
+        .WithOpenApi();
+
+        // PUT /api/users/{id}/supervisor-classes
+        group.MapPut("/{id:int}/supervisor-classes", async (int id, UpdateSupervisorClassesRequest req, SchoolClassService schoolClassService) =>
+        {
+            var result = await schoolClassService.SetSupervisorClassesAsync(id, req.ClassIds);
+            return result.Success ? Results.Ok() : Results.BadRequest(new { error = result.ErrorMessage });
+        })
+        .RequireAuthorization("AdminOnly")
+        .WithOpenApi();
+
+        // POST /api/users/{id}/profile-picture (multipart)
+        group.MapPost("/{id:int}/profile-picture", async (int id, IFormFile file, IUserRepo userRepo, IWebHostEnvironment env) =>
+        {
+            var uploadsDir = Path.Combine(env.WebRootPath ?? env.ContentRootPath, "uploads", "profile-pictures");
+            Directory.CreateDirectory(uploadsDir);
+            var ext = Path.GetExtension(file.FileName);
+            var fileName = $"{id}{ext}";
+            var filePath = Path.Combine(uploadsDir, fileName);
+            using var stream = File.Create(filePath);
+            await file.CopyToAsync(stream);
+            var relativePath = Path.Combine("uploads", "profile-pictures", fileName);
+            await userRepo.UpdateProfilePictureAsync(id, relativePath);
+            return Results.Ok(new { path = relativePath });
+        })
+        .WithOpenApi()
+        .DisableAntiforgery();
+
+        // POST /api/users/import/students  (multipart Excel upload)
+        group.MapPost("/import/students", async (IFormFile file, ExcelImportService importService) =>
+        {
+            var tempPath = Path.GetTempFileName() + ".xlsx";
+            using (var stream = File.Create(tempPath))
+                await file.CopyToAsync(stream);
+            var result = await importService.ImportStudentsFromExcelAsync(tempPath);
+            File.Delete(tempPath);
+            return result.Success
+                ? Results.Ok(new { imported = result.Data })
+                : Results.BadRequest(new { error = result.ErrorMessage });
+        })
+        .RequireAuthorization("AdminOnly")
+        .WithOpenApi()
+        .DisableAntiforgery();
+
+        // POST /api/users/import/supervisors
+        group.MapPost("/import/supervisors", async (IFormFile file, ExcelImportService importService) =>
+        {
+            var tempPath = Path.GetTempFileName() + ".xlsx";
+            using (var stream = File.Create(tempPath))
+                await file.CopyToAsync(stream);
+            var result = await importService.ImportSupervisorsFromExcelAsync(tempPath);
+            File.Delete(tempPath);
+            return result.Success
+                ? Results.Ok(new { imported = result.Data })
+                : Results.BadRequest(new { error = result.ErrorMessage });
+        })
+        .RequireAuthorization("AdminOnly")
+        .WithOpenApi()
+        .DisableAntiforgery();
+
+        // GET /api/users/import/template?type=students|supervisors
+        group.MapGet("/import/template", async (string type, ExcelImportService importService) =>
+        {
+            bool isSupervisor = type.Equals("supervisors", StringComparison.OrdinalIgnoreCase);
+            var tempPath = Path.GetTempFileName() + ".xlsx";
+            var result = importService.GenerateTemplate(isSupervisor, tempPath);
+            if (!result.Success) return Results.BadRequest(new { error = result.ErrorMessage });
+            var bytes = await File.ReadAllBytesAsync(tempPath);
+            File.Delete(tempPath);
+            var fileName = isSupervisor ? "supervisors_template.xlsx" : "students_template.xlsx";
+            return Results.File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        })
+        .RequireAuthorization("AdminOnly")
+        .WithOpenApi();
     }
 }
 
@@ -121,3 +203,5 @@ record UpdateLanguageRequest(string Language);
 record UpdateGradeClassRequest(int GradeId, int ClassNum);
 record UpdateGenderPreferencesRequest(int PreferredMentorGender, int PreferredMenteeGender);
 record UpdateMentorProfileRequest(int SubjectId);
+record UpdateMenteeProfileRequest(int SubjectId);
+record UpdateSupervisorClassesRequest(IEnumerable<int> ClassIds);

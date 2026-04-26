@@ -38,6 +38,14 @@ public static class IssueEndpoints
         })
         .WithOpenApi();
 
+        // GET /api/issues/{id}
+        group.MapGet("/{id:int}", async (int id, IIssueRepo issueRepo) =>
+        {
+            var dto = await issueRepo.GetByIdAsync(id);
+            return dto is null ? Results.NotFound() : Results.Ok(dto);
+        })
+        .WithOpenApi();
+
         // GET /api/issues/by-user/{userId}
         group.MapGet("/by-user/{userId:int}", async (int userId, IIssueRepo issueRepo) =>
         {

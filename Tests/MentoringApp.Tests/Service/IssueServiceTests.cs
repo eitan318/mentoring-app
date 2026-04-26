@@ -44,8 +44,8 @@ namespace MentoringApp.Tests.Service
             return new IssueService(issueRepo.Object, categoryRepo.Object, notificationService);
         }
 
-        private static IssueCategoryDto MakeCategoryDto(int id = 1, string name = "General") =>
-            new IssueCategoryDto { Id = id, Name = name };
+        private static IssueCategoryDao MakeCategoryDto(int id = 1, string name = "General") =>
+            new IssueCategoryDao { Id = id, Name = name };
 
         // ── CreateIssueAsync ───────────────────────────────────────────────────
 
@@ -175,7 +175,7 @@ namespace MentoringApp.Tests.Service
             issueRepo.Setup(r => r.GetByReporterAsync(7)).ReturnsAsync(Array.Empty<IssueDao>());
 
             var categoryRepo = new Mock<IIssueCategoryRepo>();
-            categoryRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(Array.Empty<IssueCategoryDto>());
+            categoryRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(Array.Empty<IssueCategoryDao>());
 
             var sut = BuildService(issueRepo, categoryRepo);
 

@@ -163,9 +163,19 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task UpsertMentorProfileAsync(int userId, int subjectId)
         {
             const string sql = @"
-        INSERT INTO UserMentors (UserId, SubjectToTeach) 
+        INSERT INTO UserMentors (UserId, SubjectToTeach)
         VALUES (@userId, @subjectId)
         ON CONFLICT(UserId) DO UPDATE SET SubjectToTeach = excluded.SubjectToTeach";
+
+            await _db.ExecuteAsync(sql, new { userId, subjectId });
+        }
+
+        public async Task UpsertMenteeProfileAsync(int userId, int subjectId)
+        {
+            const string sql = @"
+        INSERT INTO UserMentees (UserId, SubjectToLearn)
+        VALUES (@userId, @subjectId)
+        ON CONFLICT(UserId) DO UPDATE SET SubjectToLearn = excluded.SubjectToLearn";
 
             await _db.ExecuteAsync(sql, new { userId, subjectId });
         }
@@ -247,7 +257,8 @@ namespace MentoringApp.Data.Acess.SQLite
         /// </summary>
         public async Task<IEnumerable<UserDao>> GetAllUserDtosAsync()
         {
-            var users = await _db.QueryAsync<UserRow>("SELECT * FROM Users");
+            var users = await _db.QueryAsync<UserRow>(
+                "SELECT * FROM Users WHERE Id NOT IN (SELECT UserId FROM UserAdmins)");
 
             // Load all role tables once and index by UserId for O(1) lookups below
             var students = (await _db.QueryAsync<StudentRow>("SELECT * FROM UserStudents")).ToDictionary(s => s.UserId);

@@ -1,40 +1,36 @@
-using MentoringApp.Model;
-using MentoringApp.Model.User;
+using MentoringApp.ApiClient.Models;
+using MentoringApp.ViewModel.Helpers;
 
-namespace MentoringApp.ViewModel.ViewModel.Supervisor
+namespace MentoringApp.ViewModel.ViewModel.Supervisor;
+
+/// <summary>
+/// Wraps a <see cref="PairResponse"/> with resolved user names and meeting-hours progress
+/// so the supervisor list can sort by completion and show inline progress bars.
+/// </summary>
+public class PairProgressItem
 {
-    /// <summary>
-    /// Wraps a <see cref="Pair"/> together with its meeting-hours progress so the
-    /// supervisor list can sort by completion and show inline progress bars.
-    /// </summary>
-    public class PairProgressItem
+    public PairResponse Pair { get; }
+    public string MentorName { get; }
+    public string MenteeName { get; }
+
+    public int MentorId => Pair.MentorId;
+    public int MenteeId => Pair.MenteeId;
+    public MatchTier MatchTier => (MatchTier)Pair.MatchTier;
+    public int Id => Pair.Id;
+    public bool IsProfileIncomplete => Pair.IsProfileIncomplete;
+
+    public double TotalMeetingHours { get; }
+    public double RequiredMeetingHours { get; }
+    public double HoursProgress { get; }
+    public string ProgressText => $"{TotalMeetingHours:0.#}h / {RequiredMeetingHours:0.#}h";
+
+    public PairProgressItem(PairResponse pair, string mentorName, string menteeName, double totalHours, double requiredHours)
     {
-        public Pair Pair { get; }
-
-        // Forwarded for existing XAML bindings that address these directly
-        public StudentModel Mentor       => Pair.Mentor;
-        public StudentModel Mentee       => Pair.Mentee;
-        public MatchTier    MatchTier    => Pair.MatchTier;
-        public int          Id           => Pair.Id;
-        public bool         IsProfileIncomplete => Pair.IsProfileIncomplete;
-
-        public double TotalMeetingHours    { get; }
-        public double RequiredMeetingHours { get; }
-
-        /// <summary>Percentage 0-100 for a ProgressBar.</summary>
-        public double HoursProgress        { get; }
-
-        /// <summary>Compact display string, e.g. "3.5h / 10h".</summary>
-        public string ProgressText => $"{TotalMeetingHours:0.#}h / {RequiredMeetingHours:0.#}h";
-
-        public PairProgressItem(Pair pair, double totalHours, double requiredHours)
-        {
-            Pair = pair;
-            TotalMeetingHours    = totalHours;
-            RequiredMeetingHours = requiredHours;
-            HoursProgress        = requiredHours > 0
-                ? Math.Min(100, (totalHours / requiredHours) * 100)
-                : 0;
-        }
+        Pair = pair;
+        MentorName = mentorName;
+        MenteeName = menteeName;
+        TotalMeetingHours = totalHours;
+        RequiredMeetingHours = requiredHours;
+        HoursProgress = requiredHours > 0 ? Math.Min(100, (totalHours / requiredHours) * 100) : 0;
     }
 }

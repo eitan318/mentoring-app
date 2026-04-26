@@ -1,5 +1,5 @@
 using MentoringApp.Data.Acess.SQLite.ConnectionsService;
-using MentoringApp.Data.Dao.User;
+using MentoringApp.Data.Dao;
 using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Data.Acess.SQLite
@@ -53,6 +53,20 @@ namespace MentoringApp.Data.Acess.SQLite
                                           VALUES (@supervisorId, @schoolClassId)";
                 await _db.ExecuteAsync(insertSQL, new { supervisorId, schoolClassId = id });
             }
+        }
+
+        public async Task<int?> GetSupervisorIdForStudentAsync(int studentId)
+        {
+            const string sql = @"
+                SELECT svc.SupervisorId
+                FROM UserStudents us
+                INNER JOIN SchoolClasses sc ON sc.GradeId = us.GradeId AND sc.ClassNum = us.ClassNum
+                INNER JOIN SupervisorClasses svc ON svc.SchoolClassId = sc.Id
+                WHERE us.UserId = @studentId
+                LIMIT 1";
+            var results = await _db.QueryAsync<int>(sql, new { studentId });
+            var id = results.FirstOrDefault();
+            return id != 0 ? id : null;
         }
     }
 }

@@ -1,0 +1,111 @@
+@page "/"
+@page "/login"
+@inject AuthApiClient AuthClient
+@inject AuthStateService AuthState
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>Login – MentoringApp</PageTitle>
+
+<div class="auth-container">
+    <h1>Sign In</h1>
+
+    @if (!_codeSent)
+    {
+        <div class="card">
+            <div class="form-group">
+                <label>National ID</label>
+                <input @bind="_nationalId" @onkeydown="OnEnterSendCode"
+                       class="form-input" placeholder="Enter your national ID" />
+            </div>
+            <button class="btn btn-primary btn-full" @onclick="SendCode" disabled="@_loading">
+                @(_loading ? "Sending…" : "Send Verification Code")
+            </button>
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <p class="error-msg">@_error</p>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="form-group">
+                <label>Verification Code</label>
+                <input @bind="_code" @onkeydown="OnEnterLogin"
+                       class="form-input" placeholder="Enter the code sent to your email" />
+                @if (!string.IsNullOrEmpty(_devCode))
+                {
+                    <p class="dev-hint">Dev code: <strong>@_devCode</strong></p>
+                }
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-secondary" @onclick="() => _codeSent = false">Back</button>
+                <button class="btn btn-primary" style="flex:1" @onclick="DoLogin" disabled="@_loading">
+                    @(_loading ? "Signing in…" : "Sign In")
+                </button>
+            </div>
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <p class="error-msg">@_error</p>
+            }
+        </div>
+    }
+
+    <p class="text-center text-sm mt-4">
+        Don't have an account? <a href="/register">Register</a>
+    </p>
+</div>
+
+@code {
+    private string _nationalId = "";
+    private string _code = "";
+    private string? _devCode;
+    private string _error = "";
+    private bool _codeSent;
+    private bool _loading;
+
+    protected override void OnInitialized()
+    {
+        if (AuthState.IsAuthenticated)
+            Nav.NavigateTo("/dashboard", replace: true);
+    }
+
+    private async Task SendCode()
+    {
+        if (string.IsNullOrWhiteSpace(_nationalId)) { _error = "Please enter your national ID."; return; }
+        _loading = true; _error = "";
+        try
+        {
+            var resp = await AuthClient.SendCodeAsync(new SendCodeRequest(_nationalId));
+            _devCode = resp.DevCode;
+            _codeSent = true;
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private async Task DoLogin()
+    {
+        if (string.IsNullOrWhiteSpace(_code)) { _error = "Please enter the verification code."; return; }
+        _loading = true; _error = "";
+        try
+        {
+            var resp = await AuthClient.LoginAsync(new LoginRequest(_nationalId, _code));
+            AuthState.Login(resp.Token);
+            if (!AuthState.Role.Equals("Student", StringComparison.OrdinalIgnoreCase))
+            {
+                await AuthState.PersistLogoutAsync(JS);
+                _error = "This portal is for students only.";
+                return;
+            }
+            await JS.InvokeVoidAsync("localStorage.setItem", "auth_token", resp.Token);
+            Nav.NavigateTo("/dashboard", replace: true);
+        }
+        catch (Exception ex) { _error = ex.Message; }
+        finally { _loading = false; }
+    }
+
+    private async Task OnEnterSendCode(KeyboardEventArgs e) { if (e.Key == "Enter") await SendCode(); }
+    private async Task OnEnterLogin(KeyboardEventArgs e) { if (e.Key == "Enter") await DoLogin(); }
+}

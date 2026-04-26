@@ -80,8 +80,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseCors("WebClient");
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -92,5 +93,7 @@ app.MapMatchingEndpoints();
 app.MapIssueEndpoints();
 app.MapReviewEndpoints();
 app.MapReferenceEndpoints();
+app.MapSettingsEndpoints();
+app.MapNotificationEndpoints();
 
 app.Run();
