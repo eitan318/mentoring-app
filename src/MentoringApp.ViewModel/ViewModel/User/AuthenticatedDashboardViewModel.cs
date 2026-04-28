@@ -82,6 +82,7 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         }
 
         _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
+        _navigationService.NavigationChanged += OnNavigationChanged;
 
         if (IsProfileIncomplete(CurrentUser))
         {
@@ -97,7 +98,7 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         if (CurrentUser == null) return;
 
         if (CurrentUser.IsAdmin)
-            await _navigationService.NavigateToAsync<AdminDashboardViewModel>();
+            await _navigationService.NavigateToAsync<AdminShellViewModel>();
         else if (CurrentUser.IsSupervisor)
             await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id);
         else if (CurrentUser.IsStudent)
@@ -113,11 +114,20 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         return false;
     }
 
+    public Task OnNavigatedFromAsync()
+    {
+        _navigationService.NavigationChanged -= OnNavigationChanged;
+        return Task.CompletedTask;
+    }
+
+    private void OnNavigationChanged() => OnPropertyChanged(nameof(IsBackVisible));
+
     [RelayCommand] private void NavigateProfile() => _navigationService.NavigateToAsync<MyProfileViewModel>();
 
     [RelayCommand]
     private void Logout()
     {
+        _navigationService.NavigationChanged -= OnNavigationChanged;
         _sessionService.ClearSession();
         _authTokenStore.Clear();
         _userStore.User = null;

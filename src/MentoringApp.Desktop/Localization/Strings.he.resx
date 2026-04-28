@@ -207,6 +207,7 @@
   <data name="Confirm_No" xml:space="preserve"><value>לא</value></data>
 
   <!-- Admin Dashboard — Phase Panel -->
+  <data name="Admin_Dashboard_Button" xml:space="preserve"><value>לוח בקרה</value></data>
   <data name="Admin_SystemSettings_Button" xml:space="preserve"><value>⚙ הגדרות מערכת</value></data>
   <data name="Admin_Phase_Deadline_Label" xml:space="preserve"><value>מועד אחרון:</value></data>
   <data name="Admin_Phase_SetDeadline_Button" xml:space="preserve"><value>קבע מועד אחרון</value></data>

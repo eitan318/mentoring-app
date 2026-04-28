@@ -20,6 +20,13 @@ public class AdminSupervisorItem
     public int TotalStudentsCount { get; set; }
     public int Id => Supervisor.Id;
     public string UserName => Supervisor.UserName;
+    public int SupervisedPairsCount { get; set; }
+    public int PendingIssuesCount { get; set; }
+    public int ResolvedIssuesCount { get; set; }
+    public IReadOnlyList<object> AssignedClasses { get; set; } = [];
+    public double FillProgressPercent => TotalStudentsCount > 0
+        ? (double)FilledStudentsCount / TotalStudentsCount * 100 : 0;
+    public string FillProgressLabel => $"{FilledStudentsCount}/{TotalStudentsCount}";
     public AdminSupervisorItem(UserResponse supervisor) => Supervisor = supervisor;
 }
 
@@ -157,30 +164,24 @@ public partial class AdminDashboardViewModel : ObservableObject, INavigatable
         var supervisorStats = await _userClient.GetSupervisorStatsAsync();
         var statsMap = supervisorStats.ToDictionary(s => s.Id);
 
+        int filledGlobal = allStudents.Count(s => IsStudentInfoFilled(s));
+        int totalGlobal = allStudents.Count;
+
         foreach (var supervisor in allUsers.Where(u => u.IsSupervisor))
         {
-            // Approximate fill count from available data
-            int filled = allStudents.Count(s => IsStudentInfoFilled(s));
-            int total = allStudents.Count;
-
+            statsMap.TryGetValue(supervisor.Id, out var stats);
             var item = new AdminSupervisorItem(supervisor)
             {
-                FilledStudentsCount = filled,
-                TotalStudentsCount = total
+                FilledStudentsCount = filledGlobal,
+                TotalStudentsCount = totalGlobal,
+                SupervisedPairsCount = stats?.PairsCount ?? 0,
+                PendingIssuesCount = stats?.PendingIssuesCount ?? 0,
             };
-
-            globalFilled += filled;
-            globalTotal += total;
-
             SupervisorsListPreview.Add(item);
         }
 
-        // Deduplicate totals (divide by supervisor count if multiple supervisors share students)
-        if (SupervisorsListPreview.Count > 1)
-        {
-            globalFilled = allStudents.Count(s => IsStudentInfoFilled(s));
-            globalTotal = allStudents.Count;
-        }
+        globalFilled = filledGlobal;
+        globalTotal = totalGlobal;
 
         TotalFillPercent = globalTotal > 0 ? (double)globalFilled / globalTotal * 100 : 0;
         TotalFillLabel = $"{globalFilled}/{globalTotal} ({(int)TotalFillPercent}%)";
@@ -310,8 +311,6 @@ public partial class AdminDashboardViewModel : ObservableObject, INavigatable
     }
 
     [RelayCommand] private async Task ManageUsers() => await _navigationService.NavigateToAsync<ManageUsersViewModel>();
-    [RelayCommand] private async Task ManagePairs() => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
-    [RelayCommand] private async Task SystemSettings() => await _navigationService.NavigateToAsync<SystemSettingsViewModel>();
 
     [RelayCommand]
     private async Task InspectSupervisor(AdminSupervisorItem chosen)
