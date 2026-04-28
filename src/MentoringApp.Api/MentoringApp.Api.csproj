@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MentoringApp.Service\MentoringApp.Service.csproj" />
-    <ProjectReference Include="..\MentoringApp.Data\MentoringApp.Data.csproj" />
     <ProjectReference Include="..\MentoringApp.Model\MentoringApp.Model.csproj" />
   </ItemGroup>
 

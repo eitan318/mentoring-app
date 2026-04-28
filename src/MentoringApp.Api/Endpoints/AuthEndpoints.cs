@@ -80,7 +80,7 @@ public static class AuthEndpoints
                     UserName = req.UserName,
                     Email = req.Email,
                     NationalId = req.NationalId,
-                    Grade = new Grade { Id = req.GradeId ?? 0, Name = string.Empty, Num = 0 },
+                    Grade = new GradeModel { Id = req.GradeId ?? 0, Name = string.Empty, Num = 0 },
                     ClassNum = req.ClassNum ?? 0,
                 };
                 if (req.PreferredMentorGender.HasValue)

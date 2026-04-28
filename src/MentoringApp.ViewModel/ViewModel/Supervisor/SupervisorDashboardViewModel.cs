@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
+using MentoringApp.Model.User;
 using MentoringApp.ViewModel.Helpers;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
@@ -29,9 +31,9 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
     private int _currentSupervisorId;
 
-    [ObservableProperty] private UserResponse? _selectedSupervisor;
+    [ObservableProperty] private UserModel? _selectedSupervisor;
     [ObservableProperty] private ObservableCollection<PairProgressItem> _pairsSupervised = [];
-    [ObservableProperty] private ObservableCollection<UserResponse> _inactiveStudents = [];
+    [ObservableProperty] private ObservableCollection<UserModel> _inactiveStudents = [];
     [ObservableProperty] private string _classProgressInfo = string.Empty;
     [ObservableProperty] private double _classProgressPercent = 0.0;
 
@@ -54,7 +56,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
     [NotifyPropertyChangedFor(nameof(FilteredResolvedIssues))]
     [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
-    private ObservableCollection<IssueResponse> _allIssues = [];
+    private ObservableCollection<IssueModel> _allIssues = [];
 
     private int? _issueFilterMentorId;
     private int? _issueFilterMenteeId;
@@ -68,22 +70,22 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
     public string IssuesSectionContextTitle => IssueFilterPair == null
         ? "Issues"
-        : $"Issues of {IssueFilterPair.MentorName} & {IssueFilterPair.MenteeName}";
+        : $"Issues of {IssueFilterPair.Pair.Mentor.UserName} & {IssueFilterPair.Pair.Mentee.UserName}";
 
     partial void OnIssueFilterPairChanged(PairProgressItem? value)
     {
-        _issueFilterMentorId = value?.MentorId;
-        _issueFilterMenteeId = value?.MenteeId;
+        _issueFilterMentorId = value?.Pair.Mentor.Id;
+        _issueFilterMenteeId = value?.Pair.Mentee.Id;
     }
 
-    public IEnumerable<IssueResponse> FilteredPendingIssues => AllIssues
-        .Where(i => !i.IsResolvedBool)
+    public IEnumerable<IssueModel> FilteredPendingIssues => AllIssues
+        .Where(i => !i.IsResolved)
         .Where(i => IssueFilterPair == null ||
             i.ReportedByUserId == _issueFilterMentorId ||
             i.ReportedByUserId == _issueFilterMenteeId);
 
-    public IEnumerable<IssueResponse> FilteredResolvedIssues => AllIssues
-        .Where(i => i.IsResolvedBool)
+    public IEnumerable<IssueModel> FilteredResolvedIssues => AllIssues
+        .Where(i => i.IsResolved)
         .Where(i => IssueFilterPair == null ||
             i.ReportedByUserId == _issueFilterMentorId ||
             i.ReportedByUserId == _issueFilterMenteeId);
@@ -137,16 +139,91 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         _loc = loc;
     }
 
+    public async Task OnNavigatedToAsync()
+    {
+        await LoadSupervisorDataAsync(_currentSupervisorId);
+    }
+
+
+    private async Task LoadSupervisorDataAsync(int supervisorId)
+    {
+        var pairs = await _pairClient.GetBySupervisorAsync(supervisorId);
+        var issues = await _issueClient.GetBySupervisorAsync(supervisorId);
+        var settings = await _settingsClient.GetAllAsync();
+        var allUsers = await _userClient.GetAllAsync();
+
+        double requiredHours = settings.MeetingHoursBarrier;
+
+        var reviewTasks = pairs.Select(pair =>
+            _reviewClient.GetByPairAsync(pair.Id).ContinueWith(t =>
+                (pair, hours: t.Result.Sum(r => r.AmountOfHours))));
+
+        var reviewResults = await Task.WhenAll(reviewTasks);
+
+        var progressItems = reviewResults
+            .Select(r => new PairProgressItem(r.pair, r.hours, requiredHours))
+            .ToList();
+
+        PairsSupervised = new ObservableCollection<PairProgressItem>(
+            progressItems.OrderBy(p => p.TotalMeetingHours));
+
+        var warnings = progressItems
+            .Where(p => p.IsProfileIncomplete || p.MatchTier == Model.MatchTier.FallbackRandom)
+            .ToList();
+
+        IncompleteProfilePairs = new ObservableCollection<PairProgressItem>(warnings);
+        IncompleteProfileCount = warnings.Count;
+
+        // המרת רשימת ה-Issues למודלים (וודא שיש לך ObservableCollection של IssueModel)
+        AllIssues = new ObservableCollection<IssueModel>(issues);
+
+        // טיפול בנתוני הכיתות של הסופרווייזר
+        var supervisorClasses = await _referenceClient.GetSchoolClassesBySupervisorAsync(supervisorId);
+        var assignedSlots = supervisorClasses.Select(c => (c.Grade.Id, c.ClassNum)).ToHashSet();
+
+        // סינון סטודנטים השייכים לכיתות של הסופרווייזר הנוכחי
+        var myStudents = allUsers
+            .OfType<StudentModel>() // מסנן רק אובייקטים שהם סטודנטים ומבצע casting
+            .Where(s => s.Grade != null && assignedSlots.Contains((s.Grade.Id, s.ClassNum)))
+            .ToList();
+
+        int totalStudents = myStudents.Count;
+
+        // שימוש בפונקציה IsStudentInfoFilled שתיקנו קודם
+        var inactive = myStudents.Where(s => !IsStudentInfoFilled(s)).ToList();
+
+        // המרת הסטודנטים הלא פעילים לרשימת תצוגה
+        InactiveStudents = new ObservableCollection<UserModel>(inactive);
+
+        if (totalStudents > 0)
+        {
+            int registered = totalStudents - inactive.Count;
+            ClassProgressPercent = (double)registered / totalStudents * 100;
+
+            string classLabel = assignedSlots.Count == 1
+                ? $"Class {assignedSlots.First().ClassNum}"
+                : $"{assignedSlots.Count} classes";
+
+            ClassProgressInfo = $"{classLabel}: {(int)ClassProgressPercent}% complete ({registered}/{totalStudents} registered)";
+        }
+        else
+        {
+            ClassProgressPercent = 0;
+            ClassProgressInfo = "No students found in your assigned classes.";
+        }
+    }
+
+
     [RelayCommand]
-    private async Task SelectIssue(IssueResponse? issue)
+    private async Task SelectIssue(IssueModel? issue)
     {
         if (issue != null)
         {
             var vm = new IssueViewModel(_navigationService, _issueClient);
             var item = PairsSupervised.FirstOrDefault(p =>
-                p.MentorId == issue.ReportedByUserId || p.MenteeId == issue.ReportedByUserId);
+                p.Pair.Mentor.Id == issue.ReportedByUserId || p.Pair.Mentee.Id == issue.ReportedByUserId);
             if (item != null)
-                vm.RelatedPairName = _loc.Format("Supervisor_RelatedPairName_Format", item.MentorName, item.MenteeName);
+                vm.RelatedPairName = _loc.Format("Supervisor_RelatedPairName_Format", item.Pair.Mentor.UserName, item.Pair.Mentee.UserName);
             vm.ForwardingsupervisorId = _currentSupervisorId;
             vm.OnCloseRequested = () => SelectedPaneContent = null;
             vm.OnIssueResolved = () => { SelectedPaneContent = null; _ = LoadSupervisorDataAsync(_currentSupervisorId); };
@@ -176,71 +253,6 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         }
     }
 
-    private async Task LoadSupervisorDataAsync(int supervisorId)
-    {
-        var pairs = await _pairClient.GetBySupervisorAsync(supervisorId);
-        var issues = await _issueClient.GetBySupervisorAsync(supervisorId);
-        var settings = await _settingsClient.GetAllAsync();
-
-        var allUsers = await _userClient.GetAllAsync();
-        var userMap = allUsers.ToDictionary(u => u.Id, u => u.UserName);
-
-        double requiredHours = settings.MeetingHoursBarrier;
-
-        var reviewTasks = pairs.Select(pair =>
-            _reviewClient.GetByPairAsync(pair.Id).ContinueWith(t =>
-                (pair, hours: t.Result.Sum(r => r.AmountOfHours))));
-
-        var reviewResults = await Task.WhenAll(reviewTasks);
-        var progressItems = reviewResults
-            .Select(r => new PairProgressItem(
-                r.pair,
-                userMap.TryGetValue(r.pair.MentorId, out var mn) ? mn : $"User {r.pair.MentorId}",
-                userMap.TryGetValue(r.pair.MenteeId, out var men) ? men : $"User {r.pair.MenteeId}",
-                r.hours,
-                requiredHours))
-            .ToList();
-
-        PairsSupervised = new ObservableCollection<PairProgressItem>(
-            progressItems.OrderBy(p => p.TotalMeetingHours));
-
-        var warnings = progressItems
-            .Where(p => p.IsProfileIncomplete || p.MatchTier == MatchTier.FallbackRandom)
-            .ToList();
-        IncompleteProfilePairs = new ObservableCollection<PairProgressItem>(warnings);
-        IncompleteProfileCount = warnings.Count;
-
-        AllIssues = new ObservableCollection<IssueResponse>(issues);
-
-        // Class completion gauge
-        var supervisorClasses = await _referenceClient.GetSchoolClassesBySupervisorAsync(supervisorId);
-        var assignedSlots = supervisorClasses.Select(c => (c.GradeId, c.ClassNum)).ToHashSet();
-
-        var myStudents = allUsers
-            .Where(u => u.IsStudent && u.GradeId.HasValue &&
-                assignedSlots.Contains((u.GradeId.Value, u.ClassNum ?? 0)))
-            .ToList();
-
-        int totalStudents = myStudents.Count;
-        var inactive = myStudents.Where(s => !IsStudentInfoFilled(s)).ToList();
-
-        InactiveStudents = new ObservableCollection<UserResponse>(inactive);
-
-        if (totalStudents > 0)
-        {
-            int registered = totalStudents - inactive.Count;
-            ClassProgressPercent = (double)registered / totalStudents * 100;
-            string classLabel = assignedSlots.Count == 1
-                ? $"Class {assignedSlots.First().ClassNum}"
-                : $"{assignedSlots.Count} classes";
-            ClassProgressInfo = $"{classLabel}: {(int)ClassProgressPercent}% complete ({registered}/{totalStudents} registered)";
-        }
-        else
-        {
-            ClassProgressPercent = 0;
-            ClassProgressInfo = "No students found in your assigned classes.";
-        }
-    }
 
     private async Task LoadMatchingSettingsAsync()
     {
@@ -252,10 +264,6 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         SetupTimer();
     }
 
-    public new async Task OnNavigatedToAsync()
-    {
-        await LoadSupervisorDataAsync(_currentSupervisorId);
-    }
 
     public virtual async Task OnNavigatedToAsync(int supervisorId)
     {
@@ -332,12 +340,13 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         }
     }
 
-    private static bool IsStudentInfoFilled(UserResponse s)
+    private static bool IsStudentInfoFilled(StudentModel s)
     {
-        if (!s.GradeId.HasValue || s.GradeId == 0 || (s.ClassNum ?? 0) <= 0) return false;
+        if (s.Grade == null || s.Grade.Id <= 0 || s.ClassNum <= 0) return false;
         if (!s.IsMentor && !s.IsMentee) return false;
-        if (s.IsMentor && !s.MentorSubjectId.HasValue) return false;
-        if (s.IsMentee && !s.MenteeSubjectId.HasValue) return false;
+        if (s.IsMentor && (s.MentorProfile == null || s.MentorProfile.SubjectToTeach <= 0)) return false;
+        if (s.IsMentee && (s.MenteeProfile == null || s.MenteeProfile.SubjectToLearn <= 0)) return false;
+
         return true;
     }
 }

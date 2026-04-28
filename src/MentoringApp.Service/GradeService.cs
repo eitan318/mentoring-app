@@ -15,7 +15,7 @@ namespace MentoringApp.Service
             _gradeRepo = gradeRepo;
         }
 
-        public async Task<Result<IEnumerable<Grade>>> GetAllGradesAsync()
+        public async Task<Result<IEnumerable<GradeModel>>> GetAllGradesAsync()
         {
             try
             {
@@ -23,21 +23,21 @@ namespace MentoringApp.Service
 
                 if (dtos == null || !dtos.Any())
                 {
-                    return Result<IEnumerable<Grade>>.Failure("No grades found.");
+                    return Result<IEnumerable<GradeModel>>.Failure("No grades found.");
                 }
 
-                var grades = dtos.Select(dto => new Grade
+                var grades = dtos.Select(dto => new GradeModel
                 {
                     Id = dto.Id,
                     Name = dto.Name,
                     Num = dto.Num
                 });
 
-                return Result<IEnumerable<Grade>>.Ok(grades);
+                return Result<IEnumerable<GradeModel>>.Ok(grades);
             }
             catch (Exception ex)
             {
-                return Result<IEnumerable<Grade>>.Failure($"Failed to load grades: {ex.Message}");
+                return Result<IEnumerable<GradeModel>>.Failure($"Failed to load grades: {ex.Message}");
             }
         }
     }

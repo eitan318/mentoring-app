@@ -11,18 +11,18 @@
     <Grid Margin="20">
         <StackPanel>
             <!--  Circular profile picture  -->
-            <components:ProfilePictureControl Width="80" Height="80" HorizontalAlignment="Center" Margin="0,0,0,10" ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}" />
+            <components:ProfilePictureControl Width="80" Height="80" HorizontalAlignment="Center" Margin="0,0,0,10" ImagePath="{Binding User.ProfilePicturePath}" Gender="{Binding User.Gender}" />
 
-            <TextBlock Text="{Binding UserName}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Text="{Binding User.UserName}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
             <TextBlock Text="{Binding RoleName}" FontSize="14" Foreground="Gray" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
             <Separator Margin="0,10"/>
 
             <Label Content="{Binding [OtherProfile_Email_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
-            <TextBlock Text="{Binding Email}" FontSize="16" Margin="5,0,0,15"/>
+            <TextBlock Text="{Binding User.Email}" FontSize="16" Margin="5,0,0,15"/>
 
             <Label Content="{Binding [OtherProfile_PhoneNumber_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
-            <TextBlock Text="{Binding PhoneNumber}" FontSize="16" Margin="5,0,0,15"/>
+            <TextBlock Text="{Binding User.PhoneNumber}" FontSize="16" Margin="5,0,0,15"/>
 
             <Label Content="{Binding [OtherProfile_Gender_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="Gray" FontSize="11"/>
             <TextBlock Text="{Binding GenderDisplay}" FontSize="16" Margin="5,0,0,15"/>

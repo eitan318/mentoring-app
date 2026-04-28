@@ -2,6 +2,7 @@
 @inject AuthStateService Auth
 @inject NavigationManager Nav
 @inject IssueApiClient IssueClient
+@using MentoringApp.Model
 
 <PageTitle>Issues – MentoringApp</PageTitle>
 
@@ -33,10 +34,10 @@ else
         {
             <div class="issue-item">
                 <div class="issue-header">
-                    <span class="badge @(issue.IsResolvedBool ? "badge-resolved" : issue.IsForwardedToAdmin ? "badge-forwarded" : "badge-open")">
-                        @(issue.IsResolvedBool ? "Resolved" : issue.IsForwardedToAdmin ? "Forwarded to Admin" : "Open")
+                    <span class="badge @(issue.IsResolved ? "badge-resolved" : issue.IsForwardedToAdmin ? "badge-forwarded" : "badge-open")">
+                        @(issue.IsResolved ? "Resolved" : issue.IsForwardedToAdmin ? "Forwarded to Admin" : "Open")
                     </span>
-                    <span class="badge badge-pending">@CategoryName(issue.CategoryId)</span>
+                    <span class="badge badge-pending">@CategoryName(issue.Category.Id)</span>
                 </div>
                 <p class="issue-desc">@issue.Description</p>
                 <p class="issue-date">@issue.CreationDate</p>
@@ -51,7 +52,7 @@ else
 }
 
 @code {
-    private List<IssueResponse> _issues = new();
+    private List<IssueModel> _issues = new();
     private Dictionary<int, string> _categories = new();
     private bool _loading = true, _showModal;
 

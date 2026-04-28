@@ -3,6 +3,8 @@
 @inject IssueApiClient IssueClient
 @inject ReferenceApiClient Reference
 @inject SettingsApiClient SettingsClient
+@using MentoringApp.Model
+@using MentoringApp.Model.User
 
 <div>
     @if (_loading)
@@ -76,10 +78,10 @@
                 @foreach (var issue in _issues)
                 {
                     <div class="issue-row">
-                        <span class="issue-bullet @(issue.IsResolvedBool ? "bullet-green" : "bullet-red")">●</span>
+                        <span class="issue-bullet @(issue.IsResolved? "bullet-green" : "bullet-red")">●</span>
                         <div>
                             <span class="text-sm">@issue.Description</span>
-                            <p class="text-sm text-muted" style="margin-top:.1rem">@CategoryName(issue.CategoryId) · @issue.CreationDate</p>
+                            <p class="text-sm text-muted" style="margin-top:.1rem">@CategoryName(issue.Category.Id) · @issue.CreationDate</p>
                         </div>
                     </div>
                 }
@@ -149,10 +151,10 @@
                 @foreach (var issue in _issues)
                 {
                     <div class="issue-row">
-                        <span class="issue-bullet @(issue.IsResolvedBool ? "bullet-green" : "bullet-red")">●</span>
+                        <span class="issue-bullet @(issue.IsResolved ? "bullet-green" : "bullet-red")">●</span>
                         <div>
                             <span class="text-sm">@issue.Description</span>
-                            <p class="text-sm text-muted" style="margin-top:.1rem">@CategoryName(issue.CategoryId) · @issue.CreationDate</p>
+                            <p class="text-sm text-muted" style="margin-top:.1rem">@CategoryName(issue.Category.Id) · @issue.CreationDate</p>
                         </div>
                     </div>
                 }
@@ -171,13 +173,13 @@
 </div>
 
 @code {
-    [Parameter] public PairResponse Pair { get; set; } = null!;
-    [Parameter] public UserResponse CurrentUser { get; set; } = null!;
+    [Parameter] public PairModel Pair { get; set; } = null!;
+    [Parameter] public UserModel CurrentUser { get; set; } = null!;
     [Parameter] public bool IsMentor { get; set; }
 
-    private UserResponse? _peer;
+    private StudentModel? _peer;
     private List<ReviewResponse> _reviews = new();
-    private List<IssueResponse> _issues = new();
+    private List<IssueModel> _issues = new();
     private Dictionary<int, string> _categories = new();
     private Dictionary<int, string> _subjects = new();
     private double _totalHours;
@@ -191,16 +193,17 @@
     {
         try
         {
-            var peerId = IsMentor ? Pair.MenteeId : Pair.MentorId;
-            var peerTask = Users.GetByIdAsync(peerId);
             var reviewsTask = Reviews.GetByPairAsync(Pair.Id);
             var issuesTask = IssueClient.GetByUserAsync(CurrentUser.Id);
             var catsTask = IssueClient.GetCategoriesAsync();
             var subjectsTask = Reference.GetSubjectsAsync();
             var settingsTask = SettingsClient.GetAllAsync();
-            await Task.WhenAll(peerTask, reviewsTask, issuesTask, catsTask, subjectsTask, settingsTask);
+        
+            await Task.WhenAll(reviewsTask, issuesTask, catsTask, subjectsTask, settingsTask);
 
-            _peer = peerTask.Result;
+            // קביעת ה-Peer (הצד השני בזיווג)
+            _peer = IsMentor ? Pair.Mentee : Pair.Mentor;
+        
             _reviews = reviewsTask.Result.ToList();
             _issues = issuesTask.Result.ToList();
             _categories = catsTask.Result.ToDictionary(c => c.Id, c => c.Name);
@@ -211,10 +214,21 @@
             _requiredHours = settings.MeetingHoursBarrier > 0 ? settings.MeetingHoursBarrier : 10;
             UpdateHoursBar();
 
-            if (!IsMentor && _peer?.MentorSubjectId is int sid && _subjects.TryGetValue(sid, out var sname))
-                _mentorSubject = sname;
+            // לוגיקה לשליפת נושא הלימוד של המנטור (אם המשתמש הנוכחי הוא מנטי)
+            if (!IsMentor && _peer is StudentModel mentorStudent && mentorStudent.MentorProfile != null)
+            {
+                int sid = mentorStudent.MentorProfile.SubjectToTeach;
+                if (_subjects.TryGetValue(sid, out var sname))
+                {
+                    _mentorSubject = sname;
+                }
+            }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            // מומלץ להוסיף לוג קטן כאן כדי לא "לבלוע" שגיאות סריאליזציה
+            Console.WriteLine($"Error loading pair data: {ex.Message}");
+        }
         finally { _loading = false; }
     }
 

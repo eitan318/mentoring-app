@@ -11,4 +11,8 @@
     <PackageReference Include="System.Net.Http.Json" Version="10.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MentoringApp.Model\MentoringApp.Model.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,6 @@
 ﻿namespace MentoringApp.Model
 {
-    public class Subject
+    public class SubjectModel
     {
         public required int Id { get; set; }
         public required string Name { get; set; }

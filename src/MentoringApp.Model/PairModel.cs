@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
-    public class Pair
+    public class PairModel
     {
         public required StudentModel Mentee { get; set; }
         public required StudentModel Mentor { get; set; }

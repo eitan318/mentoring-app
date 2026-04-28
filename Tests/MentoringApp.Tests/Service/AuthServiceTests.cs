@@ -264,7 +264,7 @@ namespace MentoringApp.Tests.Service
                 email: "bad-email",       // invalid email
                 userName: "",             // too short
                 nationalId: "ABC",        // not 9 digits, non-numeric
-                grade: new Grade { Id = 1, Name = "Grade 1", Num = 1 });
+                grade: new GradeModel { Id = 1, Name = "Grade 1", Num = 1 });
 
             var userRepo = new Mock<IUserRepo>();
             var verificationRepo = new Mock<IVerificationCodeRepo>();

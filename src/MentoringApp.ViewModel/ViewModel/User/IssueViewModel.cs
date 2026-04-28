@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 
@@ -9,7 +10,7 @@ namespace MentoringApp.ViewModel.ViewModel.User;
 
 public partial class IssueViewModel : ObservableObject, INavigatable<int>
 {
-    [ObservableProperty] private IssueResponse? _currentIssue;
+    [ObservableProperty] private IssueModel? _currentIssue;
     [ObservableProperty] private string? _relatedPairName;
 
     private readonly INavigationService _navigationService;
@@ -45,7 +46,7 @@ public partial class IssueViewModel : ObservableObject, INavigatable<int>
     [RelayCommand]
     private async Task ResolveIssue()
     {
-        if (CurrentIssue == null || CurrentIssue.IsResolvedBool) return;
+        if (CurrentIssue == null || CurrentIssue.IsResolved) return;
         try
         {
             await _issueClient.ResolveAsync(CurrentIssue.Id);

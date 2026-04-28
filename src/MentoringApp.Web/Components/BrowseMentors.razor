@@ -1,5 +1,6 @@
 @inject MatchingApiClient Matching
 @inject ReferenceApiClient Reference
+@using MentoringApp.Model.User
 
 <div>
     @if (_loading)
@@ -34,9 +35,9 @@
                     </div>
                     <h3>@mentor.UserName</h3>
                     <p class="meta">
-                        @SubjectName(mentor.SubjectToTeach)
-                        @if (!string.IsNullOrEmpty(mentor.GradeName)) { <span> · @mentor.GradeName</span> }
-                        @if (mentor.ClassNum.HasValue) { <span> / @mentor.ClassNum</span> }
+                        @SubjectName(mentor.MentorProfile.SubjectToTeach)
+                        @if (!string.IsNullOrEmpty(mentor.Grade.Name)) { <span> · @mentor.Grade.Name</span> }
+                        <span> / @mentor.ClassNum</span>
                     </p>
                     @if (hasPending)
                     {
@@ -61,7 +62,7 @@
 @code {
     [Parameter] public int UserId { get; set; }
 
-    private List<AvailableMentorResponse> _mentors = new();
+    private List<StudentModel> _mentors = new();
     private HashSet<int> _myRequestMentorIds = new();
     private Dictionary<int, int> _requestIdByMentorId = new();
     private Dictionary<int, string> _subjectNames = new();

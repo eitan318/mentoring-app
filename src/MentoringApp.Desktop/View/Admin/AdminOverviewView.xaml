@@ -1,0 +1,393 @@
+<UserControl
+    x:Class="MentoringApp.View.Admin.AdminOverviewView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:loc="clr-namespace:MentoringApp.Localization"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- ── Shared deadline DataTemplate ── -->
+        <DataTemplate x:Key="DeadlineTemplate">
+            <StackPanel>
+                <!-- No deadline -->
+                <WrapPanel Orientation="Horizontal"
+                           Visibility="{Binding IsDeadlineNotScheduled, Converter={StaticResource BoolToVis}}"
+                           Margin="0,0,0,6">
+                    <TextBlock Text="{Binding [Admin_Phase_Deadline_Label], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"
+                               Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                               Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding DeadlineInput, Mode=TwoWay}" Margin="0,0,8,0"/>
+                    <Button Content="{Binding [Admin_Phase_SetDeadline_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="10,4"
+                            Command="{Binding SaveDeadlineCommand}"/>
+                </WrapPanel>
+
+                <!-- Deadline active -->
+                <StackPanel Visibility="{Binding IsDeadlineScheduled, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{Binding [Admin_Phase_TimeRemaining_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                               Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                               FontSize="11" Margin="0,0,0,2"/>
+                    <WrapPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding DeadlineTimeRemaining}"
+                                   FontSize="26" FontWeight="Medium"
+                                   Margin="0,0,16,0" VerticalAlignment="Center"/>
+                        <Button Content="{Binding [Admin_Phase_CancelDeadline_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="10,4" VerticalAlignment="Center"
+                                Command="{Binding CancelDeadlineCommand}"/>
+                    </WrapPanel>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" MinHeight="80"/>
+        </Grid.RowDefinitions>
+
+        <!-- ── Phase panel ── -->
+        <Border Grid.Row="0" BorderBrush="#22000000" BorderThickness="1" Margin="0,0,0,14">
+            <StackPanel>
+
+                <!-- ── Stepper ── -->
+                <Grid Margin="12,10,12,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="36"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Rectangle Grid.Row="0" Grid.Column="1" Height="2" VerticalAlignment="Center">
+                        <Rectangle.Style><Style TargetType="Rectangle"><Setter Property="Fill" Value="#CCCCCC"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding IsUsersImported}" Value="True"><Setter Property="Fill" Value="#88000000"/></DataTrigger></Style.Triggers>
+                        </Style></Rectangle.Style>
+                    </Rectangle>
+                    <Rectangle Grid.Row="0" Grid.Column="3" Height="2" VerticalAlignment="Center">
+                        <Rectangle.Style><Style TargetType="Rectangle"><Setter Property="Fill" Value="#CCCCCC"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSelectionPhaseActive}" Value="True"><Setter Property="Fill" Value="#88000000"/></DataTrigger>
+                                <DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Fill" Value="#88000000"/></DataTrigger>
+                            </Style.Triggers>
+                        </Style></Rectangle.Style>
+                    </Rectangle>
+                    <Rectangle Grid.Row="0" Grid.Column="5" Height="2" VerticalAlignment="Center">
+                        <Rectangle.Style><Style TargetType="Rectangle"><Setter Property="Fill" Value="#CCCCCC"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Fill" Value="#88000000"/></DataTrigger></Style.Triggers>
+                        </Style></Rectangle.Style>
+                    </Rectangle>
+
+                    <Border Grid.Row="0" Grid.Column="0" Width="32" Height="32" CornerRadius="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#AAAAAA"/><Setter Property="BorderThickness" Value="2"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsImportStepActive}" Value="True"><Setter Property="BorderBrush" Value="#CC000000"/><Setter Property="BorderThickness" Value="2.5"/></DataTrigger>
+                                <DataTrigger Binding="{Binding IsUsersImported}" Value="True"><Setter Property="Background" Value="#88000000"/><Setter Property="BorderBrush" Value="#88000000"/></DataTrigger>
+                            </Style.Triggers></Style></Border.Style>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Medium">
+                            <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Text" Value="1"/><Setter Property="Foreground" Value="#AAAAAA"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsImportStepActive}" Value="True"><Setter Property="Foreground" Value="#CC000000"/><Setter Property="FontWeight" Value="SemiBold"/></DataTrigger>
+                                    <DataTrigger Binding="{Binding IsUsersImported}" Value="True"><Setter Property="Text" Value="✓"/><Setter Property="Foreground" Value="White"/></DataTrigger>
+                                </Style.Triggers></Style></TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding [Admin_Step_ImportUsers], Source={x:Static loc:TranslationSource.Instance}}" TextAlignment="Center" FontSize="11" Margin="0,4,0,0" TextWrapping="Wrap">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding IsImportStepActive}" Value="True"><Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/><Setter Property="FontWeight" Value="Medium"/></DataTrigger></Style.Triggers>
+                        </Style></TextBlock.Style>
+                    </TextBlock>
+
+                    <Border Grid.Row="0" Grid.Column="2" Width="32" Height="32" CornerRadius="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#AAAAAA"/><Setter Property="BorderThickness" Value="2"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPhase1Active}" Value="True"><Setter Property="BorderBrush" Value="#CC000000"/><Setter Property="BorderThickness" Value="2.5"/></DataTrigger>
+                                <DataTrigger Binding="{Binding IsSelectionPhaseActive}" Value="True"><Setter Property="Background" Value="#88000000"/><Setter Property="BorderBrush" Value="#88000000"/></DataTrigger>
+                                <DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Background" Value="#88000000"/><Setter Property="BorderBrush" Value="#88000000"/></DataTrigger>
+                            </Style.Triggers></Style></Border.Style>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Medium">
+                            <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Text" Value="2"/><Setter Property="Foreground" Value="#AAAAAA"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPhase1Active}" Value="True"><Setter Property="Foreground" Value="#CC000000"/><Setter Property="FontWeight" Value="SemiBold"/></DataTrigger>
+                                    <DataTrigger Binding="{Binding IsSelectionPhaseActive}" Value="True"><Setter Property="Text" Value="✓"/><Setter Property="Foreground" Value="White"/></DataTrigger>
+                                    <DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Text" Value="✓"/><Setter Property="Foreground" Value="White"/></DataTrigger>
+                                </Style.Triggers></Style></TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding [Admin_Step_Registration], Source={x:Static loc:TranslationSource.Instance}}" TextAlignment="Center" FontSize="11" Margin="0,4,0,0" TextWrapping="Wrap">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding IsPhase1Active}" Value="True"><Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/><Setter Property="FontWeight" Value="Medium"/></DataTrigger></Style.Triggers>
+                        </Style></TextBlock.Style>
+                    </TextBlock>
+
+                    <Border Grid.Row="0" Grid.Column="4" Width="32" Height="32" CornerRadius="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#CCCCCC"/><Setter Property="BorderThickness" Value="2"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPhase2Active}" Value="True"><Setter Property="BorderBrush" Value="#CC000000"/><Setter Property="BorderThickness" Value="2.5"/></DataTrigger>
+                                <DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Background" Value="#88000000"/><Setter Property="BorderBrush" Value="#88000000"/></DataTrigger>
+                            </Style.Triggers></Style></Border.Style>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Medium">
+                            <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Text" Value="3"/><Setter Property="Foreground" Value="#CCCCCC"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPhase2Active}" Value="True"><Setter Property="Foreground" Value="#CC000000"/><Setter Property="FontWeight" Value="SemiBold"/></DataTrigger>
+                                    <DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Text" Value="✓"/><Setter Property="Foreground" Value="White"/></DataTrigger>
+                                </Style.Triggers></Style></TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                    <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding [Admin_Step_Selection], Source={x:Static loc:TranslationSource.Instance}}" TextAlignment="Center" FontSize="11" Margin="0,4,0,0" TextWrapping="Wrap">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding IsPhase2Active}" Value="True"><Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/><Setter Property="FontWeight" Value="Medium"/></DataTrigger></Style.Triggers>
+                        </Style></TextBlock.Style>
+                    </TextBlock>
+
+                    <Border Grid.Row="0" Grid.Column="6" Width="32" Height="32" CornerRadius="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#CCCCCC"/><Setter Property="BorderThickness" Value="2"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Background" Value="#88000000"/><Setter Property="BorderBrush" Value="#88000000"/></DataTrigger></Style.Triggers>
+                        </Style></Border.Style>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Medium">
+                            <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Text" Value="4"/><Setter Property="Foreground" Value="#CCCCCC"/>
+                                <Style.Triggers><DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Text" Value="✓"/><Setter Property="Foreground" Value="White"/></DataTrigger></Style.Triggers>
+                            </Style></TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                    <TextBlock Grid.Row="1" Grid.Column="6" Text="{Binding [Admin_Step_Complete], Source={x:Static loc:TranslationSource.Instance}}" TextAlignment="Center" FontSize="11" Margin="0,4,0,0" TextWrapping="Wrap">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding IsProcessComplete}" Value="True"><Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/><Setter Property="FontWeight" Value="Medium"/></DataTrigger></Style.Triggers>
+                        </Style></TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Active underline -->
+                <Grid Height="2" Background="Transparent">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Grid.Column="0" Fill="#CC000000" Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}"/>
+                    <Rectangle Grid.Column="1" Fill="#CC000000" Visibility="{Binding IsPhase1Active,     Converter={StaticResource BoolToVis}}"/>
+                    <Rectangle Grid.Column="2" Fill="#CC000000" Visibility="{Binding IsPhase2Active,     Converter={StaticResource BoolToVis}}"/>
+                    <Rectangle Grid.Column="3" Fill="#CC000000" Visibility="{Binding IsProcessComplete,  Converter={StaticResource BoolToVis}}"/>
+                </Grid>
+
+                <!-- Phase body -->
+                <StackPanel Margin="16,14,16,16">
+                    <Border Visibility="{Binding HasOperationResult, Converter={StaticResource BoolToVis}}"
+                            BorderThickness="2,0,0,0" BorderBrush="#88000000" Padding="10,6" Margin="0,0,0,14">
+                        <TextBlock Text="{Binding OperationResult}"
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                   TextWrapping="Wrap" FontSize="13"/>
+                    </Border>
+
+                    <StackPanel Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Step 1 — Import Users" FontWeight="Medium" FontSize="13" Margin="0,0,0,4"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,12"
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                   Text="Before starting registration, add all student and supervisor accounts. Use the Excel import tool or register users manually through Manage Users."/>
+                        <Button Content="Go to Manage Users" Padding="10,5" Margin="0,0,0,12"
+                                Cursor="Hand" HorizontalAlignment="Left" Command="{Binding ManageUsersCommand}"/>
+                        <Separator Margin="0,0,0,10"/>
+                        <Button Content="✓ Users imported — begin registration"
+                                Padding="10,5" Cursor="Hand" HorizontalAlignment="Right"
+                                Command="{Binding MarkUsersImportedCommand}"/>
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Phase 1 — Registration &amp; manual pairing" FontWeight="Medium" FontSize="13" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding Phase1Summary}" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                   FontSize="13" Margin="0,0,0,12"/>
+                        <Border BorderThickness="0" Margin="0,0,0,12">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,4">
+                                    <TextBlock DockPanel.Dock="Left" FontSize="12" FontWeight="SemiBold"
+                                               Text="{Binding [Admin_TotalFillProgress_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                    <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="SemiBold"
+                                               Text="{Binding TotalFillLabel}" HorizontalAlignment="Right"/>
+                                </DockPanel>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding TotalFillPercent}" Height="12"/>
+                            </StackPanel>
+                        </Border>
+                        <ContentControl Content="{Binding}" ContentTemplate="{StaticResource DeadlineTemplate}"/>
+                        <Separator Margin="0,12,0,10"/>
+                        <Button Content="▶ Start phase 2 now" Padding="10,5" HorizontalAlignment="Right"
+                                Cursor="Hand" ToolTip="End Phase 1 and begin Phase 2. Cannot be undone."
+                                Command="{Binding StartSelectionPhaseCommand}"/>
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Phase 2 — Selection gallery &amp; auto-match" FontWeight="Medium" FontSize="13" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding Phase2Summary}" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                   FontSize="13" Margin="0,0,0,12"/>
+                        <ContentControl Content="{Binding}" ContentTemplate="{StaticResource DeadlineTemplate}"/>
+                        <Separator Margin="0,12,0,10"/>
+                        <Button Content="▶ Run auto-match now" Padding="10,5" HorizontalAlignment="Right"
+                                Cursor="Hand" ToolTip="Run auto-matching. Cannot be undone."
+                                Command="{Binding RunAutoMatchCommand}"/>
+                    </StackPanel>
+
+                    <TextBlock Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"
+                               Text="All pairs have been assigned. The matching process is complete."
+                               Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                               FontSize="13" TextWrapping="Wrap"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ── Supervisors header ── -->
+        <Grid Grid.Row="1" Margin="0,0,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="150"/>
+                <ColumnDefinition Width="Auto" MinWidth="70"/>
+                <ColumnDefinition Width="Auto" MinWidth="80"/>
+                <ColumnDefinition Width="Auto" MinWidth="80"/>
+                <ColumnDefinition Width="*" MinWidth="120"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" FontSize="12" FontWeight="Medium"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                       Text="{Binding [Admin_SupervisorHeader_Name],        Source={x:Static loc:TranslationSource.Instance}}"/>
+            <TextBlock Grid.Column="1" FontSize="12" FontWeight="Medium"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                       Text="{Binding [Admin_SupervisorHeader_Pairs],       Source={x:Static loc:TranslationSource.Instance}}"/>
+            <TextBlock Grid.Column="2" FontSize="12" FontWeight="Medium"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                       Text="{Binding [Admin_SupervisorHeader_Pending],     Source={x:Static loc:TranslationSource.Instance}}"/>
+            <TextBlock Grid.Column="3" FontSize="12" FontWeight="Medium"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                       Text="{Binding [Admin_SupervisorHeader_Resolved],    Source={x:Static loc:TranslationSource.Instance}}"/>
+            <TextBlock Grid.Column="4" FontSize="12" FontWeight="Medium"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                       Text="{Binding [Admin_SupervisorHeader_FillProgress],Source={x:Static loc:TranslationSource.Instance}}"/>
+        </Grid>
+
+        <!-- ── Supervisors list ── -->
+        <ListView Grid.Row="2" BorderThickness="0,1,0,0" ItemsSource="{Binding SupervisorsListPreview}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="0,5"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="150"/>
+                            <ColumnDefinition Width="Auto" MinWidth="70"/>
+                            <ColumnDefinition Width="Auto" MinWidth="80"/>
+                            <ColumnDefinition Width="Auto" MinWidth="80"/>
+                            <ColumnDefinition Width="*" MinWidth="120"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding UserName}"/>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding SupervisedPairsCount}"/>
+                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#CC3300" Text="{Binding PendingIssuesCount}"/>
+                        <TextBlock Grid.Column="3" VerticalAlignment="Center" Foreground="#227722" Text="{Binding ResolvedIssuesCount}"/>
+                        <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="8,0">
+                            <DockPanel Margin="0,0,0,2">
+                                <TextBlock DockPanel.Dock="Right" FontSize="10"
+                                           Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                           Text="{Binding FillProgressLabel}" Margin="4,0,0,0"/>
+                                <TextBlock FontSize="10"
+                                           Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                           Text="{Binding FillProgressPercent, StringFormat={}{0:F0}%}"/>
+                            </DockPanel>
+                            <ProgressBar Minimum="0" Maximum="100" Value="{Binding FillProgressPercent, Mode=OneWay}" Height="6" MinWidth="80"/>
+                        </StackPanel>
+                        <Button Grid.Column="5" Padding="8,3" FontSize="11" Cursor="Hand"
+                                Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                CommandParameter="{Binding}"
+                                Content="{Binding [Admin_Inspect_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- ── Forwarded Issues header ── -->
+        <DockPanel Grid.Row="3" Margin="0,14,0,4">
+            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"
+                       Text="{Binding [Admin_ForwardedIssues_Header], Source={x:Static loc:TranslationSource.Instance}}"/>
+            <Border Margin="8,0,0,0" Background="#FF7043" CornerRadius="10" Padding="7,2"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding HasForwardedIssues, Converter={StaticResource BoolToVis}}">
+                <TextBlock Foreground="White" FontSize="11" FontWeight="Bold" Text="{Binding ForwardedIssues.Count}"/>
+            </Border>
+        </DockPanel>
+
+        <!-- ── Forwarded Issues list + detail pane ── -->
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <ListView Grid.Column="0" ItemsSource="{Binding ForwardedIssues}" BorderThickness="1" BorderBrush="#DDD">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="0,4"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="OnForwardedIssueClick"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#F0F0F0"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#E8F0FE"/></Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="8,4">
+                            <TextBlock FontSize="11" Foreground="#777" Text="{Binding Category.Name}"/>
+                            <TextBlock FontSize="12" TextTrimming="CharacterEllipsis" Text="{Binding Description}"/>
+                            <Border Background="#FFF3E0" BorderBrush="#FFB300" BorderThickness="1"
+                                    CornerRadius="3" Padding="5,1" Margin="0,3,0,0" HorizontalAlignment="Left"
+                                    Visibility="{Binding IsResolved, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock FontSize="10" Foreground="#E65100"
+                                           Text="{Binding [Issue_ForwardedBadge], Source={x:Static loc:TranslationSource.Instance}}"/>
+                            </Border>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Border Grid.Column="1" Margin="12,0,0,0" BorderBrush="#DDD" BorderThickness="1"
+                    Visibility="{Binding HasSelectedForwardedIssuePane, Converter={StaticResource BoolToVis}}">
+                <ContentControl Content="{Binding SelectedForwardedIssuePane}"/>
+            </Border>
+
+            <TextBlock Grid.Column="1" Margin="20,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                       Text="{Binding [Admin_ForwardedIssues_SelectHint], Source={x:Static loc:TranslationSource.Instance}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasForwardedIssues}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <TextBlock Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontStyle="Italic"
+                       Text="{Binding [Admin_ForwardedIssues_Empty], Source={x:Static loc:TranslationSource.Instance}}"
+                       Visibility="{Binding HasForwardedIssues, Converter={StaticResource InverseBoolToVis}}"/>
+        </Grid>
+    </Grid>
+</UserControl>

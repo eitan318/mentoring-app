@@ -22,8 +22,6 @@ public class NavigationService : INavigationService
     private readonly Stack<Action<INavigatable>> _contextStack = new();
     private readonly Stack<NavigationStore> _storeStack = new();
 
-    public event Action? NavigationChanged;
-
     public NavigationService(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -66,7 +64,6 @@ public class NavigationService : INavigationService
         }
 
         currentStore.CurrentViewModel = vm;
-        NavigationChanged?.Invoke();
         await onNavigatedTo();
     }
 
@@ -92,7 +89,6 @@ public class NavigationService : INavigationService
                 await store.CurrentViewModel.OnNavigatedFromAsync();
             }
             store.GoBack();
-            NavigationChanged?.Invoke();
             if (store.CurrentViewModel != null)
             {
                 await store.CurrentViewModel.OnNavigatedToAsync();

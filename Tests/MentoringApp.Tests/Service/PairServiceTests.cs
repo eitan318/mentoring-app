@@ -199,7 +199,7 @@ namespace MentoringApp.Tests.Service
 
             var sut = new PairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
 
-            var result = await sut.GetPairById(7);
+            var result = await sut.GetPairByIdAsync(7);
 
             result.Success.Should().BeFalse();
             result.ErrorMessage.Should().Contain("not found");
@@ -222,7 +222,7 @@ namespace MentoringApp.Tests.Service
 
             var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
 
-            var result = await sut.GetPairById(pairId);
+            var result = await sut.GetPairByIdAsync(pairId);
 
             result.Success.Should().BeTrue();
             result.Data.Should().NotBeNull();

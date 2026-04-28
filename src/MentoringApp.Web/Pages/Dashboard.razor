@@ -1,4 +1,6 @@
 @page "/dashboard"
+@using MentoringApp.Model
+@using MentoringApp.Model.User
 @inject AuthStateService Auth
 @inject NavigationManager Nav
 @inject UserApiClient Users
@@ -88,10 +90,10 @@ else
     private const string TabMentorRequests = "Incoming Requests";
     private const string TabGallery = "Select Mentor";
 
-    private UserResponse? _user;
+    private UserModel? _user;
     private SettingsResponse? _settings;
-    private PairResponse? _mentorPair;
-    private PairResponse? _menteePair;
+    private PairModel? _mentorPair;
+    private PairModel? _menteePair;
     private List<string> _tabs = new();
     private string _activeTab = "";
     private bool _loading = true;

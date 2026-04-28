@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model.User;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModel.User;
@@ -9,19 +10,6 @@ using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
-
-public class SelectableSchoolClass : ObservableObject
-{
-    private bool _isSelected;
-    public SchoolClassResponse Class { get; }
-    public bool IsSelected
-    {
-        get => _isSelected;
-        set => SetProperty(ref _isSelected, value);
-    }
-    public string DisplayName => $"Grade {Class.GradeId} – Class {Class.ClassNum}";
-    public SelectableSchoolClass(SchoolClassResponse c, bool selected = false) { Class = c; IsSelected = selected; }
-}
 
 public partial class ManageUsersViewModel : ObservableObject, INavigatable
 {
@@ -32,79 +20,41 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
     private readonly ILocalizationService _loc;
     private readonly UserApiClient _userClient;
     private readonly PairApiClient _pairClient;
-    private readonly ReferenceApiClient _referenceClient;
 
-    [RelayCommand] private async Task RegisterStudent()
-        => await _navigationService.NavigateToAsync<RegistrationViewModel, bool>(false);
+    public ManageUsersViewModel(
+        IFileService fileService,
+        IWindowService windowService,
+        INavigationService navigationService,
+        IToastService toastService,
+        ILocalizationService loc,
+        UserApiClient userClient,
+        PairApiClient pairClient)
+    {
+        _fileService = fileService;
+        _windowService = windowService;
+        _navigationService = navigationService;
+        _toastService = toastService;
+        _loc = loc;
+        _userClient = userClient;
+        _pairClient = pairClient;
+    }
 
-    [RelayCommand] private async Task RegisterSupervisor()
-        => await _navigationService.NavigateToAsync<RegistrationViewModel, bool>(true);
-
-    public ObservableCollection<UserResponse> AllUsers { get; set; } = [];
+    // --- Properties & Collections ---
+    public ObservableCollection<UserModel> AllUsers { get; set; } = [];
+    public ObservableCollection<string> AvailableGrades { get; set; } = [];
+    private HashSet<int> _pairedUserIds = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DeleteUserCommand))]
     [NotifyCanExecuteChangedFor(nameof(ViewUserCommand))]
-    [NotifyCanExecuteChangedFor(nameof(SaveSupervisorClassCommand))]
-    [NotifyPropertyChangedFor(nameof(IsSupervisorSelected))]
-    private UserResponse? _selectedUser;
+    private UserModel? _selectedUser;
 
-    public bool IsSupervisorSelected => SelectedUser?.IsSupervisor == true;
     private bool HasSelectedUser => SelectedUser != null;
 
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private string _selectedRole = "All";
-
     public static IReadOnlyList<string> RoleOptions { get; } = ["All", "Supervisor", "Student"];
     public bool IsStudentFilterVisible => SelectedRole == "Student";
-
-    [ObservableProperty] private string _supervisorClassSaveStatus = "";
-    [ObservableProperty] private bool _supervisorClassSaveIsError;
-
-    public ObservableCollection<SelectableSchoolClass> SelectableClasses { get; } = [];
-
-    [RelayCommand(CanExecute = nameof(HasSelectedUser))]
-    private async Task SaveSupervisorClass()
-    {
-        if (SelectedUser == null || !SelectedUser.IsSupervisor) return;
-        var ids = SelectableClasses.Where(c => c.IsSelected).Select(c => c.Class.Id).ToList();
-        try
-        {
-            await _userClient.UpdateSupervisorClassesAsync(SelectedUser.Id, new UpdateSupervisorClassesRequest(ids));
-            var updated = await _userClient.GetByIdAsync(SelectedUser.Id);
-            if (updated != null)
-            {
-                var idx = AllUsers.IndexOf(SelectedUser);
-                if (idx >= 0) AllUsers[idx] = updated;
-                SelectedUser = updated;
-            }
-            OnPropertyChanged(nameof(FilteredUsers));
-            SupervisorClassSaveIsError = false;
-            SupervisorClassSaveStatus = "✓ Saved";
-            _ = Task.Delay(3000).ContinueWith(_ => SupervisorClassSaveStatus = "",
-                System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
-        }
-        catch (Exception ex)
-        {
-            SupervisorClassSaveIsError = true;
-            SupervisorClassSaveStatus = $"✗ {ex.Message}";
-        }
-    }
-
-    private List<SchoolClassResponse> _allSchoolClasses = new();
-
-    partial void OnSelectedUserChanged(UserResponse? value)
-    {
-        SelectableClasses.Clear();
-        SupervisorClassSaveStatus = "";
-        SupervisorClassSaveIsError = false;
-        if (value == null || !value.IsSupervisor) return;
-
-        // Classes taken by other supervisors — we don't have that data directly.
-        // For now, allow all classes; server-side validation will prevent conflicts.
-        foreach (var sc in _allSchoolClasses)
-            SelectableClasses.Add(new SelectableSchoolClass(sc, false));
-    }
 
     [ObservableProperty] private bool _filterIsMentor;
     [ObservableProperty] private bool _filterIsMentee;
@@ -112,11 +62,11 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
     [ObservableProperty] private string? _filterMinGrade;
     [ObservableProperty] private string? _filterMaxGrade;
 
-    public ObservableCollection<string> AvailableGrades { get; set; } = [];
+    [ObservableProperty] private bool _isStudentInfoVisible;
+    [ObservableProperty] private bool _isSupervisorInfoVisible;
 
-    private HashSet<int> _pairedUserIds = [];
-
-    public IEnumerable<UserResponse> FilteredUsers
+    // --- Logic & Filtering ---
+    public IEnumerable<UserModel> FilteredUsers
     {
         get
         {
@@ -128,81 +78,50 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
 
             q = SelectedRole switch
             {
-                "Supervisor" => q.Where(u => u.IsSupervisor),
-                "Student"    => q.Where(u => u.IsStudent),
-                _            => q
+                "Supervisor" => q.OfType<SupervisorModel>(),
+                "Student" => q.OfType<StudentModel>(),
+                _ => q
             };
 
             if (SelectedRole == "Student")
             {
+                var students = q.OfType<StudentModel>();
+
                 if (FilterIsMentor || FilterIsMentee)
-                    q = q.Where(u => FilterIsMentor && FilterIsMentee ? u.IsMentor && u.IsMentee
-                                   : FilterIsMentor ? u.IsMentor : u.IsMentee);
+                    students = students.Where(s => FilterIsMentor && FilterIsMentee ? s.IsMentor && s.IsMentee
+                                                 : FilterIsMentor ? s.IsMentor : s.IsMentee);
 
                 if (FilterUnpairedOnly)
-                    q = q.Where(u => !_pairedUserIds.Contains(u.Id));
+                    students = students.Where(s => !_pairedUserIds.Contains(s.Id));
 
                 if (!string.IsNullOrEmpty(FilterMinGrade) && int.TryParse(FilterMinGrade, out int min))
-                    q = q.Where(u => u.GradeId >= min);
+                    students = students.Where(s => s.Grade != null && s.Grade.Id >= min);
 
                 if (!string.IsNullOrEmpty(FilterMaxGrade) && int.TryParse(FilterMaxGrade, out int max))
-                    q = q.Where(u => u.GradeId <= max);
+                    students = students.Where(s => s.Grade != null && s.Grade.Id <= max);
+
+                return students;
             }
 
             return q;
         }
     }
 
-    partial void OnSearchTextChanged(string v)       => OnPropertyChanged(nameof(FilteredUsers));
-    partial void OnSelectedRoleChanged(string v)     { OnPropertyChanged(nameof(IsStudentFilterVisible)); OnPropertyChanged(nameof(FilteredUsers)); }
-    partial void OnFilterIsMentorChanged(bool v)     => OnPropertyChanged(nameof(FilteredUsers));
-    partial void OnFilterIsMenteeChanged(bool v)     => OnPropertyChanged(nameof(FilteredUsers));
-    partial void OnFilterUnpairedOnlyChanged(bool v) => OnPropertyChanged(nameof(FilteredUsers));
-    partial void OnFilterMinGradeChanged(string? v)  => OnPropertyChanged(nameof(FilteredUsers));
-    partial void OnFilterMaxGradeChanged(string? v)  => OnPropertyChanged(nameof(FilteredUsers));
-
-    [ObservableProperty] private bool _isStudentInfoVisible;
-    [ObservableProperty] private bool _isSupervisorInfoVisible;
-
-    [RelayCommand] private void ToggleStudentInfo()    => IsStudentInfoVisible    = !IsStudentInfoVisible;
-    [RelayCommand] private void ToggleSupervisorInfo() => IsSupervisorInfoVisible = !IsSupervisorInfoVisible;
-    [RelayCommand] private void CloseStudentInfo()     => IsStudentInfoVisible    = false;
-    [RelayCommand] private void CloseSupervisorInfo()  => IsSupervisorInfoVisible = false;
-
-    public ManageUsersViewModel(
-        IFileService fileService,
-        IWindowService windowService,
-        INavigationService navigationService,
-        IToastService toastService,
-        ILocalizationService loc,
-        UserApiClient userClient,
-        PairApiClient pairClient,
-        ReferenceApiClient referenceClient)
-    {
-        _fileService       = fileService;
-        _windowService     = windowService;
-        _navigationService = navigationService;
-        _toastService      = toastService;
-        _loc               = loc;
-        _userClient        = userClient;
-        _pairClient        = pairClient;
-        _referenceClient   = referenceClient;
-    }
-
+    // --- Lifecycle ---
     public async Task OnNavigatedToAsync()
     {
-        var classes = await _referenceClient.GetSchoolClassesAsync();
-        _allSchoolClasses = classes.ToList();
-
         var users = await _userClient.GetAllAsync();
-        AllUsers = new ObservableCollection<UserResponse>(users);
+        AllUsers = new ObservableCollection<UserModel>(users);
 
         var pairs = await _pairClient.GetAllAsync();
-        _pairedUserIds = pairs.SelectMany(p => new[] { p.MentorId, p.MenteeId }).ToHashSet();
+        _pairedUserIds = pairs.SelectMany(p => new[] { p.Mentor.Id, p.Mentee.Id }).ToHashSet();
 
-        var grades = AllUsers.Where(u => u.IsStudent && u.GradeId.HasValue)
-                             .Select(u => u.GradeId!.Value.ToString())
-                             .Distinct().OrderBy(x => x).ToList();
+        var grades = AllUsers.OfType<StudentModel>()
+                             .Where(s => s.Grade != null)
+                             .Select(s => s.Grade!.Id.ToString())
+                             .Distinct()
+                             .OrderBy(x => int.Parse(x))
+                             .ToList();
 
         AvailableGrades.Clear();
         foreach (var g in grades) AvailableGrades.Add(g);
@@ -212,13 +131,28 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
         OnPropertyChanged(nameof(FilteredUsers));
     }
 
+    // --- Property Change Handlers ---
+    partial void OnSearchTextChanged(string v) => OnPropertyChanged(nameof(FilteredUsers));
+    partial void OnSelectedRoleChanged(string v) { OnPropertyChanged(nameof(IsStudentFilterVisible)); OnPropertyChanged(nameof(FilteredUsers)); }
+    partial void OnFilterIsMentorChanged(bool v) => OnPropertyChanged(nameof(FilteredUsers));
+    partial void OnFilterIsMenteeChanged(bool v) => OnPropertyChanged(nameof(FilteredUsers));
+    partial void OnFilterUnpairedOnlyChanged(bool v) => OnPropertyChanged(nameof(FilteredUsers));
+    partial void OnFilterMinGradeChanged(string? v) => OnPropertyChanged(nameof(FilteredUsers));
+    partial void OnFilterMaxGradeChanged(string? v) => OnPropertyChanged(nameof(FilteredUsers));
+
+    // --- Commands ---
+    [RelayCommand] private async Task RegisterStudent() => await _navigationService.NavigateToAsync<RegistrationViewModel, bool>(false);
+    [RelayCommand] private async Task RegisterSupervisor() => await _navigationService.NavigateToAsync<RegistrationViewModel, bool>(true);
+    [RelayCommand] private void ToggleStudentInfo() => IsStudentInfoVisible = !IsStudentInfoVisible;
+    [RelayCommand] private void ToggleSupervisorInfo() => IsSupervisorInfoVisible = !IsSupervisorInfoVisible;
+    [RelayCommand] private void CloseStudentInfo() => IsStudentInfoVisible = false;
+    [RelayCommand] private void CloseSupervisorInfo() => IsSupervisorInfoVisible = false;
+
     [RelayCommand(CanExecute = nameof(HasSelectedUser))]
     private async Task DeleteUser()
     {
         if (SelectedUser is null) return;
-        bool confirmed = await _toastService.ConfirmAsync(
-            _loc.Get("Confirm_DeleteUser_Title"),
-            _loc.Get("Confirm_DeleteUser_Body"));
+        bool confirmed = await _toastService.ConfirmAsync(_loc.Get("Confirm_DeleteUser_Title"), _loc.Get("Confirm_DeleteUser_Body"));
         if (!confirmed) return;
 
         await _userClient.DeleteAsync(SelectedUser.Id);
@@ -240,17 +174,13 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
         IsStudentInfoVisible = false;
         string? file = _fileService.OpenFile("Excel files (*.xlsx)|*.xlsx");
         if (string.IsNullOrEmpty(file)) return;
-
         try
         {
             int count = await _userClient.ImportStudentsAsync(file);
             _toastService.Success(_loc.Format("ManageUsers_ImportStudents_Success", count));
             await OnNavigatedToAsync();
         }
-        catch (Exception ex)
-        {
-            _toastService.Error(_loc.Format("ManageUsers_ImportStudents_Error", ex.Message));
-        }
+        catch (Exception ex) { _toastService.Error(_loc.Format("ManageUsers_ImportStudents_Error", ex.Message)); }
     }
 
     [RelayCommand]
@@ -259,17 +189,13 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
         IsSupervisorInfoVisible = false;
         string? file = _fileService.OpenFile("Excel files (*.xlsx)|*.xlsx");
         if (string.IsNullOrEmpty(file)) return;
-
         try
         {
             int count = await _userClient.ImportSupervisorsAsync(file);
             _toastService.Success(_loc.Format("ManageUsers_ImportSupervisors_Success", count));
             await OnNavigatedToAsync();
         }
-        catch (Exception ex)
-        {
-            _toastService.Error(_loc.Format("ManageUsers_ImportSupervisors_Error", ex.Message));
-        }
+        catch (Exception ex) { _toastService.Error(_loc.Format("ManageUsers_ImportSupervisors_Error", ex.Message)); }
     }
 
     [RelayCommand]
@@ -277,15 +203,8 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
     {
         string? savePath = _fileService.SaveFile("Excel files (*.xlsx)|*.xlsx", "students_import_template.xlsx");
         if (string.IsNullOrEmpty(savePath)) return;
-        try
-        {
-            await _userClient.DownloadTemplateAsync(isSupervisor: false, savePath);
-            _toastService.Success(_loc.Get("ManageUsers_TemplateSaved_Success"));
-        }
-        catch (Exception ex)
-        {
-            _toastService.Error(_loc.Format("ManageUsers_TemplateSaved_Error", ex.Message));
-        }
+        try { await _userClient.DownloadTemplateAsync(false, savePath); _toastService.Success(_loc.Get("ManageUsers_TemplateSaved_Success")); }
+        catch (Exception ex) { _toastService.Error(_loc.Format("ManageUsers_TemplateSaved_Error", ex.Message)); }
     }
 
     [RelayCommand]
@@ -293,14 +212,7 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
     {
         string? savePath = _fileService.SaveFile("Excel files (*.xlsx)|*.xlsx", "supervisors_import_template.xlsx");
         if (string.IsNullOrEmpty(savePath)) return;
-        try
-        {
-            await _userClient.DownloadTemplateAsync(isSupervisor: true, savePath);
-            _windowService.ShowMessage(_loc.Get("ManageUsers_TemplateSaved_Success"), _loc.Get("ManageUsers_DownloadComplete_Title"));
-        }
-        catch (Exception ex)
-        {
-            _windowService.ShowMessage(_loc.Format("ManageUsers_TemplateSaved_Error", ex.Message), _loc.Get("Common_Error_Title"));
-        }
+        try { await _userClient.DownloadTemplateAsync(true, savePath); _windowService.ShowMessage(_loc.Get("ManageUsers_TemplateSaved_Success"), _loc.Get("ManageUsers_DownloadComplete_Title")); }
+        catch (Exception ex) { _windowService.ShowMessage(_loc.Format("ManageUsers_TemplateSaved_Error", ex.Message), _loc.Get("Common_Error_Title")); }
     }
 }

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 
@@ -13,10 +14,10 @@ public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
     private readonly ReviewApiClient _reviewClient;
     private readonly SettingsApiClient _settingsClient;
 
-    [ObservableProperty] private PairResponse? _currentPair;
+    [ObservableProperty] private PairModel? _currentPair;
     [ObservableProperty] private string _mentorName = "";
     [ObservableProperty] private string _menteeName = "";
-    [ObservableProperty] private ObservableCollection<IssueResponse> _pairIssues = new();
+    [ObservableProperty] private ObservableCollection<IssueModel> _pairIssues = new();
     [ObservableProperty] private ObservableCollection<ReviewResponse> _pairReviews = new();
     [ObservableProperty] private double _totalMeetingHours;
     [ObservableProperty] private double _requiredMeetingHours = 10;
@@ -50,12 +51,12 @@ public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
 
         if (CurrentPair != null)
         {
-            var mentorIssues = await _issueClient.GetByUserAsync(CurrentPair.MentorId);
-            var menteeIssues = await _issueClient.GetByUserAsync(CurrentPair.MenteeId);
+            var mentorIssues = await _issueClient.GetByUserAsync(CurrentPair.Mentor.Id);
+            var menteeIssues = await _issueClient.GetByUserAsync(CurrentPair.Mentee.Id);
             var allIssues = mentorIssues.Concat(menteeIssues)
                 .GroupBy(i => i.Id).Select(g => g.First())
                 .OrderByDescending(i => i.CreationDate);
-            PairIssues = new ObservableCollection<IssueResponse>(allIssues);
+            PairIssues = new ObservableCollection<IssueModel>(allIssues);
         }
     }
 }

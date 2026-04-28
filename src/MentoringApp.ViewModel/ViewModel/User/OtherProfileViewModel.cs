@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.ApiClient.Clients;
-using MentoringApp.ApiClient.Models;
+using MentoringApp.Model.User;
 using MentoringApp.ViewModel.Helpers;
 using MentoringApp.ViewModel.ViewModelHelper;
 
@@ -8,20 +8,28 @@ namespace MentoringApp.ViewModel.ViewModel.User;
 
 public partial class OtherProfileViewModel : ObservableObject, INavigatable<int>
 {
-    [ObservableProperty] private string _userName = "";
-    [ObservableProperty] private string _email = "";
-    [ObservableProperty] private string? _phoneNumber;
-    [ObservableProperty] private string _genderDisplay = "";
-    [ObservableProperty] private string _preferredMentorGenderDisplay = "";
-    [ObservableProperty] private string _preferredMenteeGenderDisplay = "";
-    [ObservableProperty] private bool _isStudent;
-    [ObservableProperty] private bool _isSupervisor;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsStudent))]
+    [NotifyPropertyChangedFor(nameof(GradeName))]
+    [NotifyPropertyChangedFor(nameof(ClassNum))]
+    [NotifyPropertyChangedFor(nameof(GenderDisplay))]
+    [NotifyPropertyChangedFor(nameof(PreferredMentorGenderDisplay))]
+    [NotifyPropertyChangedFor(nameof(PreferredMenteeGenderDisplay))]
+    private UserModel? _user;
+
     [ObservableProperty] private string _roleName = "";
-    [ObservableProperty] private string _gradeName = "";
-    [ObservableProperty] private int _classNum;
     [ObservableProperty] private string _teachingSubject = "None";
     [ObservableProperty] private string _learningSubject = "None";
-    [ObservableProperty] private string? _profilePicturePath;
+    [ObservableProperty] private bool _loading;
+
+    public bool IsStudent => User is StudentModel;
+    public string GradeName => (User as StudentModel)?.Grade?.Name ?? "";
+    public int ClassNum => (User as StudentModel)?.ClassNum ?? 0;
+    public string GenderDisplay => User != null ? GenderHelper.GenderToDisplay((int)User.Gender) : "";
+    public string PreferredMentorGenderDisplay => User is StudentModel s
+        ? GenderHelper.GenderPreferenceToDisplay((int)s.PreferredMentorGender) : "";
+    public string PreferredMenteeGenderDisplay => User is StudentModel s2
+        ? GenderHelper.GenderPreferenceToDisplay((int)s2.PreferredMenteeGender) : "";
 
     private readonly UserApiClient _userClient;
     private readonly ReferenceApiClient _referenceClient;
@@ -34,51 +42,52 @@ public partial class OtherProfileViewModel : ObservableObject, INavigatable<int>
 
     public async Task OnNavigatedToAsync(int userId)
     {
-        var user = await _userClient.GetByIdAsync(userId);
-        if (user == null) return;
-
-        var subjects = (await _referenceClient.GetSubjectsAsync()).ToDictionary(s => s.Id, s => s.Name);
-        var grades = (await _referenceClient.GetGradesAsync()).ToDictionary(g => g.Id, g => g.Name);
-
-        UserName = user.UserName;
-        Email = user.Email;
-        ProfilePicturePath = user.ProfilePicturePath;
-        PhoneNumber = user.PhoneNumber;
-        GenderDisplay = GenderHelper.GenderToDisplay(user.Gender);
-
-        if (user.IsStudent)
+        Loading = true;
+        try
         {
-            IsStudent = true;
-            IsSupervisor = false;
-            RoleName = (user.IsMentor, user.IsMentee) switch
+            // ה-API מחזיר StudentModel/SupervisorModel אוטומטית
+            var user = await _userClient.GetByIdAsync(userId);
+            if (user == null) return;
+
+            User = user;
+
+            // עיבוד נתונים ספציפיים לפי סוג המשתמש (Pattern Matching)
+            if (User is StudentModel student)
             {
-                (true, true)  => "Student · Mentor & Mentee",
-                (true, false) => "Student · Mentor",
-                (false, true) => "Student · Mentee",
-                _             => "Student"
-            };
-            GradeName = user.GradeId.HasValue && grades.TryGetValue(user.GradeId.Value, out var gn) ? gn : "";
-            ClassNum = user.ClassNum ?? 0;
-            PreferredMentorGenderDisplay = user.PreferredMentorGender.HasValue
-                ? GenderHelper.GenderPreferenceToDisplay(user.PreferredMentorGender.Value) : "";
-            PreferredMenteeGenderDisplay = user.PreferredMenteeGender.HasValue
-                ? GenderHelper.GenderPreferenceToDisplay(user.PreferredMenteeGender.Value) : "";
+                var subjects = (await _referenceClient.GetSubjectsAsync()).ToDictionary(s => s.Id, s => s.Name);
 
-            if (user.MentorSubjectId.HasValue)
-                TeachingSubject = subjects.TryGetValue(user.MentorSubjectId.Value, out var ts) ? $"Teaching: {ts}" : $"Teaching: {user.MentorSubjectId}";
-            if (user.MenteeSubjectId.HasValue)
-                LearningSubject = subjects.TryGetValue(user.MenteeSubjectId.Value, out var ls) ? $"Learning: {ls}" : $"Learning: {user.MenteeSubjectId}";
+                RoleName = (student.IsMentor, student.IsMentee) switch
+                {
+                    (true, true) => "Student · Mentor & Mentee",
+                    (true, false) => "Student · Mentor",
+                    (false, true) => "Student · Mentee",
+                    _ => "Student"
+                };
+
+                if (student.MentorProfile != null)
+                {
+                    TeachingSubject = subjects.TryGetValue(student.MentorProfile.SubjectToTeach, out var ts)
+                        ? $"Teaching: {ts}" : "Teaching: Unknown";
+                }
+
+                if (student.MenteeProfile != null)
+                {
+                    LearningSubject = subjects.TryGetValue(student.MenteeProfile.SubjectToLearn, out var ls)
+                        ? $"Learning: {ls}" : "Learning: Unknown";
+                }
+            }
+            else if (User is AdminModel)
+            {
+                RoleName = "Admin";
+            }
+            else if (User is SupervisorModel)
+            {
+                RoleName = "Supervisor";
+            }
         }
-        else if (user.IsAdmin)
+        finally
         {
-            IsStudent = false;
-            RoleName = "Admin";
-        }
-        else
-        {
-            IsStudent = false;
-            IsSupervisor = true;
-            RoleName = "Supervisor";
+            Loading = false;
         }
     }
 }

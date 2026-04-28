@@ -2,7 +2,7 @@
 
 namespace MentoringApp.Model
 {
-    public class Grade
+    public class GradeModel
     {
         public required int Id { get; set; }
         public required string Name { get; set; }

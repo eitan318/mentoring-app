@@ -1,5 +1,6 @@
+using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using MentoringApp.Api.Helpers;
-using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
 
 namespace MentoringApp.Api.Endpoints;
@@ -13,62 +14,41 @@ public static class IssueEndpoints
             .RequireAuthorization();
 
         // GET /api/issues — Admin
-        group.MapGet("/", async (IIssueRepo issueRepo) =>
-        {
-            var dtos = await issueRepo.GetAllAsync();
-            return Results.Ok(dtos);
-        })
-        .RequireAuthorization("AdminOnly")
-        .WithOpenApi();
+        group.MapGet("/", async (IssueService issueService) =>
+            (await issueService.GetAllIssuesAsync()).ToHttp())
+            .RequireAuthorization("AdminOnly")
+            .WithOpenApi();
 
         // GET /api/issues/forwarded — Admin (before /{id} to avoid conflict)
-        group.MapGet("/forwarded", async (IIssueRepo issueRepo) =>
-        {
-            var dtos = await issueRepo.GetForwardedAsync();
-            return Results.Ok(dtos);
-        })
-        .RequireAuthorization("AdminOnly")
-        .WithOpenApi();
+        group.MapGet("/forwarded", async (IssueService issueService) =>
+            (await issueService.GetForwardedIssuesAsync()).ToHttp())
+            .RequireAuthorization("AdminOnly")
+            .WithOpenApi();
 
         // GET /api/issues/categories
-        group.MapGet("/categories", async (IIssueCategoryRepo categoryRepo) =>
-        {
-            var dtos = await categoryRepo.GetAllAsync();
-            return Results.Ok(dtos);
-        })
-        .WithOpenApi();
+        group.MapGet("/categories", async (IssueService issueService) =>
+            (await issueService.GetCategoriesAsync()).ToHttp())
+            .WithOpenApi();
 
         // GET /api/issues/{id}
-        group.MapGet("/{id:int}", async (int id, IIssueRepo issueRepo) =>
-        {
-            var dto = await issueRepo.GetByIdAsync(id);
-            return dto is null ? Results.NotFound() : Results.Ok(dto);
-        })
-        .WithOpenApi();
+        group.MapGet("/{id:int}", async (int id, IssueService issueService) =>
+            (await issueService.GetIssueByIdAsync(id)).ToHttp())
+            .WithOpenApi();
 
         // GET /api/issues/by-user/{userId}
-        group.MapGet("/by-user/{userId:int}", async (int userId, IIssueRepo issueRepo) =>
-        {
-            var dtos = await issueRepo.GetByReporterAsync(userId);
-            return Results.Ok(dtos);
-        })
-        .WithOpenApi();
+        group.MapGet("/by-user/{userId:int}", async (int userId, IssueService issueService) =>
+            (await issueService.GetIssuesByUserAsync(userId)).ToHttp())
+            .WithOpenApi();
 
         // GET /api/issues/by-supervisor/{supervisorId}
-        group.MapGet("/by-supervisor/{supervisorId:int}", async (int supervisorId, IIssueRepo issueRepo) =>
-        {
-            var dtos = await issueRepo.GetBySupervisorAsync(supervisorId);
-            return Results.Ok(dtos);
-        })
-        .WithOpenApi();
+        group.MapGet("/by-supervisor/{supervisorId:int}", async (int supervisorId, IssueService issueService) =>
+        (await issueService.GetIssuesBySupervisorAsync(supervisorId)).ToHttp())
+            .WithOpenApi();
 
         // POST /api/issues
         group.MapPost("/", async (CreateIssueRequest req, IssueService issueService) =>
-        {
-            var result = await issueService.CreateIssueAsync(req.Description, req.CategoryId, req.ReportedByUserId);
-            return result.ToHttp();
-        })
-        .WithOpenApi();
+            (await issueService.CreateIssueAsync(req.Description, req.CategoryId, req.ReportedByUserId)).ToHttp())
+            .WithOpenApi();
 
         // PUT /api/issues/{id}/resolve — Admin/Supervisor
         group.MapPut("/{id:int}/resolve", async (int id, IssueService issueService) =>

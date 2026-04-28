@@ -101,7 +101,7 @@ namespace MentoringApp.Service
                     {
                         var supGradeDto = await _gradeRepo.GetByIdAsync(dto.GradeId.Value) 
                                         ?? new GradeDao { Id = dto.GradeId.Value, Name = "Unknown", Num = 0 };
-                        supervisor.Grade = new Grade { Id = supGradeDto.Id, Name = supGradeDto.Name, Num = supGradeDto.Num };
+                        supervisor.Grade = new GradeModel { Id = supGradeDto.Id, Name = supGradeDto.Name, Num = supGradeDto.Num };
                     }
                     supervisor.ClassNum = dto.ClassNum ?? 0;
 
@@ -118,13 +118,13 @@ namespace MentoringApp.Service
                     supervisor.AssignedClasses = classDtos.Select(dto =>
                     {
                         if (!allGrades.TryGetValue(dto.GradeId, out var gDto)) return null;
-                        return new SchoolClass
+                        return new SchoolClassModel
                         {
                             Id = dto.Id,
-                            Grade = new Grade { Id = gDto.Id, Name = gDto.Name, Num = gDto.Num },
+                            Grade = new GradeModel { Id = gDto.Id, Name = gDto.Name, Num = gDto.Num },
                             ClassNum = dto.ClassNum
                         };
-                    }).Where(x => x != null).Cast<SchoolClass>().ToList();
+                    }).Where(x => x != null).Cast<SchoolClassModel>().ToList();
 
                     user = supervisor;
                     break;
@@ -133,7 +133,7 @@ namespace MentoringApp.Service
                     var gradeDto = await _gradeRepo.GetByIdAsync(dto.GradeId ?? 0)
                                 ?? new GradeDao { Id = 0, Name = "Unknown", Num = 0 };
 
-                    var student = new StudentModel(dto.Id, dto.Email, dto.UserName, dto.NationalId, new Grade { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num });
+                    var student = new StudentModel(dto.Id, dto.Email, dto.UserName, dto.NationalId, new GradeModel { Id = gradeDto.Id, Name = gradeDto.Name, Num = gradeDto.Num });
                     student.ClassNum = dto.ClassNum ?? 0;
                     student.PreferredMentorGender = dto.PreferredMentorGender.HasValue
                         ? (MentoringApp.Model.User.GenderPreference)dto.PreferredMentorGender.Value

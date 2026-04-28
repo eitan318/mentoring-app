@@ -1,23 +1,24 @@
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 
 public class PairApiClient(HttpClient http) : ApiClientBase(http)
 {
-    public Task<IEnumerable<PairResponse>> GetAllAsync() =>
-        GetAsync<IEnumerable<PairResponse>>("/api/pairs");
+    public Task<IEnumerable<PairModel>> GetAllAsync() =>
+        GetAsync<IEnumerable<PairModel>>("/api/pairs");
 
-    public Task<PairResponse> GetByIdAsync(int id) =>
-        GetAsync<PairResponse>($"/api/pairs/{id}");
+    public Task<PairModel> GetByIdAsync(int id) =>
+        GetAsync<PairModel>($"/api/pairs/{id}");
 
-    public Task<PairResponse> GetByMentorAsync(int mentorId) =>
-        GetAsync<PairResponse>($"/api/pairs/by-mentor/{mentorId}");
+    public Task<PairModel> GetByMentorAsync(int mentorId) =>
+        GetAsync<PairModel>($"/api/pairs/by-mentor/{mentorId}");
 
-    public Task<PairResponse> GetByMenteeAsync(int menteeId) =>
-        GetAsync<PairResponse>($"/api/pairs/by-mentee/{menteeId}");
+    public Task<PairModel> GetByMenteeAsync(int menteeId) =>
+        GetAsync<PairModel>($"/api/pairs/by-mentee/{menteeId}");
 
-    public Task<IEnumerable<PairResponse>> GetBySupervisorAsync(int supervisorId) =>
-        GetAsync<IEnumerable<PairResponse>>($"/api/pairs/by-supervisor/{supervisorId}");
+    public Task<IEnumerable<PairModel>> GetBySupervisorAsync(int supervisorId) =>
+        GetAsync<IEnumerable<PairModel>>($"/api/pairs/by-supervisor/{supervisorId}");
 
     public Task CreateAsync(CreatePairRequest request) =>
         PostAsync("/api/pairs", request);

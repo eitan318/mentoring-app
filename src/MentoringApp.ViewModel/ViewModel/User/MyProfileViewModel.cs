@@ -2,6 +2,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
+using MentoringApp.Model.User;
+using MentoringApp.Model.User.StudentProfiles; // וודא שה-Namespace הזה קיים
 using MentoringApp.ViewModel.Helpers;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
@@ -11,7 +14,6 @@ using MentoringApp.ViewModel.ViewModel.Supervisor;
 using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
 
@@ -24,48 +26,107 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
 
     [ObservableProperty] private bool _isReadOnly = true;
     [ObservableProperty] private bool _isEditMode = false;
-    [ObservableProperty] private string? _profilePicturePath;
-    [ObservableProperty] private ObservableCollection<SubjectResponse> _subjects = [];
-    [ObservableProperty] private ObservableCollection<GradeResponse> _grades = [];
     [ObservableProperty] private string _errorMessage = "";
 
-    // Identity
-    [ObservableProperty] private string _nationalId = "";
+    [ObservableProperty] private ObservableCollection<SubjectModel> _subjects = [];
+    [ObservableProperty] private ObservableCollection<GradeModel> _grades = [];
 
+    // האובייקט המרכזי - ה-Data Binding ב-XAML יתבצע ישירות מולו
     [ObservableProperty]
-    [Required(ErrorMessage = "Email is required")]
-    [EmailAddress(ErrorMessage = "Invalid email format")]
-    private string _email = "";
+    [NotifyPropertyChangedFor(nameof(UserName))]
+    [NotifyPropertyChangedFor(nameof(Email))]
+    [NotifyPropertyChangedFor(nameof(NationalId))]
+    [NotifyPropertyChangedFor(nameof(PhoneNumber))]
+    [NotifyPropertyChangedFor(nameof(ProfilePicturePath))]
+    [NotifyPropertyChangedFor(nameof(Gender))]
+    [NotifyPropertyChangedFor(nameof(SelectedGenderValue))]
+    [NotifyPropertyChangedFor(nameof(IsSupervisor))]
+    [NotifyPropertyChangedFor(nameof(SelectedGrade))]
+    [NotifyPropertyChangedFor(nameof(ClassNum))]
+    [NotifyPropertyChangedFor(nameof(HasMentorProfile))]
+    [NotifyPropertyChangedFor(nameof(HasMenteeProfile))]
+    [NotifyPropertyChangedFor(nameof(SubjectToTeach))]
+    [NotifyPropertyChangedFor(nameof(MaxMentees))]
+    [NotifyPropertyChangedFor(nameof(SubjectToLearn))]
+    [NotifyPropertyChangedFor(nameof(SelectedPreferredMentorGenderValue))]
+    [NotifyPropertyChangedFor(nameof(SelectedPreferredMenteeGenderValue))]
+    private UserModel? _currentUser;
 
-    [ObservableProperty]
-    [Required(ErrorMessage = "Username is required")]
-    [MinLength(3)]
-    private string _userName = "";
-
-    // Role Detection
-    [ObservableProperty] private bool _hasMentorProfile;
-    [ObservableProperty] private bool _hasMenteeProfile;
-    [ObservableProperty] private bool _isSupervisor;
-    [ObservableProperty] private bool _isAdmin;
     [ObservableProperty] private string _roleBadge = string.Empty;
 
-    // Contact & Gender
-    [ObservableProperty] private string? _phoneNumber;
+    // ── Proxy properties bound by MyProfileView.xaml ──────────────────────────
+    public string UserName
+    {
+        get => CurrentUser?.UserName ?? "";
+        set { if (CurrentUser != null) CurrentUser.UserName = value; }
+    }
+    public string Email
+    {
+        get => CurrentUser?.Email ?? "";
+        set { if (CurrentUser != null) CurrentUser.Email = value; }
+    }
+    public string NationalId => CurrentUser?.NationalId ?? "";
+    public string? PhoneNumber
+    {
+        get => CurrentUser?.PhoneNumber;
+        set { if (CurrentUser != null) CurrentUser.PhoneNumber = value; }
+    }
+    public string ProfilePicturePath => CurrentUser?.ProfilePicturePath ?? "";
+    public Gender Gender => CurrentUser?.Gender ?? Gender.PreferNoAnswer;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Gender))]
-    private int _selectedGenderValue = (int)Gender.PreferNoAnswer;
+    public int SelectedGenderValue
+    {
+        get => (int)(CurrentUser?.Gender ?? Gender.PreferNoAnswer);
+        set { if (CurrentUser != null) CurrentUser.Gender = (Gender)value; }
+    }
 
-    public Gender Gender => (Gender)SelectedGenderValue;
+    public bool IsSupervisor => CurrentUser is SupervisorModel;
 
-    // Student-specific
-    [ObservableProperty] private GradeResponse? _selectedGrade;
-    [ObservableProperty] private int _classNum;
-    [ObservableProperty] private int _subjectToTeach = -1;
-    [ObservableProperty] private int _subjectToLearn = -1;
-    [ObservableProperty] private int _maxMentees = 1;
-    [ObservableProperty] private int _selectedPreferredMentorGenderValue = (int)GenderPreference.NoPreference;
-    [ObservableProperty] private int _selectedPreferredMenteeGenderValue = (int)GenderPreference.NoPreference;
+    private StudentModel? AsStudent => CurrentUser as StudentModel;
+    public bool HasMentorProfile => AsStudent?.IsMentor == true;
+    public bool HasMenteeProfile => AsStudent?.IsMentee == true;
+
+    public GradeModel? SelectedGrade
+    {
+        get => AsStudent?.Grade;
+        set { if (AsStudent != null && value != null) AsStudent.Grade = value; }
+    }
+
+    public int ClassNum
+    {
+        get => AsStudent?.ClassNum ?? 0;
+        set { if (AsStudent != null) AsStudent.ClassNum = value; }
+    }
+
+    public int SubjectToTeach
+    {
+        get => AsStudent?.MentorProfile?.SubjectToTeach ?? 0;
+        set { if (AsStudent?.MentorProfile != null) AsStudent.MentorProfile.SubjectToTeach = value; }
+    }
+
+    public int MaxMentees
+    {
+        get => AsStudent?.MentorProfile?.MaxMentees ?? 1;
+        set { if (AsStudent?.MentorProfile != null) AsStudent.MentorProfile.MaxMentees = value; }
+    }
+
+    public int SubjectToLearn
+    {
+        get => AsStudent?.MenteeProfile?.SubjectToLearn ?? 0;
+        set { if (AsStudent?.MenteeProfile != null) AsStudent.MenteeProfile.SubjectToLearn = value; }
+    }
+
+    public int SelectedPreferredMentorGenderValue
+    {
+        get => (int)(AsStudent?.PreferredMentorGender ?? GenderPreference.NoPreference);
+        set { if (AsStudent != null) AsStudent.PreferredMentorGender = (GenderPreference)value; }
+    }
+
+    public int SelectedPreferredMenteeGenderValue
+    {
+        get => (int)(AsStudent?.PreferredMenteeGender ?? GenderPreference.NoPreference);
+        set { if (AsStudent != null) AsStudent.PreferredMenteeGender = (GenderPreference)value; }
+    }
 
     public static IReadOnlyList<GenderOption> GenderOptions { get; } = GenderHelper.GenderOptions;
     public static IReadOnlyList<GenderPreferenceOption> GenderPreferenceOptions { get; } = GenderHelper.GenderPreferenceOptions;
@@ -80,7 +141,11 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
         _userClient = userClient;
         _referenceClient = referenceClient;
         _navigationService = navigationService;
-        _ = InitializeAsync();
+    }
+
+    public async Task OnNavigatedToAsync()
+    {
+        await InitializeAsync();
     }
 
     private async Task InitializeAsync()
@@ -88,64 +153,33 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
         var grades = await _referenceClient.GetGradesAsync();
         var subjects = await _referenceClient.GetSubjectsAsync();
 
-        Grades = new ObservableCollection<GradeResponse>(grades);
-        Subjects = new ObservableCollection<SubjectResponse>(subjects);
+        Grades = new ObservableCollection<GradeModel>(grades);
+        Subjects = new ObservableCollection<SubjectModel>(subjects);
 
         LoadUserData();
     }
 
     private void LoadUserData()
     {
-        var user = _userStore.User;
-        if (user == null) return;
+        if (_userStore.User == null) return;
 
-        UserName = user.UserName;
-        Email = user.Email;
-        NationalId = user.NationalId;
-        ProfilePicturePath = user.ProfilePicturePath;
-        PhoneNumber = user.PhoneNumber;
-        SelectedGenderValue = user.Gender;
+        // אנחנו עובדים על העותק שנמצא ב-Store
+        CurrentUser = _userStore.User;
 
-        if (user.IsAdmin)
+        // קביעת ה-Badge באמצעות Pattern Matching על סוג האובייקט
+        RoleBadge = CurrentUser switch
         {
-            IsAdmin = true;
-            IsSupervisor = false;
-            RoleBadge = "Admin";
-        }
-        else if (user.IsStudent)
-        {
-            IsAdmin = false;
-            IsSupervisor = false;
-            SelectedGrade = Grades.FirstOrDefault(g => g.Id == user.GradeId);
-            ClassNum = user.ClassNum ?? 0;
-            SelectedPreferredMentorGenderValue = user.PreferredMentorGender ?? (int)GenderPreference.NoPreference;
-            SelectedPreferredMenteeGenderValue = user.PreferredMenteeGender ?? (int)GenderPreference.NoPreference;
-            HasMentorProfile = user.IsMentor;
-            HasMenteeProfile = user.IsMentee;
-
-            RoleBadge = (HasMentorProfile, HasMenteeProfile) switch
+            AdminModel => "Admin",
+            SupervisorModel => "Supervisor",
+            StudentModel s => (s.IsMentor, s.IsMentee) switch
             {
-                (true, true)  => "Student · Mentor & Mentee",
+                (true, true) => "Student · Mentor & Mentee",
                 (true, false) => "Student · Mentor",
                 (false, true) => "Student · Mentee",
-                _             => "Student"
-            };
-
-            if (HasMentorProfile) SubjectToTeach = user.MentorSubjectId ?? -1;
-            if (HasMenteeProfile) SubjectToLearn = user.MenteeSubjectId ?? -1;
-            MaxMentees = user.MaxMentees ?? 1;
-        }
-        else
-        {
-            IsAdmin = false;
-            IsSupervisor = true;
-            RoleBadge = "Supervisor";
-        }
-    }
-
-    public async Task OnNavigatedToAsync()
-    {
-        await InitializeAsync();
+                _ => "Student"
+            },
+            _ => "User"
+        };
     }
 
     [RelayCommand]
@@ -158,52 +192,84 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     [RelayCommand]
     private async Task SaveAsync()
     {
+        if (CurrentUser == null) return;
+
+        // וולידציה בסיסית (במידה והוספת Attributes למודל ב-Shared)
         ValidateAllProperties();
         if (HasErrors) return;
 
-        var user = _userStore.User;
-        if (user == null) return;
-
         try
         {
-            await _userClient.UpdateBaseInfoAsync(user.Id, new UpdateBaseInfoRequest(UserName, Email, NationalId, PhoneNumber, SelectedGenderValue));
+            // 1. עדכון פרטי בסיס
+            await _userClient.UpdateBaseInfoAsync(CurrentUser.Id,
+                new UpdateBaseInfoRequest(
+                    CurrentUser.UserName,
+                    CurrentUser.Email,
+                    CurrentUser.NationalId,
+                    CurrentUser.PhoneNumber,
+                    (int)CurrentUser.Gender));
 
-            if (user.IsStudent)
+            // 2. לוגיקה ספציפית לסטודנט
+            if (CurrentUser is StudentModel student)
             {
-                if (SelectedGrade != null)
-                    await _userClient.UpdateGradeClassAsync(user.Id, new UpdateGradeClassRequest(SelectedGrade.Id, ClassNum));
+                // עדכון כיתה
+                if (student.Grade != null)
+                {
+                    await _userClient.UpdateGradeClassAsync(student.Id,
+                        new UpdateGradeClassRequest(student.Grade.Id, student.ClassNum));
+                }
 
-                await _userClient.UpdateGenderPreferencesAsync(user.Id,
-                    new UpdateGenderPreferencesRequest(SelectedPreferredMentorGenderValue, SelectedPreferredMenteeGenderValue));
+                // עדכון העדפות מגדר
+                await _userClient.UpdateGenderPreferencesAsync(student.Id,
+                    new UpdateGenderPreferencesRequest(
+                        (int)student.PreferredMentorGender,
+                        (int)student.PreferredMenteeGender));
 
-                if (HasMentorProfile)
-                    await _userClient.UpdateMentorProfileAsync(user.Id, new UpdateMentorProfileRequest(SubjectToTeach));
-                if (HasMenteeProfile)
-                    await _userClient.UpdateMenteeProfileAsync(user.Id, new UpdateMenteeProfileRequest(SubjectToLearn));
+                // עדכון פרופילי מנטור/מנטי
+                if (student.IsMentor && student.MentorProfile != null)
+                {
+                    await _userClient.UpdateMentorProfileAsync(student.Id,
+                        new UpdateMentorProfileRequest(student.MentorProfile.SubjectToTeach));
+                }
+
+                if (student.IsMentee && student.MenteeProfile != null)
+                {
+                    await _userClient.UpdateMenteeProfileAsync(student.Id,
+                        new UpdateMenteeProfileRequest(student.MenteeProfile.SubjectToLearn));
+                }
             }
 
-            // Refresh UserStore with updated data
-            var updated = await _userClient.GetByIdAsync(user.Id);
-            if (updated != null) _userStore.User = updated;
+            // 3. רענון הנתונים מהשרת לאחר השמירה
+            var updated = await _userClient.GetByIdAsync(CurrentUser.Id);
+            if (updated != null)
+            {
+                _userStore.User = updated;
+                CurrentUser = updated;
+            }
 
             ErrorMessage = string.Empty;
             IsReadOnly = true;
             IsEditMode = false;
 
-            if (!_navigationService.CanGoBack())
-            {
-                if (user.IsAdmin)
-                    await _navigationService.NavigateToAsync<AdminDashboardViewModel>();
-                else if (user.IsSupervisor)
-                    await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(user.Id);
-                else
-                    await _navigationService.NavigateToAsync<StudentDashboardViewModel>();
-            }
+            // ניווט חזרה לדשבורד המתאים במידה וצריך
+            await NavigateBackToDashboard();
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Save failed: " + ex.Message;
         }
+    }
+
+    private async Task NavigateBackToDashboard()
+    {
+        if (_navigationService.CanGoBack()) return;
+
+        if (CurrentUser is AdminModel)
+            await _navigationService.NavigateToAsync<AdminDashboardViewModel>();
+        else if (CurrentUser is SupervisorModel)
+            await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id);
+        else
+            await _navigationService.NavigateToAsync<StudentDashboardViewModel>();
     }
 
     [RelayCommand]
@@ -215,31 +281,25 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
             Filter = "Image Files|*.jpg;*.jpeg;*.png",
             Multiselect = false
         };
-        if (dialog.ShowDialog() != true) return;
 
-        var user = _userStore.User;
-        if (user == null) return;
+        if (dialog.ShowDialog() != true || CurrentUser == null) return;
 
         try
         {
-            var newPath = await _userClient.UploadProfilePictureAsync(user.Id, dialog.FileName);
+            var newPath = await _userClient.UploadProfilePictureAsync(CurrentUser.Id, dialog.FileName);
             if (newPath != null)
             {
-                var updated = await _userClient.GetByIdAsync(user.Id);
+                var updated = await _userClient.GetByIdAsync(CurrentUser.Id);
                 if (updated != null)
                 {
                     _userStore.User = updated;
-                    ProfilePicturePath = updated.ProfilePicturePath;
+                    CurrentUser = updated;
                 }
-            }
-            else
-            {
-                ErrorMessage = "Failed to upload picture.";
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Upload failed: " + ex.Message;
         }
     }
 }

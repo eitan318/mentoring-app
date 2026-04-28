@@ -9,7 +9,7 @@ namespace MentoringApp.Tests.Model
     {
         private static StudentModel MakeUser() =>
             new StudentModel(1, "test@test.com", "Test", "123456789",
-                new Grade { Id = 1, Name = "Grade 9", Num = 9 });
+                new GradeModel { Id = 1, Name = "Grade 9", Num = 9 });
 
         [Fact]
         public void IsValidProfilePicture_ReturnsTrue_ForJpg()

@@ -1,4 +1,5 @@
 @inject IssueApiClient IssueClient
+@using MentoringApp.Model
 
 <div class="modal-overlay">
     <div class="modal">
@@ -38,7 +39,7 @@
 
     private string _description = "", _categoryId = "", _error = "";
     private bool _loading;
-    private List<IssueCategoryResponse> _categories = new();
+    private List<IssueCategoryModel> _categories = new();
 
     protected override async Task OnInitializedAsync()
     {

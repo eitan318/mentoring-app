@@ -15,23 +15,23 @@ namespace MentoringApp.Service
             _gradeRepo = gradeRepo;
         }
 
-        public async Task<Result<IEnumerable<SchoolClass>>> GetAllAsync()
+        public async Task<Result<IEnumerable<SchoolClassModel>>> GetAllAsync()
         {
             var dtos = await _repo.GetAllAsync();
             var grades = (await _gradeRepo.GetAllGradesAsync()).ToDictionary(g => g.Id);
-            var list = dtos.Select(dto => Map(dto, grades)).Where(x => x != null).Cast<SchoolClass>().ToList();
-            return Result<IEnumerable<SchoolClass>>.Ok(list);
+            var list = dtos.Select(dto => Map(dto, grades)).Where(x => x != null).Cast<SchoolClassModel>().ToList();
+            return Result<IEnumerable<SchoolClassModel>>.Ok(list);
         }
 
-        public async Task<Result<IEnumerable<SchoolClass>>> GetBySupervisorAsync(int supervisorId)
+        public async Task<Result<IEnumerable<SchoolClassModel>>> GetBySupervisorAsync(int supervisorId)
         {
             var dtos = await _repo.GetBySupervisorAsync(supervisorId);
             var grades = (await _gradeRepo.GetAllGradesAsync()).ToDictionary(g => g.Id);
-            var list = dtos.Select(dto => Map(dto, grades)).Where(x => x != null).Cast<SchoolClass>().ToList();
-            return Result<IEnumerable<SchoolClass>>.Ok(list);
+            var list = dtos.Select(dto => Map(dto, grades)).Where(x => x != null).Cast<SchoolClassModel>().ToList();
+            return Result<IEnumerable<SchoolClassModel>>.Ok(list);
         }
 
-        public async Task<Result<IEnumerable<SchoolClass>>> GetAvailableForSupervisorAsync(int supervisorId)
+        public async Task<Result<IEnumerable<SchoolClassModel>>> GetAvailableForSupervisorAsync(int supervisorId)
         {
             var all = (await _repo.GetAllAsync()).ToList();
             var assigned = (await _repo.GetBySupervisorAsync(supervisorId)).Select(x => x.Id).ToHashSet();
@@ -39,8 +39,8 @@ namespace MentoringApp.Service
             // All existing supervisor classes except those assigned to OTHER supervisors need to be fetched
             // Simple approach: return all, mark which ones belong to this supervisor — UI handles availability
             var grades = (await _gradeRepo.GetAllGradesAsync()).ToDictionary(g => g.Id);
-            var list = all.Select(dto => Map(dto, grades)).Where(x => x != null).Cast<SchoolClass>().ToList();
-            return Result<IEnumerable<SchoolClass>>.Ok(list);
+            var list = all.Select(dto => Map(dto, grades)).Where(x => x != null).Cast<SchoolClassModel>().ToList();
+            return Result<IEnumerable<SchoolClassModel>>.Ok(list);
         }
 
         public async Task<Result<int>> AddClassAsync(int gradeId, int classNum)
@@ -65,13 +65,13 @@ namespace MentoringApp.Service
             return Result.Ok();
         }
 
-        private SchoolClass? Map(SchoolClassDao dto, Dictionary<int, GradeDao> grades)
+        private SchoolClassModel? Map(SchoolClassDao dto, Dictionary<int, GradeDao> grades)
         {
             if (!grades.TryGetValue(dto.GradeId, out var g)) return null;
-            return new SchoolClass
+            return new SchoolClassModel
             {
                 Id = dto.Id,
-                Grade = new Grade { Id = g.Id, Name = g.Name, Num = g.Num },
+                Grade = new GradeModel { Id = g.Id, Name = g.Name, Num = g.Num },
                 ClassNum = dto.ClassNum
             };
         }
