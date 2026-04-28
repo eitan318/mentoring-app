@@ -1,3 +1,5 @@
+using MentoringApp.Model.User;
+
 namespace MentoringApp.ViewModel.Helpers
 {
     public class GenderOption

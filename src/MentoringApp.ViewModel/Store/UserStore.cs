@@ -1,8 +1,9 @@
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.ViewModel.Store;
 
 public class UserStore
 {
-    public UserResponse? User { get; set; }
+    public UserModel? User { get; set; }
 }

@@ -11,10 +11,10 @@ namespace MentoringApp.Model.User
     public class SupervisorModel : UserModel
     {
         /// <summary>All school class slots assigned to this supervisor.</summary>
-        public List<SchoolClass> AssignedClasses { get; set; } = new();
+        public List<SchoolClassModel> AssignedClasses { get; set; } = new();
 
         /// <summary>Legacy compat: first assigned class's grade (or null).</summary>
-        public Grade? Grade
+        public GradeModel? Grade
         {
             get => AssignedClasses.FirstOrDefault()?.Grade;
             set { /* kept for backward compat — do not use to set */ }

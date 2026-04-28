@@ -13,14 +13,14 @@ namespace MentoringApp.Service
             _subjectRepo = subjectRepo;
         }
 
-        public async Task<Result<IEnumerable<Subject>>> GetAllSubjectsAsync()
+        public async Task<Result<IEnumerable<SubjectModel>>> GetAllSubjectsAsync()
         {
             var dtos = await _subjectRepo.GetAllSubjectsAsync();
             var subjects = dtos.Select(MapDtoToSubject);
-            return Result<IEnumerable<Subject>>.Ok(subjects);
+            return Result<IEnumerable<SubjectModel>>.Ok(subjects);
         }
 
-        private static Subject MapDtoToSubject(SubjectDao dto) =>
-            new Subject { Id = dto.Id, Name = dto.Name };
+        private static SubjectModel MapDtoToSubject(SubjectDao dto) =>
+            new SubjectModel { Id = dto.Id, Name = dto.Name };
     }
 }

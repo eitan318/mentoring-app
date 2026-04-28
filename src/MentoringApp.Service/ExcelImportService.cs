@@ -49,7 +49,7 @@ namespace MentoringApp.Service
                         email:      email,
                         userName:   userName,
                         nationalId: nationalId,
-                        grade:      new Grade { Id = 1, Name = "Imported", Num = 0 }
+                        grade:      new GradeModel { Id = 1, Name = "Imported", Num = 0 }
                     );
 
                     var result = await _userService.CreateUserAsync(student);

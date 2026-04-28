@@ -1,14 +1,11 @@
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MentoringApp.Model.User
 {
-
+    [JsonDerivedType(typeof(StudentModel), typeDiscriminator: "student")]
+    [JsonDerivedType(typeof(SupervisorModel), typeDiscriminator: "supervisor")]
+    [JsonDerivedType(typeof(AdminModel), typeDiscriminator: "admin")]
     public abstract partial class UserModel : ObservableObject
     {
         public int Id { get; set; }
@@ -29,6 +26,21 @@ namespace MentoringApp.Model.User
 
         [ObservableProperty]
         private Gender _gender = Gender.PreferNoAnswer;
+
+        public bool IsAdmin => this is AdminModel;
+        public bool IsStudent => this is StudentModel;
+        public bool IsSupervisor => this is SupervisorModel;
+        public bool IsMentor => IsStudent && (this as StudentModel)?.IsMentor == true;
+        public bool IsMentee => IsStudent && (this as StudentModel)?.IsMentee == true;
+
+        [JsonIgnore]
+        public string Role => this switch
+        {
+            AdminModel => "Admin",
+            SupervisorModel => "Supervisor",
+            StudentModel => "Student",
+            _ => "User"
+        };
 
         public VerificationCode? CurrentVerificationCode { get; set; }
 

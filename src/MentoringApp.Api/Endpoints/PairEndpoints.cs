@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2010.Excel;
 using MentoringApp.Api.Helpers;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
@@ -13,63 +14,49 @@ public static class PairEndpoints
             .RequireAuthorization();
 
         // GET /api/pairs — Admin/Supervisor
-        group.MapGet("/", async (IPairRepo pairRepo) =>
-        {
-            var pairs = await pairRepo.GetAllAsync();
-            return Results.Ok(pairs);
-        })
-        .RequireAuthorization("AdminOrSupervisor")
-        .WithOpenApi();
+        group.MapGet("/", async (PairService pairService) =>
+            (await pairService.GetAllPairsAsync())
+            .ToHttp())
+
+            .RequireAuthorization("AdminOrSupervisor")
+            .WithOpenApi();
 
         // GET /api/pairs/{id}
-        group.MapGet("/{id:int}", async (int id, IPairRepo pairRepo) =>
-        {
-            var pair = await pairRepo.GetByIdAsync(id);
-            return pair is null ? Results.NotFound() : Results.Ok(pair);
-        })
-        .WithOpenApi();
+        group.MapGet("/{id:int}", async (int id, PairService pairService) =>
+            (await pairService.GetPairByIdAsync(id))
+            .ToHttp())
+            .WithOpenApi();
 
         // GET /api/pairs/by-mentor/{mentorId}
-        group.MapGet("/by-mentor/{mentorId:int}", async (int mentorId, IPairRepo pairRepo) =>
-        {
-            var pair = await pairRepo.GetByMentorIdAsync(mentorId);
-            return pair is null ? Results.NotFound() : Results.Ok(pair);
-        })
-        .WithOpenApi();
+        group.MapGet("/by-mentor/{mentorId:int}", async (int mentorId, PairService pairService) =>
+            (await pairService.GetPairByMentorIdAsync(mentorId))
+            .ToHttp())
+            .WithOpenApi();
 
         // GET /api/pairs/by-mentee/{menteeId}
-        group.MapGet("/by-mentee/{menteeId:int}", async (int menteeId, IPairRepo pairRepo) =>
-        {
-            var pair = await pairRepo.GetByMenteeIdAsync(menteeId);
-            return pair is null ? Results.NotFound() : Results.Ok(pair);
-        })
-        .WithOpenApi();
+        group.MapGet("/by-mentee/{menteeId:int}", async (int menteeId, PairService pairService) =>
+            (await pairService.GetPairByMenteeIdAsync(menteeId))
+            .ToHttp())
+            .WithOpenApi();
 
         // GET /api/pairs/by-supervisor/{supervisorId}
-        group.MapGet("/by-supervisor/{supervisorId:int}", async (int supervisorId, IPairRepo pairRepo) =>
-        {
-            var pairs = await pairRepo.GetBySupervisorIdAsync(supervisorId);
-            return Results.Ok(pairs);
-        })
-        .WithOpenApi();
+        group.MapGet("/by-supervisor/{id}", async(int id, PairService svc) =>
+            (await svc.GetPairsBySupervisorAsync(id))
+            .ToHttp());
 
         // POST /api/pairs — Admin only
         group.MapPost("/", async (CreatePairRequest req, PairService pairService) =>
-        {
-            var result = await pairService.CreatePairAsync(req.SupervisorId, req.MentorId, req.MenteeId);
-            return result.ToHttp();
-        })
-        .RequireAuthorization("AdminOnly")
-        .WithOpenApi();
+            (await pairService.CreatePairAsync(req.SupervisorId, req.MentorId, req.MenteeId))
+            .ToHttp())
+            .RequireAuthorization("AdminOnly")
+            .WithOpenApi();
 
         // DELETE /api/pairs/{id} — Admin only
         group.MapDelete("/{id:int}", async (int id, PairService pairService) =>
-        {
-            var result = await pairService.SeparatePairAsync(id);
-            return result.Success ? Results.NoContent() : Results.NotFound();
-        })
-        .RequireAuthorization("AdminOnly")
-        .WithOpenApi();
+            (await pairService.SeparatePairAsync(id))
+            .ToHttp())
+            .RequireAuthorization("AdminOnly")
+            .WithOpenApi();
     }
 }
 

@@ -14,32 +14,7 @@ public record RegisterRequest(
     int? MenteeSubjectId);
 
 // ── Users ─────────────────────────────────────────────────────────────────────
-public record UserResponse(
-    int Id,
-    string UserName,
-    string Email,
-    string NationalId,
-    string? ProfilePicturePath,
-    string Language,
-    string? PhoneNumber,
-    int Gender,
-    string Role,
-    int? GradeId,
-    int? ClassNum,
-    int? PreferredMentorGender,
-    int? PreferredMenteeGender,
-    int? MentorSubjectId,
-    int? MaxMentees,
-    int? MenteeSubjectId)
-{
-    public bool IsMentor => MentorSubjectId.HasValue;
-    public bool IsMentee => MenteeSubjectId.HasValue;
-    public bool IsStudent => Role.Equals("Student", StringComparison.OrdinalIgnoreCase);
-    public bool IsAdmin => Role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
-    public bool IsSupervisor => Role.Equals("Supervisor", StringComparison.OrdinalIgnoreCase);
-}
-
-public record SupervisorStatsResponse(int Id, string UserName, int PendingIssuesCount, int PairsCount);
+public record SupervisorStatsResponse(int Id, string UserName, int PendingIssuesCount, int ResolvedIssuesCount, int PairsCount);
 
 public record CreateUserRequest(
     string UserName,
@@ -63,38 +38,11 @@ public record UpdateMentorProfileRequest(int SubjectId);
 public record UpdateMenteeProfileRequest(int SubjectId);
 public record UpdateSupervisorClassesRequest(IEnumerable<int> ClassIds);
 
-// ── Pairs ─────────────────────────────────────────────────────────────────────
-public record PairResponse(
-    int Id,
-    int MentorId,
-    int MenteeId,
-    int SupervisorId,
-    string CreatedAt,
-    int MatchTier,
-    bool IsProfileIncomplete);
-
 public record CreatePairRequest(int SupervisorId, int MentorId, int MenteeId);
 
-// ── Matching ──────────────────────────────────────────────────────────────────
-public record AvailableMentorResponse(
-    int Id,
-    string UserName,
-    string Email,
-    int Gender,
-    int? SubjectToTeach,
-    int? MaxMentees,
-    string? ProfilePicturePath,
-    int? GradeId,
-    string? GradeName,
-    int? ClassNum);
 
-public record AvailableMenteeResponse(
-    int Id,
-    string UserName,
-    string Email,
-    int Gender,
-    int? SubjectToLearn,
-    string? ProfilePicturePath);
+
+
 
 public record SendPairRequestBody(int MenteeId, int MentorId);
 
@@ -127,21 +75,8 @@ public record MatchRecommendationResponse(
 public record GalleryPickRequest(int MenteeId, int MentorId, int SupervisorId);
 public record PipelineMatchResponse(int PairsCreated);
 
-// ── Issues ────────────────────────────────────────────────────────────────────
-public record IssueResponse(
-    int Id,
-    string Description,
-    int CategoryId,
-    int ReportedByUserId,
-    int IsResolved,
-    string CreationDate,
-    int? ForwardedBySupervisorId)
-{
-    public bool IsResolvedBool => IsResolved != 0;
-    public bool IsForwardedToAdmin => ForwardedBySupervisorId.HasValue;
-}
 
-public record IssueCategoryResponse(int Id, string Name);
+
 public record CreateIssueRequest(string Description, int CategoryId, int ReportedByUserId);
 public record ForwardIssueRequest(int SupervisorId);
 
@@ -162,9 +97,6 @@ public record CreateReviewRequest(
     double AmountOfHours);
 
 // ── Reference ─────────────────────────────────────────────────────────────────
-public record SubjectResponse(int Id, string Name);
-public record GradeResponse(int Id, string Name, int Num);
-public record SchoolClassResponse(int Id, int GradeId, int ClassNum);
 public record AddSchoolClassRequest(int GradeId, int ClassNum);
 
 // ── Settings ──────────────────────────────────────────────────────────────────

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MentoringApp.ApiClient\MentoringApp.ApiClient.csproj" />
+    <ProjectReference Include="..\MentoringApp.Model\MentoringApp.Model.csproj" />
   </ItemGroup>
 
   <ItemGroup>

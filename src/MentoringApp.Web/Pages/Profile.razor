@@ -3,6 +3,8 @@
 @inject NavigationManager Nav
 @inject UserApiClient Users
 @inject ReferenceApiClient Reference
+@using MentoringApp.Model
+@using MentoringApp.Model.User
 
 <PageTitle>Profile – MentoringApp</PageTitle>
 
@@ -24,6 +26,7 @@ else
         <h1>My Profile</h1>
     </div>
 
+    @* --- Basic Info --- *@
     <div class="card">
         <p class="card-title">Basic Info</p>
         <div class="form-group">
@@ -45,18 +48,23 @@ else
         <div class="form-group">
             <label>Gender</label>
             <select @bind="_gender" class="form-select">
-                <option value="1">Male</option>
-                <option value="2">Female</option>
-                <option value="3">Prefer not to say</option>
+                @foreach (var g in Enum.GetValues<Gender>())
+                {
+                    <option value="@g">@g.ToString()</option>
+                }
             </select>
         </div>
         <button class="btn btn-primary" @onclick="SaveBaseInfo" disabled="@_saving">
             @(_saving ? "Saving…" : "Save Basic Info")
         </button>
-        @if (!string.IsNullOrEmpty(_baseInfoMsg)) { <p class="@(_baseInfoOk ? "success-msg" : "error-msg") mt-2">@_baseInfoMsg</p> }
+        @if (!string.IsNullOrEmpty(_baseInfoMsg))
+        {
+            <p class="@(_baseInfoOk ? "success-msg" : "error-msg") mt-2">@_baseInfoMsg</p>
+        }
     </div>
 
-    @if (_user.IsStudent)
+    @* --- Student Specific Info --- *@
+    @if (_user is StudentModel student)
     {
         <div class="card">
             <p class="card-title">School</p>
@@ -75,7 +83,10 @@ else
                 <input @bind="_classNum" class="form-input" type="number" min="1" max="20" />
             </div>
             <button class="btn btn-primary" @onclick="SaveGradeClass" disabled="@_saving">Save School Info</button>
-            @if (!string.IsNullOrEmpty(_gradeClassMsg)) { <p class="@(_gradeClassOk ? "success-msg" : "error-msg") mt-2">@_gradeClassMsg</p> }
+            @if (!string.IsNullOrEmpty(_gradeClassMsg))
+            {
+                <p class="@(_gradeClassOk ? "success-msg" : "error-msg") mt-2">@_gradeClassMsg</p>
+            }
         </div>
 
         <div class="card">
@@ -83,24 +94,29 @@ else
             <div class="form-group">
                 <label>Preferred Mentor Gender</label>
                 <select @bind="_prefMentorGender" class="form-select">
-                    <option value="3">No preference</option>
-                    <option value="1">Male</option>
-                    <option value="2">Female</option>
+                    @foreach (var gp in Enum.GetValues<GenderPreference>())
+                    {
+                        <option value="@gp">@gp.ToString().Replace("Preference", "")</option>
+                    }
                 </select>
             </div>
             <div class="form-group">
                 <label>Preferred Mentee Gender</label>
                 <select @bind="_prefMenteeGender" class="form-select">
-                    <option value="3">No preference</option>
-                    <option value="1">Male</option>
-                    <option value="2">Female</option>
+                    @foreach (var gp in Enum.GetValues<GenderPreference>())
+                    {
+                        <option value="@gp">@gp.ToString().Replace("Preference", "")</option>
+                    }
                 </select>
             </div>
             <button class="btn btn-primary" @onclick="SaveGenderPrefs" disabled="@_saving">Save Preferences</button>
-            @if (!string.IsNullOrEmpty(_genderPrefsMsg)) { <p class="@(_genderPrefsOk ? "success-msg" : "error-msg") mt-2">@_genderPrefsMsg</p> }
+            @if (!string.IsNullOrEmpty(_genderPrefsMsg))
+            {
+                <p class="@(_genderPrefsOk ? "success-msg" : "error-msg") mt-2">@_genderPrefsMsg</p>
+            }
         </div>
 
-        @if (_user.IsMentor)
+        @if (student.IsMentor)
         {
             <div class="card">
                 <p class="card-title">Mentor Subject</p>
@@ -115,11 +131,14 @@ else
                     </select>
                 </div>
                 <button class="btn btn-primary" @onclick="SaveMentorProfile" disabled="@_saving">Save</button>
-                @if (!string.IsNullOrEmpty(_mentorProfileMsg)) { <p class="@(_mentorProfileOk ? "success-msg" : "error-msg") mt-2">@_mentorProfileMsg</p> }
+                @if (!string.IsNullOrEmpty(_mentorProfileMsg))
+                {
+                    <p class="@(_mentorProfileOk ? "success-msg" : "error-msg") mt-2">@_mentorProfileMsg</p>
+                }
             </div>
         }
 
-        @if (_user.IsMentee)
+        @if (student.IsMentee)
         {
             <div class="card">
                 <p class="card-title">Mentee Subject</p>
@@ -134,35 +153,42 @@ else
                     </select>
                 </div>
                 <button class="btn btn-primary" @onclick="SaveMenteeProfile" disabled="@_saving">Save</button>
-                @if (!string.IsNullOrEmpty(_menteeProfileMsg)) { <p class="@(_menteeProfileOk ? "success-msg" : "error-msg") mt-2">@_menteeProfileMsg</p> }
+                @if (!string.IsNullOrEmpty(_menteeProfileMsg))
+                {
+                    <p class="@(_menteeProfileOk ? "success-msg" : "error-msg") mt-2">@_menteeProfileMsg</p>
+                }
             </div>
         }
     }
 }
 
 @code {
-    private UserResponse? _user;
+    private UserModel? _user;
     private bool _loading = true, _saving;
 
-    private string _userName = "", _email = "", _nationalId = "", _phone = "", _gender = "3";
+    // עברנו להשתמש ב-Enums ישירות
+    private string _userName = "", _email = "", _nationalId = "", _phone = "";
+    private Gender _gender = Gender.PreferNoAnswer;
+    
     private string _gradeId = "", _classNum = "";
-    private string _prefMentorGender = "3", _prefMenteeGender = "3";
+    private GenderPreference _prefMentorGender = GenderPreference.NoPreference;
+    private GenderPreference _prefMenteeGender = GenderPreference.NoPreference;
     private string _mentorSubjectId = "", _menteeSubjectId = "";
 
     private string _baseInfoMsg = "", _gradeClassMsg = "", _genderPrefsMsg = "", _mentorProfileMsg = "", _menteeProfileMsg = "";
     private bool _baseInfoOk, _gradeClassOk, _genderPrefsOk, _mentorProfileOk, _menteeProfileOk;
 
-    private List<GradeResponse> _grades = new();
-    private List<SubjectResponse> _subjects = new();
-
-    protected override void OnInitialized()
-    {
-        if (!Auth.IsAuthenticated) Nav.NavigateTo("/login", replace: true);
-    }
+    private List<GradeModel> _grades = new();
+    private List<SubjectModel> _subjects = new();
 
     protected override async Task OnInitializedAsync()
     {
-        if (!Auth.IsAuthenticated) return;
+        if (!Auth.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login", replace: true);
+            return;
+        }
+        
         try
         {
             _user = await Users.GetByIdAsync(Auth.UserId);
@@ -181,13 +207,17 @@ else
         _email = _user.Email;
         _nationalId = _user.NationalId;
         _phone = _user.PhoneNumber ?? "";
-        _gender = _user.Gender.ToString();
-        _gradeId = _user.GradeId?.ToString() ?? "";
-        _classNum = _user.ClassNum?.ToString() ?? "";
-        _prefMentorGender = _user.PreferredMentorGender?.ToString() ?? "3";
-        _prefMenteeGender = _user.PreferredMenteeGender?.ToString() ?? "3";
-        _mentorSubjectId = _user.MentorSubjectId?.ToString() ?? "";
-        _menteeSubjectId = _user.MenteeSubjectId?.ToString() ?? "";
+        _gender = _user.Gender;
+
+        if (_user is StudentModel s)
+        {
+            _gradeId = s.Grade?.Id.ToString() ?? "";
+            _classNum = s.ClassNum.ToString();
+            _prefMentorGender = s.PreferredMentorGender;
+            _prefMenteeGender = s.PreferredMenteeGender;
+            _mentorSubjectId = s.MentorProfile?.SubjectToTeach.ToString() ?? "";
+            _menteeSubjectId = s.MenteeProfile?.SubjectToLearn.ToString() ?? "";
+        }
     }
 
     private async Task SaveBaseInfo()
@@ -198,7 +228,7 @@ else
             await Users.UpdateBaseInfoAsync(Auth.UserId, new UpdateBaseInfoRequest(
                 _userName, _email, _nationalId,
                 string.IsNullOrWhiteSpace(_phone) ? null : _phone,
-                int.Parse(_gender)));
+                (int)_gender));
             _baseInfoMsg = "Saved!"; _baseInfoOk = true;
         }
         catch (Exception ex) { _baseInfoMsg = ex.Message; _baseInfoOk = false; }
@@ -225,7 +255,7 @@ else
         try
         {
             await Users.UpdateGenderPreferencesAsync(Auth.UserId, new UpdateGenderPreferencesRequest(
-                int.Parse(_prefMentorGender), int.Parse(_prefMenteeGender)));
+                (int)_prefMentorGender, (int)_prefMenteeGender));
             _genderPrefsMsg = "Saved!"; _genderPrefsOk = true;
         }
         catch (Exception ex) { _genderPrefsMsg = ex.Message; _genderPrefsOk = false; }

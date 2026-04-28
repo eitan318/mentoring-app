@@ -41,8 +41,14 @@ namespace MentoringApp.Data.Acess.SQLite
                         )
                         AND i.IsResolved = 0) AS PendingIssuesCount,
                     (SELECT COUNT(*)
-                        FROM Pairs p
-                        WHERE p.SupervisorId = u.Id) AS PairsCount
+                        FROM Issues i
+                        WHERE i.ReportedByUserId IN (
+                            SELECT MentorId FROM Pairs WHERE SupervisorId = u.Id
+                            UNION
+                            SELECT MenteeId FROM Pairs WHERE SupervisorId = u.Id
+                        )
+                        AND i.IsResolved = 1) AS ResolvedIssuesCount,
+                    (SELECT COUNT(*) FROM Pairs p WHERE p.SupervisorId = u.Id) AS PairsCount
                 FROM Users u
                 INNER JOIN UserSupervisors us ON u.Id = us.UserId";
 

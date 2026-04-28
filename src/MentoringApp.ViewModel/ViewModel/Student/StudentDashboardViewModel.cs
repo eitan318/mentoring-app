@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
+using MentoringApp.Model.User;
 using MentoringApp.ViewModel.Helpers;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
@@ -16,7 +18,7 @@ namespace MentoringApp.ViewModel.ViewModel.Student;
 /// Student dashboard ViewModel. Dynamically composes the tab list (<see cref="Pairs"/>)
 /// based on the current phase and the student's match status.
 /// </summary>
-public partial class StudentDashboardViewModel : ObservableObject, MentoringApp.ViewModel.ViewModelHelper.INavigatable
+public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelper.INavigatable
 {
     public ObservableCollection<object> Pairs { get; set; } = new();
     public bool HasNoPairs => Pairs.Count == 0;
@@ -47,7 +49,6 @@ public partial class StudentDashboardViewModel : ObservableObject, MentoringApp.
     private readonly SettingsApiClient _settingsClient;
     private readonly MatchingApiClient _matchingClient;
     private readonly ReferenceApiClient _referenceClient;
-    private readonly UserApiClient _userClient;
     private readonly BrowseMentorsViewModel _browseMentorsVm;
     private readonly SelectionGalleryViewModel _selectionGalleryVm;
     private readonly MentorRequestsViewModel _mentorRequestsVm;
@@ -64,7 +65,6 @@ public partial class StudentDashboardViewModel : ObservableObject, MentoringApp.
         SettingsApiClient settingsClient,
         MatchingApiClient matchingClient,
         ReferenceApiClient referenceClient,
-        UserApiClient userClient,
         BrowseMentorsViewModel browseMentorsVm,
         SelectionGalleryViewModel selectionGalleryVm,
         MentorRequestsViewModel mentorRequestsVm)
@@ -80,7 +80,6 @@ public partial class StudentDashboardViewModel : ObservableObject, MentoringApp.
         _settingsClient = settingsClient;
         _matchingClient = matchingClient;
         _referenceClient = referenceClient;
-        _userClient = userClient;
         _browseMentorsVm = browseMentorsVm;
         _selectionGalleryVm = selectionGalleryVm;
         _mentorRequestsVm = mentorRequestsVm;
@@ -111,10 +110,9 @@ public partial class StudentDashboardViewModel : ObservableObject, MentoringApp.
             try
             {
                 var pair = await _pairClient.GetByMentorAsync(currentUser.Id);
-                var mentee = await LoadUserOrNull(pair.MenteeId);
                 var vm = new MentorDashboardViewModel(
                     _windowService, _navigationService, _issueClient,
-                    _reviewClient, _userStore, _settingsClient, pair, mentee);
+                    _reviewClient, _userStore, _settingsClient, pair, pair.Mentee);
                 await vm.LoadDataAsync();
                 Pairs.Add(vm);
                 mentorIsMatched = true;
@@ -127,10 +125,9 @@ public partial class StudentDashboardViewModel : ObservableObject, MentoringApp.
             try
             {
                 var pair = await _pairClient.GetByMenteeAsync(currentUser.Id);
-                var mentor = await LoadUserOrNull(pair.MentorId);
                 var vm = new MenteeDashboardViewModel(
                     _windowService, _navigationService, _issueClient,
-                    _reviewClient, _userStore, _settingsClient, pair, mentor);
+                    _reviewClient, _userStore, _settingsClient, pair, pair.Mentor);
                 await vm.LoadDataAsync();
                 Pairs.Add(vm);
                 menteeIsMatched = true;
@@ -169,12 +166,6 @@ public partial class StudentDashboardViewModel : ObservableObject, MentoringApp.
 
         SelectedPair = Pairs.Count > 0 ? Pairs[0] : null;
         OnPropertyChanged(nameof(HasNoPairs));
-    }
-
-    private async Task<UserResponse?> LoadUserOrNull(int userId)
-    {
-        try { return await _userClient.GetByIdAsync(userId); }
-        catch { return null; }
     }
 
     [RelayCommand]
@@ -241,128 +232,6 @@ public partial class StudentDashboardViewModel : ObservableObject, MentoringApp.
     }
 }
 
-
-// ─── Pair dashboard base ───────────────────────────────────────────────────
-
-public abstract partial class PairMemberDashboardViewModel : ObservableObject
-{
-    public abstract string CounterpartRole { get; }
-
-    protected readonly IWindowService _windowService;
-    protected readonly INavigationService _navigationService;
-    protected readonly IssueApiClient _issueClient;
-    protected readonly ReviewApiClient _reviewClient;
-    protected readonly UserStore _userStore;
-    protected readonly SettingsApiClient _settingsClient;
-
-    [ObservableProperty] private UserResponse? _counterpart;
-    public bool HasSupervisor => false; // Supervisor info not directly available from PairResponse
-
-    public PairResponse Pair { get; }
-
-    public ObservableCollection<IssueResponse> MyIssues { get; set; } = new();
-    public ObservableCollection<ReviewResponse> RecentReviews { get; set; } = new();
-
-    [ObservableProperty] private double _totalMeetingHours;
-    [ObservableProperty] private double _requiredMeetingHours = 10;
-    [ObservableProperty] private double _hoursProgress;
-
-    protected PairMemberDashboardViewModel(
-        IWindowService windowService,
-        INavigationService navigationService,
-        IssueApiClient issueClient,
-        ReviewApiClient reviewClient,
-        UserStore userStore,
-        SettingsApiClient settingsClient,
-        PairResponse pair,
-        UserResponse? counterpart)
-    {
-        _windowService = windowService;
-        _navigationService = navigationService;
-        _issueClient = issueClient;
-        _reviewClient = reviewClient;
-        _userStore = userStore;
-        _settingsClient = settingsClient;
-        Pair = pair;
-        Counterpart = counterpart;
-    }
-
-    public virtual async Task LoadDataAsync()
-    {
-        var issues = await _issueClient.GetByUserAsync(_userStore.User!.Id);
-        MyIssues = new ObservableCollection<IssueResponse>(issues);
-
-        var reviews = await _reviewClient.GetByPairAsync(Pair.Id);
-        RecentReviews = new ObservableCollection<ReviewResponse>(
-            reviews.OrderByDescending(r => r.Date));
-
-        var settings = await _settingsClient.GetAllAsync();
-        RequiredMeetingHours = settings.MeetingHoursBarrier;
-        TotalMeetingHours = RecentReviews.Sum(r => r.AmountOfHours);
-        HoursProgress = RequiredMeetingHours > 0
-            ? Math.Min(100, (TotalMeetingHours / RequiredMeetingHours) * 100) : 0;
-
-        OnPropertyChanged(nameof(MyIssues));
-        OnPropertyChanged(nameof(RecentReviews));
-    }
-
-    [RelayCommand]
-    private async Task IssueToSupervisor()
-    {
-        var categories = await _issueClient.GetCategoriesAsync();
-        await _navigationService.NavigateToAsync<AddIssueViewModel, IEnumerable<IssueCategoryResponse>>(categories);
-    }
-
-    [RelayCommand]
-    private async Task NavigateToProfile()
-    {
-        if (Counterpart != null)
-            await _navigationService.NavigateToAsync<OtherProfileViewModel, int>(Counterpart.Id);
-    }
-}
-
-public partial class MenteeDashboardViewModel : PairMemberDashboardViewModel
-{
-    public override string CounterpartRole => "MENTOR";
-    [ObservableProperty] private string _mentorSubject = "Assigned Mentor";
-
-    public MenteeDashboardViewModel(
-        IWindowService windowService,
-        INavigationService navigationService,
-        IssueApiClient issueClient,
-        ReviewApiClient reviewClient,
-        UserStore userStore,
-        SettingsApiClient settingsClient,
-        PairResponse pair,
-        UserResponse? mentor)
-        : base(windowService, navigationService, issueClient, reviewClient, userStore, settingsClient, pair, mentor)
-    { }
-}
-
-public partial class MentorDashboardViewModel : PairMemberDashboardViewModel
-{
-    public override string CounterpartRole => "MENTEE";
-    [ObservableProperty] private double _menteeProgress = 50.0;
-
-    public MentorDashboardViewModel(
-        IWindowService windowService,
-        INavigationService navigationService,
-        IssueApiClient issueClient,
-        ReviewApiClient reviewClient,
-        UserStore userStore,
-        SettingsApiClient settingsClient,
-        PairResponse pair,
-        UserResponse? mentee)
-        : base(windowService, navigationService, issueClient, reviewClient, userStore, settingsClient, pair, mentee)
-    { }
-
-    [RelayCommand]
-    private async Task CreateReview()
-    {
-        await _navigationService.NavigateToAsync<AddReviewViewModel, int>(Pair.Id);
-        await LoadDataAsync();
-    }
-}
 
 
 // ─── SelectionGalleryViewModel (Phase 2 mentee tab) ───────────────────────
@@ -559,8 +428,7 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
 
         foreach (var mentor in availableMentors.Where(m => m.Id != currentUser?.Id))
         {
-            string subjectName = mentor.SubjectToTeach.HasValue &&
-                subjectMap.TryGetValue(mentor.SubjectToTeach.Value, out string? sn) ? sn : "N/A";
+            string subjectName = subjectMap.TryGetValue(mentor.MentorProfile.SubjectToTeach, out string? sn) ? sn : "N/A";
 
             Mentors.Add(new MentorCard
             {
@@ -569,8 +437,8 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
                 ProfilePicturePath = mentor.ProfilePicturePath ?? "",
                 Gender = mentor.Gender,
                 SubjectName = subjectName,
-                GradeName = mentor.GradeName ?? "",
-                ClassNum = mentor.ClassNum ?? 0,
+                GradeName = mentor.Grade.Name ?? "",
+                ClassNum = mentor.ClassNum,
                 HasPendingRequest = pendingMentorIds.Contains(mentor.Id)
             });
         }
@@ -625,6 +493,6 @@ public partial class MentorCard : ObservableObject
     public string GradeName { get; set; } = string.Empty;
     public int ClassNum { get; set; }
     public string ProfilePicturePath { get; set; } = string.Empty;
-    public int Gender { get; set; }
+    public Gender Gender { get; set; }
     [ObservableProperty] private bool _hasPendingRequest;
 }

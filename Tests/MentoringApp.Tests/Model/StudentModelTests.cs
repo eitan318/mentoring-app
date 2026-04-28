@@ -8,8 +8,8 @@ namespace MentoringApp.Tests.Model
 {
     public class StudentModelTests
     {
-        private static Grade MakeGrade(int num) =>
-            new Grade { Id = num, Name = $"Grade {num}", Num = num };
+        private static GradeModel MakeGrade(int num) =>
+            new GradeModel { Id = num, Name = $"Grade {num}", Num = num };
 
         private static StudentModel MakeStudent(int gradeNum = 9) =>
             new StudentModel(1, "test@test.com", "Test", "123456789", MakeGrade(gradeNum));

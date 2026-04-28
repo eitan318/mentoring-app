@@ -2,6 +2,7 @@
 @inject AuthApiClient AuthClient
 @inject ReferenceApiClient Reference
 @inject NavigationManager Nav
+@using MentoringApp.Model
 
 <PageTitle>Register – MentoringApp</PageTitle>
 
@@ -131,8 +132,8 @@
     private string _error = "", _success = "";
     private bool _loading;
 
-    private List<GradeResponse> _grades = new();
-    private List<SubjectResponse> _subjects = new();
+    private List<GradeModel> _grades = new();
+    private List<SubjectModel> _subjects = new();
 
     protected override async Task OnInitializedAsync()
     {

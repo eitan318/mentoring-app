@@ -16,11 +16,11 @@ namespace MentoringApp.Tests.Model
         private static IssueModel MakeIssue(bool isResolved) =>
             new IssueModel("Test issue", MakeCategory(), isResolved, reportedByUserId: 1);
 
-        private static Grade MakeGrade(int num) =>
-            new Grade { Id = num, Name = $"Grade {num}", Num = num };
+        private static GradeModel MakeGrade(int num) =>
+            new GradeModel { Id = num, Name = $"Grade {num}", Num = num };
 
-        private static SchoolClass MakeSchoolClass(int gradeNum, int classNum) =>
-            new SchoolClass { Grade = MakeGrade(gradeNum), ClassNum = classNum };
+        private static SchoolClassModel MakeSchoolClass(int gradeNum, int classNum) =>
+            new SchoolClassModel { Grade = MakeGrade(gradeNum), ClassNum = classNum };
 
         [Fact]
         public void PendingCount_ReturnsZero_WhenIssuesNull()
@@ -121,8 +121,8 @@ namespace MentoringApp.Tests.Model
         {
             var supervisor = MakeSupervisor();
             var grade = MakeGrade(10);
-            supervisor.AssignedClasses.Add(new SchoolClass { Grade = grade, ClassNum = 2 });
-            supervisor.AssignedClasses.Add(new SchoolClass { Grade = MakeGrade(11), ClassNum = 3 });
+            supervisor.AssignedClasses.Add(new SchoolClassModel { Grade = grade, ClassNum = 2 });
+            supervisor.AssignedClasses.Add(new SchoolClassModel { Grade = MakeGrade(11), ClassNum = 3 });
 
             supervisor.Grade.Should().Be(grade);
         }

@@ -16,10 +16,10 @@ public static class UserEndpoints
             .RequireAuthorization();
 
         // GET /api/users — Admin only
-        group.MapGet("/", async (IUserRepo userRepo) =>
+        group.MapGet("/", async (UserService userService) =>
         {
-            var dtos = await userRepo.GetAllUserDtosAsync();
-            return Results.Ok(dtos);
+            var users = await userService.GetAllUsersAsync();
+            return Results.Ok<IEnumerable<UserModel>>(users);
         })
         .RequireAuthorization("AdminOnly")
         .WithOpenApi();
@@ -34,10 +34,10 @@ public static class UserEndpoints
         .WithOpenApi();
 
         // GET /api/users/{id}
-        group.MapGet("/{id:int}", async (int id, IUserRepo userRepo) =>
+        group.MapGet("/{id:int}", async (int id, UserService userService) =>
         {
-            var dto = await userRepo.GetUserDtoByIdAsync(id);
-            return dto is null ? Results.NotFound() : Results.Ok(dto);
+            var result = await userService.GetUserByIdAsync(id);
+            return result.Success ? Results.Ok<UserModel>(result.Data!) : Results.NotFound();
         })
         .WithOpenApi();
 
@@ -53,7 +53,7 @@ public static class UserEndpoints
                     Email = req.Email,
                     UserName = req.UserName,
                     NationalId = req.NationalId,
-                    Grade = new Grade { Id = 0, Name = string.Empty, Num = 0 }
+                    Grade = new GradeModel { Id = 0, Name = string.Empty, Num = 0 }
                 }
             };
             user.PhoneNumber = req.PhoneNumber;

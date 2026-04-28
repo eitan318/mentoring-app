@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 
@@ -11,29 +12,21 @@ public partial class CreatePairViewModel : ObservableObject, INavigatable
 {
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CreatePairCommand))]
-    private UserResponse? _selectedSupervisor;
+    private UserModel? _selectedSupervisor;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CreatePairCommand))]
-    private UserResponse? _selectedMentor;
+    private UserModel? _selectedMentor;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CreatePairCommand))]
-    private UserResponse? _selectedMentee;
+    private UserModel? _selectedMentee;
 
-    partial void OnSelectedMenteeChanged(UserResponse? value)
-    {
-        if (value?.GradeId != null)
-        {
-            var match = AvailableSupervisors.FirstOrDefault(s =>
-                s.GradeId == value.GradeId && s.ClassNum == value.ClassNum);
-            if (match != null) SelectedSupervisor = match;
-        }
-    }
 
-    [ObservableProperty] private ObservableCollection<UserResponse> _availableSupervisors = [];
-    [ObservableProperty] private ObservableCollection<UserResponse> _availableMentors = [];
-    [ObservableProperty] private ObservableCollection<UserResponse> _availableMentees = [];
+
+    [ObservableProperty] private ObservableCollection<SupervisorModel> _availableSupervisors = [];
+    [ObservableProperty] private ObservableCollection<StudentModel> _availableMentors = [];
+    [ObservableProperty] private ObservableCollection<StudentModel> _availableMentees = [];
 
     [ObservableProperty] private string _supervisorSearchText = string.Empty;
     [ObservableProperty] private string _mentorSearchText = string.Empty;
@@ -54,12 +47,20 @@ public partial class CreatePairViewModel : ObservableObject, INavigatable
         var allUsers = await _userClient.GetAllAsync();
         var allPairs = await _pairClient.GetAllAsync();
 
-        var pairedMentorIds  = allPairs.Select(p => p.MentorId).ToHashSet();
-        var pairedMenteeIds  = allPairs.Select(p => p.MenteeId).ToHashSet();
+        var pairedMentorIds = allPairs.Select(p => p.Mentor.Id).ToHashSet();
+        var pairedMenteeIds = allPairs.Select(p => p.Mentee.Id).ToHashSet();
 
-        AvailableSupervisors = new ObservableCollection<UserResponse>(allUsers.Where(u => u.IsSupervisor));
-        AvailableMentors     = new ObservableCollection<UserResponse>(allUsers.Where(u => u.IsStudent && u.IsMentor && !pairedMentorIds.Contains(u.Id)));
-        AvailableMentees     = new ObservableCollection<UserResponse>(allUsers.Where(u => u.IsStudent && u.IsMentee && !pairedMenteeIds.Contains(u.Id)));
+      
+        AvailableSupervisors = new ObservableCollection<SupervisorModel>(
+            allUsers.OfType<SupervisorModel>());
+   
+        AvailableMentors = new ObservableCollection<StudentModel>(
+            allUsers.OfType<StudentModel>()
+                    .Where(s => s.IsMentor && !pairedMentorIds.Contains(s.Id)));
+
+        AvailableMentees = new ObservableCollection<StudentModel>(
+            allUsers.OfType<StudentModel>()
+                    .Where(s => s.IsMentee && !pairedMenteeIds.Contains(s.Id)));
 
         OnPropertyChanged(nameof(FilteredSupervisors));
         OnPropertyChanged(nameof(FilteredMentors));
@@ -70,18 +71,18 @@ public partial class CreatePairViewModel : ObservableObject, INavigatable
         SelectedSupervisor = null;
     }
 
-    public IEnumerable<UserResponse> FilteredSupervisors =>
+    public IEnumerable<UserModel> FilteredSupervisors =>
         AvailableSupervisors.Where(x => x.UserName.Contains(SupervisorSearchText, StringComparison.OrdinalIgnoreCase));
 
-    public IEnumerable<UserResponse> FilteredMentors =>
+    public IEnumerable<UserModel> FilteredMentors =>
         AvailableMentors.Where(x => x.UserName.Contains(MentorSearchText, StringComparison.OrdinalIgnoreCase));
 
-    public IEnumerable<UserResponse> FilteredMentees =>
+    public IEnumerable<UserModel> FilteredMentees =>
         AvailableMentees.Where(x => x.UserName.Contains(MenteeSearchText, StringComparison.OrdinalIgnoreCase));
 
     partial void OnSupervisorSearchTextChanged(string v) => OnPropertyChanged(nameof(FilteredSupervisors));
-    partial void OnMentorSearchTextChanged(string v)     => OnPropertyChanged(nameof(FilteredMentors));
-    partial void OnMenteeSearchTextChanged(string v)     => OnPropertyChanged(nameof(FilteredMentees));
+    partial void OnMentorSearchTextChanged(string v) => OnPropertyChanged(nameof(FilteredMentors));
+    partial void OnMenteeSearchTextChanged(string v) => OnPropertyChanged(nameof(FilteredMentees));
 
     private bool CanCreatePair => SelectedSupervisor != null && SelectedMentor != null && SelectedMentee != null;
 

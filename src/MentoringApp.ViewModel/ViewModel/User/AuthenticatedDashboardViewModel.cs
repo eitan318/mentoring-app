@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model.User;
 using MentoringApp.ViewModel.Auth;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
@@ -51,7 +52,7 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
     public bool IsProfileButtonVisible => ActiveSubPage is not MyProfileViewModel;
     public bool IsBackVisible => _navigationService.CanGoBack();
 
-    [ObservableProperty] private UserResponse? _currentUser;
+    [ObservableProperty] private UserModel? _currentUser;
 
     public System.Collections.ObjectModel.ObservableCollection<string> AvailableLanguages { get; } = ["en", "he"];
     [ObservableProperty] private string _selectedLanguage = "en";
@@ -82,7 +83,6 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         }
 
         _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
-        _navigationService.NavigationChanged += OnNavigationChanged;
 
         if (IsProfileIncomplete(CurrentUser))
         {
@@ -98,36 +98,32 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         if (CurrentUser == null) return;
 
         if (CurrentUser.IsAdmin)
-            await _navigationService.NavigateToAsync<AdminShellViewModel>();
+            await _navigationService.NavigateToAsync<AdminDashboardViewModel>();
         else if (CurrentUser.IsSupervisor)
             await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id);
         else if (CurrentUser.IsStudent)
             await _navigationService.NavigateToAsync<StudentDashboardViewModel>();
     }
 
-    private static bool IsProfileIncomplete(UserResponse? user)
+    private static bool IsProfileIncomplete(UserModel? user)
     {
-        if (user == null || !user.IsStudent) return false;
-        if (!user.GradeId.HasValue || user.GradeId == 0 || (user.ClassNum ?? 0) <= 0) return true;
-        if (user.IsMentor && !user.MentorSubjectId.HasValue) return true;
-        if (user.IsMentee && !user.MenteeSubjectId.HasValue) return true;
+        if (user is not StudentModel student)
+            return false;
+        if (student.Grade == null || student.Grade.Id <= 0 || student.ClassNum <= 0)
+            return true;
+        if (student.IsMentor && (student.MentorProfile == null || student.MentorProfile.SubjectToTeach <= 0))
+            return true;
+        if (student.IsMentee && (student.MenteeProfile == null || student.MenteeProfile.SubjectToLearn <= 0))
+            return true;
+
         return false;
     }
-
-    public Task OnNavigatedFromAsync()
-    {
-        _navigationService.NavigationChanged -= OnNavigationChanged;
-        return Task.CompletedTask;
-    }
-
-    private void OnNavigationChanged() => OnPropertyChanged(nameof(IsBackVisible));
 
     [RelayCommand] private void NavigateProfile() => _navigationService.NavigateToAsync<MyProfileViewModel>();
 
     [RelayCommand]
     private void Logout()
     {
-        _navigationService.NavigationChanged -= OnNavigationChanged;
         _sessionService.ClearSession();
         _authTokenStore.Clear();
         _userStore.User = null;

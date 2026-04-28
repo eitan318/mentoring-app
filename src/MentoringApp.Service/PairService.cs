@@ -7,7 +7,7 @@ namespace MentoringApp.Service
 {
     /// <summary>
     /// CRUD and query operations for mentor–mentee pairs.
-    /// Hydrates <see cref="Pair"/> models from <see cref="PairDao"/>s by loading both
+    /// Hydrates <see cref="PairModel"/> models from <see cref="PairDao"/>s by loading both
     /// mentor and mentee as <see cref="StudentModel"/> instances via <see cref="UserService"/>.
     /// Returns <c>null</c> from <see cref="MapDtoToPairAsync"/> if either user fails to load,
     /// so callers should check <see cref="Result{T}.Success"/> before using the data.
@@ -23,52 +23,52 @@ namespace MentoringApp.Service
             _userService = userService;
         }
 
-        public async Task<Result<IEnumerable<Pair>>> GetAllPairsAsync()
+        public async Task<Result<IEnumerable<PairModel>>> GetAllPairsAsync()
         {
             var dtos = await _pairRepo.GetAllAsync();
-            var pairs = new List<Pair>();
+            var pairs = new List<PairModel>();
             foreach (var dto in dtos)
             {
                 var pair = await MapDtoToPairAsync(dto);
                 if (pair != null) pairs.Add(pair);
             }
-            return Result<IEnumerable<Pair>>.Ok(pairs);
+            return Result<IEnumerable<PairModel>>.Ok(pairs);
         }
 
-        public async Task<Result<Pair>> GetPairById(int id)
+        public async Task<Result<PairModel>> GetPairByIdAsync(int id)
         {
             var dto = await _pairRepo.GetByIdAsync(id);
-            if (dto == null) return Result<Pair>.Failure("Pair not found.");
+            if (dto == null) return Result<PairModel>.Failure("Pair not found.");
             var pair = await MapDtoToPairAsync(dto);
-            return pair != null ? Result<Pair>.Ok(pair) : Result<Pair>.Failure("Failed to build pair.");
+            return pair != null ? Result<PairModel>.Ok(pair) : Result<PairModel>.Failure("Failed to build pair.");
         }
 
-        public async Task<Result<Pair>> GetPairByMentorAsync(int mentorId)
+        public async Task<Result<PairModel>> GetPairByMentorIdAsync(int mentorId)
         {
             var dto = await _pairRepo.GetByMentorIdAsync(mentorId);
-            if (dto == null) return Result<Pair>.Failure("No pair found for this mentor.");
+            if (dto == null) return Result<PairModel>.Failure("No pair found for this mentor.");
             var pair = await MapDtoToPairAsync(dto);
-            return pair != null ? Result<Pair>.Ok(pair) : Result<Pair>.Failure("Failed to build pair.");
+            return pair != null ? Result<PairModel>.Ok(pair) : Result<PairModel>.Failure("Failed to build pair.");
         }
 
-        public async Task<Result<Pair>> GetPairByMenteeAsync(int menteeId)
+        public async Task<Result<PairModel>> GetPairByMenteeIdAsync(int menteeId)
         {
             var dto = await _pairRepo.GetByMenteeIdAsync(menteeId);
-            if (dto == null) return Result<Pair>.Failure("No pair found for this mentee.");
+            if (dto == null) return Result<PairModel>.Failure("No pair found for this mentee.");
             var pair = await MapDtoToPairAsync(dto);
-            return pair != null ? Result<Pair>.Ok(pair) : Result<Pair>.Failure("Failed to build pair.");
+            return pair != null ? Result<PairModel>.Ok(pair) : Result<PairModel>.Failure("Failed to build pair.");
         }
 
-        public async Task<Result<IEnumerable<Pair>>> GetPairsBySupervisorAsync(int supervisorId)
+        public async Task<Result<IEnumerable<PairModel>>> GetPairsBySupervisorAsync(int supervisorId)
         {
             var dtos = await _pairRepo.GetBySupervisorIdAsync(supervisorId);
-            var pairs = new List<Pair>();
+            var pairs = new List<PairModel>();
             foreach (var dto in dtos)
             {
                 var pair = await MapDtoToPairAsync(dto);
                 if (pair != null) pairs.Add(pair);
             }
-            return Result<IEnumerable<Pair>>.Ok(pairs);
+            return Result<IEnumerable<PairModel>>.Ok(pairs);
         }
 
         public async Task<Result> CreatePairAsync(int supervisorId, int mentorId, int menteeId)
@@ -96,7 +96,7 @@ namespace MentoringApp.Service
             return deleted ? Result.Ok() : Result.Failure("Pair not found or could not be deleted.");
         }
 
-        private async Task<Pair?> MapDtoToPairAsync(PairDao dto)
+        private async Task<PairModel?> MapDtoToPairAsync(PairDao dto)
         {
             var mentorResult = await _userService.GetUserByIdAsync(dto.MentorId);
             var menteeResult = await _userService.GetUserByIdAsync(dto.MenteeId);
@@ -107,7 +107,7 @@ namespace MentoringApp.Service
             var supervisorResult = await _userService.GetUserByIdAsync(dto.SupervisorId);
             var supervisor = supervisorResult.Data as SupervisorModel;
 
-            return new Pair
+            return new PairModel
             {
                 Id = dto.Id,
                 Mentor = mentor,

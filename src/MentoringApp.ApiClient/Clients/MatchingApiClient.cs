@@ -1,14 +1,15 @@
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.ApiClient.Clients;
 
 public class MatchingApiClient(HttpClient http) : ApiClientBase(http)
 {
-    public Task<IEnumerable<AvailableMentorResponse>> GetAvailableMentorsAsync() =>
-        GetAsync<IEnumerable<AvailableMentorResponse>>("/api/matching/available-mentors");
+    public Task<IEnumerable<StudentModel>> GetAvailableMentorsAsync() =>
+        GetAsync<IEnumerable<StudentModel>>("/api/matching/available-mentors");
 
-    public Task<IEnumerable<AvailableMenteeResponse>> GetAvailableMenteesAsync() =>
-        GetAsync<IEnumerable<AvailableMenteeResponse>>("/api/matching/available-mentees");
+    public Task<IEnumerable<StudentModel>> GetAvailableMenteesAsync() =>
+        GetAsync<IEnumerable<StudentModel>>("/api/matching/available-mentees");
 
     public Task SendPairRequestAsync(SendPairRequestBody request) =>
         PostAsync("/api/matching/requests", request);

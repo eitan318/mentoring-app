@@ -10,7 +10,7 @@ namespace MentoringApp.Model.User
 {
     public class StudentModel : UserModel
     {
-        public required Grade Grade { get; set; }
+        public required GradeModel Grade { get; set; }
         public int ClassNum { get; set; }
         public MentorProfile? MentorProfile { get; set; }
         public MenteeProfile? MenteeProfile { get; set; }
@@ -27,7 +27,7 @@ namespace MentoringApp.Model.User
         public StudentModel() : base() { }
 
         [SetsRequiredMembers]
-        public StudentModel(int id, string email, string userName, string nationalId, Grade grade)
+        public StudentModel(int id, string email, string userName, string nationalId, GradeModel grade)
             : base(id, email, userName, nationalId)
         {
             Grade = grade;

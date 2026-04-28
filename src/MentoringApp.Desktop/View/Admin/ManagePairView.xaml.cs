@@ -25,7 +25,7 @@ namespace MentoringApp.View.Admin
                 element = System.Windows.Media.VisualTreeHelper.GetParent(element);
             }
 
-            if (sender is ListViewItem item && item.Content is Pair selectedPair)
+            if (sender is ListViewItem item && item.Content is PairModel selectedPair)
             {
                 if (DataContext is ManagePairsViewModel vm)
                 {

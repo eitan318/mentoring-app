@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
+using MentoringApp.Model.User;
 using MentoringApp.ViewModel.Helpers;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
@@ -18,9 +20,9 @@ public partial class RegistrationViewModel : ObservableValidator, INavigatable<b
 
     public event Action? RequestClose;
 
-    [ObservableProperty] private ObservableCollection<SubjectResponse> _subjects = [];
-    [ObservableProperty] private ObservableCollection<GradeResponse> _grades = [];
-    [ObservableProperty] private GradeResponse? _selectedGrade;
+    [ObservableProperty] private ObservableCollection<SubjectModel> _subjects = [];
+    [ObservableProperty] private ObservableCollection<GradeModel> _grades = [];
+    [ObservableProperty] private GradeModel? _selectedGrade;
     [ObservableProperty] private int _subjectToTeach = -1;
     [ObservableProperty] private int _subjectToLearn = -1;
     [ObservableProperty] private int _classNum = 1;
@@ -99,9 +101,9 @@ public partial class RegistrationViewModel : ObservableValidator, INavigatable<b
         SupervisorOrStudentIsSupervisor = supervisorOrStudentIsSupervisor;
 
         var subjects = await _referenceClient.GetSubjectsAsync();
-        Subjects = new ObservableCollection<SubjectResponse>(subjects);
+        Subjects = new ObservableCollection<SubjectModel>(subjects);
 
         var grades = await _referenceClient.GetGradesAsync();
-        Grades = new ObservableCollection<GradeResponse>(grades);
+        Grades = new ObservableCollection<GradeModel>(grades);
     }
 }

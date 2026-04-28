@@ -1,15 +1,16 @@
 using System.Net.Http.Json;
 using MentoringApp.ApiClient.Models;
+using MentoringApp.Model.User;
 
 namespace MentoringApp.ApiClient.Clients;
 
 public class UserApiClient(HttpClient http) : ApiClientBase(http)
 {
-    public Task<IEnumerable<UserResponse>> GetAllAsync() =>
-        GetAsync<IEnumerable<UserResponse>>("/api/users");
+    public Task<IEnumerable<UserModel>> GetAllAsync() =>
+        GetAsync<IEnumerable<UserModel>>("/api/users");
 
-    public Task<UserResponse> GetByIdAsync(int id) =>
-        GetAsync<UserResponse>($"/api/users/{id}");
+    public Task<UserModel> GetByIdAsync(int id) =>
+        GetAsync<UserModel>($"/api/users/{id}");
 
     public Task<IEnumerable<SupervisorStatsResponse>> GetSupervisorStatsAsync() =>
         GetAsync<IEnumerable<SupervisorStatsResponse>>("/api/users/supervisors/stats");

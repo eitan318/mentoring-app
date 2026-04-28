@@ -36,8 +36,8 @@ public static class ViewModelDependencyInjection
         services.AddTransient<LoginViewModel>();
         services.AddTransient<AuthenticatedDashboardViewModel>();
         services.AddTransient<RegistrationViewModel>();
-        services.AddTransient<AdminShellViewModel>();
         services.AddTransient<AdminDashboardViewModel>();
+        services.AddTransient<AdminOverviewViewModel>();
         services.AddTransient<StudentDashboardViewModel>();
         services.AddTransient<ManagePairsViewModel>();
         services.AddTransient<CreatePairViewModel>();
