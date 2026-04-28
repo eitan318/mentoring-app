@@ -11,169 +11,264 @@
     mc:Ignorable="d"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
-    <Grid Margin="12">
+    <UserControl.Resources>
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#9EB4CB" Opacity="0.10" BlurRadius="6" ShadowDepth="1" Direction="270"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CardHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryDarkBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#F0F4F8">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Action bar (Create Pair) -->
-            <RowDefinition Height="*"/>    <!-- Main split content -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ── TOP BAR ──────────────────────────────────────────────────── -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-            <Button Command="{Binding CreatePairCommand}" Content="{Binding [Admin_ManagePair_Create], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Padding="8,4"/>
-        </StackPanel>
+        <!-- ── TOP BAR ──────────────────────────────────────────────────────── -->
+        <Border Grid.Row="0" Margin="16,16,16,0" Style="{StaticResource CardBorder}">
+            <StackPanel Orientation="Horizontal" Margin="20,14">
+                <Border Width="4" Height="18" Background="{StaticResource PrimaryBrush}" CornerRadius="2"
+                        VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <TextBlock Text="Manage Pairs" FontSize="15" FontWeight="SemiBold"
+                           Foreground="{StaticResource PrimaryDarkBrush}" VerticalAlignment="Center"
+                           Margin="0,0,20,0"/>
+                <Button Command="{Binding CreatePairCommand}"
+                        Content="{Binding [Admin_ManagePair_Create], Source={x:Static loc:TranslationSource.Instance}}"
+                        Style="{StaticResource PrimaryButtonStyle}"/>
+            </StackPanel>
+        </Border>
 
-        <!-- ── MAIN SPLIT ─────────────────────────────────────────────── -->
-        <Grid Grid.Row="1">
+        <!-- ── MAIN SPLIT ─────────────────────────────────────────────────── -->
+        <Grid Grid.Row="1" Margin="16,12,16,16">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>  <!-- Pairs List -->
-                <ColumnDefinition Width="2*"/>  <!-- Details Sidebar -->
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: Search + Pairs List -->
-            <Grid Grid.Column="0" Margin="0,0,15,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,8,0">
+                <DockPanel>
+                    <!-- Card header -->
+                    <Border DockPanel.Dock="Top" Padding="20,14" Background="#EBF5FF"
+                            BorderThickness="0,0,0,1" BorderBrush="#BBDEFB" CornerRadius="12,12,0,0">
+                        <DockPanel>
+                            <Border Width="4" Height="18" Background="{StaticResource PrimaryBrush}" CornerRadius="2"
+                                    VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Style="{StaticResource CardHeader}" Text="Pairs"/>
+                        </DockPanel>
+                    </Border>
 
-                <!-- Search bar -->
-                <TextBox Grid.Row="0" Margin="0,0,0,8" Padding="4,3"
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Tag="{Binding [Admin_ManagePair_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
+                    <!-- Search bar -->
+                    <TextBox DockPanel.Dock="Top" Margin="16,12,16,8" Padding="4,3"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Tag="{Binding [Admin_ManagePair_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
 
-                <!-- Pairs ListBox -->
-                <ListBox Grid.Row="1"
-                         ItemsSource="{Binding FilteredPairs}"
-                         SelectedItem="{Binding SelectedPair}"
-                         HorizontalContentAlignment="Stretch">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vmAdmin:PairDisplayItem}">
-                            <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10">
+                    <!-- Pairs list -->
+                    <ListView DockPanel.Dock="Top" BorderThickness="0" Padding="8,0,8,8"
+                              ItemsSource="{Binding FilteredPairs}"
+                              SelectedItem="{Binding SelectedPair}"
+                              HorizontalContentAlignment="Stretch">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="12,10"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListViewItem">
+                                            <Border x:Name="row" CornerRadius="8"
+                                                    Padding="{TemplateBinding Padding}"
+                                                    Background="{TemplateBinding Background}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="row" Property="Background" Value="#F8FAFF"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="row" Property="Background" Value="{StaticResource HoverLightBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vmAdmin:PairDisplayItem}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock VerticalAlignment="Center" FontWeight="Bold" Text="{Binding MentorName}" Margin="0,0,6,0"/>
-                                    <TextBlock VerticalAlignment="Center" Text="→" Foreground="Gray" Margin="0,0,6,0"/>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding MenteeName}"/>
+                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               Text="{Binding MentorName}" Margin="0,0,8,0"/>
+                                    <TextBlock VerticalAlignment="Center" Text="→"
+                                               Foreground="{StaticResource TextHintBrush}" Margin="0,0,8,0"/>
+                                    <TextBlock VerticalAlignment="Center" FontSize="13"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Text="{Binding MenteeName}"/>
                                 </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DockPanel>
+            </Border>
 
             <!-- RIGHT: Details Sidebar -->
-            <GroupBox Header="{Binding [Admin_ManagePair_DetailsHeader], Source={x:Static loc:TranslationSource.Instance}}" Grid.Column="1" Padding="10">
-                <Grid>
-                    <!-- Placeholder when nothing selected -->
-                    <TextBlock Text="{Binding [Admin_ManagePair_SelectHint], Source={x:Static loc:TranslationSource.Instance}}"
-                               Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"
-                               TextWrapping="Wrap" TextAlignment="Center">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+            <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+                <DockPanel>
+                    <!-- Card header -->
+                    <Border DockPanel.Dock="Top" Padding="20,14" Background="#EBF5FF"
+                            BorderThickness="0,0,0,1" BorderBrush="#BBDEFB" CornerRadius="12,12,0,0">
+                        <DockPanel>
+                            <Border Width="4" Height="18" Background="{StaticResource PrimaryBrush}" CornerRadius="2"
+                                    VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Style="{StaticResource CardHeader}"
+                                       Text="{Binding [Admin_ManagePair_DetailsHeader], Source={x:Static loc:TranslationSource.Instance}}"/>
+                        </DockPanel>
+                    </Border>
 
-                    <!-- Detail pane -->
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <ScrollViewer.Style>
-                            <Style TargetType="ScrollViewer">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ScrollViewer.Style>
+                    <Grid DockPanel.Dock="Top" Margin="16,12,16,16">
+                        <!-- Placeholder when nothing selected -->
+                        <TextBlock Text="{Binding [Admin_ManagePair_SelectHint], Source={x:Static loc:TranslationSource.Instance}}"
+                                   Foreground="{StaticResource TextHintBrush}" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
+                                   FontStyle="Italic">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
-                        <StackPanel DataContext="{Binding SelectedPair}">
-                            <!-- Mentor Card -->
-                            <TextBlock Text="{Binding [Admin_ManagePair_Mentor], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,5"/>
-                            <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,15">
-                                <StackPanel Orientation="Horizontal">
-                                    <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
-                                                                      VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"
-                                                                      Gender="{Binding Mentor.Gender}"/>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Mentor.UserName}" FontWeight="Bold" FontSize="15"/>
-                                        <TextBlock Text="{Binding Mentor.Email}" Foreground="Gray" FontSize="12"/>
-                                        <TextBlock FontSize="12" Foreground="DarkGray">
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource GradeClassDisplay}">
-                                                    <Binding Path="Mentor.Grade.Name"/>
-                                                    <Binding Path="Mentor.ClassNum"/>
-                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
-                                                </MultiBinding>
-                                            </TextBlock.Text>
+                        <!-- Detail pane -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer.Style>
+                                <Style TargetType="ScrollViewer">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ScrollViewer.Style>
+
+                            <StackPanel DataContext="{Binding SelectedPair}">
+                                <!-- Mentor card -->
+                                <TextBlock Text="{Binding [Admin_ManagePair_Mentor], Source={x:Static loc:TranslationSource.Instance}}"
+                                           FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <Border BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                                        Padding="12,10" Background="#FAFCFF" CornerRadius="8" Margin="0,0,0,14">
+                                    <StackPanel Orientation="Horizontal">
+                                        <components:ProfilePictureControl Width="46" Height="46" Margin="0,0,12,0"
+                                                                          VerticalAlignment="Center"
+                                                                          ImagePath="{Binding Mentor.ProfilePicturePath}"
+                                                                          Gender="{Binding Mentor.Gender}"/>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Mentor.UserName}" FontWeight="SemiBold" FontSize="13"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="{Binding Mentor.Email}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                                            <TextBlock FontSize="12" Foreground="{StaticResource TextHintBrush}">
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                                        <Binding Path="Mentor.Grade.Name"/>
+                                                        <Binding Path="Mentor.ClassNum"/>
+                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Mentee card -->
+                                <TextBlock Text="{Binding [Admin_ManagePair_Mentee], Source={x:Static loc:TranslationSource.Instance}}"
+                                           FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <Border BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                                        Padding="12,10" Background="#FAFCFF" CornerRadius="8" Margin="0,0,0,16">
+                                    <StackPanel Orientation="Horizontal">
+                                        <components:ProfilePictureControl Width="46" Height="46" Margin="0,0,12,0"
+                                                                          VerticalAlignment="Center"
+                                                                          ImagePath="{Binding Mentee.ProfilePicturePath}"
+                                                                          Gender="{Binding Mentee.Gender}"/>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Mentee.UserName}" FontWeight="SemiBold" FontSize="13"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="{Binding Mentee.Email}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                                            <TextBlock FontSize="12" Foreground="{StaticResource TextHintBrush}">
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                                        <Binding Path="Mentee.Grade.Name"/>
+                                                        <Binding Path="Mentee.ClassNum"/>
+                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Separator Background="{StaticResource BorderLightBrush}" Margin="0,0,0,12"/>
+
+                                <!-- Recent activity -->
+                                <TextBlock Text="{Binding [Admin_ManagePair_RecentActivity], Source={x:Static loc:TranslationSource.Instance}}"
+                                           FontWeight="SemiBold" FontSize="12" Margin="0,0,0,8"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <Border BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                                        Padding="12,10" Background="#FAFCFF" CornerRadius="8" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,4">
+                                            <Run Text="{Binding [Admin_ManagePair_TotalReviews], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
+                                            <Run Text="{Binding DataContext.SelectedPairReviewCount, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                 FontWeight="SemiBold"/>
+                                        </TextBlock>
+                                        <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
+                                            <Run Text="{Binding [Admin_ManagePair_ActiveIssues], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
+                                            <Run Text="{Binding DataContext.SelectedPairActiveIssueCount, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                 FontWeight="SemiBold"/>
                                         </TextBlock>
                                     </StackPanel>
-                                </StackPanel>
-                            </Border>
+                                </Border>
 
-                            <!-- Mentee Card -->
-                            <TextBlock Text="{Binding [Admin_ManagePair_Mentee], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,5"/>
-                            <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,20">
-                                <StackPanel Orientation="Horizontal">
-                                    <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
-                                                                      VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"
-                                                                      Gender="{Binding Mentee.Gender}"/>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Mentee.UserName}" FontWeight="Bold" FontSize="15"/>
-                                        <TextBlock Text="{Binding Mentee.Email}" Foreground="Gray" FontSize="12"/>
-                                        <TextBlock FontSize="12" Foreground="DarkGray">
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource GradeClassDisplay}">
-                                                    <Binding Path="Mentee.Grade.Name"/>
-                                                    <Binding Path="Mentee.ClassNum"/>
-                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
+                                <Separator Background="{StaticResource BorderLightBrush}" Margin="0,0,0,12"/>
 
-                            <Separator Margin="0,0,0,10"/>
-
-                            <!-- Summary Section -->
-                            <StackPanel Margin="0,0,0,15">
-                                <TextBlock Text="{Binding [Admin_ManagePair_RecentActivity], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBlock Foreground="#555" Margin="0,0,0,2">
-                                    <Run Text="{Binding [Admin_ManagePair_TotalReviews], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
-                                    <Run Text="{Binding DataContext.SelectedPairReviewCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold"/>
-                                </TextBlock>
-                                <TextBlock Foreground="#555">
-                                    <Run Text="{Binding [Admin_ManagePair_ActiveIssues], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
-                                    <Run Text="{Binding DataContext.SelectedPairActiveIssueCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold"/>
-                                </TextBlock>
+                                <!-- Actions -->
+                                <TextBlock Text="{Binding [Admin_ManagePair_Actions], Source={x:Static loc:TranslationSource.Instance}}"
+                                           FontWeight="SemiBold" FontSize="12" Margin="0,0,0,10"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <Button Content="{Binding [Admin_ManagePair_ViewDetails], Source={x:Static loc:TranslationSource.Instance}}"
+                                        Command="{Binding DataContext.SelectPairCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Style="{StaticResource SecondaryButtonStyle}" Cursor="Hand"
+                                        Margin="0,0,0,8" Padding="5,8" HorizontalAlignment="Stretch"/>
+                                <Button Content="{Binding [Admin_ManagePair_Separate], Source={x:Static loc:TranslationSource.Instance}}"
+                                        Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
+                                        Cursor="Hand"
+                                        ToolTip="{Binding [ManagePairs_Separate_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
+                                        Padding="5,8" HorizontalAlignment="Stretch"/>
                             </StackPanel>
-
-                            <Separator Margin="0,0,0,10"/>
-
-                            <!-- Actions  -->
-                            <TextBlock Text="{Binding [Admin_ManagePair_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                            <Button Content="{Binding [Admin_ManagePair_ViewDetails], Source={x:Static loc:TranslationSource.Instance}}"
-                                    Command="{Binding DataContext.SelectPairCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    Cursor="Hand"
-                                    Margin="0,0,0,10" Padding="5,8"/>
-                            <Button Content="{Binding [Admin_ManagePair_Separate], Source={x:Static loc:TranslationSource.Instance}}"
-                                    Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
-                                    Cursor="Hand"
-                                    ToolTip="{Binding [ManagePairs_Separate_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
-                                    Padding="5,8"/>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Grid>
-            </GroupBox>
+                        </ScrollViewer>
+                    </Grid>
+                </DockPanel>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

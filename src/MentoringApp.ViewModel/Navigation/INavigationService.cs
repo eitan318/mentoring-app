@@ -13,6 +13,9 @@ namespace MentoringApp.ViewModel.Navigation
         IDisposable UseContext(Action<INavigatable> contextSetter);
         Task GoBackAsync();
         bool CanGoBack();
+
+        /// <summary>Fires after any navigation in any context, allowing observers to refresh back-button state.</summary>
+        event Action? NavigationChanged;
     }
 
 }

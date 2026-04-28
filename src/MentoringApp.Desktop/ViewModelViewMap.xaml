@@ -41,6 +41,10 @@
         <userv:IssueView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type adminvm:AdminShellViewModel}">
+        <adminv:AdminShellView />
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type adminvm:AdminDashboardViewModel}">
         <adminv:AdminDashboardView />
     </DataTemplate>
