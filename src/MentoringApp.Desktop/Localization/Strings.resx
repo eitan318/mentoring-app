@@ -826,6 +826,36 @@ The system is currently processing matches based on compatibility. Please wait u
   <data name="Supervisor_InactiveStudents_Header" xml:space="preserve">
     <value>Students with incomplete profiles:</value>
   </data>
+  <data name="Supervisor_ClassRegistration_Title" xml:space="preserve">
+    <value>Class Registration</value>
+  </data>
+  <data name="Supervisor_Registered_Label" xml:space="preserve">
+    <value>registered</value>
+  </data>
+  <data name="Supervisor_AllRegistered_Label" xml:space="preserve">
+    <value>All students have registered!</value>
+  </data>
+  <data name="Supervisor_Role_Mentor" xml:space="preserve">
+    <value>Mentor</value>
+  </data>
+  <data name="Supervisor_Role_Mentee" xml:space="preserve">
+    <value>Mentee</value>
+  </data>
+  <data name="Supervisor_Role_NoRole" xml:space="preserve">
+    <value>No role</value>
+  </data>
+  <data name="Admin_ManageUsers_Name_Column" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Admin_ManageUsers_Email_Column" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Admin_ManageUsers_Class_Column" xml:space="preserve">
+    <value>Class</value>
+  </data>
+  <data name="Admin_ManageUsers_Status_Column" xml:space="preserve">
+    <value>Status</value>
+  </data>
   <data name="Supervisor_ClearSelection_Button" xml:space="preserve">
     <value>Clear Selection</value>
   </data>
@@ -1189,5 +1219,8 @@ You may see new pairs appear in your list as students make their selections.</va
   </data>
   <data name="DB_Grade_1st" xml:space="preserve">
     <value>first grade</value>
+  </data>
+  <data name="Student_YourMentor_Label" xml:space="preserve">
+    <value>Your Mentor</value>
   </data>
 </root>

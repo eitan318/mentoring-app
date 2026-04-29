@@ -43,8 +43,12 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     [ObservableProperty] private string _bannerTimer = string.Empty;
     [ObservableProperty] private string _bannerColor = "#E3F2FD";
     [ObservableProperty] private string _bannerTextColor = "#1565C0";
-    [ObservableProperty] private bool _isPhase1Active;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ArePairsAndIssuesVisible))]
+    private bool _isPhase1Active;
     [ObservableProperty] private bool _isPhase2Active;
+
+    public bool ArePairsAndIssuesVisible => !IsPhase1Active;
 
     private DispatcherTimer? _timer;
     private DateTime? _tier1Deadline;

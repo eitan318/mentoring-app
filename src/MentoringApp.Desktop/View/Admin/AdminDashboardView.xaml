@@ -44,7 +44,7 @@
 
     <Grid Background="#F4F7FE">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -56,21 +56,6 @@
             </Border.Effect>
 
             <DockPanel LastChildFill="False">
-
-                <!-- Logo block -->
-                <Border DockPanel.Dock="Top" Padding="24,30,24,20">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="32" Height="32" CornerRadius="8"
-                                Background="#A855F7" Margin="0,0,12,0" VerticalAlignment="Center">
-                            <TextBlock Text="E" Foreground="White" FontWeight="Bold" FontSize="18"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="EDUCATION" FontWeight="Bold" FontSize="14" Foreground="#111827"/>
-                            <TextBlock Text="ONLINE LEARNING" FontSize="8" Foreground="#9CA3AF"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
 
                 <!-- Navigation -->
                 <StackPanel DockPanel.Dock="Top" Margin="16,10,16,0">

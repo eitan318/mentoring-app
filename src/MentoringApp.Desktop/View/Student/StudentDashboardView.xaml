@@ -10,29 +10,135 @@
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}"
     mc:Ignorable="d">
 
-    <!--
-        Layout:
-        Row 0 — Phase banner (visible only when IsPhaseBannerVisible; shown whenever the
-                student has at least one unmatched-role tab in the Pairs list).
-        Row 1 — Tab strip (ListBox of heterogeneous Pairs items).
-        Row 2 — Tab content area (ContentControl that dispatches per ViewModel type).
+    <UserControl.Resources>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="15" Color="#000000" Opacity="0.03" ShadowDepth="2" Direction="270"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        There is NO empty-state panel.  Every student always has at least one tab:
-        paired students get Mentor/Mentee dashboard tabs; unmatched students in Phase 1
-        get Browse Mentors and/or Mentor Requests tabs; unmatched students in Phase 2
-        get Selection Gallery and/or a passive Phase-2 mentor info tab.
-    -->
+        <Style x:Key="PrimaryBtn" TargetType="Button">
+            <Setter Property="Background" Value="#A855F7"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#9333EA"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-    <Grid>
+        <Style x:Key="SecondaryBtn" TargetType="Button">
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#4B5563"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E5E7EB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DangerBtn" TargetType="Button">
+            <Setter Property="Background" Value="#FEF2F2"/>
+            <Setter Property="Foreground" Value="#DC2626"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FECACA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TabItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,0,3"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="12,14"/>
+            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#A855F7"/>
+                                <Setter Property="Foreground" Value="#A855F7"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F9FAFB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#F4F7FE">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />   <!-- Phase banner -->
-            <RowDefinition Height="Auto" />   <!-- Tab strip -->
-            <RowDefinition Height="*"    />   <!-- Tab content -->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"    />
         </Grid.RowDefinitions>
 
-        <!-- ══ ROW 0: Phase banner ══════════════════════════════════════════ -->
-        <Border Grid.Row="0" Margin="10,10,10,0" Padding="16,12" CornerRadius="8"
-                Background="{Binding BannerColor}" BorderThickness="0"
+        <!-- ══ ROW 0: Phase banner ══ -->
+        <Border Grid.Row="0" Margin="24,16,24,0" Padding="16,14" CornerRadius="12"
+                Background="{Binding BannerColor}"
                 Visibility="{Binding IsPhaseBannerVisible, Converter={StaticResource BoolToVis}}">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
@@ -51,232 +157,301 @@
             </StackPanel>
         </Border>
 
-        <!-- ══ ROW 1: Tab strip ═════════════════════════════════════════════ -->
-        <ListBox
-            Grid.Row="1"
-            Cursor="Hand"
-            ItemsSource="{Binding Pairs}"
-            SelectedItem="{Binding SelectedPair}">
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <ContentControl Content="{Binding}">
-                        <ContentControl.Resources>
-                            <!-- Real pair tabs: show avatar + counterpart name -->
-                            <DataTemplate DataType="{x:Type studentvm:MentorDashboardViewModel}">
-                                <StackPanel Margin="5" Orientation="Horizontal">
-                                    <components:ProfilePictureControl
-                                        Width="28" Height="28" Margin="0,0,6,0"
-                                        ImagePath="{Binding Counterpart.ProfilePicturePath}"
-                                        Gender="{Binding Counterpart.Gender}" />
-                                    <TextBlock VerticalAlignment="Center" FontSize="13"
-                                               Text="{Binding Counterpart.UserName}" />
-                                </StackPanel>
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type studentvm:MenteeDashboardViewModel}">
-                                <StackPanel Margin="5" Orientation="Horizontal">
-                                    <components:ProfilePictureControl
-                                        Width="28" Height="28" Margin="0,0,6,0"
-                                        ImagePath="{Binding Counterpart.ProfilePicturePath}"
-                                        Gender="{Binding Counterpart.Gender}" />
-                                    <TextBlock VerticalAlignment="Center" FontSize="13"
-                                               Text="{Binding Counterpart.UserName}" />
-                                </StackPanel>
-                            </DataTemplate>
-                            <!-- Phase tabs: plain label -->
-                            <DataTemplate DataType="{x:Type studentvm:BrowseMentorsViewModel}">
-                                <TextBlock Margin="8,6" FontSize="13" Text="{Binding TabLabel}" />
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type studentvm:SelectionGalleryViewModel}">
-                                <TextBlock Margin="8,6" FontSize="13" Text="{Binding TabLabel}" />
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type studentvm:MentorRequestsViewModel}">
-                                <TextBlock Margin="8,6" FontSize="13" Text="{Binding TabLabel}" />
-                            </DataTemplate>
-                        </ContentControl.Resources>
-                    </ContentControl>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <!-- ══ ROW 1: Tab bar ══ -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#F3F4F6" BorderThickness="0,0,0,1">
+            <ListBox
+                BorderThickness="0"
+                Background="Transparent"
+                Padding="16,0,16,0"
+                ItemsSource="{Binding Pairs}"
+                SelectedItem="{Binding SelectedPair}"
+                ItemContainerStyle="{StaticResource TabItemStyle}">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl Content="{Binding}">
+                            <ContentControl.Resources>
+                                <DataTemplate DataType="{x:Type studentvm:MentorDashboardViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <components:ProfilePictureControl
+                                            Width="28" Height="28" Margin="0,0,6,0"
+                                            ImagePath="{Binding Counterpart.ProfilePicturePath}"
+                                            Gender="{Binding Counterpart.Gender}" />
+                                        <TextBlock VerticalAlignment="Center" FontSize="13" FontWeight="Medium"
+                                                   Text="{Binding Counterpart.UserName}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type studentvm:MenteeDashboardViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <components:ProfilePictureControl
+                                            Width="28" Height="28" Margin="0,0,6,0"
+                                            ImagePath="{Binding Counterpart.ProfilePicturePath}"
+                                            Gender="{Binding Counterpart.Gender}" />
+                                        <TextBlock VerticalAlignment="Center" FontSize="13" FontWeight="Medium"
+                                                   Text="{Binding Counterpart.UserName}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type studentvm:BrowseMentorsViewModel}">
+                                    <TextBlock FontSize="13" FontWeight="Medium" Text="{Binding TabLabel}" />
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type studentvm:SelectionGalleryViewModel}">
+                                    <TextBlock FontSize="13" FontWeight="Medium" Text="{Binding TabLabel}" />
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type studentvm:MentorRequestsViewModel}">
+                                    <TextBlock FontSize="13" FontWeight="Medium" Text="{Binding TabLabel}" />
+                                </DataTemplate>
+                            </ContentControl.Resources>
+                        </ContentControl>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
 
-        <!-- ══ ROW 2: Tab content ════════════════════════════════════════════ -->
-        <ContentControl
-            Grid.Row="2"
-            Margin="10"
-            Content="{Binding SelectedPair}">
+        <!-- ══ ROW 2: Tab content ══ -->
+        <ContentControl Grid.Row="2" Content="{Binding SelectedPair}">
             <ContentControl.Resources>
 
-                <!-- ── Mentor dashboard (you are mentoring a mentee) ── -->
+                <!-- ── Mentor dashboard ── -->
                 <DataTemplate DataType="{x:Type studentvm:MentorDashboardViewModel}">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="18" FontWeight="Bold">
-                                <Hyperlink Command="{Binding NavigateToProfileCommand}"
-                                           Foreground="#0066CC" TextDecorations="Underline">
-                                    <Run Text="{Binding Counterpart.UserName}" />
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock Foreground="Gray"
-                                       Text="{Binding [Student_YourMentee_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <DockPanel Margin="0,8,0,2">
-                                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#555"
-                                           Text="{Binding [Student_MeetingHours_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                                <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right">
-                                    <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}" />
-                                    <Run Text=" / " />
-                                    <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}" />
-                                </TextBlock>
-                            </DockPanel>
-                            <ProgressBar Height="10" Margin="0,0,0,4" Minimum="0" Maximum="100"
-                                         Value="{Binding HoursProgress, Mode=OneWay}" />
-                        </StackPanel>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="24,16">
 
-                        <UniformGrid DockPanel.Dock="Bottom" Columns="2" Margin="0,8,0,0">
-                            <Button Margin="0,0,4,0" Command="{Binding CreateReviewCommand}"
-                                    Content="{Binding [Student_WriteReview_Button], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <Button Margin="4,0,0,0" Command="{Binding IssueToSupervisorCommand}"
-                                    Content="{Binding [Student_ReportIssue_Button], Source={x:Static loc:TranslationSource.Instance}}" />
-                        </UniformGrid>
+                            <!-- Counterpart header card -->
+                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                                <DockPanel>
+                                    <!-- Action buttons (right) -->
+                                    <StackPanel DockPanel.Dock="Right" Margin="16,0,0,0" VerticalAlignment="Top">
+                                        <Button Margin="0,0,0,8" MinWidth="140"
+                                                Style="{StaticResource PrimaryBtn}"
+                                                Command="{Binding CreateReviewCommand}"
+                                                Content="{Binding [Student_WriteReview_Button], Source={x:Static loc:TranslationSource.Instance}}" />
+                                        <Button MinWidth="140"
+                                                Style="{StaticResource SecondaryBtn}"
+                                                Command="{Binding IssueToSupervisorCommand}"
+                                                Content="{Binding [Student_ReportIssue_Button], Source={x:Static loc:TranslationSource.Instance}}" />
+                                    </StackPanel>
 
-                        <ScrollViewer>
-                            <StackPanel>
-                                <TextBlock Margin="0,10,0,4" FontWeight="Bold" Foreground="#333"
-                                           Text="{Binding [Student_RecentReviews_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                                <ItemsControl ItemsSource="{Binding RecentReviews}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Padding="4,6" BorderBrush="#DDD" BorderThickness="0,0,0,1">
-                                                <StackPanel>
+                                    <!-- Left: name + progress -->
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,2">
+                                            <Hyperlink Command="{Binding NavigateToProfileCommand}"
+                                                       Foreground="#A855F7" TextDecorations="None">
+                                                <Run Text="{Binding Counterpart.UserName}" />
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#6B7280" FontSize="13" Margin="0,0,0,16"
+                                                   Text="{Binding [Student_YourMentee_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+
+                                        <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,0,0,6"
+                                                   Text="{Binding [Student_MeetingHours_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Height="8" Background="#F3F4F6" CornerRadius="4" ClipToBounds="True">
+                                                <ProgressBar Minimum="0" Maximum="100"
+                                                             Value="{Binding HoursProgress, Mode=OneWay}"
+                                                             Foreground="#A855F7" Background="Transparent" BorderThickness="0"/>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center">
+                                                <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}" />
+                                                <Run Text=" / " />
+                                                <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}" />
+                                            </TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+
+                            <!-- Recent reviews card -->
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel>
+                                    <TextBlock FontSize="16" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,16"
+                                               Text="{Binding [Student_RecentReviews_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                    <ItemsControl ItemsSource="{Binding RecentReviews}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="0,12" BorderBrush="#F3F4F6" BorderThickness="0,0,0,1">
                                                     <DockPanel>
-                                                        <TextBlock DockPanel.Dock="Left" Text="{Binding Content}" TextWrapping="Wrap" />
-                                                        <TextBlock DockPanel.Dock="Right" FontSize="11" Foreground="#2E7D32" HorizontalAlignment="Right"
-                                                                   Text="{Binding AmountOfHours, StringFormat='{}{0:0.#} hrs'}" />
+                                                        <Border DockPanel.Dock="Right" Background="#ECFDF5" CornerRadius="12"
+                                                                Padding="10,4" Margin="12,0,0,0" VerticalAlignment="Center">
+                                                            <TextBlock Foreground="#059669" FontSize="12" FontWeight="SemiBold"
+                                                                       Text="{Binding AmountOfHours, StringFormat='{}{0:0.#} hrs'}" />
+                                                        </Border>
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Content}" TextWrapping="Wrap"
+                                                                       Foreground="#374151" FontSize="14"/>
+                                                            <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="#9CA3AF"
+                                                                       Text="{Binding Date, StringFormat='{}{0:MMM d, yyyy}'}" />
+                                                        </StackPanel>
                                                     </DockPanel>
-                                                    <TextBlock Margin="0,2,0,0" FontSize="11" Foreground="#999"
-                                                               Text="{Binding Date, StringFormat='{}{0:MMM d, yyyy}'}" />
-                                                </StackPanel>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </ScrollViewer>
-                    </DockPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                        </StackPanel>
+                    </ScrollViewer>
                 </DataTemplate>
 
-                <!-- ── Mentee dashboard (you are being mentored) ── -->
+                <!-- ── Mentee dashboard ── -->
                 <DataTemplate DataType="{x:Type studentvm:MenteeDashboardViewModel}">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="18" FontWeight="Bold">
-                                <Hyperlink Command="{Binding NavigateToProfileCommand}"
-                                           Foreground="#0066CC" TextDecorations="Underline">
-                                    <Run Text="{Binding Counterpart.UserName}" />
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock Foreground="#2E7D32" FontWeight="SemiBold"
-                                       Text="{Binding MentorSubject, StringFormat='Expert in: {0}'}" />
-                            <DockPanel Margin="0,8,0,2">
-                                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#555"
-                                           Text="{Binding [Student_MeetingHours_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                                <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right">
-                                    <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}" />
-                                    <Run Text=" / " />
-                                    <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}" />
-                                </TextBlock>
-                            </DockPanel>
-                            <ProgressBar Height="10" Margin="0,0,0,4" Minimum="0" Maximum="100"
-                                         Value="{Binding HoursProgress, Mode=OneWay}" />
-                        </StackPanel>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="24,16">
 
-                        <Button DockPanel.Dock="Bottom" Margin="0,8,0,0"
-                                Command="{Binding IssueToSupervisorCommand}"
-                                Content="{Binding [Student_RaiseIssue_Button], Source={x:Static loc:TranslationSource.Instance}}" />
+                            <!-- Counterpart header card -->
+                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                                <DockPanel>
+                                    <!-- Action button (right) -->
+                                    <StackPanel DockPanel.Dock="Right" Margin="16,0,0,0" VerticalAlignment="Top">
+                                        <Button MinWidth="140"
+                                                Style="{StaticResource SecondaryBtn}"
+                                                Command="{Binding IssueToSupervisorCommand}"
+                                                Content="{Binding [Student_RaiseIssue_Button], Source={x:Static loc:TranslationSource.Instance}}" />
+                                    </StackPanel>
 
-                        <ScrollViewer>
-                            <StackPanel>
-                                <TextBlock Margin="0,10,0,4" FontWeight="Bold" Foreground="#333"
-                                           Text="{Binding [Student_MentorFeedback_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                                <ItemsControl ItemsSource="{Binding RecentReviews}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Padding="4,6" BorderBrush="#DDD" BorderThickness="0,0,0,1">
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding Content}" TextWrapping="Wrap" />
-                                                    <TextBlock Margin="0,2,0,0" FontSize="11" Foreground="#999"
-                                                               Text="{Binding Date, StringFormat='{}{0:MMM d, yyyy}'}" />
-                                                </StackPanel>
+                                    <!-- Left: name + subject + progress -->
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,2">
+                                            <Hyperlink Command="{Binding NavigateToProfileCommand}"
+                                                       Foreground="#A855F7" TextDecorations="None">
+                                                <Run Text="{Binding Counterpart.UserName}" />
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#6B7280" FontSize="13" Margin="0,0,0,8"
+                                                   Text="{Binding [Student_YourMentor_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+
+                                        <Border Background="#ECFDF5" CornerRadius="8" Padding="10,4" HorizontalAlignment="Left" Margin="0,0,0,16">
+                                            <TextBlock Foreground="#059669" FontSize="12" FontWeight="SemiBold"
+                                                       Text="{Binding MentorSubject, StringFormat='Expert in: {0}'}" />
+                                        </Border>
+
+                                        <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,0,0,6"
+                                                   Text="{Binding [Student_MeetingHours_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Height="8" Background="#F3F4F6" CornerRadius="4" ClipToBounds="True">
+                                                <ProgressBar Minimum="0" Maximum="100"
+                                                             Value="{Binding HoursProgress, Mode=OneWay}"
+                                                             Foreground="#A855F7" Background="Transparent" BorderThickness="0"/>
                                             </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                            <TextBlock Grid.Column="1" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center">
+                                                <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}" />
+                                                <Run Text=" / " />
+                                                <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}" />
+                                            </TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
 
-                                <TextBlock Margin="0,14,0,4" FontWeight="Bold" Foreground="#333"
-                                           Text="{Binding [Student_MyIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                                <ItemsControl ItemsSource="{Binding MyIssues}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Padding="4,5" BorderBrush="#DDD" BorderThickness="0,0,0,1">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Width="8" Height="8" Margin="0,3,8,0"
-                                                               VerticalAlignment="Top" Foreground="#E53935" Text="●" />
+                            <!-- Mentor feedback card -->
+                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock FontSize="16" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,16"
+                                               Text="{Binding [Student_MentorFeedback_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                    <ItemsControl ItemsSource="{Binding RecentReviews}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="0,12" BorderBrush="#F3F4F6" BorderThickness="0,0,0,1">
                                                     <StackPanel>
-                                                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
-                                                        <TextBlock FontSize="11" Foreground="#999">
-                                                            <TextBlock.Text>
-                                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Category_">
-                                                                    <Binding Path="Category.Name" />
-                                                                    <Binding Path="CurrentCulture" Source="{x:Static loc:TranslationSource.Instance}" />
-                                                                </MultiBinding>
-                                                            </TextBlock.Text>
-                                                        </TextBlock>
+                                                        <TextBlock Text="{Binding Content}" TextWrapping="Wrap"
+                                                                   Foreground="#374151" FontSize="14"/>
+                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="#9CA3AF"
+                                                                   Text="{Binding Date, StringFormat='{}{0:MMM d, yyyy}'}" />
                                                     </StackPanel>
-                                                </StackPanel>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </ScrollViewer>
-                    </DockPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- My issues card -->
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel>
+                                    <TextBlock FontSize="16" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,16"
+                                               Text="{Binding [Student_MyIssues_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                    <ItemsControl ItemsSource="{Binding MyIssues}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="0,10" BorderBrush="#F3F4F6" BorderThickness="0,0,0,1">
+                                                    <DockPanel>
+                                                        <Border DockPanel.Dock="Right" Background="#F3F4F6" CornerRadius="8"
+                                                                Padding="8,4" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#374151">
+                                                                <TextBlock.Text>
+                                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Category_">
+                                                                        <Binding Path="Category.Name" />
+                                                                        <Binding Path="CurrentCulture" Source="{x:Static loc:TranslationSource.Instance}" />
+                                                                    </MultiBinding>
+                                                                </TextBlock.Text>
+                                                            </TextBlock>
+                                                        </Border>
+                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <Ellipse Width="8" Height="8" Fill="#DC2626" Margin="0,0,10,0"/>
+                                                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
+                                                                       Foreground="#374151" FontSize="14"/>
+                                                        </StackPanel>
+                                                    </DockPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                        </StackPanel>
+                    </ScrollViewer>
                 </DataTemplate>
 
-                <!-- ── Phase 1 mentee tab: browse & request mentors ── -->
+                <!-- ── Browse mentors (Phase 1 mentee) ── -->
                 <DataTemplate DataType="{x:Type studentvm:BrowseMentorsViewModel}">
-                    <DockPanel Margin="4">
-                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="13" FontWeight="Bold" Text="Available mentors" />
-                            <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="24,16">
+
+                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4">Available Mentors</TextBlock>
+                            <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,16"
                                        Text="Send a request to a mentor you would like to be paired with." />
-                        </StackPanel>
 
-                        <Border DockPanel.Dock="Top" Margin="0,0,0,8"
-                                Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{Binding StatusMessage}" FontSize="12" TextWrapping="Wrap" />
-                        </Border>
+                            <!-- Status message -->
+                            <Border Margin="0,0,0,12" Background="#EFF6FF" CornerRadius="8" Padding="12,8"
+                                    Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{Binding StatusMessage}" FontSize="13" Foreground="#1D4ED8" TextWrapping="Wrap" />
+                            </Border>
 
-                        <TextBlock DockPanel.Dock="Top" FontSize="12" Foreground="Gray" Margin="0,0,0,8"
-                                   Text="Loading…"
-                                   Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
+                            <!-- Loading -->
+                            <TextBlock FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,12"
+                                       Text="Loading…"
+                                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
 
-                        <ScrollViewer>
+                            <!-- Mentor list -->
                             <ItemsControl ItemsSource="{Binding Mentors}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Padding="0,6" BorderBrush="#DDD" BorderThickness="0,0,0,1">
+                                        <Border Background="#F9FAFB" CornerRadius="12" Padding="16" Margin="0,0,0,8">
                                             <DockPanel>
                                                 <Button DockPanel.Dock="Right"
+                                                        Style="{StaticResource PrimaryBtn}"
+                                                        VerticalAlignment="Center"
                                                         Content="Send Request"
                                                         Command="{Binding DataContext.SendRequestCommand,
                                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}" />
-                                                <StackPanel Margin="0,0,8,0">
-                                                    <TextBlock FontSize="13" Text="{Binding MentorName}" />
-                                                    <TextBlock FontSize="11" Foreground="Gray">
+                                                <StackPanel Margin="0,0,12,0" VerticalAlignment="Center">
+                                                    <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#111827"
+                                                               Text="{Binding MentorName}" />
+                                                    <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,2,0,0">
                                                         <Run Text="{Binding SubjectName}" />
                                                         <Run Text="·" />
                                                         <Run>
@@ -295,147 +470,159 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </ScrollViewer>
-                    </DockPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
                 </DataTemplate>
 
-                <!-- ── Phase 2 mentee tab: top-3 ranked recommendations (choice is final) ── -->
+                <!-- ── Selection gallery (Phase 2 mentee) ── -->
                 <DataTemplate DataType="{x:Type studentvm:SelectionGalleryViewModel}">
-                    <DockPanel Margin="4">
-                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="13" FontWeight="Bold" Text="Your top mentor matches" />
-                            <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="24,16">
+
+                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4">Your top mentor matches</TextBlock>
+                            <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,16"
                                        Text="Ranked by compatibility. Choose one — your selection is final." />
-                        </StackPanel>
 
-                        <!-- Already matched banner -->
-                        <Border DockPanel.Dock="Top" Margin="0,0,0,6" Padding="10,8"
-                                Background="#E8F5E9" CornerRadius="4"
-                                Visibility="{Binding AlreadyMatched, Converter={StaticResource BoolToVis}}">
-                            <TextBlock FontSize="12" Foreground="#2E7D32" FontWeight="SemiBold"
-                                       Text="You are matched! Check the new tab." />
-                        </Border>
+                            <!-- Already matched banner -->
+                            <Border Margin="0,0,0,12" Background="#ECFDF5" CornerRadius="8" Padding="12,8"
+                                    Visibility="{Binding AlreadyMatched, Converter={StaticResource BoolToVis}}">
+                                <TextBlock FontSize="13" Foreground="#059669" FontWeight="SemiBold"
+                                           Text="You are matched! Check the new tab." />
+                            </Border>
 
-                        <Border DockPanel.Dock="Top" Margin="0,0,0,8"
-                                Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{Binding StatusMessage}" FontSize="12" TextWrapping="Wrap" />
-                        </Border>
+                            <!-- Status message -->
+                            <Border Margin="0,0,0,12" Background="#EFF6FF" CornerRadius="8" Padding="12,8"
+                                    Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{Binding StatusMessage}" FontSize="13" Foreground="#1D4ED8" TextWrapping="Wrap" />
+                            </Border>
 
-                        <TextBlock DockPanel.Dock="Top" FontSize="12" Foreground="Gray" Margin="0,0,0,8"
-                                   Text="Loading…"
-                                   Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
+                            <!-- Loading -->
+                            <TextBlock FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,12"
+                                       Text="Loading…"
+                                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
 
-                        <ScrollViewer>
+                            <!-- Recommendations -->
                             <ItemsControl ItemsSource="{Binding Recommendations}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Margin="0,0,0,8" Padding="12,10"
-                                                BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
+                                        <Border Background="White" CornerRadius="12" Padding="16" Margin="0,0,0,12">
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="12" Color="#000000" Opacity="0.04" ShadowDepth="2" Direction="270"/>
+                                            </Border.Effect>
                                             <DockPanel>
-                                                <!-- Match score badge -->
-                                                <Border DockPanel.Dock="Right" VerticalAlignment="Center"
-                                                        Background="#E3F2FD" CornerRadius="4"
-                                                        Padding="10,6" Margin="12,0,0,0">
+                                                <!-- Score badge -->
+                                                <Border DockPanel.Dock="Right" Background="#EFF6FF" CornerRadius="12"
+                                                        Padding="16,12" Margin="16,0,0,0" VerticalAlignment="Center">
                                                     <StackPanel HorizontalAlignment="Center">
-                                                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="#1565C0"
+                                                        <TextBlock FontSize="22" FontWeight="Bold" Foreground="#3B82F6"
                                                                    HorizontalAlignment="Center"
                                                                    Text="{Binding ScorePercent, StringFormat='{}{0:0}%'}" />
-                                                        <TextBlock FontSize="10" Foreground="#1565C0"
+                                                        <TextBlock FontSize="10" Foreground="#3B82F6"
                                                                    HorizontalAlignment="Center" Text="match" />
                                                     </StackPanel>
                                                 </Border>
+                                                <!-- Mentor info -->
                                                 <StackPanel VerticalAlignment="Center">
-                                                    <TextBlock FontSize="14" FontWeight="SemiBold" Text="{Binding MentorName}" />
-                                                    <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,8"
+                                                    <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="#111827"
+                                                               Text="{Binding MentorName}" />
+                                                    <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,2,0,12"
                                                                Text="{Binding MentorSubjectName}" />
-                                                    <Button Content="Choose this mentor"
+                                                    <Button Style="{StaticResource PrimaryBtn}"
+                                                            HorizontalAlignment="Left"
+                                                            Content="Choose this mentor"
                                                             IsEnabled="{Binding DataContext.AlreadyMatched,
                                                                 RelativeSource={RelativeSource AncestorType=ItemsControl},
                                                                 Converter={StaticResource InverseBoolConverter}}"
                                                             Command="{Binding DataContext.ChooseMentorCommand,
                                                                 RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                            CommandParameter="{Binding}"
-                                                            HorizontalAlignment="Left"
-                                                            Padding="10,4" />
+                                                            CommandParameter="{Binding}" />
                                                 </StackPanel>
                                             </DockPanel>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </ScrollViewer>
-                    </DockPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
                 </DataTemplate>
 
-                <!-- ── Mentor requests tab (Phase 1: accept/decline; Phase 2: passive info only) ── -->
+                <!-- ── Mentor requests (Phase 1 mentor) ── -->
                 <DataTemplate DataType="{x:Type studentvm:MentorRequestsViewModel}">
-                    <DockPanel Margin="4">
-                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                            <TextBlock FontSize="13" FontWeight="Bold" Text="Mentoring requests" />
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <DockPanel Margin="24,16">
 
-                            <!-- Phase 1: active instructions + deadline timer -->
-                            <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
-                                       Text="Students who have requested you as their mentor."
-                                       Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
-                            <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
-                                       Text="{Binding RequestWindowTimerDisplay}"
-                                       Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
+                            <!-- Footnote at bottom -->
+                            <TextBlock DockPanel.Dock="Bottom" FontSize="12" Foreground="#9CA3AF" Margin="0,12,0,0"
+                                       Text="Accepting a request will create an active pair."
+                                       Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}"
+                                       TextWrapping="Wrap" />
 
-                            <!-- Phase 2: single-line note (outer banner already describes the phase) -->
-                            <TextBlock FontSize="11" Foreground="Gray" Margin="0,2,0,0"
-                                       Text="No action required — you will be notified once paired."
-                                       Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}" />
-                        </StackPanel>
+                            <StackPanel>
+                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4">Mentoring requests</TextBlock>
 
-                        <Border DockPanel.Dock="Top" Margin="0,0,0,8"
-                                Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{Binding StatusMessage}" FontSize="12" TextWrapping="Wrap" />
-                        </Border>
+                                <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,4"
+                                           Text="Students who have requested you as their mentor."
+                                           Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
+                                <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,4"
+                                           Text="{Binding RequestWindowTimerDisplay}"
+                                           Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
+                                <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,16"
+                                           Text="No action required — you will be notified once paired."
+                                           Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}" />
 
-                        <TextBlock DockPanel.Dock="Top" FontSize="12" Foreground="Gray" Margin="0,0,0,8"
-                                   Text="Loading…"
-                                   Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
+                                <!-- Status message -->
+                                <Border Margin="0,0,0,12" Background="#EFF6FF" CornerRadius="8" Padding="12,8"
+                                        Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="{Binding StatusMessage}" FontSize="13" Foreground="#1D4ED8" TextWrapping="Wrap" />
+                                </Border>
 
-                        <!-- "Accepting creates a pair" footnote only relevant in Phase 1 -->
-                        <TextBlock DockPanel.Dock="Bottom" FontSize="11" Foreground="Gray" Margin="0,8,0,0"
-                                   Text="Accepting a request will create an active pair."
-                                   Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}"
-                                   TextWrapping="Wrap" />
+                                <!-- Loading -->
+                                <TextBlock FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,12"
+                                           Text="Loading…"
+                                           Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
 
-                        <ScrollViewer>
-                            <ItemsControl ItemsSource="{Binding PendingRequests}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Padding="0,6" BorderBrush="#DDD" BorderThickness="0,0,0,1">
-                                            <DockPanel>
-                                                <!-- Accept / Decline only shown in Phase 1 -->
-                                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
-                                                            Visibility="{Binding DataContext.IsPhase2Active,
-                                                                RelativeSource={RelativeSource AncestorType=ItemsControl},
-                                                                Converter={StaticResource InverseBoolToVis}}">
-                                                    <Button Margin="0,0,6,0" Content="Accept"
-                                                            Command="{Binding DataContext.AcceptRequestCommand,
-                                                                RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                            CommandParameter="{Binding}" />
-                                                    <Button Content="Decline"
-                                                            Command="{Binding DataContext.RejectRequestCommand,
-                                                                RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                            CommandParameter="{Binding}" />
-                                                </StackPanel>
-                                                <StackPanel Margin="0,0,8,0">
-                                                    <TextBlock FontSize="13" Text="{Binding MenteeName}" />
-                                                    <TextBlock FontSize="11" Foreground="Gray"
-                                                               Text="{Binding MenteeSubjectName}" />
-                                                    <TextBlock FontSize="11" Foreground="Gray"
-                                                               Text="{Binding CreatedAt, StringFormat='Requested: {0:d}'}" />
-                                                </StackPanel>
-                                            </DockPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </DockPanel>
+                                <!-- Request list -->
+                                <ItemsControl ItemsSource="{Binding PendingRequests}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#F9FAFB" CornerRadius="12" Padding="16" Margin="0,0,0,8">
+                                                <DockPanel>
+                                                    <!-- Accept / Decline only in Phase 1 -->
+                                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
+                                                                Visibility="{Binding DataContext.IsPhase2Active,
+                                                                    RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                                                    Converter={StaticResource InverseBoolToVis}}">
+                                                        <Button Margin="0,0,8,0"
+                                                                Style="{StaticResource PrimaryBtn}"
+                                                                Content="Accept"
+                                                                Command="{Binding DataContext.AcceptRequestCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                CommandParameter="{Binding}" />
+                                                        <Button Style="{StaticResource DangerBtn}"
+                                                                Content="Decline"
+                                                                Command="{Binding DataContext.RejectRequestCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                CommandParameter="{Binding}" />
+                                                    </StackPanel>
+                                                    <!-- Mentee info -->
+                                                    <StackPanel Margin="0,0,12,0" VerticalAlignment="Center">
+                                                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#111827"
+                                                                   Text="{Binding MenteeName}" />
+                                                        <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,2,0,0"
+                                                                   Text="{Binding MenteeSubjectName}" />
+                                                        <TextBlock FontSize="11" Foreground="#9CA3AF" Margin="0,2,0,0"
+                                                                   Text="{Binding CreatedAt, StringFormat='Requested: {0:d}'}" />
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DockPanel>
+                    </ScrollViewer>
                 </DataTemplate>
 
             </ContentControl.Resources>
