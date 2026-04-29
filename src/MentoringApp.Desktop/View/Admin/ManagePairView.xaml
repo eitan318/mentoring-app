@@ -1,29 +1,116 @@
-<UserControl
-    x:Class="MentoringApp.View.Admin.ManagePairViewModel"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vmAdmin="clr-namespace:MentoringApp.ViewModel.ViewModel.Admin;assembly=MentoringApp.ViewModel"
-    xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
-    xmlns:components="clr-namespace:MentoringApp.View.Components"
-    xmlns:loc="clr-namespace:MentoringApp.Localization"
-    d:DesignHeight="600" d:DesignWidth="800"
-    mc:Ignorable="d"
-    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+<UserControl x:Class="MentoringApp.View.Admin.ManagePairViewModel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
+             xmlns:components="clr-namespace:MentoringApp.View.Components"
+             xmlns:loc="clr-namespace:MentoringApp.Localization"
+             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="900"
+             FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
-    <Grid Margin="12">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- Base Card Style -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="15" Color="#000000" Opacity="0.03" ShadowDepth="2" Direction="270"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Search Bar Style -->
+        <Style x:Key="SearchTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="20">
+                            <Grid>
+                                <TextBlock Text="{TemplateBinding Tag}" Foreground="#9CA3AF" Margin="14,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" x:Name="Placeholder"/>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Button Style -->
+        <Style x:Key="ModernBtn" TargetType="Button">
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#4B5563"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E5E7EB"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PrimaryBtn" TargetType="Button" BasedOn="{StaticResource ModernBtn}">
+            <Setter Property="Background" Value="#A855F7"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#9333EA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DangerBtn" TargetType="Button" BasedOn="{StaticResource ModernBtn}">
+            <Setter Property="Background" Value="#FEE2E2"/>
+            <Setter Property="Foreground" Value="#DC2626"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FECACA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid Margin="30,24,30,24">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Action bar (Create Pair) -->
-            <RowDefinition Height="*"/>    <!-- Main split content -->
+            <RowDefinition Height="Auto"/> <!-- Action bar -->
+            <RowDefinition Height="*"/>    <!-- Split content -->
         </Grid.RowDefinitions>
 
-        <!-- ── TOP BAR ──────────────────────────────────────────────────── -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-            <Button Command="{Binding CreatePairCommand}" Content="{Binding [Admin_ManagePair_Create], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Padding="8,4"/>
-        </StackPanel>
+        <!-- ── TOP BAR ── -->
+        <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,24" Padding="20,16">
+            <DockPanel>
+                <TextBlock Text="Manage Pairs" FontWeight="Bold" FontSize="18" Foreground="#111827" VerticalAlignment="Center"/>
+                <Button Command="{Binding CreatePairCommand}" Content="{Binding [Admin_ManagePair_Create], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource PrimaryBtn}" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+            </DockPanel>
+        </Border>
 
-        <!-- ── MAIN SPLIT ─────────────────────────────────────────────── -->
+        <!-- ── MAIN SPLIT ── -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>  <!-- Pairs List -->
@@ -31,51 +118,98 @@
             </Grid.ColumnDefinitions>
 
             <!-- LEFT: Search + Pairs List -->
-            <Grid Grid.Column="0" Margin="0,0,15,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,24,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <!-- Search bar -->
-                <TextBox Grid.Row="0" Margin="0,0,0,8" Padding="4,3"
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Tag="{Binding [Admin_ManagePair_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
+                    <!-- Search bar -->
+                    <TextBox Grid.Row="0" Style="{StaticResource SearchTextBox}" Margin="0,0,0,16"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Tag="{Binding [Admin_ManagePair_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
 
-                <!-- Pairs ListBox -->
-                <ListBox Grid.Row="1"
-                         ItemsSource="{Binding FilteredPairs}"
-                         SelectedItem="{Binding SelectedPair}"
-                         HorizontalContentAlignment="Stretch">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type model:PairModel}">
-                            <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock VerticalAlignment="Center" FontWeight="Bold" Text="{Binding Mentor.UserName}" Margin="0,0,6,0"/>
-                                    <TextBlock VerticalAlignment="Center" Text="→" Foreground="Gray" Margin="0,0,6,0"/>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding Mentee.UserName}"/>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
+                    <!-- Pairs ListBox -->
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Margin="10,0,10,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Mentor" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
+                            <TextBlock Grid.Column="2" Text="Mentee" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
+                        </Grid>
+                        <Rectangle Grid.Row="0" Height="1" Fill="#F3F4F6" VerticalAlignment="Bottom"/>
+
+                        <ListView Grid.Row="1" ItemsSource="{Binding FilteredPairs}" SelectedItem="{Binding SelectedPair}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Padding" Value="10,12"/>
+                                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                    <Setter Property="BorderBrush" Value="#F3F4F6"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListViewItem">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="#F9FAFB"/></Trigger>
+                                                    <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="#F3F4F6"/></Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate DataType="{x:Type model:PairModel}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Mentor -->
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,12,0" ImagePath="{Binding Mentor.ProfilePicturePath}" Gender="{Binding Mentor.Gender}"/>
+                                            <TextBlock Text="{Binding Mentor.UserName}" FontWeight="Medium" Foreground="#111827" VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <!-- Arrow -->
+                                        <TextBlock Grid.Column="1" Text="→" Foreground="#9CA3AF" FontSize="16" FontWeight="Bold" Margin="16,0" VerticalAlignment="Center"/>
+
+                                        <!-- Mentee -->
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,12,0" ImagePath="{Binding Mentee.ProfilePicturePath}" Gender="{Binding Mentee.Gender}"/>
+                                            <TextBlock Text="{Binding Mentee.UserName}" FontWeight="Medium" Foreground="#111827" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </Grid>
+            </Border>
 
             <!-- RIGHT: Details Sidebar -->
-            <GroupBox Header="{Binding [Admin_ManagePair_DetailsHeader], Source={x:Static loc:TranslationSource.Instance}}" Grid.Column="1" Padding="10">
+            <Border Grid.Column="1" Style="{StaticResource CardStyle}">
                 <Grid>
                     <!-- Placeholder when nothing selected -->
-                    <TextBlock Text="{Binding [Admin_ManagePair_SelectHint], Source={x:Static loc:TranslationSource.Instance}}"
-                               Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"
-                               TextWrapping="Wrap" TextAlignment="Center">
+                    <TextBlock Text="{Binding [Admin_ManagePair_SelectHint], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#9CA3AF" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
+                                <Style.Triggers><DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
@@ -85,27 +219,22 @@
                         <ScrollViewer.Style>
                             <Style TargetType="ScrollViewer">
                                 <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
+                                <Style.Triggers><DataTrigger Binding="{Binding SelectedPair}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
                             </Style>
                         </ScrollViewer.Style>
 
                         <StackPanel DataContext="{Binding SelectedPair}">
+                            <TextBlock Text="{Binding [Admin_ManagePair_DetailsHeader], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827" Margin="0,0,0,24"/>
+                            
                             <!-- Mentor Card -->
-                            <TextBlock Text="{Binding [Admin_ManagePair_Mentor], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,5"/>
-                            <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,15">
+                            <TextBlock Text="{Binding [Admin_ManagePair_Mentor], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,8"/>
+                            <Border Background="#F9FAFB" BorderThickness="1" BorderBrush="#E5E7EB" CornerRadius="12" Padding="16" Margin="0,0,0,20">
                                 <StackPanel Orientation="Horizontal">
-                                    <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
-                                                                      VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentor.ProfilePicturePath}"
-                                                                      Gender="{Binding Mentor.Gender}"/>
+                                    <components:ProfilePictureControl Width="56" Height="56" Margin="0,0,16,0" VerticalAlignment="Center" ImagePath="{Binding Mentor.ProfilePicturePath}" Gender="{Binding Mentor.Gender}"/>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Mentor.UserName}" FontWeight="Bold" FontSize="15"/>
-                                        <TextBlock Text="{Binding Mentor.Email}" Foreground="Gray" FontSize="12"/>
-                                        <TextBlock FontSize="12" Foreground="DarkGray">
+                                        <TextBlock Text="{Binding Mentor.UserName}" FontWeight="Bold" FontSize="16" Foreground="#111827"/>
+                                        <TextBlock Text="{Binding Mentor.Email}" Foreground="#6B7280" FontSize="12" Margin="0,2"/>
+                                        <TextBlock FontSize="12" Foreground="#9CA3AF" FontWeight="Medium">
                                             <TextBlock.Text>
                                                 <MultiBinding Converter="{StaticResource GradeClassDisplay}">
                                                     <Binding Path="Mentor.Grade.Name"/>
@@ -119,17 +248,14 @@
                             </Border>
 
                             <!-- Mentee Card -->
-                            <TextBlock Text="{Binding [Admin_ManagePair_Mentee], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,5"/>
-                            <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,20">
+                            <TextBlock Text="{Binding [Admin_ManagePair_Mentee], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,8"/>
+                            <Border Background="#F9FAFB" BorderThickness="1" BorderBrush="#E5E7EB" CornerRadius="12" Padding="16" Margin="0,0,0,24">
                                 <StackPanel Orientation="Horizontal">
-                                    <components:ProfilePictureControl Width="50" Height="50" Margin="0,0,10,0"
-                                                                      VerticalAlignment="Center"
-                                                                      ImagePath="{Binding Mentee.ProfilePicturePath}"
-                                                                      Gender="{Binding Mentee.Gender}"/>
+                                    <components:ProfilePictureControl Width="56" Height="56" Margin="0,0,16,0" VerticalAlignment="Center" ImagePath="{Binding Mentee.ProfilePicturePath}" Gender="{Binding Mentee.Gender}"/>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Mentee.UserName}" FontWeight="Bold" FontSize="15"/>
-                                        <TextBlock Text="{Binding Mentee.Email}" Foreground="Gray" FontSize="12"/>
-                                        <TextBlock FontSize="12" Foreground="DarkGray">
+                                        <TextBlock Text="{Binding Mentee.UserName}" FontWeight="Bold" FontSize="16" Foreground="#111827"/>
+                                        <TextBlock Text="{Binding Mentee.Email}" Foreground="#6B7280" FontSize="12" Margin="0,2"/>
+                                        <TextBlock FontSize="12" Foreground="#9CA3AF" FontWeight="Medium">
                                             <TextBlock.Text>
                                                 <MultiBinding Converter="{StaticResource GradeClassDisplay}">
                                                     <Binding Path="Mentee.Grade.Name"/>
@@ -142,39 +268,29 @@
                                 </StackPanel>
                             </Border>
 
-                            <Separator Margin="0,0,0,10"/>
-
                             <!-- Summary Section -->
-                            <StackPanel Margin="0,0,0,15">
-                                <TextBlock Text="{Binding [Admin_ManagePair_RecentActivity], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBlock Foreground="#555" Margin="0,0,0,2">
-                                    <Run Text="{Binding [Admin_ManagePair_TotalReviews], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
-                                    <Run Text="{Binding DataContext.SelectedPairReviewCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold"/>
-                                </TextBlock>
-                                <TextBlock Foreground="#555">
-                                    <Run Text="{Binding [Admin_ManagePair_ActiveIssues], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
-                                    <Run Text="{Binding DataContext.SelectedPairActiveIssueCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold"/>
-                                </TextBlock>
-                            </StackPanel>
-
-                            <Separator Margin="0,0,0,10"/>
+                            <TextBlock Text="{Binding [Admin_ManagePair_RecentActivity], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"/>
+                            <Border Background="#F3F4F6" CornerRadius="8" Padding="16" Margin="0,0,0,24">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,8">
+                                        <TextBlock Text="{Binding [Admin_ManagePair_TotalReviews], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#4B5563"/>
+                                        <TextBlock Text="{Binding DataContext.SelectedPairReviewCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Right"/>
+                                    </DockPanel>
+                                    <DockPanel>
+                                        <TextBlock Text="{Binding [Admin_ManagePair_ActiveIssues], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#4B5563"/>
+                                        <TextBlock Text="{Binding DataContext.SelectedPairActiveIssueCount, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#DC2626" HorizontalAlignment="Right"/>
+                                    </DockPanel>
+                                </StackPanel>
+                            </Border>
 
                             <!-- Actions  -->
-                            <TextBlock Text="{Binding [Admin_ManagePair_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                            <Button Content="{Binding [Admin_ManagePair_ViewDetails], Source={x:Static loc:TranslationSource.Instance}}"
-                                    Command="{Binding DataContext.SelectPairCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    Cursor="Hand"
-                                    Margin="0,0,0,10" Padding="5,8"/>
-                            <Button Content="{Binding [Admin_ManagePair_Separate], Source={x:Static loc:TranslationSource.Instance}}"
-                                    Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
-                                    Cursor="Hand"
-                                    ToolTip="{Binding [ManagePairs_Separate_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
-                                    Padding="5,8"/>
+                            <TextBlock Text="{Binding [Admin_ManagePair_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"/>
+                            <Button Content="{Binding [Admin_ManagePair_ViewDetails], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Command="{Binding DataContext.SelectPairCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0,0,0,12"/>
+                            <Button Content="{Binding [Admin_ManagePair_Separate], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource DangerBtn}" Command="{Binding DataContext.SeparateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" ToolTip="{Binding [ManagePairs_Separate_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"/>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
-            </GroupBox>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

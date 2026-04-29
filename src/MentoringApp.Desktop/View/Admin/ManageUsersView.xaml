@@ -6,196 +6,272 @@
              xmlns:usermodel="clr-namespace:MentoringApp.Model.User;assembly=MentoringApp.Model"
              xmlns:components="clr-namespace:MentoringApp.View.Components"
              xmlns:loc="clr-namespace:MentoringApp.Localization"
-             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="700"
+             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="900"
              FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
-    <!--
-        Layout overview:
-        Row 0 — Add/Import toolbar (buttons + Excel help toggles).
-        Row 1 — Two-column split: left = search/filter + user list, right = detail sidebar.
-        Popups (student and supervisor import instructions) float over Row 0+1 using Grid.RowSpan;
-        they are shown/hidden via BoolToVis bound to IsStudentInfoVisible / IsSupervisorInfoVisible.
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        The student filter row (Row 1 of the left column) uses a DataTrigger on IsStudentFilterVisible
-        to collapse entirely when the role filter is not set to "Student".
+        <!-- Base Card Style -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="15" Color="#000000" Opacity="0.03" ShadowDepth="2" Direction="270"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        Commands in the detail sidebar that act on SelectedUser use RelativeSource AncestorType=UserControl
-        to reach the ViewModel, because the sidebar DataContext is set to SelectedUser directly.
-    -->
-    <!-- Root grid for layout and popups -->
-    <Grid Margin="12">
+        <!-- Search Bar Style -->
+        <Style x:Key="SearchTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="20">
+                            <Grid>
+                                <TextBlock Text="{TemplateBinding Tag}" Foreground="#9CA3AF" Margin="14,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" x:Name="Placeholder"/>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Button Style -->
+        <Style x:Key="ModernBtn" TargetType="Button">
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#4B5563"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E5E7EB"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PrimaryBtn" TargetType="Button" BasedOn="{StaticResource ModernBtn}">
+            <Setter Property="Background" Value="#A855F7"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#9333EA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DangerBtn" TargetType="Button" BasedOn="{StaticResource ModernBtn}">
+            <Setter Property="Background" Value="#FEE2E2"/>
+            <Setter Property="Foreground" Value="#DC2626"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FECACA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid Margin="30,24,30,24">
         <Grid.RowDefinitions>
-            <!-- Add / Import Section -->
+            <!-- Header & Actions -->
             <RowDefinition Height="Auto"/>
-            <!-- Main Content: Search/List and Sidebar -->
+            <!-- Split Content -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ── SECTION 1: ADD & IMPORT USERS ─────────────────────────────── -->
-        <GroupBox Header="{Binding [Admin_ManageUsers_AddImportHeader], Source={x:Static loc:TranslationSource.Instance}}" Grid.Row="0" Margin="0,0,0,15" Padding="10">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                    <Button Command="{Binding RegisterSupervisorCommand}" Content="{Binding [Admin_ManageUsers_AddSupervisor], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding RegisterStudentCommand}" Content="{Binding [Admin_ManageUsers_AddStudent], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2"/>
+        <!-- ── SECTION 1: HEADER & ACTIONS ── -->
+        <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,24" Padding="20,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [Admin_ManageUsers_AddImportHeader], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827"/>
                 </StackPanel>
-
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding [Admin_ManageUsers_BulkImport], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-
-                    <Button Command="{Binding ImportStudentsCommand}" Content="{Binding [Admin_ManageUsers_ImportStudents], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding ToggleStudentInfoCommand}" Content="{Binding [Admin_ManageUsers_Help], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,15,0" Padding="5,2" ToolTip="{Binding [Admin_ManageUsers_ImportStudentsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
-
-                    <Button Command="{Binding ImportSupervisorsCommand}" Content="{Binding [Admin_ManageUsers_ImportSupervisors], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding ToggleSupervisorInfoCommand}" Content="{Binding [Admin_ManageUsers_Help], Source={x:Static loc:TranslationSource.Instance}}" Cursor="Hand" Margin="0,0,5,0" Padding="5,2" ToolTip="{Binding [Admin_ManageUsers_ImportSupervisorsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
+                
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Command="{Binding RegisterSupervisorCommand}" Content="{Binding [Admin_ManageUsers_AddSupervisor], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Margin="0,0,8,0"/>
+                    <Button Command="{Binding RegisterStudentCommand}" Content="{Binding [Admin_ManageUsers_AddStudent], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Margin="0,0,24,0"/>
+                    
+                    <!-- Import Area -->
+                    <Border BorderBrush="#E5E7EB" BorderThickness="1,0,0,0" Margin="0,4" Padding="24,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding [Admin_ManageUsers_BulkImport], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" FontWeight="Medium" Foreground="#6B7280" Margin="0,0,12,0"/>
+                            <Button Command="{Binding ImportStudentsCommand}" Content="{Binding [Admin_ManageUsers_ImportStudents], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource PrimaryBtn}" Margin="0,0,4,0"/>
+                            <Button Command="{Binding ToggleStudentInfoCommand}" Content="?" Style="{StaticResource ModernBtn}" Margin="0,0,16,0" Padding="12,8" ToolTip="{Binding [Admin_ManageUsers_ImportStudentsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
+                            
+                            <Button Command="{Binding ImportSupervisorsCommand}" Content="{Binding [Admin_ManageUsers_ImportSupervisors], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource PrimaryBtn}" Margin="0,0,4,0"/>
+                            <Button Command="{Binding ToggleSupervisorInfoCommand}" Content="?" Style="{StaticResource ModernBtn}" Padding="12,8" ToolTip="{Binding [Admin_ManageUsers_ImportSupervisorsHelp], Source={x:Static loc:TranslationSource.Instance}}"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
-            </StackPanel>
-        </GroupBox>
+            </DockPanel>
+        </Border>
 
-        <!-- ── SECTION 2 & 3: MAIN SPLIT CONTENT ─────────────────────────── -->
+        <!-- ── SECTION 2 & 3: MAIN SPLIT CONTENT ── -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/> <!-- List Box Area -->
-                <ColumnDefinition Width="2*"/> <!-- Sidebar Area -->
+                <ColumnDefinition Width="3*"/> <!-- User List -->
+                <ColumnDefinition Width="2*"/> <!-- Sidebar -->
             </Grid.ColumnDefinitions>
 
-            <!-- LEFT SIDE: Filter Bar + ListBox -->
-            <Grid Grid.Column="0" Margin="0,0,15,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>  <!-- Filter Bar Row 1 -->
-                    <RowDefinition Height="Auto"/>  <!-- Filter Bar Row 2 (student-specific) -->
-                    <RowDefinition Height="*"/>     <!-- ListBox -->
-                </Grid.RowDefinitions>
-
-                <!-- Row 1: Search + Role Dropdown -->
-                <Grid Grid.Row="0" Margin="0,0,0,6">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0"
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="4,3" Margin="0,0,8,0"
-                             Tag="{Binding [Admin_ManageUsers_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
-                    <ComboBox Grid.Column="1"
-                              ItemsSource="{Binding RoleOptions}"
-                              SelectedItem="{Binding SelectedRole}"
-                              Width="110" Padding="4,2">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <!-- Map role options to static keys if you wish, or keep as is if RoleOptions are correctly localized strings -->
-                                <TextBlock Text="{Binding}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </Grid>
-
-                <!-- Row 2: Student-specific filters — visibility driven by SelectedRole -->
-                <Border Grid.Row="1" Margin="0,0,0,6" Padding="6,4"
-                        BorderBrush="#CCC" BorderThickness="1">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsStudentFilterVisible}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-
-                    <StackPanel>
-                        <!-- Profile checkboxes -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <TextBlock Text="{Binding [Admin_ManageUsers_Profile], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
-                            <CheckBox Content="{Binding [Admin_ManageUsers_Mentor], Source={x:Static loc:TranslationSource.Instance}}"  IsChecked="{Binding FilterIsMentor}"  VerticalAlignment="Center" Margin="0,0,12,0"/>
-                            <CheckBox Content="{Binding [Admin_ManageUsers_Mentee], Source={x:Static loc:TranslationSource.Instance}}"  IsChecked="{Binding FilterIsMentee}"  VerticalAlignment="Center" Margin="0,0,12,0"/>
-                            <CheckBox Content="{Binding [Admin_ManageUsers_UnpairedOnly], Source={x:Static loc:TranslationSource.Instance}}" IsChecked="{Binding FilterUnpairedOnly}" VerticalAlignment="Center"/>
-                        </StackPanel>
-
-                        <!-- Grade range -->
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding [Admin_ManageUsers_Grade], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
-                            <ComboBox ItemsSource="{Binding AvailableGrades}"
-                                      SelectedItem="{Binding FilterMinGrade}"
-                                      Width="70" Padding="4,2" Margin="0,0,4,0">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
-                                                    <Binding Path="." />
-                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                            <TextBlock Text="{Binding [Admin_ManageUsers_To], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                            <ComboBox ItemsSource="{Binding AvailableGrades}"
-                                      SelectedItem="{Binding FilterMaxGrade}"
-                                      Width="70" Padding="4,2">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
-                                                    <Binding Path="." />
-                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <ListBox Grid.Row="2"
-                         ItemsSource="{Binding FilteredUsers}"
-                         SelectedItem="{Binding SelectedUser}"
-                         HorizontalContentAlignment="Stretch">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type usermodel:UserModel}">
-                            <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <components:ProfilePictureControl Grid.Column="0"
-                                        Width="40" Height="40" Margin="0,0,10,0"
-                                        VerticalAlignment="Center"
-                                        ImagePath="{Binding ProfilePicturePath}"
-                                        Gender="{Binding Gender}"/>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding UserName}" FontWeight="Bold" FontSize="15"/>
-                                        <TextBlock Text="{Binding Email}" Foreground="Gray" FontSize="12"/>
-                                        <TextBlock Text="{Binding Role}" Foreground="Gray" FontSize="11" Margin="0,1,0,0"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
-
-            <!-- RIGHT SIDE: Details Sidebar -->
-            <GroupBox Header="{Binding [Admin_ManageUsers_DetailsHeader], Source={x:Static loc:TranslationSource.Instance}}" Grid.Column="1" Padding="10">
+            <!-- LEFT SIDE: Search & List -->
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,24,0">
                 <Grid>
-                    <!-- Null State Placeholder -->
-                    <TextBlock Text="{Binding [Admin_ManageUsers_SelectHint], Source={x:Static loc:TranslationSource.Instance}}"
-                               Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"
-                               TextWrapping="Wrap" TextAlignment="Center">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Search & Role Dropdown -->
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchTextBox}"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,12,0"
+                                 Tag="{Binding [Admin_ManageUsers_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
+                        <Border Grid.Column="1" Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="12,4">
+                            <ComboBox ItemsSource="{Binding RoleOptions}" SelectedItem="{Binding SelectedRole}" MinWidth="120" BorderThickness="0" Background="Transparent" Foreground="#374151" FontWeight="Medium">
+                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding}"/></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Border>
+                    </Grid>
+
+                    <!-- Student Specific Filters -->
+                    <Border Grid.Row="1" Background="#F9FAFB" CornerRadius="8" Padding="16,12" Margin="0,0,0,16">
+                        <Border.Style>
+                            <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedUser}" Value="{x:Null}">
+                                    <DataTrigger Binding="{Binding IsStudentFilterVisible}" Value="True">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
                                 </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="{Binding [Admin_ManageUsers_Profile], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,12,0"/>
+                                <CheckBox Content="{Binding [Admin_ManageUsers_Mentor], Source={x:Static loc:TranslationSource.Instance}}" IsChecked="{Binding FilterIsMentor}" VerticalAlignment="Center" Margin="0,0,16,0" Foreground="#374151"/>
+                                <CheckBox Content="{Binding [Admin_ManageUsers_Mentee], Source={x:Static loc:TranslationSource.Instance}}" IsChecked="{Binding FilterIsMentee}" VerticalAlignment="Center" Margin="0,0,16,0" Foreground="#374151"/>
+                                <CheckBox Content="{Binding [Admin_ManageUsers_UnpairedOnly], Source={x:Static loc:TranslationSource.Instance}}" IsChecked="{Binding FilterUnpairedOnly}" VerticalAlignment="Center" Foreground="#374151"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding [Admin_ManageUsers_Grade], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,12,0"/>
+                                <ComboBox ItemsSource="{Binding AvailableGrades}" SelectedItem="{Binding FilterMinGrade}" Width="80" Margin="0,0,8,0">
+                                    <ComboBox.ItemTemplate><DataTemplate><TextBlock><TextBlock.Text><MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_"><Binding Path="." /><Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" /></MultiBinding></TextBlock.Text></TextBlock></DataTemplate></ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBlock Text="{Binding [Admin_ManageUsers_To], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Foreground="#6B7280" Margin="0,0,8,0"/>
+                                <ComboBox ItemsSource="{Binding AvailableGrades}" SelectedItem="{Binding FilterMaxGrade}" Width="80">
+                                    <ComboBox.ItemTemplate><DataTemplate><TextBlock><TextBlock.Text><MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_"><Binding Path="." /><Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" /></MultiBinding></TextBlock.Text></TextBlock></DataTemplate></ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- User List (Modern Table) -->
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Table Header -->
+                        <Grid Grid.Row="0" Margin="10,0,10,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="1" Text="Name" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
+                            <TextBlock Grid.Column="2" Text="Email" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
+                            <TextBlock Grid.Column="3" Text="Role" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
+                        </Grid>
+                        <Rectangle Grid.Row="0" Height="1" Fill="#F3F4F6" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
+
+                        <!-- List Content -->
+                        <ListView Grid.Row="1" ItemsSource="{Binding FilteredUsers}" SelectedItem="{Binding SelectedUser}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Padding" Value="10,12"/>
+                                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                    <Setter Property="BorderBrush" Value="#F3F4F6"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListViewItem">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="#F9FAFB"/></Trigger>
+                                                    <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="#F3F4F6"/></Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate DataType="{x:Type usermodel:UserModel}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="2*"/>
+                                            <ColumnDefinition Width="2*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <components:ProfilePictureControl Grid.Column="0" Width="32" Height="32" Margin="0,0,12,0" VerticalAlignment="Center" ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding UserName}" VerticalAlignment="Center" FontWeight="Medium" Foreground="#111827"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Email}" VerticalAlignment="Center" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                                        <Border Grid.Column="3" Background="#F3F4F6" CornerRadius="10" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Role}" Foreground="#374151" FontSize="11" FontWeight="SemiBold"/>
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- RIGHT SIDE: Details Sidebar -->
+            <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                <Grid>
+                    <!-- Null State Placeholder -->
+                    <TextBlock Text="{Binding [Admin_ManageUsers_SelectHint], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#9CA3AF" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers><DataTrigger Binding="{Binding SelectedUser}" Value="{x:Null}"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
@@ -205,98 +281,73 @@
                         <ScrollViewer.Style>
                             <Style TargetType="ScrollViewer">
                                 <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedUser}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
+                                <Style.Triggers><DataTrigger Binding="{Binding SelectedUser}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
                             </Style>
                         </ScrollViewer.Style>
-
                         <StackPanel DataContext="{Binding SelectedUser}">
-                            <components:ProfilePictureControl Width="80" Height="80" Margin="0,0,0,10"
-                                                              ImagePath="{Binding ProfilePicturePath}"
-                                                              Gender="{Binding Gender}"
-                                                              HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_ManageUsers_DetailsHeader], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827" Margin="0,0,0,24"/>
                             
-                            <TextBlock Text="{Binding UserName}" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <TextBlock Text="{Binding Email}" FontSize="14" Foreground="DarkGray" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                            <components:ProfilePictureControl Width="96" Height="96" Margin="0,0,0,16" ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}" HorizontalAlignment="Center"/>
                             
-                            <TextBlock Text="{Binding [Admin_ManageUsers_AccountInfo], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#333"/>
-                            <Border BorderBrush="#DDD" BorderThickness="1" Padding="10" Background="#FAFAFA" Margin="0,0,0,15">
+                            <TextBlock Text="{Binding UserName}" FontWeight="Bold" FontSize="20" Foreground="#111827" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding Email}" FontSize="14" Foreground="#6B7280" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+                            
+                            <TextBlock Text="{Binding [Admin_ManageUsers_AccountInfo], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"/>
+                            <Border Background="#F9FAFB" BorderThickness="1" BorderBrush="#F3F4F6" CornerRadius="8" Padding="16" Margin="0,0,0,24">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    
-                                    <TextBlock Text="{Binding [Admin_ManageUsers_NationalId], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
-                                    <TextBlock Text="{Binding NationalId}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
-
+                                    <TextBlock Text="{Binding [Admin_ManageUsers_NationalId], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#6B7280" Grid.Column="0" Margin="0,0,16,0"/>
+                                    <TextBlock Text="{Binding NationalId}" Foreground="#111827" FontWeight="Medium" Grid.Column="1" HorizontalAlignment="Right"/>
                                 </Grid>
                             </Border>
 
-                            <Separator Margin="0,10"/>
-
-                            <TextBlock Text="{Binding [Admin_ManageUsers_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                            <!-- Commands are in ManageUsersViewModel, so we need RelativeSource bonding -->
-                            <Button Content="{Binding [Admin_ManageUsers_FullProfile], Source={x:Static loc:TranslationSource.Instance}}" 
-                                    Command="{Binding DataContext.ViewUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                    Margin="0,0,0,10" Padding="5,8"/>
+                            <TextBlock Text="{Binding [Admin_ManageUsers_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"/>
+                            <!-- Commands are in ManageUsersViewModel -->
+                            <Button Content="{Binding [Admin_ManageUsers_FullProfile], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Command="{Binding DataContext.ViewUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0,0,0,12"/>
                                     
-                            <Button Content="{Binding [Admin_ManageUsers_DeleteUser], Source={x:Static loc:TranslationSource.Instance}}"
-                                    Command="{Binding DataContext.DeleteUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    Background="#FFEDD4D4" Foreground="#8A1515" BorderBrush="#8A1515"
-                                    Cursor="Hand"
-                                    ToolTip="{Binding [ManageUsers_DeleteUser_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
-                                    Margin="0,0,0,5" Padding="5,8"/>
+                            <Button Content="{Binding [Admin_ManageUsers_DeleteUser], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource DangerBtn}" Command="{Binding DataContext.DeleteUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" ToolTip="{Binding [ManageUsers_DeleteUser_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"/>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
-            </GroupBox>
+            </Border>
         </Grid>
 
-        <!-- ══ STUDENT IMPORT INFO POPUP (Remains absolute over everything) ════ -->
-        <Border Grid.Row="0" Grid.RowSpan="2"
-                Background="White" BorderBrush="Black" BorderThickness="1"
-                Visibility="{Binding IsStudentInfoVisible, Converter={StaticResource BoolToVis}}"
-                HorizontalAlignment="Center" VerticalAlignment="Center" Padding="20">
+        <!-- ══ IMPORT INFO POPUPS ════ -->
+        <!-- Student Import Info -->
+        <Border Grid.Row="0" Grid.RowSpan="2" Background="White" CornerRadius="12" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsStudentInfoVisible, Converter={StaticResource BoolToVis}}">
+            <Border.Effect><DropShadowEffect BlurRadius="30" Color="#000000" Opacity="0.1" ShadowDepth="10"/></Border.Effect>
             <StackPanel>
-                <TextBlock Text="{Binding [Admin_ManageUsers_StudentInstructions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,10"/>
-                <TextBlock Text="{Binding [Admin_ManageUsers_ExcelFormat], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,0,5"/>
-                <TextBlock Text="{Binding [Admin_ManageUsers_ColANationalId], Source={x:Static loc:TranslationSource.Instance}}" />
-                <TextBlock Text="{Binding [Admin_ManageUsers_ColBEmail], Source={x:Static loc:TranslationSource.Instance}}" />
-                <TextBlock Text="{Binding [Admin_ManageUsers_ColCUserName], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,0,15"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_StudentInstructions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Margin="0,0,0,16"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ExcelFormat], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#4B5563" Margin="0,0,0,8"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColANationalId], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColBEmail], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColCUserName], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280" Margin="0,0,0,24"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Command="{Binding DownloadStudentTemplateCommand}" Content="{Binding [Admin_ManageUsers_DownloadTemplate], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding CloseStudentInfoCommand}" Content="{Binding [Admin_ManageUsers_Close], Source={x:Static loc:TranslationSource.Instance}}" Padding="5,2"/>
+                    <Button Command="{Binding DownloadStudentTemplateCommand}" Content="{Binding [Admin_ManageUsers_DownloadTemplate], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Margin="0,0,12,0"/>
+                    <Button Command="{Binding CloseStudentInfoCommand}" Content="{Binding [Admin_ManageUsers_Close], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource PrimaryBtn}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
 
-        <!-- ══ SUPERVISOR IMPORT INFO POPUP (Remains absolute over everything) ════ -->
-        <Border Grid.Row="0" Grid.RowSpan="2"
-                Background="White" BorderBrush="Black" BorderThickness="1"
-                Visibility="{Binding IsSupervisorInfoVisible, Converter={StaticResource BoolToVis}}"
-                HorizontalAlignment="Center" VerticalAlignment="Center" Padding="20">
+        <!-- Supervisor Import Info -->
+        <Border Grid.Row="0" Grid.RowSpan="2" Background="White" CornerRadius="12" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsSupervisorInfoVisible, Converter={StaticResource BoolToVis}}">
+            <Border.Effect><DropShadowEffect BlurRadius="30" Color="#000000" Opacity="0.1" ShadowDepth="10"/></Border.Effect>
             <StackPanel>
-                <TextBlock Text="{Binding [Admin_ManageUsers_SupervisorInstructions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Margin="0,0,0,10"/>
-                <TextBlock Text="{Binding [Admin_ManageUsers_ExcelFormat], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,0,5"/>
-                <TextBlock Text="{Binding [Admin_ManageUsers_ColANationalId], Source={x:Static loc:TranslationSource.Instance}}" />
-                <TextBlock Text="{Binding [Admin_ManageUsers_ColBEmail], Source={x:Static loc:TranslationSource.Instance}}" />
-                <TextBlock Text="{Binding [Admin_ManageUsers_ColCUserName], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,0,15"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_SupervisorInstructions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Margin="0,0,0,16"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ExcelFormat], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#4B5563" Margin="0,0,0,8"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColANationalId], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColBEmail], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280"/>
+                <TextBlock Text="{Binding [Admin_ManageUsers_ColCUserName], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280" Margin="0,0,0,24"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Command="{Binding DownloadSupervisorTemplateCommand}" Content="{Binding [Admin_ManageUsers_DownloadTemplate], Source={x:Static loc:TranslationSource.Instance}}" Margin="0,0,5,0" Padding="5,2"/>
-                    <Button Command="{Binding CloseSupervisorInfoCommand}" Content="{Binding [Admin_ManageUsers_Close], Source={x:Static loc:TranslationSource.Instance}}" Padding="5,2"/>
+                    <Button Command="{Binding DownloadSupervisorTemplateCommand}" Content="{Binding [Admin_ManageUsers_DownloadTemplate], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Margin="0,0,12,0"/>
+                    <Button Command="{Binding CloseSupervisorInfoCommand}" Content="{Binding [Admin_ManageUsers_Close], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource PrimaryBtn}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
-
     </Grid>
 </UserControl>
