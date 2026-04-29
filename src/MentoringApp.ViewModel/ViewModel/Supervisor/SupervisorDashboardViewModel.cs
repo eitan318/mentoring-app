@@ -145,7 +145,12 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
     public async Task OnNavigatedToAsync()
     {
-        await LoadSupervisorDataAsync(_currentSupervisorId);
+        // If no supervisor ID is set, try to use the current logged-in user's ID.
+        // This handles cases where a supervisor navigates back to their own dashboard.
+        int supervisorId = _currentSupervisorId > 0 ? _currentSupervisorId : _userStore.User?.Id ?? 0;
+        if (supervisorId <= 0) return;
+
+        await LoadSupervisorDataAsync(supervisorId);
     }
 
 
@@ -154,7 +159,6 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         var pairs = await _pairClient.GetBySupervisorAsync(supervisorId);
         var issues = await _issueClient.GetBySupervisorAsync(supervisorId);
         var settings = await _settingsClient.GetAllAsync();
-        var allUsers = await _userClient.GetAllAsync();
 
         double requiredHours = settings.MeetingHoursBarrier;
 
@@ -178,25 +182,20 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         IncompleteProfilePairs = new ObservableCollection<PairProgressItem>(warnings);
         IncompleteProfileCount = warnings.Count;
 
-        // המרת רשימת ה-Issues למודלים (וודא שיש לך ObservableCollection של IssueModel)
         AllIssues = new ObservableCollection<IssueModel>(issues);
 
-        // טיפול בנתוני הכיתות של הסופרווייזר
+        // Get supervisor's assigned classes
         var supervisorClasses = await _referenceClient.GetSchoolClassesBySupervisorAsync(supervisorId);
         var assignedSlots = supervisorClasses.Select(c => (c.Grade.Id, c.ClassNum)).ToHashSet();
 
-        // סינון סטודנטים השייכים לכיתות של הסופרווייזר הנוכחי
-        var myStudents = allUsers
-            .OfType<StudentModel>() // מסנן רק אובייקטים שהם סטודנטים ומבצע casting
-            .Where(s => s.Grade != null && assignedSlots.Contains((s.Grade.Id, s.ClassNum)))
+        // Load students in the supervisor's assigned classes to track registration progress
+        var myStudents = (await _userClient.GetStudentsBySupervisorAsync(supervisorId))
+            .OfType<StudentModel>()
             .ToList();
 
         int totalStudents = myStudents.Count;
-
-        // שימוש בפונקציה IsStudentInfoFilled שתיקנו קודם
         var inactive = myStudents.Where(s => !IsStudentInfoFilled(s)).ToList();
 
-        // המרת הסטודנטים הלא פעילים לרשימת תצוגה
         InactiveStudents = new ObservableCollection<UserModel>(inactive);
 
         if (totalStudents > 0)

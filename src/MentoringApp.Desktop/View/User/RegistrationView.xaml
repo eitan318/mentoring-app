@@ -7,158 +7,348 @@
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}"
     FocusManager.FocusedElement="{Binding ElementName=firstInput}">
 
-    <Grid Margin="20">
-        <StackPanel>
-            <!-- Info banner: admin does not need to fill every field -->
-            <Border Background="#EEF4FF" BorderBrush="#9ABFFF" BorderThickness="1"
-                    CornerRadius="4" Padding="10,8" Margin="0,0,0,14">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="ℹ " FontSize="14" VerticalAlignment="Top" Foreground="#1A56DB"/>
-                    <TextBlock TextWrapping="Wrap" Foreground="#1E3A6E" FontSize="12"
-                               Text="{Binding [Register_InfoBanner], Source={x:Static loc:TranslationSource.Instance}}"/>
+    <UserControl.Resources>
+        <!-- Card Style -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="24"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="15" Color="#000000" Opacity="0.03" ShadowDepth="2" Direction="270"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="InputTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#F9FAFB"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Foreground" Value="#111827"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <Grid>
+                                <TextBlock Text="{TemplateBinding Tag}" Foreground="#9CA3AF" Margin="14,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" x:Name="Placeholder" IsHitTestVisible="False"/>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#A855F7"/>
+                                <Setter Property="Background" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="InputComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#F9FAFB"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Foreground" Value="#111827"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <Grid>
+                                <ToggleButton x:Name="ToggleButton" Grid.Column="2" Focusable="false" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="Transparent" CornerRadius="8">
+                                                <Path x:Name="Arrow" Fill="#6B7280" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+                                <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="14,10,30,10" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                <TextBlock Text="{TemplateBinding Tag}" Foreground="#9CA3AF" Margin="14,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" x:Name="Placeholder" IsHitTestVisible="False"/>
+                                <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                    <Grid x:Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                        <Border x:Name="DropDownBorder" Background="#FFFFFF" BorderThickness="1" BorderBrush="#E5E7EB" CornerRadius="8" Margin="0,4,0,0">
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="10" Color="#000000" Opacity="0.1" ShadowDepth="2"/>
+                                            </Border.Effect>
+                                            <ScrollViewer Margin="0,4" SnapsToDevicePixels="True">
+                                                <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Grid>
+                                </Popup>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="true">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#A855F7"/>
+                                <Setter Property="Background" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="SelectionBoxItem" Value="{x:Null}">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="SelectionBoxItem" Value="">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernLabel" TargetType="Label">
+            <Setter Property="Foreground" Value="#4B5563"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <!-- Modern Button Style -->
+        <Style x:Key="PrimaryBtn" TargetType="Button">
+            <Setter Property="Background" Value="#A855F7"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#9333EA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="16" MaxWidth="600" HorizontalAlignment="Center">
+        <Border Style="{StaticResource CardStyle}">
+            <StackPanel>
+                <!-- Info banner: admin does not need to fill every field -->
+                <Border Background="#EEF4FF" BorderBrush="#9ABFFF" BorderThickness="1"
+                        CornerRadius="8" Padding="12,10" Margin="0,0,0,20">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#x2139;" FontSize="16" VerticalAlignment="Top" Foreground="#1A56DB" Margin="0,0,8,0" FontWeight="Bold"/>
+                        <TextBlock TextWrapping="Wrap" Foreground="#1E3A6E" FontSize="13"
+                                   Text="{Binding [Register_InfoBanner], Source={x:Static loc:TranslationSource.Instance}}"/>
+                    </StackPanel>
+                </Border>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Column -->
+                    <StackPanel Grid.Column="0">
+                        <Label Content="{Binding [Register_Username_Tag], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                        <TextBox x:Name="firstInput" Tag="{Binding [Register_Username_Tag], Source={x:Static loc:TranslationSource.Instance}}" Text="{Binding UserName}" Style="{StaticResource InputTextBox}" Margin="0,0,0,16" />
+
+                        <Label Content="{Binding [Register_Email_Tag], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                        <TextBox Tag="{Binding [Register_Email_Tag], Source={x:Static loc:TranslationSource.Instance}}" Text="{Binding Email}" Style="{StaticResource InputTextBox}" Margin="0,0,0,16" />
+
+                        <Label Content="{Binding [Register_NationalId_Tag], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                        <TextBox Tag="{Binding [Register_NationalId_Tag], Source={x:Static loc:TranslationSource.Instance}}" Text="{Binding NationalId}" Style="{StaticResource InputTextBox}" Margin="0,0,0,16" />
+                    </StackPanel>
+
+                    <!-- Right Column -->
+                    <StackPanel Grid.Column="2">
+                        <Label Content="{Binding [Register_Phone_Tag], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                        <TextBox Tag="{Binding [Register_Phone_Tag], Source={x:Static loc:TranslationSource.Instance}}" Text="{Binding PhoneNumber}" Style="{StaticResource InputTextBox}" Margin="0,0,0,16" />
+
+                        <Label Content="{Binding [Register_Gender_Label], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                        <ComboBox ItemsSource="{Binding GenderOptions}"
+                                  SelectedValue="{Binding SelectedGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                                  SelectedValuePath="Value"
+                                  DisplayMemberPath="Display"
+                                  Style="{StaticResource InputComboBox}"
+                                  Margin="0,0,0,16" />
+                    </StackPanel>
+                </Grid>
+
+                <Border BorderBrush="#F3F4F6" BorderThickness="0,1,0,0" Margin="0,8,0,16" />
+
+                <!-- Grade and Class Num (for Student only) -->
+                <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <Label Content="{Binding [Register_Grade_Tag], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                            <ComboBox ItemsSource="{Binding Grades}"
+                                      SelectedItem="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                      Tag="{Binding [Register_Grade_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                                      Style="{StaticResource InputComboBox}"
+                                      Margin="0,0,0,16">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                    <Binding Path="Name" />
+                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <Label Content="{Binding [Register_ClassNum_Tag], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                            <TextBox Tag="{Binding [Register_ClassNum_Tag], Source={x:Static loc:TranslationSource.Instance}}" Text="{Binding ClassNum}" Style="{StaticResource InputTextBox}" Margin="0,0,0,16" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Mentor / Mentee role selection -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <CheckBox Content="{Binding [Register_IsMentor_Check], Source={x:Static loc:TranslationSource.Instance}}" IsChecked="{Binding IsMentor}" Margin="0,0,24,0" Foreground="#374151" FontWeight="Medium" />
+                        <CheckBox Content="{Binding [Register_IsMentee_Check], Source={x:Static loc:TranslationSource.Instance}}" IsChecked="{Binding IsMentee}" Foreground="#374151" FontWeight="Medium" />
+                    </StackPanel>
                 </StackPanel>
-            </Border>
 
-            <TextBox x:Name="firstInput"
-                     Tag="{Binding [Register_Username_Tag], Source={x:Static loc:TranslationSource.Instance}}"
-                     Text="{Binding UserName}"
-                     Margin="0,0,0,10" />
-            <TextBox Tag="{Binding [Register_Email_Tag], Source={x:Static loc:TranslationSource.Instance}}"
-                     Text="{Binding Email}"
-                     Margin="0,0,0,10" />
-            <TextBox Tag="{Binding [Register_NationalId_Tag], Source={x:Static loc:TranslationSource.Instance}}"
-                     Text="{Binding NationalId}"
-                     Margin="0,0,0,10" />
+                <!-- Mentor-specific fields: subject to teach, max mentees, preferred mentee gender -->
+                <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
+                    <Border BorderBrush="#F3F4F6" BorderThickness="0,1,0,0" Margin="0,0,0,16" />
+                    
+                    <Label Content="{Binding [Register_SubjectToTeach_Tag], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                    <ComboBox ItemsSource="{Binding Subjects}"
+                              SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                              SelectedValuePath="Id"
+                              Tag="{Binding [Register_SubjectToTeach_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                              Style="{StaticResource InputComboBox}"
+                              Margin="0,0,0,16">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                            <Binding Path="Name" />
+                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
-            <TextBox Tag="{Binding [Register_Phone_Tag], Source={x:Static loc:TranslationSource.Instance}}"
-                     Text="{Binding PhoneNumber}"
-                     Margin="0,0,0,10" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <Label Content="{Binding [Register_MaxMentees_Label], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                            <TextBox Text="{Binding MaxMentees, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" Margin="0,0,0,16" />
+                        </StackPanel>
 
-            <Label Content="{Binding [Register_Gender_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-            <ComboBox
-                ItemsSource="{Binding GenderOptions}"
-                SelectedValue="{Binding SelectedGenderValue, UpdateSourceTrigger=PropertyChanged}"
-                SelectedValuePath="Value"
-                DisplayMemberPath="Display"
-                Margin="0,0,0,10" />
+                        <StackPanel Grid.Column="2">
+                            <Label Content="{Binding [Register_PreferredMenteeGender_Label], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                            <ComboBox ItemsSource="{Binding GenderPreferenceOptions}"
+                                      SelectedValue="{Binding SelectedPreferredMenteeGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                                      SelectedValuePath="Value"
+                                      DisplayMemberPath="Display"
+                                      Style="{StaticResource InputComboBox}"
+                                      Margin="0,0,0,16" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
 
-            <!-- Grade and Class Num (for Student only) -->
-            <StackPanel Visibility="{Binding SupervisorOrStudentIsSupervisor, Converter={StaticResource InverseBoolToVis}}">
-                <ComboBox
-                    ItemsSource="{Binding Grades}"
-                    SelectedItem="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                    Tag="{Binding [Register_Grade_Tag], Source={x:Static loc:TranslationSource.Instance}}"
-                    Margin="0,0,0,10">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <TextBlock.Text>
-                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
-                                        <Binding Path="Name" />
-                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <!-- Mentee-specific fields: subject to learn, preferred mentor gender -->
+                <StackPanel Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
+                    <Border BorderBrush="#F3F4F6" BorderThickness="0,1,0,0" Margin="0,0,0,16" />
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                <TextBox Tag="{Binding [Register_ClassNum_Tag], Source={x:Static loc:TranslationSource.Instance}}"
-                         Text="{Binding ClassNum}"
-                         Margin="0,0,0,10" />
+                        <StackPanel Grid.Column="0">
+                            <Label Content="{Binding [Register_SubjectToLearn_Tag], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                            <ComboBox ItemsSource="{Binding Subjects}"
+                                      SelectedValue="{Binding SubjectToLearn, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                      SelectedValuePath="Id"
+                                      Tag="{Binding [Register_SubjectToLearn_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                                      Style="{StaticResource InputComboBox}"
+                                      Margin="0,0,0,16">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                                    <Binding Path="Name" />
+                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
 
-                <!-- Mentor / Mentee role selection -->
-                <CheckBox
-                    Margin="0,0,0,6"
-                    Content="{Binding [Register_IsMentor_Check], Source={x:Static loc:TranslationSource.Instance}}"
-                    IsChecked="{Binding IsMentor}" />
-                <CheckBox
-                    Margin="0,0,0,6"
-                    Content="{Binding [Register_IsMentee_Check], Source={x:Static loc:TranslationSource.Instance}}"
-                    IsChecked="{Binding IsMentee}" />
+                        <StackPanel Grid.Column="2">
+                            <Label Content="{Binding [Register_PreferredMentorGender_Label], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernLabel}" />
+                            <ComboBox ItemsSource="{Binding GenderPreferenceOptions}"
+                                      SelectedValue="{Binding SelectedPreferredMentorGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                                      SelectedValuePath="Value"
+                                      DisplayMemberPath="Display"
+                                      Style="{StaticResource InputComboBox}"
+                                      Margin="0,0,0,16" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Footer area -->
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding [Register_RequiredField], Source={x:Static loc:TranslationSource.Instance}}" FontSize="12" Foreground="#9CA3AF" />
+                        <TextBlock Margin="0,4,0,0" Foreground="#DC2626" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Style="{StaticResource PrimaryBtn}"
+                            IsDefault="True"
+                            Command="{Binding RegisterCommand}"
+                            Content="{Binding [Register_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}" />
+                </Grid>
             </StackPanel>
-
-            <!-- Mentor-specific fields: subject to teach, max mentees, preferred mentee gender -->
-            <StackPanel Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
-                <ComboBox
-                    ItemsSource="{Binding Subjects}"
-                    SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                    SelectedValuePath="Id"
-                    Tag="{Binding [Register_SubjectToTeach_Tag], Source={x:Static loc:TranslationSource.Instance}}"
-                    Margin="0,0,0,10">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <TextBlock.Text>
-                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
-                                        <Binding Path="Name" />
-                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-
-                <Label Content="{Binding [Register_MaxMentees_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                <TextBox Text="{Binding MaxMentees, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,10" />
-
-                <Label Content="{Binding [Register_PreferredMenteeGender_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                <ComboBox
-                    ItemsSource="{Binding GenderPreferenceOptions}"
-                    SelectedValue="{Binding SelectedPreferredMenteeGenderValue, UpdateSourceTrigger=PropertyChanged}"
-                    SelectedValuePath="Value"
-                    DisplayMemberPath="Display"
-                    Margin="0,0,0,10" />
-            </StackPanel>
-
-            <!-- Mentee-specific fields: subject to learn, preferred mentor gender -->
-            <StackPanel Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
-                <ComboBox
-                    ItemsSource="{Binding Subjects}"
-                    SelectedValue="{Binding SubjectToLearn, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                    SelectedValuePath="Id"
-                    Tag="{Binding [Register_SubjectToLearn_Tag], Source={x:Static loc:TranslationSource.Instance}}"
-                    Margin="0,0,0,10">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <TextBlock.Text>
-                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
-                                        <Binding Path="Name" />
-                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-
-                <Label Content="{Binding [Register_PreferredMentorGender_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                <ComboBox
-                    ItemsSource="{Binding GenderPreferenceOptions}"
-                    SelectedValue="{Binding SelectedPreferredMentorGenderValue, UpdateSourceTrigger=PropertyChanged}"
-                    SelectedValuePath="Value"
-                    DisplayMemberPath="Display"
-                    Margin="0,0,0,10" />
-            </StackPanel>
-
-            <TextBlock Text="{Binding [Register_RequiredField], Source={x:Static loc:TranslationSource.Instance}}" FontSize="10" Foreground="Gray" Margin="0,6,0,0" />
-            <Button
-                Padding="10,6"
-                Margin="0,10,0,0"
-                HorizontalAlignment="Right"
-                Cursor="Hand"
-                IsDefault="True"
-                Command="{Binding RegisterCommand}"
-                Content="{Binding [Register_Submit_Button], Source={x:Static loc:TranslationSource.Instance}}" />
-
-            <TextBlock
-                Margin="0,5"
-                Foreground="Red"
-                Text="{Binding ErrorMessage}"
-                TextWrapping="Wrap" />
-        </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

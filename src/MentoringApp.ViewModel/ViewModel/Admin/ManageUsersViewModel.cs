@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.ApiClient.Models;
 using MentoringApp.Model.User;
+using MentoringApp.Model.User.StudentProfiles;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModel.User;
@@ -20,6 +21,8 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
     private readonly ILocalizationService _loc;
     private readonly UserApiClient _userClient;
     private readonly PairApiClient _pairClient;
+    private readonly ReferenceApiClient _referenceClient;
+    private Dictionary<int, string> _subjectNames = [];
 
     public ManageUsersViewModel(
         IFileService fileService,
@@ -28,7 +31,8 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
         IToastService toastService,
         ILocalizationService loc,
         UserApiClient userClient,
-        PairApiClient pairClient)
+        PairApiClient pairClient,
+        ReferenceApiClient referenceClient)
     {
         _fileService = fileService;
         _windowService = windowService;
@@ -37,6 +41,7 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
         _loc = loc;
         _userClient = userClient;
         _pairClient = pairClient;
+        _referenceClient = referenceClient;
     }
 
     // --- Properties & Collections ---
@@ -47,9 +52,21 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DeleteUserCommand))]
     [NotifyCanExecuteChangedFor(nameof(ViewUserCommand))]
+    [NotifyPropertyChangedFor(nameof(SelectedUserTeachingSubjectName))]
+    [NotifyPropertyChangedFor(nameof(SelectedUserLearningSubjectName))]
     private UserModel? _selectedUser;
 
     private bool HasSelectedUser => SelectedUser != null;
+
+    public string SelectedUserTeachingSubjectName =>
+        SelectedUser is StudentModel { MentorProfile: MentorProfile mp }
+            ? (_subjectNames.TryGetValue(mp.SubjectToTeach, out var t) ? t : "")
+            : "";
+
+    public string SelectedUserLearningSubjectName =>
+        SelectedUser is StudentModel { MenteeProfile: MenteeProfile mp }
+            ? (_subjectNames.TryGetValue(mp.SubjectToLearn, out var l) ? l : "")
+            : "";
 
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private string _selectedRole = "All";
@@ -110,6 +127,9 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
     // --- Lifecycle ---
     public async Task OnNavigatedToAsync()
     {
+        var subjects = await _referenceClient.GetSubjectsAsync();
+        _subjectNames = subjects.ToDictionary(s => s.Id, s => s.Name);
+
         var users = await _userClient.GetAllAsync();
         AllUsers = new ObservableCollection<UserModel>(users);
 
@@ -118,9 +138,14 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
 
         var grades = AllUsers.OfType<StudentModel>()
                              .Where(s => s.Grade != null)
-                             .Select(s => s.Grade!.Id.ToString())
+                             .Select(s => s.Grade!.Name)
                              .Distinct()
-                             .OrderBy(x => int.Parse(x))
+                             .OrderBy(x =>
+                             {
+                                 // Sort numerically: extract number from names like "5th", "6th"
+                                 var numStr = new string(x.TakeWhile(char.IsDigit).ToArray());
+                                 return int.TryParse(numStr, out var num) ? num : 0;
+                             })
                              .ToList();
 
         AvailableGrades.Clear();

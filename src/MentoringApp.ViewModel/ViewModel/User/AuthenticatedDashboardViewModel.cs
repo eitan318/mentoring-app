@@ -122,12 +122,23 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
     [RelayCommand] private void NavigateProfile() => _navigationService.NavigateToAsync<MyProfileViewModel>();
 
     [RelayCommand]
-    private void Logout()
+    private async Task Logout()
     {
+        if (_navContext == null) return;
+
         _sessionService.ClearSession();
         _authTokenStore.Clear();
         _userStore.User = null;
-        _navContext?.Dispose();
-        _navigationService.NavigateToAsync<LoginViewModel>();
+
+        // Cascade: let the child role dashboard pop its own nav context first.
+        // Otherwise our disposer (which pops the top blindly) tears down the wrong
+        // level and leaves the stacks misaligned for subsequent navigations.
+        if (ActiveSubPage != null)
+            await ActiveSubPage.OnNavigatedFromAsync();
+
+        _navContext.Dispose();
+        _navContext = null;
+
+        await _navigationService.NavigateToAsync<LoginViewModel>();
     }
 }

@@ -10,6 +10,9 @@ public partial class OtherProfileViewModel : ObservableObject, INavigatable<int>
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStudent))]
+    [NotifyPropertyChangedFor(nameof(IsSupervisor))]
+    [NotifyPropertyChangedFor(nameof(HasMentorProfile))]
+    [NotifyPropertyChangedFor(nameof(HasMenteeProfile))]
     [NotifyPropertyChangedFor(nameof(GradeName))]
     [NotifyPropertyChangedFor(nameof(ClassNum))]
     [NotifyPropertyChangedFor(nameof(GenderDisplay))]
@@ -23,6 +26,9 @@ public partial class OtherProfileViewModel : ObservableObject, INavigatable<int>
     [ObservableProperty] private bool _loading;
 
     public bool IsStudent => User is StudentModel;
+    public bool IsSupervisor => User is SupervisorModel;
+    public bool HasMentorProfile => User is StudentModel s && s.MentorProfile != null;
+    public bool HasMenteeProfile => User is StudentModel s2 && s2.MenteeProfile != null;
     public string GradeName => (User as StudentModel)?.Grade?.Name ?? "";
     public int ClassNum => (User as StudentModel)?.ClassNum ?? 0;
     public string GenderDisplay => User != null ? GenderHelper.GenderToDisplay((int)User.Gender) : "";

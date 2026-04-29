@@ -41,6 +41,27 @@ public static class UserEndpoints
         })
         .WithOpenApi();
 
+        // GET /api/users/students/by-supervisor/{supervisorId} — Accessible to supervisors viewing their own students
+        group.MapGet("/students/by-supervisor/{supervisorId:int}", async (int supervisorId, UserService userService, ISchoolClassRepo classRepo) =>
+        {
+            // Get supervisor's assigned classes
+            var supervisorClasses = await classRepo.GetBySupervisorAsync(supervisorId);
+            if (!supervisorClasses.Any())
+                return Results.Ok<IEnumerable<StudentModel>>(new List<StudentModel>());
+
+            var assignedSlots = supervisorClasses.Select(c => (c.GradeId, c.ClassNum)).ToHashSet();
+
+            // Get all students and filter to those in the supervisor's assigned classes
+            var allUserDtos = await userService.GetAllUsersAsync();
+            var myStudents = allUserDtos
+                .OfType<StudentModel>()
+                .Where(s => s.Grade != null && assignedSlots.Contains((s.Grade.Id, s.ClassNum)))
+                .ToList();
+
+            return Results.Ok<IEnumerable<StudentModel>>(myStudents);
+        })
+        .WithOpenApi();
+
         // POST /api/users — Admin only
         group.MapPost("/", async (CreateUserRequest req, UserService userService) =>
         {
