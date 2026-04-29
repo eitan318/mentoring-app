@@ -5,107 +5,186 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:loc="clr-namespace:MentoringApp.Localization"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="600" d:DesignWidth="800"
+    d:DesignHeight="700" d:DesignWidth="1100"
     mc:Ignorable="d"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
-        <!-- Navbar button base style -->
-        <Style x:Key="NavButtonStyle" TargetType="Button">
-            <Setter Property="Background"      Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0,0,0,2"/>
-            <Setter Property="BorderBrush"     Value="Transparent"/>
-            <Setter Property="Padding"         Value="14,0"/>
-            <Setter Property="Margin"          Value="0,0,4,0"/>
-            <Setter Property="FontWeight"      Value="SemiBold"/>
-            <Setter Property="FontSize"        Value="12"/>
-            <Setter Property="Cursor"          Value="Hand"/>
-            <Setter Property="Foreground"      Value="#555555"/>
+
+        <!-- Sidebar nav item template -->
+        <Style x:Key="SideNavStyle" TargetType="Button">
+            <Setter Property="Background"               Value="Transparent"/>
+            <Setter Property="BorderThickness"          Value="0"/>
+            <Setter Property="Padding"                  Value="14,12"/>
+            <Setter Property="Margin"                   Value="0,4"/>
+            <Setter Property="Foreground"               Value="#6B7280"/>
+            <Setter Property="FontSize"                 Value="13"/>
+            <Setter Property="FontWeight"               Value="Medium"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Cursor"                   Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#EBEBEB"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#F3F4F6"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
     </UserControl.Resources>
 
-    <DockPanel>
-        <!-- ── Top Navigation Bar ── -->
-        <Border Height="50" Background="#F8F8F8" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" DockPanel.Dock="Top">
-            <StackPanel Orientation="Horizontal" Margin="12,0" VerticalAlignment="Stretch">
+    <Grid Background="#F4F7FE">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-                <Button Content="&#x1F4CA; Dashboard"
-                        Command="{Binding GoToDashboardCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsOnDashboard}" Value="True">
-                                    <Setter Property="BorderBrush" Value="#3B82F6"/>
-                                    <Setter Property="Foreground"  Value="#1D4ED8"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+        <!-- ── Left Sidebar ── -->
+        <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="0,20,20,0">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" Color="#000000" Opacity="0.03"
+                                  ShadowDepth="0" Direction="0"/>
+            </Border.Effect>
 
-                <Button Content="&#x1F517; Manage Pairs"
-                        Command="{Binding ManagePairsCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsOnManagePairs}" Value="True">
-                                    <Setter Property="BorderBrush" Value="#3B82F6"/>
-                                    <Setter Property="Foreground"  Value="#1D4ED8"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+            <DockPanel LastChildFill="False">
 
-                <Button Content="&#x1F465; Manage Users"
-                        Command="{Binding ManageUsersCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsOnManageUsers}" Value="True">
-                                    <Setter Property="BorderBrush" Value="#3B82F6"/>
-                                    <Setter Property="Foreground"  Value="#1D4ED8"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                <!-- Logo block -->
+                <Border DockPanel.Dock="Top" Padding="24,30,24,20">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="32" Height="32" CornerRadius="8"
+                                Background="#A855F7" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="E" Foreground="White" FontWeight="Bold" FontSize="18"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="EDUCATION" FontWeight="Bold" FontSize="14" Foreground="#111827"/>
+                            <TextBlock Text="ONLINE LEARNING" FontSize="8" Foreground="#9CA3AF"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
 
-                <Button Content="&#x2699; System Settings"
-                        Command="{Binding SystemSettingsCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsOnSystemSettings}" Value="True">
-                                    <Setter Property="BorderBrush" Value="#3B82F6"/>
-                                    <Setter Property="Foreground"  Value="#1D4ED8"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                <!-- Navigation -->
+                <StackPanel DockPanel.Dock="Top" Margin="16,10,16,0">
 
-            </StackPanel>
+                    <!-- Dashboard -->
+                    <Button Command="{Binding GoToDashboardCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOnDashboard}" Value="True">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                    <GradientStop Color="#C084FC" Offset="0.0" />
+                                                    <GradientStop Color="#A855F7" Offset="1.0" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#x25A6;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Dashboard" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Manage Pairs -->
+                    <Button Command="{Binding ManagePairsCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOnManagePairs}" Value="True">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                    <GradientStop Color="#C084FC" Offset="0.0" />
+                                                    <GradientStop Color="#A855F7" Offset="1.0" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#x1F4DA;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Manage Pairs" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Manage Users -->
+                    <Button Command="{Binding ManageUsersCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOnManageUsers}" Value="True">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                    <GradientStop Color="#C084FC" Offset="0.0" />
+                                                    <GradientStop Color="#A855F7" Offset="1.0" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#x1F393;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Manage Users" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- System Settings -->
+                    <Button Command="{Binding SystemSettingsCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOnSystemSettings}" Value="True">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                    <GradientStop Color="#C084FC" Offset="0.0" />
+                                                    <GradientStop Color="#A855F7" Offset="1.0" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#x2699;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="System Settings" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+                
+               
+            </DockPanel>
         </Border>
 
-        <!-- ── Active sub-page content (resolved via DataTemplate in ViewModelViewMap.xaml) ── -->
-        <ContentControl Content="{Binding ActiveSubPage}"/>
-    </DockPanel>
+        <!-- ── Main content area ── -->
+        <Border Grid.Column="1" Padding="0">
+            <ContentControl Content="{Binding ActiveSubPage}"/>
+        </Border>
+
+    </Grid>
 </UserControl>
