@@ -107,10 +107,7 @@
         <!-- ── SECTION 1: HEADER & ACTIONS ── -->
         <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,24" Padding="20,16">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding [Admin_ManageUsers_AddImportHeader], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827"/>
-                </StackPanel>
-                
+
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Command="{Binding RegisterSupervisorCommand}" Content="{Binding [Admin_ManageUsers_AddSupervisor], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Margin="0,0,8,0"/>
                     <Button Command="{Binding RegisterStudentCommand}" Content="{Binding [Admin_ManageUsers_AddStudent], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Margin="0,0,24,0"/>

@@ -10,69 +10,137 @@
     d:DesignWidth="800"
     mc:Ignorable="d"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
-    <Grid Margin="20">
-        <StackPanel>
+
+    <UserControl.Resources>
+        <Style x:Key="PrimaryBtn" TargetType="Button">
+            <Setter Property="Background" Value="#A855F7"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#9333EA"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryBtn" TargetType="Button">
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#4B5563"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E5E7EB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="4,0">
+
             <TextBlock
-                FontSize="22"
+                FontSize="20"
                 FontWeight="Bold"
+                Foreground="#111827"
+                Margin="0,0,0,4"
                 Text="{Binding [Issue_Title], Source={x:Static loc:TranslationSource.Instance}}" />
 
             <TextBlock
-                FontSize="14"
-                Foreground="#005A9E"
-                Margin="0,5,0,15"
+                FontSize="13"
+                Foreground="#A855F7"
                 FontStyle="Italic"
+                Margin="0,0,0,20"
                 Text="{Binding RelatedPairName}" />
 
+            <!-- Category -->
+            <TextBlock
+                FontSize="11"
+                FontWeight="SemiBold"
+                Foreground="#6B7280"
+                Margin="0,0,0,6"
+                Text="{Binding [Issue_Category_Label], Source={x:Static loc:TranslationSource.Instance}}" />
             <Border
-                Padding="0,0,0,10"
-                BorderBrush="LightGray"
-                BorderThickness="0,0,0,1">
-                <StackPanel>
-                    <TextBlock
-                        FontSize="12"
-                        Foreground="Gray"
-                        Text="{Binding [Issue_Category_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                    <!-- Category.Name is user-typed/DB data — not translated -->
-                    <TextBlock FontSize="16" Text="{Binding CurrentIssue.Category.Name}" />
-                </StackPanel>
+                Background="#F3F4F6"
+                CornerRadius="8"
+                Padding="12,8"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,20">
+                <TextBlock FontSize="14" Foreground="#374151" Text="{Binding CurrentIssue.Category.Name}" />
             </Border>
 
-            <StackPanel>
+            <!-- Description -->
+            <TextBlock
+                FontSize="11"
+                FontWeight="SemiBold"
+                Foreground="#6B7280"
+                Margin="0,0,0,6"
+                Text="{Binding [Issue_Description_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+            <Border
+                Background="#F9FAFB"
+                BorderBrush="#F3F4F6"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="12"
+                Margin="0,0,0,20">
                 <TextBlock
-                    FontSize="12"
-                    Foreground="Gray"
-                    Text="{Binding [Issue_Description_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                <!-- Description is user-typed — not translated -->
-                <TextBlock
-                    FontSize="16"
+                    FontSize="14"
+                    Foreground="#374151"
                     Text="{Binding CurrentIssue.Description}"
                     TextWrapping="Wrap" />
-            </StackPanel>
+            </Border>
 
             <!-- Forwarded badge -->
-            <Border Margin="0,12,0,0" Background="#FFF3E0" BorderBrush="#FFB300" BorderThickness="1"
-                    CornerRadius="4" Padding="10,6" HorizontalAlignment="Left"
-                    Visibility="{Binding CurrentIssue.IsForwardedToAdmin, Converter={StaticResource BoolToVis}}">
-                <TextBlock FontSize="12" Foreground="#E65100"
+            <Border
+                Margin="0,0,0,20"
+                Background="#FEF3C7"
+                BorderBrush="#FDE68A"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="12,8"
+                HorizontalAlignment="Left"
+                Visibility="{Binding CurrentIssue.IsForwardedToAdmin, Converter={StaticResource BoolToVis}}">
+                <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#92400E"
                            Text="{Binding [Issue_ForwardedBadge], Source={x:Static loc:TranslationSource.Instance}}"/>
             </Border>
 
+            <!-- Actions -->
             <StackPanel
-                Margin="0,20,0,0"
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
                 <Button
-                    Padding="10,6"
-                    Margin="5"
-                    Background="#1565C0"
-                    Foreground="White"
-                    Cursor="Hand"
+                    Margin="0,0,8,0"
                     ToolTip="{Binding [Issue_Forward_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
                     Command="{Binding ForwardToAdminCommand}"
                     Content="{Binding [Issue_Forward_Button], Source={x:Static loc:TranslationSource.Instance}}">
                     <Button.Style>
-                        <Style TargetType="Button">
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryBtn}">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <MultiDataTrigger>
@@ -87,16 +155,13 @@
                     </Button.Style>
                 </Button>
                 <Button
-                    Padding="10,6"
-                    Margin="5"
-                    Background="DarkGreen"
-                    Cursor="Hand"
+                    Style="{StaticResource PrimaryBtn}"
                     ToolTip="{Binding [Issue_Resolve_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
                     Command="{Binding ResolveIssueCommand}"
                     Content="{Binding [Issue_Resolve_Button], Source={x:Static loc:TranslationSource.Instance}}"
-                    Foreground="White"
                     Visibility="{Binding CurrentIssue.IsResolved, Converter={StaticResource InverseBoolToVis}}" />
             </StackPanel>
+
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

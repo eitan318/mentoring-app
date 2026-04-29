@@ -10,4 +10,5 @@
     <loc:DbTranslationConverter x:Key="DbTranslation" />
     <conv:LocalizedClassCountConverter x:Key="LocalizedClassCount" />
     <conv:GradeClassDisplayConverter x:Key="GradeClassDisplay" />
+    <conv:PercentToStrokeDashArrayConverter x:Key="PercentToStrokeDash" />
 </ResourceDictionary>

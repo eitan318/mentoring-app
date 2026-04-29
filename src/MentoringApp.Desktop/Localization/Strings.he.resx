@@ -244,7 +244,7 @@
     <value>אין בעיות שהועברו</value>
   </data>
   <data name="Student_YourMentee_Label" xml:space="preserve">
-    <value>המתאמן שלך</value>
+    <value>החניך שלך</value>
   </data>
   <data name="Student_MeetingHours_Label" xml:space="preserve">
     <value>שעות פגישות</value>
@@ -274,7 +274,7 @@
     <value>פנה אל המדריך או מנהל המערכת לשיבוץ.</value>
   </data>
   <data name="Student_Supervisor_Label" xml:space="preserve">
-    <value>המדריך שלך</value>
+    <value>המפקח שלך</value>
   </data>
   <data name="Review_Content_Label" xml:space="preserve">
     <value>תוכן הסקירה</value>
@@ -826,6 +826,36 @@
   <data name="Supervisor_InactiveStudents_Header" xml:space="preserve">
     <value>תלמידים עם פרופילים לא שלמים:</value>
   </data>
+  <data name="Supervisor_ClassRegistration_Title" xml:space="preserve">
+    <value>רישום כיתה</value>
+  </data>
+  <data name="Supervisor_Registered_Label" xml:space="preserve">
+    <value>רשומים</value>
+  </data>
+  <data name="Supervisor_AllRegistered_Label" xml:space="preserve">
+    <value>כל התלמידים נרשמו!</value>
+  </data>
+  <data name="Supervisor_Role_Mentor" xml:space="preserve">
+    <value>חונך</value>
+  </data>
+  <data name="Supervisor_Role_Mentee" xml:space="preserve">
+    <value>מודרך</value>
+  </data>
+  <data name="Supervisor_Role_NoRole" xml:space="preserve">
+    <value>אין תפקיד</value>
+  </data>
+  <data name="Admin_ManageUsers_Name_Column" xml:space="preserve">
+    <value>שם</value>
+  </data>
+  <data name="Admin_ManageUsers_Email_Column" xml:space="preserve">
+    <value>אימייל</value>
+  </data>
+  <data name="Admin_ManageUsers_Class_Column" xml:space="preserve">
+    <value>כיתה</value>
+  </data>
+  <data name="Admin_ManageUsers_Status_Column" xml:space="preserve">
+    <value>סטטוס</value>
+  </data>
   <data name="Supervisor_ClearSelection_Button" xml:space="preserve">
     <value>נקה בחירה</value>
   </data>
@@ -1189,5 +1219,8 @@
   </data>
   <data name="DB_Grade_1st" xml:space="preserve">
     <value>כיתה א'</value>
+  </data>
+  <data name="Student_YourMentor_Label" xml:space="preserve">
+    <value>החונך שלך</value>
   </data>
 </root>

@@ -94,28 +94,9 @@
                 <RowDefinition Height="*"/>    <!-- Table -->
             </Grid.RowDefinitions>
 
-            <!-- Top Header -->
-            <DockPanel Grid.Row="0" Margin="0,0,0,24">
-                <TextBlock Text="Dashboard" FontWeight="Bold" FontSize="26" Foreground="#111827" VerticalAlignment="Center"/>
-                
-                <!-- Fake Search & User profile (from sample) -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Border Background="White" CornerRadius="20" Padding="16,8" Margin="0,0,16,0" Width="200">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#x1F50D;" Foreground="#9CA3AF" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Search" Foreground="#9CA3AF" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
-                    <!-- User badge from sample -->
-                    <Border Background="#C084FC" CornerRadius="20" Width="40" Height="40">
-                        <TextBlock Text="&#x1F514;" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </StackPanel>
-            </DockPanel>
-
-            <!-- 4 Stat Cards Row -->
+            <!-- 4 Stat Cards Row --><!--
             <UniformGrid Grid.Row="1" Columns="4" Margin="-8,0,-8,24">
-                <!-- Total Students / Fill Progress -->
+                --><!-- Total Students / Fill Progress --><!--
                 <Border Style="{StaticResource CardStyle}" Background="#F3E8FF" Margin="8" Padding="16,24">
                     <StackPanel>
                         <TextBlock Text="&#x1F393;" FontSize="32" HorizontalAlignment="Center"/>
@@ -123,7 +104,7 @@
                         <TextBlock Text="{Binding TotalFillLabel}" Style="{StaticResource StatCardValue}"/>
                     </StackPanel>
                 </Border>
-                <!-- Total Teachers / Supervisors -->
+                --><!-- Total Teachers / Supervisors --><!--
                 <Border Style="{StaticResource CardStyle}" Background="#FCE7F3" Margin="8" Padding="16,24">
                     <StackPanel>
                         <TextBlock Text="&#x1F468;&#x200D;&#x1F3EB;" FontSize="32" HorizontalAlignment="Center"/>
@@ -131,7 +112,7 @@
                         <TextBlock Text="{Binding SupervisorsCount}" Style="{StaticResource StatCardValue}"/>
                     </StackPanel>
                 </Border>
-                <!-- Pending Issues -->
+                --><!-- Pending Issues --><!--
                 <Border Style="{StaticResource CardStyle}" Background="#E0F2FE" Margin="8" Padding="16,24">
                     <StackPanel>
                         <TextBlock Text="&#x1F4DA;" FontSize="32" HorizontalAlignment="Center"/>
@@ -139,7 +120,7 @@
                         <TextBlock Text="{Binding PendingIssuesTotal}" Style="{StaticResource StatCardValue}"/>
                     </StackPanel>
                 </Border>
-                <!-- Current Phase -->
+                --><!-- Current Phase --><!--
                 <Border Style="{StaticResource CardStyle}" Background="#FFEDD5" Margin="8" Padding="16,24">
                     <StackPanel>
                         <TextBlock Text="&#x1F3EB;" FontSize="32" HorizontalAlignment="Center"/>
@@ -147,17 +128,11 @@
                         <TextBlock Text="{Binding CurrentPhaseLabel}" Style="{StaticResource StatCardValue}"/>
                     </StackPanel>
                 </Border>
-            </UniformGrid>
+            </UniformGrid>-->
 
             <!-- Middle Row: Phase Stepper & Summary (replaces sample charts) -->
-            <Grid Grid.Row="2" Margin="0,0,0,24">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-
-                <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,12,0">
-                    <StackPanel>
+            <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="0,0,0,24">
+                <StackPanel>
                         <TextBlock Text="Phase Progress" FontWeight="Bold" FontSize="16" Margin="0,0,0,20"/>
                         
                         <!-- Simplified Horizontal Stepper -->
@@ -258,45 +233,7 @@
                             <TextBlock Grid.Column="6" Text="{Binding [Admin_Step_Complete], Source={x:Static loc:TranslationSource.Instance}}" TextAlignment="Center" FontSize="11" TextWrapping="Wrap" Foreground="#6B7280"/>
                         </Grid>
                     </StackPanel>
-                </Border>
-
-                <!-- Actions / Chart area -->
-                <Border Grid.Column="1" Style="{StaticResource CardStyle}" Margin="12,0,0,0">
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Phase Actions" FontWeight="Bold" FontSize="16" Margin="0,0,0,16"/>
-                        
-                        <Button Content="Go to Manage Users" Padding="0,10" Margin="0,0,0,10"
-                                Background="#F3F4F6" Foreground="#4B5563" FontWeight="SemiBold" BorderThickness="0"
-                                Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}"
-                                Command="{Binding ManageUsersCommand}">
-                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                        </Button>
-                        <Button Content="✓ Begin Registration" Padding="0,10"
-                                Background="#10B981" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                                Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}"
-                                Command="{Binding MarkUsersImportedCommand}">
-                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                        </Button>
-
-                        <Button Content="▶ Start phase 2" Padding="0,10"
-                                Background="#3B82F6" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                                Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}"
-                                Command="{Binding StartSelectionPhaseCommand}">
-                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                        </Button>
-
-                        <Button Content="▶ Run auto-match" Padding="0,10"
-                                Background="#8B5CF6" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                                Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}"
-                                Command="{Binding RunAutoMatchCommand}">
-                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                        </Button>
-
-                        <TextBlock Text="Process Complete" Foreground="#10B981" FontWeight="Bold" HorizontalAlignment="Center"
-                                   Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
-                    </StackPanel>
-                </Border>
-            </Grid>
+            </Border>
 
             <!-- Bottom Row: Table (Database) -->
             <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="20,20,20,0">
@@ -306,9 +243,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Text="Database" FontWeight="Bold" FontSize="18" Foreground="#111827" Margin="0,0,0,20"/>
-
+                    
                     <!-- Table Header -->
                     <Grid Grid.Row="1" Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
@@ -401,6 +336,40 @@
                                     
                     <TextBlock Text="Process Complete. No active deadlines." Foreground="#6B7280" FontStyle="Italic" TextWrapping="Wrap"
                                Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
+
+                    <Rectangle Height="1" Fill="#E5E7EB" Margin="0,20"/>
+                    <TextBlock Text="Phase Actions" FontWeight="Bold" FontSize="16" Foreground="#111827" Margin="0,0,0,16"/>
+                        
+                    <Button Content="Go to Manage Users" Padding="0,10" Margin="0,0,0,10"
+                            Background="#F3F4F6" Foreground="#4B5563" FontWeight="SemiBold" BorderThickness="0"
+                            Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}"
+                            Command="{Binding ManageUsersCommand}">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
+                    </Button>
+                    <Button Content="✓ Begin Registration" Padding="0,10"
+                            Background="#10B981" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
+                            Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}"
+                            Command="{Binding MarkUsersImportedCommand}">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
+                    </Button>
+
+                    <Button Content="▶ Start phase 2" Padding="0,10"
+                            Background="#3B82F6" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
+                            Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}"
+                            Command="{Binding StartSelectionPhaseCommand}">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
+                    </Button>
+
+                    <Button Content="▶ Run auto-match" Padding="0,10"
+                            Background="#8B5CF6" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
+                            Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}"
+                            Command="{Binding RunAutoMatchCommand}">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
+                    </Button>
+
+                    <TextBlock Text="Process Complete" Foreground="#10B981" FontWeight="Bold" HorizontalAlignment="Center"
+                                Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
+
                 </StackPanel>
             </Border>
 

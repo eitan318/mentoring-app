@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Data + service layers
 builder.Services.AddDataLayer(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
+builder.Services.AddTransient<DummyDataSeeder>();
 
 // JWT settings
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
@@ -95,5 +96,6 @@ app.MapReviewEndpoints();
 app.MapReferenceEndpoints();
 app.MapSettingsEndpoints();
 app.MapNotificationEndpoints();
+app.MapDevEndpoints();
 
 app.Run();
