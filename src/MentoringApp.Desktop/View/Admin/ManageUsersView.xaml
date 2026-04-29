@@ -301,6 +301,61 @@
                                 </Grid>
                             </Border>
 
+                            <!-- Student: Grade & Class (hidden for non-students) -->
+                            <Border Background="#F9FAFB" BorderThickness="1" BorderBrush="#F3F4F6" CornerRadius="8" Padding="16" Margin="0,0,0,24"
+                                    Visibility="{Binding IsStudent, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding [Admin_ManageUsers_Class], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,12"/>
+                                    <TextBlock Foreground="#111827" FontWeight="Medium">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0} · Class {1}">
+                                                <Binding Path="Grade.Name"/>
+                                                <Binding Path="ClassNum"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Mentor: Subject to Teach (hidden when no mentor profile) -->
+                            <Border Background="#F9FAFB" BorderThickness="1" BorderBrush="#F3F4F6" CornerRadius="8" Padding="16" Margin="0,0,0,24"
+                                    Visibility="{Binding DataContext.SelectedUserTeachingSubjectName, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToVis}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding [Register_SubjectToTeach_Tag], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#6B7280" Grid.Column="0" Margin="0,0,16,0"/>
+                                    <TextBlock Text="{Binding DataContext.SelectedUserTeachingSubjectName, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="#111827" FontWeight="Medium" Grid.Column="1" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Mentee: Subject to Learn (hidden when no mentee profile) -->
+                            <Border Background="#F9FAFB" BorderThickness="1" BorderBrush="#F3F4F6" CornerRadius="8" Padding="16" Margin="0,0,0,24"
+                                    Visibility="{Binding DataContext.SelectedUserLearningSubjectName, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToVis}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding [Register_SubjectToLearn_Tag], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#6B7280" Grid.Column="0" Margin="0,0,16,0"/>
+                                    <TextBlock Text="{Binding DataContext.SelectedUserLearningSubjectName, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="#111827" FontWeight="Medium" Grid.Column="1" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Supervisor: Phone Number (hidden when not supervisor) -->
+                            <Border Background="#F9FAFB" BorderThickness="1" BorderBrush="#F3F4F6" CornerRadius="8" Padding="16" Margin="0,0,0,24"
+                                    Visibility="{Binding IsSupervisor, Converter={StaticResource BoolToVis}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding [Admin_ManageUsers_PhoneNumber], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#6B7280" Grid.Column="0" Margin="0,0,16,0"/>
+                                    <TextBlock Text="{Binding PhoneNumber}" Foreground="#111827" FontWeight="Medium" Grid.Column="1" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </Border>
+
                             <TextBlock Text="{Binding [Admin_ManageUsers_Actions], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"/>
                             <!-- Commands are in ManageUsersViewModel -->
                             <Button Content="{Binding [Admin_ManageUsers_FullProfile], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource ModernBtn}" Command="{Binding DataContext.ViewUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0,0,0,12"/>

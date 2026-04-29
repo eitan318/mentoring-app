@@ -97,13 +97,6 @@ namespace MentoringApp.Service
 
                 case UserRoleType.Supervisor:
                     var supervisor = new SupervisorModel(dto.Id, dto.Email, dto.UserName, dto.NationalId);
-                    if (dto.GradeId.HasValue && dto.GradeId.Value > 0)
-                    {
-                        var supGradeDto = await _gradeRepo.GetByIdAsync(dto.GradeId.Value) 
-                                        ?? new GradeDao { Id = dto.GradeId.Value, Name = "Unknown", Num = 0 };
-                        supervisor.Grade = new GradeModel { Id = supGradeDto.Id, Name = supGradeDto.Name, Num = supGradeDto.Num };
-                    }
-                    supervisor.ClassNum = dto.ClassNum ?? 0;
 
                     var issueDtos = await _issueRepo.GetAllAsync();
                     var categoryDto = await _issueCategoryRepo.GetAllAsync();

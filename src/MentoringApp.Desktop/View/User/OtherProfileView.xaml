@@ -52,14 +52,16 @@
                         Text="{Binding User.Email}"
                         FontSize="15" Foreground="#374151" FontWeight="Medium"/>
 
-                    <!-- Phone -->
-                    <TextBlock
-                        Text="{Binding [OtherProfile_PhoneNumber_Label], Source={x:Static loc:TranslationSource.Instance}}"
-                        FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
-                        Margin="0,16,0,4"/>
-                    <TextBlock
-                        Text="{Binding User.PhoneNumber}"
-                        FontSize="15" Foreground="#374151" FontWeight="Medium"/>
+                    <!-- Phone — supervisors only -->
+                    <StackPanel Visibility="{Binding IsSupervisor, Converter={StaticResource BoolToVis}}">
+                        <TextBlock
+                            Text="{Binding [OtherProfile_PhoneNumber_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                            FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
+                            Margin="0,16,0,4"/>
+                        <TextBlock
+                            Text="{Binding User.PhoneNumber}"
+                            FontSize="15" Foreground="#374151" FontWeight="Medium"/>
+                    </StackPanel>
 
                     <!-- Gender -->
                     <TextBlock
@@ -87,32 +89,43 @@
                             </TextBlock.Text>
                         </TextBlock>
 
-                        <TextBlock
-                            Text="{Binding [OtherProfile_PreferredMentorGender_Label], Source={x:Static loc:TranslationSource.Instance}}"
-                            FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
-                            Margin="0,16,0,4"/>
-                        <TextBlock
-                            Text="{Binding PreferredMentorGenderDisplay}"
-                            FontSize="15" Foreground="#374151" FontWeight="Medium"/>
+                        <!-- Mentor fields: subject to teach + preferred mentee gender -->
+                        <StackPanel Visibility="{Binding HasMentorProfile, Converter={StaticResource BoolToVis}}">
+                            <TextBlock
+                                Text="{Binding [Register_SubjectToTeach_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                                FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
+                                Margin="0,16,0,4"/>
+                            <TextBlock
+                                Text="{Binding TeachingSubject}"
+                                FontSize="15" Foreground="#374151" FontWeight="Medium"/>
 
-                        <TextBlock
-                            Text="{Binding [OtherProfile_PreferredMenteeGender_Label], Source={x:Static loc:TranslationSource.Instance}}"
-                            FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
-                            Margin="0,16,0,4"/>
-                        <TextBlock
-                            Text="{Binding PreferredMenteeGenderDisplay}"
-                            FontSize="15" Foreground="#374151" FontWeight="Medium"/>
+                            <TextBlock
+                                Text="{Binding [OtherProfile_PreferredMenteeGender_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                                FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
+                                Margin="0,16,0,4"/>
+                            <TextBlock
+                                Text="{Binding PreferredMenteeGenderDisplay}"
+                                FontSize="15" Foreground="#374151" FontWeight="Medium"/>
+                        </StackPanel>
 
-                        <TextBlock
-                            Text="{Binding [OtherProfile_MentoringDetails_Label], Source={x:Static loc:TranslationSource.Instance}}"
-                            FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
-                            Margin="0,16,0,4"/>
-                        <Border Background="#F9FAFB" BorderBrush="#F3F4F6" BorderThickness="1" CornerRadius="8" Padding="12">
-                            <StackPanel>
-                                <TextBlock Text="{Binding TeachingSubject}" FontSize="14" Foreground="#374151" Margin="0,0,0,2"/>
-                                <TextBlock Text="{Binding LearningSubject}" FontSize="14" Foreground="#374151"/>
-                            </StackPanel>
-                        </Border>
+                        <!-- Mentee fields: subject to learn + preferred mentor gender -->
+                        <StackPanel Visibility="{Binding HasMenteeProfile, Converter={StaticResource BoolToVis}}">
+                            <TextBlock
+                                Text="{Binding [Register_SubjectToLearn_Tag], Source={x:Static loc:TranslationSource.Instance}}"
+                                FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
+                                Margin="0,16,0,4"/>
+                            <TextBlock
+                                Text="{Binding LearningSubject}"
+                                FontSize="15" Foreground="#374151" FontWeight="Medium"/>
+
+                            <TextBlock
+                                Text="{Binding [OtherProfile_PreferredMentorGender_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                                FontSize="11" FontWeight="SemiBold" Foreground="#6B7280"
+                                Margin="0,16,0,4"/>
+                            <TextBlock
+                                Text="{Binding PreferredMentorGenderDisplay}"
+                                FontSize="15" Foreground="#374151" FontWeight="Medium"/>
+                        </StackPanel>
 
                     </StackPanel>
 

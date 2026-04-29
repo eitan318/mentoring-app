@@ -12,21 +12,6 @@ namespace MentoringApp.Model.User
     {
         /// <summary>All school class slots assigned to this supervisor.</summary>
         public List<SchoolClassModel> AssignedClasses { get; set; } = new();
-
-        /// <summary>Legacy compat: first assigned class's grade (or null).</summary>
-        public GradeModel? Grade
-        {
-            get => AssignedClasses.FirstOrDefault()?.Grade;
-            set { /* kept for backward compat — do not use to set */ }
-        }
-
-        /// <summary>Legacy compat: first assigned class's ClassNum (or 0).</summary>
-        public int ClassNum
-        {
-            get => AssignedClasses.FirstOrDefault()?.ClassNum ?? 0;
-            set { /* kept for backward compat — do not use to set */ }
-        }
-
         public SupervisorModel() : base() { }
 
         [SetsRequiredMembers]

@@ -1037,7 +1037,7 @@ You may see new pairs appear in your list as students make their selections.</va
   <data name="DB_Subject_Biology" xml:space="preserve">
     <value>Biology</value>
   </data>
-  <data name="כ" xml:space="preserve">
+  <data name="DB_Category_TechnicalIssue" xml:space="preserve">
     <value>Technical Issue</value>
   </data>
   <data name="DB_Category_BehavioralIssue" xml:space="preserve">
@@ -1222,5 +1222,14 @@ You may see new pairs appear in your list as students make their selections.</va
   </data>
   <data name="Student_YourMentor_Label" xml:space="preserve">
     <value>Your Mentor</value>
+  </data>
+  <data name="Admin_ManageUsers_PhoneNumber" xml:space="preserve">
+    <value>Phone number:</value>
+  </data>
+  <data name="/mode." xml:space="preserve">
+    <value>Class</value>
+  </data>
+  <data name="Admin_ManageUsers_Class" xml:space="preserve">
+    <value>Class:</value>
   </data>
 </root>

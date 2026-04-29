@@ -98,8 +98,14 @@ public class NavigationService : INavigationService
     private class ContextReliever : IDisposable
     {
         private readonly Action _onDispose;
+        private bool _disposed;
         public ContextReliever(Action onDispose) => _onDispose = onDispose;
-        public void Dispose() => _onDispose();
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            _onDispose();
+        }
     }
 
     private class NavigationStore : StoreBase

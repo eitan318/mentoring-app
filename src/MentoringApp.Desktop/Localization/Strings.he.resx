@@ -1037,7 +1037,7 @@
   <data name="DB_Subject_Biology" xml:space="preserve">
     <value>ביולוגיה</value>
   </data>
-  <data name="כ" xml:space="preserve">
+  <data name="DB_Category_TechnicalIssue" xml:space="preserve">
     <value>בעיה טכנית</value>
   </data>
   <data name="DB_Category_BehavioralIssue" xml:space="preserve">
@@ -1222,5 +1222,20 @@
   </data>
   <data name="Student_YourMentor_Label" xml:space="preserve">
     <value>החונך שלך</value>
+  </data>
+  <data name="Issue_Forward_Button" xml:space="preserve">
+    <value>קדם בעיה לאדמין</value>
+  </data>
+  <data name="Admin_ManageUsers_PhoneNumber" xml:space="preserve">
+    <value>מספר טלפון:</value>
+  </data>
+  <data name="Sונחקבא אם אקשבי שמג דונחקבא אם ךקש" xml:space="preserve">
+    <value>כיתה</value>
+  </data>
+  <data name="/mode." xml:space="preserve">
+    <value>כיתה</value>
+  </data>
+  <data name="Admin_ManageUsers_Class" xml:space="preserve">
+    <value>כיתה</value>
   </data>
 </root>
