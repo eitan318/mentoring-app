@@ -1,0 +1,22 @@
+@page "/authenticated"
+@rendermode InteractiveServer
+@using MentoringApp.ViewModel.ViewModel.User
+@inject AuthenticatedDashboardViewModel ViewModel
+
+@*
+    Intermediate routing page that mirrors the AuthenticatedDashboardViewModel shell:
+    OnNavigatedToAsync inspects the current user and triggers the role-specific
+    NavigateToAsync<...>() call — which our WebNavigationService translates into
+    a URL change to /student, /supervisor, /admin, etc.
+*@
+
+<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',sans-serif;color:#6B7280;">
+    Redirecting…
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.OnNavigatedToAsync();
+    }
+}

@@ -1,0 +1,159 @@
+@page "/issue"
+@rendermode InteractiveServer
+@layout MentoringApp.Web.Components.Layout.AuthenticatedLayout
+@implements IDisposable
+@using System.ComponentModel
+@using MentoringApp.ViewModel.ViewModel.User
+@using MentoringApp.ViewModel.IService
+@using MentoringApp.ViewModel.Localization
+@using MentoringApp.Web.Services
+@inject IssueViewModel Vm
+@inject ILocalizationService Loc
+@inject NavigationParameterStore ParamStore
+
+@*
+    Mirrors IssueView.xaml — bound 1:1 to IssueViewModel.
+    Receives issueId via NavigationParameterStore (parameter type: int).
+*@
+
+<div class="issue-root" dir="@Dir">
+    @if (Vm.CurrentIssue == null)
+    {
+        <div class="loading">Loading…</div>
+    }
+    else
+    {
+        <div class="title">@Loc.Get("Issue_Title")</div>
+        @if (!string.IsNullOrEmpty(Vm.RelatedPairName))
+        {
+            <div class="pair-name">@Vm.RelatedPairName</div>
+        }
+
+        @* ── Category ────────────────────────────────────────────────────── *@
+        <div class="field-label">@Loc.Get("Issue_Category_Label")</div>
+        <div class="category-pill">@Vm.CurrentIssue.Category?.Name</div>
+
+        @* ── Description ────────────────────────────────────────────────── *@
+        <div class="field-label">@Loc.Get("Issue_Description_Label")</div>
+        <div class="description-box">@Vm.CurrentIssue.Description</div>
+
+        @* ── Forwarded badge ───────────────────────────────────────────── *@
+        @if (Vm.CurrentIssue.IsForwardedToAdmin)
+        {
+            <div class="forwarded-badge">@Loc.Get("Issue_ForwardedBadge")</div>
+        }
+
+        @* ── Actions ────────────────────────────────────────────────────── *@
+        <div class="actions">
+            @if (Vm.CanForward && !Vm.CurrentIssue.IsForwardedToAdmin)
+            {
+                <button class="btn-secondary"
+                        title="@Loc.Get("Issue_Forward_Tooltip")"
+                        @onclick="async () => await Vm.ForwardToAdminCommand.ExecuteAsync(null)">
+                    @Loc.Get("Issue_Forward_Button")
+                </button>
+            }
+            @if (!Vm.CurrentIssue.IsResolved)
+            {
+                <button class="btn-primary"
+                        title="@Loc.Get("Issue_Resolve_Tooltip")"
+                        @onclick="async () => await Vm.ResolveIssueCommand.ExecuteAsync(null)">
+                    @Loc.Get("Issue_Resolve_Button")
+                </button>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .issue-root {
+        background: #F4F7FE;
+        min-height: 100%;
+        padding: 32px 40px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .loading { color: #6B7280; padding: 40px 0; text-align: center; }
+
+    .title {
+        font-size: 20px; font-weight: bold;
+        color: #111827; margin-bottom: 4px;
+    }
+    .pair-name {
+        font-size: 13px; color: #A855F7;
+        font-style: italic; margin-bottom: 20px;
+    }
+
+    .field-label {
+        font-size: 11px; font-weight: 600;
+        color: #6B7280; margin: 0 0 6px;
+    }
+    .category-pill {
+        display: inline-block;
+        background: #F3F4F6; color: #374151;
+        border-radius: 8px; padding: 8px 12px;
+        font-size: 14px; margin-bottom: 20px;
+    }
+    .description-box {
+        background: #F9FAFB;
+        border: 1px solid #F3F4F6;
+        border-radius: 8px; padding: 12px;
+        font-size: 14px; color: #374151;
+        white-space: pre-wrap; margin-bottom: 20px;
+    }
+
+    .forwarded-badge {
+        display: inline-block;
+        background: #FEF3C7;
+        border: 1px solid #FDE68A;
+        color: #92400E;
+        font-size: 12px; font-weight: 600;
+        padding: 8px 12px; border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .actions {
+        display: flex; gap: 8px;
+        justify-content: flex-end;
+    }
+    .btn-secondary {
+        background: #F3F4F6; color: #4B5563;
+        border: 0; padding: 8px 16px;
+        border-radius: 8px; font-weight: 600;
+        font-size: 14px; cursor: pointer;
+    }
+    .btn-secondary:hover { background: #E5E7EB; }
+
+    .btn-primary {
+        background: #A855F7; color: white;
+        border: 0; padding: 8px 16px;
+        border-radius: 8px; font-weight: 600;
+        font-size: 14px; cursor: pointer;
+    }
+    .btn-primary:hover { background: #9333EA; }
+</style>
+
+@code {
+    private string Dir => TranslationSource.Instance.IsRtl ? "rtl" : "ltr";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Vm.PropertyChanged += OnVmChanged;
+        TranslationSource.Instance.PropertyChanged += OnLocChanged;
+
+        var issueId = ParamStore.Take<int>(typeof(IssueViewModel));
+        if (issueId > 0)
+            await Vm.OnNavigatedToAsync(issueId);
+    }
+
+    private void OnVmChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private void OnLocChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Vm.PropertyChanged -= OnVmChanged;
+        TranslationSource.Instance.PropertyChanged -= OnLocChanged;
+    }
+}

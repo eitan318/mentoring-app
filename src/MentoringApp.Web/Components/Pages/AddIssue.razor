@@ -1,0 +1,129 @@
+@page "/add-issue"
+@rendermode InteractiveServer
+@layout MentoringApp.Web.Components.Layout.AuthenticatedLayout
+@implements IDisposable
+@using System.ComponentModel
+@using MentoringApp.Model
+@using MentoringApp.ViewModel.ViewModel.Student
+@using MentoringApp.ViewModel.IService
+@using MentoringApp.ViewModel.Localization
+@using MentoringApp.Web.Services
+@inject AddIssueViewModel Vm
+@inject ILocalizationService Loc
+@inject NavigationParameterStore ParamStore
+
+@*
+    Mirrors AddIssueView.xaml — bound 1:1 to AddIssueViewModel.
+    Receives IssueCategoryList via NavigationParameterStore (parameter type: IEnumerable<IssueCategoryModel>).
+*@
+
+<div class="issue-root" dir="@Dir">
+    <div class="issue-card">
+        <div class="title">@Loc.Get("Issue_Title")</div>
+
+        <div class="field-label">@Loc.Get("Issue_Description_Label")</div>
+        <input class="field-input"
+               value="@Vm.IssueDescription"
+               @oninput="e => Vm.IssueDescription = e.Value?.ToString() ?? string.Empty"
+               @onkeydown="OnKeyDown" />
+
+        <div class="field-label">@Loc.Get("Issue_Category_Label")</div>
+        <select class="field-input"
+                value="@(Vm.SelectedIssueCategory?.Id.ToString() ?? "")"
+                @onchange="OnCategoryChanged">
+            <option value=""></option>
+            @foreach (var c in Vm.IssueCategoryList)
+            {
+                <option value="@c.Id" selected="@(Vm.SelectedIssueCategory?.Id == c.Id)">@c.Name</option>
+            }
+        </select>
+
+        <div class="actions">
+            <button class="btn-primary"
+                    @onclick="async () => await Vm.AddIssueCommand.ExecuteAsync(null)">
+                @Loc.Get("Issue_Submit_Button")
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .issue-root {
+        background: #F4F7FE;
+        min-height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        padding: 40px 24px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .issue-card {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        max-width: 480px; width: 100%;
+        box-shadow: 0 2px 15px rgba(0,0,0,.06);
+    }
+    .title {
+        font-size: 20px; font-weight: bold;
+        color: #111827; margin-bottom: 20px;
+    }
+    .field-label {
+        font-size: 12px; font-weight: 600;
+        color: #374151; margin: 0 0 6px;
+    }
+    .field-input {
+        width: 100%; box-sizing: border-box;
+        padding: 10px 8px; font-size: 14px;
+        border: 1px solid #E5E7EB; border-radius: 6px;
+        outline: none; background: white;
+        margin-bottom: 16px;
+    }
+    .field-input:focus { border-color: #4E6EF2; }
+    .actions { display: flex; justify-content: flex-end; }
+    .btn-primary {
+        background: #A855F7; color: white;
+        border: 0; padding: 10px 16px;
+        border-radius: 8px; font-weight: 600;
+        font-size: 14px; cursor: pointer;
+    }
+    .btn-primary:hover { background: #9333EA; }
+    .btn-primary:disabled { opacity: .5; cursor: default; }
+</style>
+
+@code {
+    private string Dir => TranslationSource.Instance.IsRtl ? "rtl" : "ltr";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Vm.PropertyChanged += OnVmChanged;
+        TranslationSource.Instance.PropertyChanged += OnLocChanged;
+
+        var categories = ParamStore.Take<IEnumerable<IssueCategoryModel>>(typeof(AddIssueViewModel))
+                         ?? Enumerable.Empty<IssueCategoryModel>();
+        await Vm.OnNavigatedToAsync(categories);
+    }
+
+    private void OnVmChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private void OnLocChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private void OnCategoryChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+            Vm.SelectedIssueCategory = Vm.IssueCategoryList.FirstOrDefault(c => c.Id == id);
+        else
+            Vm.SelectedIssueCategory = null;
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Vm.AddIssueCommand.ExecuteAsync(null);
+    }
+
+    public void Dispose()
+    {
+        Vm.PropertyChanged -= OnVmChanged;
+        TranslationSource.Instance.PropertyChanged -= OnLocChanged;
+    }
+}

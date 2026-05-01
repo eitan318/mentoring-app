@@ -12,7 +12,7 @@ using MentoringApp.ViewModel.ViewModel.Admin;
 using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
-using System.Windows.Threading;
+using System.Threading;
 
 namespace MentoringApp.ViewModel.ViewModel.Supervisor;
 
@@ -50,7 +50,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
     public bool ArePairsAndIssuesVisible => !IsPhase1Active;
 
-    private DispatcherTimer? _timer;
+    private CancellationTokenSource? _timerCts;
     private DateTime? _tier1Deadline;
     private DateTime? _tier3Deadline;
     private bool _isPhase1Complete;
@@ -289,11 +289,23 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
     private void SetupTimer()
     {
-        _timer?.Stop();
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _timer.Tick += (s, e) => UpdatePhaseTimer();
+        _timerCts?.Cancel();
+        _timerCts = new CancellationTokenSource();
+        _ = RunTimerAsync(_timerCts.Token);
+    }
+
+    private async Task RunTimerAsync(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         UpdatePhaseTimer();
-        _timer.Start();
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                UpdatePhaseTimer();
+            }
+        }
+        catch (OperationCanceledException) { }
     }
 
     private void UpdatePhaseTimer()

@@ -5,9 +5,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
              xmlns:components="clr-namespace:MentoringApp.View.Components"
-             xmlns:loc="clr-namespace:MentoringApp.Localization"
+             xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
              mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="900"
-             FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+                 FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, 
+                   Path=FlowDirection, 
+                   Converter={StaticResource FlowConverter}}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>

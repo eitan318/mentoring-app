@@ -4,10 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:components="clr-namespace:MentoringApp.View.Components"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:loc="clr-namespace:MentoringApp.Localization"
+    xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:studentvm="clr-namespace:MentoringApp.ViewModel.ViewModel.Student;assembly=MentoringApp.ViewModel"
-    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, 
+                   Path=FlowDirection, 
+                   Converter={StaticResource FlowConverter}}"
     mc:Ignorable="d">
 
     <UserControl.Resources>

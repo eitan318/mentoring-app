@@ -1,5 +1,6 @@
 using MentoringApp.Service;
 using MentoringApp.ViewModel.IService;
+using MentoringApp.ViewModel.Service;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.DI;

@@ -10,7 +10,7 @@ using MentoringApp.ViewModel.ViewModel.Supervisor;
 using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
-using System.Windows.Threading;
+using System.Threading;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
@@ -49,7 +49,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     private readonly NotificationApiClient _notificationClient;
     private readonly IToastService _toastService;
     private readonly ILocalizationService _loc;
-    private readonly DispatcherTimer _uiUpdateTimer;
+    private CancellationTokenSource? _timerCts;
 
     [ObservableProperty] private string _operationResult = string.Empty;
     [ObservableProperty] private bool _hasOperationResult;
@@ -125,13 +125,22 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         _notificationClient = notificationClient;
         _toastService = toastService;
         _loc = loc;
-
-        _uiUpdateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _uiUpdateTimer.Tick += OnTimerTick;
-        _uiUpdateTimer.Start();
     }
 
-    private void OnTimerTick(object? sender, EventArgs e)
+    private async Task RunTimerAsync(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                OnTimerTick();
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private void OnTimerTick()
     {
         if (!ActiveDeadline.HasValue) { DeadlineTimeRemaining = string.Empty; return; }
         var remaining = ActiveDeadline.Value - DateTime.Now;
@@ -140,8 +149,17 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             : $"{remaining.Days}d {remaining.Hours:D2}h {remaining.Minutes:D2}m {remaining.Seconds:D2}s";
     }
 
-    public async Task OnNavigatedToAsync() => await LoadDataAsync();
-    public Task OnNavigatedFromAsync() { _uiUpdateTimer.Stop(); return Task.CompletedTask; }
+    public async Task OnNavigatedToAsync()
+    {
+        if (_timerCts == null || _timerCts.IsCancellationRequested)
+        {
+            _timerCts = new CancellationTokenSource();
+            _ = RunTimerAsync(_timerCts.Token);
+        }
+        await LoadDataAsync();
+    }
+    
+    public Task OnNavigatedFromAsync() { _timerCts?.Cancel(); return Task.CompletedTask; }
 
     private async Task LoadDataAsync()
     {
