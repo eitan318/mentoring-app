@@ -1,0 +1,233 @@
+@page "/student"
+@rendermode InteractiveServer
+@layout MentoringApp.Web.Components.Layout.AuthenticatedLayout
+@implements IDisposable
+@using System.ComponentModel
+@using MentoringApp.ViewModel.ViewModel.Student
+@using MentoringApp.ViewModel.IService
+@using MentoringApp.ViewModel.Localization
+@using MentoringApp.ApiClient.Models
+@inject StudentDashboardViewModel ViewModel
+@inject ILocalizationService Loc
+
+@*
+    Blazor equivalent of StudentDashboardView.xaml.
+
+    Binding strategy:
+    - INotifyPropertyChanged          → ViewModel.PropertyChanged += StateHasChanged
+    - ObservableCollection<object>    → @foreach (re-renders on PropertyChanged)
+    - SelectedItem (tab)              → @onclick sets ViewModel.SelectedPair
+    - Type-based DataTemplates        → @if/else if pattern matching on SelectedPair type
+    - FlowDirection (RTL/LTR)         → dir="@Dir" on root element
+    - Localization {Binding [Key]…}   → @Loc.Get("Key")
+*@
+
+<div class="dash-root" dir="@Dir">
+
+    @* ── Phase banner ─────────────────────────────────────────────── *@
+    @if (ViewModel.IsPhaseBannerVisible)
+    {
+        <div class="banner" style="background:@ViewModel.BannerColor;color:@ViewModel.BannerTextColor">
+            <div class="banner-row">
+                <span class="banner-title">@ViewModel.BannerTitle</span>
+                <button class="info-btn"
+                        style="color:@ViewModel.BannerTextColor"
+                        title="Click for details about the current phase"
+                        @onclick="async () => await ViewModel.ShowPhaseInfoCommand.ExecuteAsync(null)">🛈</button>
+            </div>
+            <div class="banner-sub">@ViewModel.BannerSubtitle</div>
+            <div class="banner-timer">@ViewModel.BannerTimer</div>
+        </div>
+    }
+
+    @* ── Tab bar ──────────────────────────────────────────────────── *@
+    <div class="tab-bar">
+        @foreach (var tab in ViewModel.Pairs)
+        {
+            <div class="tab @(tab == ViewModel.SelectedPair ? "tab-active" : "")"
+                 @onclick="() => ViewModel.SelectedPair = tab">
+                @TabLabel(tab)
+            </div>
+        }
+    </div>
+
+    @* ── Tab content ──────────────────────────────────────────────── *@
+    <div class="tab-content">
+        @switch (ViewModel.SelectedPair)
+        {
+            case MentorDashboardViewModel mentor:
+                <MentorTabContent Vm="mentor" />
+                break;
+            case MenteeDashboardViewModel mentee:
+                <MenteeTabContent Vm="mentee" />
+                break;
+            case BrowseMentorsViewModel browse:
+                <BrowseMentorsContent Vm="browse" />
+                break;
+            case SelectionGalleryViewModel gallery:
+                <SelectionGalleryContent Vm="gallery" />
+                break;
+            case MentorRequestsViewModel requests:
+                <MentorRequestsContent Vm="requests" />
+                break;
+        }
+    </div>
+
+</div>
+
+<style>
+    .dash-root {
+        background: #F4F7FE;
+        min-height: 100vh;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .banner {
+        margin: 16px 24px 0;
+        padding: 14px 16px;
+        border-radius: 12px;
+    }
+
+    .banner-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+    }
+
+    .banner-title {
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    .info-btn {
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .banner-sub {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-bottom: 4px;
+    }
+
+    .banner-timer {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .tab-bar {
+        background: white;
+        border-bottom: 1px solid #F3F4F6;
+        padding: 0 16px;
+        display: flex;
+    }
+
+    .tab {
+        padding: 14px 12px;
+        cursor: pointer;
+        color: #6B7280;
+        border-bottom: 3px solid transparent;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .tab:hover {
+        background: #F9FAFB;
+    }
+
+    .tab-active {
+        color: #A855F7;
+        border-bottom-color: #A855F7;
+    }
+
+    .tab-content {
+        padding: 16px 24px;
+    }
+
+    [dir="rtl"] .banner,
+    [dir="rtl"] .tab-content {
+        direction: rtl;
+    }
+</style>
+
+@code {
+    private readonly List<INotifyPropertyChanged> _subscribed = new();
+
+    private string Dir =>
+        TranslationSource.Instance.IsRtl ? "rtl" : "ltr";
+
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel.PropertyChanged += OnVmPropertyChanged;
+        ViewModel.Pairs.CollectionChanged += OnPairsChanged;
+        TranslationSource.Instance.PropertyChanged += OnLocChanged;
+
+        await ViewModel.OnNavigatedToAsync();
+        ResubscribeToTabs();
+    }
+
+    private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.SelectedPair))
+        {
+            ResubscribeToTabs();
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnPairsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        ResubscribeToTabs();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnLocChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private void OnTabPropertyChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    /// <summary>
+    /// Re-subscribe to PropertyChanged on every tab VM and the SelectedPair so deep
+    /// updates (e.g. RecentReviews loaded async) propagate to the UI.
+    /// </summary>
+    private void ResubscribeToTabs()
+    {
+        foreach (var vm in _subscribed)
+            vm.PropertyChanged -= OnTabPropertyChanged;
+        _subscribed.Clear();
+
+        foreach (var pair in ViewModel.Pairs)
+        {
+            if (pair is INotifyPropertyChanged inpc)
+            {
+                inpc.PropertyChanged += OnTabPropertyChanged;
+                _subscribed.Add(inpc);
+            }
+        }
+    }
+
+    /// <summary>Returns the display label for a tab VM (mirrors the WPF DataTemplates).</summary>
+    private string TabLabel(object pair) => pair switch
+    {
+        MentorDashboardViewModel m   => m.Counterpart?.UserName ?? "Mentee",
+        MenteeDashboardViewModel m   => m.Counterpart?.UserName ?? "Mentor",
+        BrowseMentorsViewModel b     => b.TabLabel,
+        SelectionGalleryViewModel s  => s.TabLabel,
+        MentorRequestsViewModel r    => r.TabLabel,
+        _                            => pair?.ToString() ?? string.Empty
+    };
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnVmPropertyChanged;
+        ViewModel.Pairs.CollectionChanged -= OnPairsChanged;
+        TranslationSource.Instance.PropertyChanged -= OnLocChanged;
+        foreach (var vm in _subscribed)
+            vm.PropertyChanged -= OnTabPropertyChanged;
+        _subscribed.Clear();
+    }
+}

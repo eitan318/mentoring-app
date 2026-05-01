@@ -12,7 +12,7 @@ using MentoringApp.ViewModel.ViewModel.Admin;
 using MentoringApp.ViewModel.ViewModel.Student;
 using MentoringApp.ViewModel.ViewModel.Supervisor;
 using MentoringApp.ViewModel.ViewModelHelper;
-using Microsoft.Win32;
+using MentoringApp.ViewModel.IService;
 using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
@@ -23,6 +23,7 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     private readonly UserApiClient _userClient;
     private readonly ReferenceApiClient _referenceClient;
     private readonly INavigationService _navigationService;
+    private readonly IFileService _fileService;
 
     [ObservableProperty] private bool _isReadOnly = true;
     [ObservableProperty] private bool _isEditMode = false;
@@ -135,12 +136,14 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
         UserStore userStore,
         UserApiClient userClient,
         ReferenceApiClient referenceClient,
-        INavigationService navigationService)
+        INavigationService navigationService,
+        IFileService fileService)
     {
         _userStore = userStore;
         _userClient = userClient;
         _referenceClient = referenceClient;
         _navigationService = navigationService;
+        _fileService = fileService;
     }
 
     public async Task OnNavigatedToAsync()
@@ -275,18 +278,13 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     [RelayCommand]
     private async Task UploadProfilePictureAsync()
     {
-        var dialog = new OpenFileDialog
-        {
-            Title = "Select a Profile Picture",
-            Filter = "Image Files|*.jpg;*.jpeg;*.png",
-            Multiselect = false
-        };
+        var filePath = _fileService.OpenFile("Image Files|*.jpg;*.jpeg;*.png");
 
-        if (dialog.ShowDialog() != true || CurrentUser == null) return;
+        if (string.IsNullOrEmpty(filePath) || CurrentUser == null) return;
 
         try
         {
-            var newPath = await _userClient.UploadProfilePictureAsync(CurrentUser.Id, dialog.FileName);
+            var newPath = await _userClient.UploadProfilePictureAsync(CurrentUser.Id, filePath);
             if (newPath != null)
             {
                 var updated = await _userClient.GetByIdAsync(CurrentUser.Id);

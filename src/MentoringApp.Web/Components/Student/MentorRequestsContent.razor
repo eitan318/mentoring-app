@@ -1,0 +1,103 @@
+@using MentoringApp.ViewModel.ViewModel.Student
+
+@*
+    Mirrors the MentorRequestsViewModel DataTemplate (mentor-side).
+    Shows pending pair requests with Accept / Decline actions in Phase 1.
+*@
+
+<div class="scroll">
+    <div class="title">Mentoring requests</div>
+
+    @if (!Vm.IsPhase2Active)
+    {
+        <div class="subtitle">Students who have requested you as their mentor.</div>
+        <div class="subtitle">@Vm.RequestWindowTimerDisplay</div>
+    }
+    else
+    {
+        <div class="subtitle">No action required — you will be notified once paired.</div>
+    }
+
+    @if (Vm.HasStatusMessage)
+    {
+        <div class="status-msg">@Vm.StatusMessage</div>
+    }
+
+    @if (Vm.IsLoading)
+    {
+        <div class="loading">Loading…</div>
+    }
+
+    @foreach (var req in Vm.PendingRequests)
+    {
+        <div class="req-row">
+            <div class="req-info">
+                <div class="req-name">@req.MenteeName</div>
+                <div class="req-subject">@req.MenteeSubjectName</div>
+                <div class="req-date">Requested: @FormatDate(req.CreatedAt)</div>
+            </div>
+            @if (!Vm.IsPhase2Active)
+            {
+                <div class="req-actions">
+                    <button class="btn-primary"
+                            @onclick="async () => await Vm.AcceptRequestCommand.ExecuteAsync(req)">
+                        Accept
+                    </button>
+                    <button class="btn-danger"
+                            @onclick="async () => await Vm.RejectRequestCommand.ExecuteAsync(req)">
+                        Decline
+                    </button>
+                </div>
+            }
+        </div>
+    }
+
+    @if (!Vm.IsPhase2Active)
+    {
+        <div class="footnote">Accepting a request will create an active pair.</div>
+    }
+</div>
+
+<style>
+    .scroll { overflow-y: auto; }
+    .title { font-size: 18px; font-weight: bold; color: #111827; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #6B7280; margin-bottom: 4px; }
+    .footnote {
+        font-size: 12px; color: #9CA3AF; margin-top: 12px;
+    }
+    .status-msg {
+        background: #EFF6FF; color: #1D4ED8;
+        padding: 8px 12px; border-radius: 8px;
+        font-size: 13px; margin: 12px 0;
+    }
+    .loading { font-size: 13px; color: #9CA3AF; margin-bottom: 12px; }
+    .req-row {
+        background: #F9FAFB; border-radius: 12px;
+        padding: 16px; margin: 12px 0 8px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .req-info { flex: 1; }
+    .req-name { font-size: 14px; font-weight: 600; color: #111827; }
+    .req-subject { font-size: 12px; color: #6B7280; margin-top: 2px; }
+    .req-date { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+    .req-actions { display: flex; gap: 8px; }
+    .btn-primary {
+        background: #A855F7; color: white; border: 0;
+        padding: 8px 14px; border-radius: 8px; font-weight: 600;
+        font-size: 13px; cursor: pointer;
+    }
+    .btn-primary:hover { background: #9333EA; }
+    .btn-danger {
+        background: #FEF2F2; color: #DC2626; border: 0;
+        padding: 8px 14px; border-radius: 8px; font-weight: 600;
+        font-size: 13px; cursor: pointer;
+    }
+    .btn-danger:hover { background: #FECACA; }
+</style>
+
+@code {
+    [Parameter, EditorRequired] public MentorRequestsViewModel Vm { get; set; } = default!;
+
+    private static string FormatDate(string raw) =>
+        DateTime.TryParse(raw, out var dt) ? dt.ToString("d") : raw;
+}

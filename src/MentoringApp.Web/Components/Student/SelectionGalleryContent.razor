@@ -1,0 +1,89 @@
+@using MentoringApp.ViewModel.ViewModel.Student
+
+@*
+    Mirrors the SelectionGalleryViewModel DataTemplate (Phase 2 mentee).
+    Top mentor recommendations ranked by compatibility — pick one.
+*@
+
+<div class="scroll">
+    <div class="title">Your top mentor matches</div>
+    <div class="subtitle">Ranked by compatibility. Choose one — your selection is final.</div>
+
+    @if (Vm.AlreadyMatched)
+    {
+        <div class="success-msg">You are matched! Check the new tab.</div>
+    }
+
+    @if (Vm.HasStatusMessage)
+    {
+        <div class="status-msg">@Vm.StatusMessage</div>
+    }
+
+    @if (Vm.IsLoading)
+    {
+        <div class="loading">Loading…</div>
+    }
+
+    @foreach (var rec in Vm.Recommendations)
+    {
+        <div class="rec-card">
+            <div class="rec-info">
+                <div class="rec-name">@rec.MentorName</div>
+                <div class="rec-subject">@rec.MentorSubjectName</div>
+                <button class="btn-primary"
+                        disabled="@Vm.AlreadyMatched"
+                        @onclick="async () => await Vm.ChooseMentorCommand.ExecuteAsync(rec)">
+                    Choose this mentor
+                </button>
+            </div>
+            <div class="score-badge">
+                <div class="score">@($"{rec.ScorePercent:0}%")</div>
+                <div class="score-label">match</div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .scroll { overflow-y: auto; }
+    .title { font-size: 18px; font-weight: bold; color: #111827; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #6B7280; margin-bottom: 16px; }
+    .success-msg {
+        background: #ECFDF5; color: #059669;
+        font-weight: 600; padding: 8px 12px;
+        border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+    }
+    .status-msg {
+        background: #EFF6FF; color: #1D4ED8;
+        padding: 8px 12px; border-radius: 8px;
+        font-size: 13px; margin-bottom: 12px;
+    }
+    .loading { font-size: 13px; color: #9CA3AF; margin-bottom: 12px; }
+    .rec-card {
+        background: white; border-radius: 12px;
+        padding: 16px; margin-bottom: 12px;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 2px 12px rgba(0,0,0,.04);
+    }
+    .rec-info { flex: 1; }
+    .rec-name { font-size: 15px; font-weight: 600; color: #111827; }
+    .rec-subject { font-size: 12px; color: #6B7280; margin: 2px 0 12px; }
+    .score-badge {
+        background: #EFF6FF; color: #3B82F6;
+        padding: 12px 16px; border-radius: 12px;
+        text-align: center; min-width: 80px;
+    }
+    .score { font-size: 22px; font-weight: bold; }
+    .score-label { font-size: 10px; }
+    .btn-primary {
+        background: #A855F7; color: white; border: 0;
+        padding: 8px 14px; border-radius: 8px; font-weight: 600;
+        font-size: 13px; cursor: pointer;
+    }
+    .btn-primary:hover:not(:disabled) { background: #9333EA; }
+    .btn-primary:disabled { opacity: .55; cursor: default; }
+</style>
+
+@code {
+    [Parameter, EditorRequired] public SelectionGalleryViewModel Vm { get; set; } = default!;
+}

@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using System.Windows.Data;
-using MentoringApp.Localization;
+using MentoringApp.ViewModel.Localization;
 
 namespace MentoringApp.Converter
 {

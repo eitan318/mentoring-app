@@ -108,41 +108,6 @@ namespace MentoringApp.Tests.Model
             supervisor.Problematicness().Should().Be(supervisor.PendingCount);
         }
 
-        [Fact]
-        public void Grade_ReturnsNull_WhenNoAssignedClasses()
-        {
-            var supervisor = MakeSupervisor();
 
-            supervisor.Grade.Should().BeNull();
-        }
-
-        [Fact]
-        public void Grade_ReturnsFirstAssignedClassGrade()
-        {
-            var supervisor = MakeSupervisor();
-            var grade = MakeGrade(10);
-            supervisor.AssignedClasses.Add(new SchoolClassModel { Grade = grade, ClassNum = 2 });
-            supervisor.AssignedClasses.Add(new SchoolClassModel { Grade = MakeGrade(11), ClassNum = 3 });
-
-            supervisor.Grade.Should().Be(grade);
-        }
-
-        [Fact]
-        public void ClassNum_ReturnsZero_WhenNoAssignedClasses()
-        {
-            var supervisor = MakeSupervisor();
-
-            supervisor.ClassNum.Should().Be(0);
-        }
-
-        [Fact]
-        public void ClassNum_ReturnsFirstAssignedClassNum()
-        {
-            var supervisor = MakeSupervisor();
-            supervisor.AssignedClasses.Add(MakeSchoolClass(9, 5));
-            supervisor.AssignedClasses.Add(MakeSchoolClass(10, 3));
-
-            supervisor.ClassNum.Should().Be(5);
-        }
     }
 }
