@@ -9,8 +9,8 @@ public class UserApiClient(HttpClient http) : ApiClientBase(http)
     public Task<IEnumerable<UserModel>> GetAllAsync() =>
         GetAsync<IEnumerable<UserModel>>("/api/users");
 
-    public Task<IEnumerable<UserModel>> GetStudentsBySupervisorAsync(int supervisorId) =>
-        GetAsync<IEnumerable<UserModel>>($"/api/users/students/by-supervisor/{supervisorId}");
+    public Task<IEnumerable<StudentModel>> GetStudentsBySupervisorAsync(int supervisorId) =>
+        GetAsync<IEnumerable<StudentModel>>($"/api/users/students/by-supervisor/{supervisorId}");
 
     public Task<UserModel> GetByIdAsync(int id) =>
         GetAsync<UserModel>($"/api/users/{id}");

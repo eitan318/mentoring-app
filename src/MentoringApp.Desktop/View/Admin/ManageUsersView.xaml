@@ -155,7 +155,18 @@
                                  Tag="{Binding [Admin_ManageUsers_SearchHint], Source={x:Static loc:TranslationSource.Instance}}"/>
                         <Border Grid.Column="1" Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="12,4">
                             <ComboBox ItemsSource="{Binding RoleOptions}" SelectedItem="{Binding SelectedRole}" MinWidth="120" BorderThickness="0" Background="Transparent" Foreground="#374151" FontWeight="Medium">
-                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding}"/></DataTemplate></ComboBox.ItemTemplate>
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="ManageUsers_RoleFilter_">
+                                                    <Binding Path="."/>
+                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
                             </ComboBox>
                         </Border>
                     </Grid>
@@ -207,9 +218,9 @@
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="1" Text="Name" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
-                            <TextBlock Grid.Column="2" Text="Email" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
-                            <TextBlock Grid.Column="3" Text="Role" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
+                            <TextBlock Grid.Column="1" Text="{Binding [Admin_ManageUsers_Name_Column], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
+                            <TextBlock Grid.Column="2" Text="{Binding [Admin_ManageUsers_Email_Column], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
+                            <TextBlock Grid.Column="3" Text="{Binding [Table_Role], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
                         </Grid>
                         <Rectangle Grid.Row="0" Height="1" Fill="#F3F4F6" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
 
@@ -250,7 +261,14 @@
                                         <TextBlock Grid.Column="1" Text="{Binding UserName}" VerticalAlignment="Center" FontWeight="Medium" Foreground="#111827"/>
                                         <TextBlock Grid.Column="2" Text="{Binding Email}" VerticalAlignment="Center" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
                                         <Border Grid.Column="3" Background="#F3F4F6" CornerRadius="10" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Role}" Foreground="#374151" FontSize="11" FontWeight="SemiBold"/>
+                                            <TextBlock Foreground="#374151" FontSize="11" FontWeight="SemiBold">
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Role_">
+                                                        <Binding Path="Role"/>
+                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
                                         </Border>
                                     </Grid>
                                 </DataTemplate>
@@ -308,9 +326,10 @@
                                     <TextBlock Text="{Binding [Admin_ManageUsers_Class], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,12"/>
                                     <TextBlock Foreground="#111827" FontWeight="Medium">
                                         <TextBlock.Text>
-                                            <MultiBinding StringFormat="{}{0} · Class {1}">
+                                            <MultiBinding Converter="{StaticResource LocalizedFormat}" ConverterParameter="ManageUsers_GradeClass_Format">
                                                 <Binding Path="Grade.Name"/>
                                                 <Binding Path="ClassNum"/>
+                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
                                             </MultiBinding>
                                         </TextBlock.Text>
                                     </TextBlock>

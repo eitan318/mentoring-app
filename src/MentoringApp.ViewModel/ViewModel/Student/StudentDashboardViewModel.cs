@@ -83,6 +83,9 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         _browseMentorsVm = browseMentorsVm;
         _selectionGalleryVm = selectionGalleryVm;
         _mentorRequestsVm = mentorRequestsVm;
+
+        _selectionGalleryVm.OnPairCreated = LoadDataAsync;
+        _mentorRequestsVm.OnPairCreated = LoadDataAsync;
     }
 
     public async Task OnNavigatedToAsync() => await LoadDataAsync();
@@ -262,6 +265,8 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
     [ObservableProperty] private bool _hasStatusMessage;
     [ObservableProperty] private bool _alreadyMatched;
 
+    public Func<Task>? OnPairCreated { get; set; }
+
     public SelectionGalleryViewModel(MatchingApiClient matchingClient, UserStore userStore, ILocalizationService loc)
     {
         _matchingClient = matchingClient;
@@ -297,6 +302,7 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
             await _matchingClient.GalleryPickAsync(new GalleryPickRequest(currentUser.Id, recommendation.MentorId, 1));
             AlreadyMatched = true;
             StatusMessage = _loc.Format("Student_MatchedWith_Message", recommendation.MentorName);
+            if (OnPairCreated != null) await OnPairCreated();
         }
         catch (Exception ex)
         {
@@ -324,6 +330,8 @@ public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.Vi
     [ObservableProperty] private bool _hasStatusMessage;
     [ObservableProperty] private string _requestWindowTimerDisplay = string.Empty;
     [ObservableProperty] private bool _isPhase2Active;
+
+    public Func<Task>? OnPairCreated { get; set; }
 
     public int AssignedSupervisorId { get; set; } = 1;
 
@@ -369,6 +377,7 @@ public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.Vi
         {
             await _matchingClient.AcceptRequestAsync(request.Id, new AcceptRequestBody(AssignedSupervisorId));
             StatusMessage = _loc.Format("Student_AcceptedPaired_Message", request.MenteeName);
+            if (OnPairCreated != null) await OnPairCreated();
         }
         catch (Exception ex)
         {
@@ -440,7 +449,11 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
 
         foreach (var mentor in availableMentors.Where(m => m.Id != currentUser?.Id))
         {
-            string subjectName = subjectMap.TryGetValue(mentor.MentorProfile.SubjectToTeach, out string? sn) ? sn : "N/A";
+            string subjectName = "";
+            if (mentor.MentorProfile != null && subjectMap.TryGetValue(mentor.MentorProfile.SubjectToTeach, out string? sn))
+            {
+                subjectName = sn;
+            }
 
             Mentors.Add(new MentorCard
             {
@@ -449,7 +462,7 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
                 ProfilePicturePath = mentor.ProfilePicturePath ?? "",
                 Gender = mentor.Gender,
                 SubjectName = subjectName,
-                GradeName = mentor.Grade.Name ?? "",
+                GradeName = mentor.Grade?.Name ?? "",
                 ClassNum = mentor.ClassNum,
                 HasPendingRequest = pendingMentorIds.Contains(mentor.Id)
             });

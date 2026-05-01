@@ -263,7 +263,9 @@
                                             <TextBlock Grid.Column="1" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center">
                                                 <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}" />
                                                 <Run Text=" / " />
-                                                <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}" />
+                                                <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0}'}" />
+                                                <Run Text=" " />
+                                                <Run Text="{Binding [Common_HoursUnit], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
                                             </TextBlock>
                                         </Grid>
                                     </StackPanel>
@@ -282,8 +284,11 @@
                                                     <DockPanel>
                                                         <Border DockPanel.Dock="Right" Background="#ECFDF5" CornerRadius="12"
                                                                 Padding="10,4" Margin="12,0,0,0" VerticalAlignment="Center">
-                                                            <TextBlock Foreground="#059669" FontSize="12" FontWeight="SemiBold"
-                                                                       Text="{Binding AmountOfHours, StringFormat='{}{0:0.#} hrs'}" />
+                                                            <TextBlock Foreground="#059669" FontSize="12" FontWeight="SemiBold">
+                                                                <Run Text="{Binding AmountOfHours, StringFormat='{}{0:0.#}'}" />
+                                                                <Run Text=" " />
+                                                                <Run Text="{Binding [Common_HoursUnit], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
+                                                            </TextBlock>
                                                         </Border>
                                                         <StackPanel>
                                                             <TextBlock Text="{Binding Content}" TextWrapping="Wrap"
@@ -331,8 +336,11 @@
                                                    Text="{Binding [Student_YourMentor_Label], Source={x:Static loc:TranslationSource.Instance}}" />
 
                                         <Border Background="#ECFDF5" CornerRadius="8" Padding="10,4" HorizontalAlignment="Left" Margin="0,0,0,16">
-                                            <TextBlock Foreground="#059669" FontSize="12" FontWeight="SemiBold"
-                                                       Text="{Binding MentorSubject, StringFormat='Expert in: {0}'}" />
+                                            <TextBlock Foreground="#059669" FontSize="12" FontWeight="SemiBold">
+                                                <Run Text="{Binding [Student_ExpertIn_Label], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
+                                                <Run Text=": " />
+                                                <Run Text="{Binding MentorSubject}" />
+                                            </TextBlock>
                                         </Border>
 
                                         <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,0,0,6"
@@ -350,7 +358,9 @@
                                             <TextBlock Grid.Column="1" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center">
                                                 <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}" />
                                                 <Run Text=" / " />
-                                                <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}" />
+                                                <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0}'}" />
+                                                <Run Text=" " />
+                                                <Run Text="{Binding [Common_HoursUnit], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
                                             </TextBlock>
                                         </Grid>
                                     </StackPanel>
@@ -422,9 +432,10 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="24,16">
 
-                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4">Available Mentors</TextBlock>
+                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4"
+                                       Text="{Binding [Student_AvailableMentors_Header], Source={x:Static loc:TranslationSource.Instance}}" />
                             <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,16"
-                                       Text="Send a request to a mentor you would like to be paired with." />
+                                       Text="{Binding [Student_AvailableMentors_Desc], Source={x:Static loc:TranslationSource.Instance}}" />
 
                             <!-- Status message -->
                             <Border Margin="0,0,0,12" Background="#EFF6FF" CornerRadius="8" Padding="12,8"
@@ -434,7 +445,7 @@
 
                             <!-- Loading -->
                             <TextBlock FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,12"
-                                       Text="Loading…"
+                                       Text="{Binding [Student_Loading], Source={x:Static loc:TranslationSource.Instance}}"
                                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
 
                             <!-- Mentor list -->
@@ -446,7 +457,7 @@
                                                 <Button DockPanel.Dock="Right"
                                                         Style="{StaticResource PrimaryBtn}"
                                                         VerticalAlignment="Center"
-                                                        Content="Send Request"
+                                                        Content="{Binding [Student_SendRequest_Button], Source={x:Static loc:TranslationSource.Instance}}"
                                                         Command="{Binding DataContext.SendRequestCommand,
                                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}" />
@@ -454,8 +465,15 @@
                                                     <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#111827"
                                                                Text="{Binding MentorName}" />
                                                     <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,2,0,0">
-                                                        <Run Text="{Binding SubjectName}" />
-                                                        <Run Text="·" />
+                                                        <Run>
+                                                            <Run.Text>
+                                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                                                    <Binding Path="SubjectName"/>
+                                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                                </MultiBinding>
+                                                            </Run.Text>
+                                                        </Run>
+                                                        <Run Text=" · " />
                                                         <Run>
                                                             <Run.Text>
                                                                 <MultiBinding Converter="{StaticResource GradeClassDisplay}">
@@ -482,15 +500,16 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="24,16">
 
-                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4">Your top mentor matches</TextBlock>
+                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4"
+                                       Text="{Binding [Student_TopMatches_Header], Source={x:Static loc:TranslationSource.Instance}}" />
                             <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,16"
-                                       Text="Ranked by compatibility. Choose one — your selection is final." />
+                                       Text="{Binding [Student_TopMatches_Desc], Source={x:Static loc:TranslationSource.Instance}}" />
 
                             <!-- Already matched banner -->
                             <Border Margin="0,0,0,12" Background="#ECFDF5" CornerRadius="8" Padding="12,8"
                                     Visibility="{Binding AlreadyMatched, Converter={StaticResource BoolToVis}}">
                                 <TextBlock FontSize="13" Foreground="#059669" FontWeight="SemiBold"
-                                           Text="You are matched! Check the new tab." />
+                                           Text="{Binding [Student_AlreadyMatched_Banner], Source={x:Static loc:TranslationSource.Instance}}" />
                             </Border>
 
                             <!-- Status message -->
@@ -501,7 +520,7 @@
 
                             <!-- Loading -->
                             <TextBlock FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,12"
-                                       Text="Loading…"
+                                       Text="{Binding [Student_Loading], Source={x:Static loc:TranslationSource.Instance}}"
                                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
 
                             <!-- Recommendations -->
@@ -521,18 +540,25 @@
                                                                    HorizontalAlignment="Center"
                                                                    Text="{Binding ScorePercent, StringFormat='{}{0:0}%'}" />
                                                         <TextBlock FontSize="10" Foreground="#3B82F6"
-                                                                   HorizontalAlignment="Center" Text="match" />
+                                                                   HorizontalAlignment="Center"
+                                                                   Text="{Binding [Student_Match_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                                                     </StackPanel>
                                                 </Border>
                                                 <!-- Mentor info -->
                                                 <StackPanel VerticalAlignment="Center">
                                                     <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="#111827"
                                                                Text="{Binding MentorName}" />
-                                                    <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,2,0,12"
-                                                               Text="{Binding MentorSubjectName}" />
+                                                    <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,2,0,12">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                                                <Binding Path="MentorSubjectName"/>
+                                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
                                                     <Button Style="{StaticResource PrimaryBtn}"
                                                             HorizontalAlignment="Left"
-                                                            Content="Choose this mentor"
+                                                            Content="{Binding [Student_ChooseMentor_Button], Source={x:Static loc:TranslationSource.Instance}}"
                                                             IsEnabled="{Binding DataContext.AlreadyMatched,
                                                                 RelativeSource={RelativeSource AncestorType=ItemsControl},
                                                                 Converter={StaticResource InverseBoolConverter}}"
@@ -557,21 +583,22 @@
 
                             <!-- Footnote at bottom -->
                             <TextBlock DockPanel.Dock="Bottom" FontSize="12" Foreground="#9CA3AF" Margin="0,12,0,0"
-                                       Text="Accepting a request will create an active pair."
+                                       Text="{Binding [Student_AcceptCreates_Footnote], Source={x:Static loc:TranslationSource.Instance}}"
                                        Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}"
                                        TextWrapping="Wrap" />
 
                             <StackPanel>
-                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4">Mentoring requests</TextBlock>
+                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,4"
+                                           Text="{Binding [Student_MentoringRequests_Header], Source={x:Static loc:TranslationSource.Instance}}" />
 
                                 <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,4"
-                                           Text="Students who have requested you as their mentor."
+                                           Text="{Binding [Student_MentoringRequests_Desc], Source={x:Static loc:TranslationSource.Instance}}"
                                            Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
                                 <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,4"
                                            Text="{Binding RequestWindowTimerDisplay}"
                                            Visibility="{Binding IsPhase2Active, Converter={StaticResource InverseBoolToVis}}" />
                                 <TextBlock FontSize="13" Foreground="#6B7280" Margin="0,0,0,16"
-                                           Text="No action required — you will be notified once paired."
+                                           Text="{Binding [Student_Phase2_NoAction], Source={x:Static loc:TranslationSource.Instance}}"
                                            Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}" />
 
                                 <!-- Status message -->
@@ -582,7 +609,7 @@
 
                                 <!-- Loading -->
                                 <TextBlock FontSize="13" Foreground="#9CA3AF" Margin="0,0,0,12"
-                                           Text="Loading…"
+                                           Text="{Binding [Student_Loading], Source={x:Static loc:TranslationSource.Instance}}"
                                            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
 
                                 <!-- Request list -->
@@ -598,12 +625,12 @@
                                                                     Converter={StaticResource InverseBoolToVis}}">
                                                         <Button Margin="0,0,8,0"
                                                                 Style="{StaticResource PrimaryBtn}"
-                                                                Content="Accept"
+                                                                Content="{Binding [Student_Accept_Button], Source={x:Static loc:TranslationSource.Instance}}"
                                                                 Command="{Binding DataContext.AcceptRequestCommand,
                                                                     RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                 CommandParameter="{Binding}" />
                                                         <Button Style="{StaticResource DangerBtn}"
-                                                                Content="Decline"
+                                                                Content="{Binding [Student_Decline_Button], Source={x:Static loc:TranslationSource.Instance}}"
                                                                 Command="{Binding DataContext.RejectRequestCommand,
                                                                     RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                 CommandParameter="{Binding}" />
@@ -614,8 +641,11 @@
                                                                    Text="{Binding MenteeName}" />
                                                         <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,2,0,0"
                                                                    Text="{Binding MenteeSubjectName}" />
-                                                        <TextBlock FontSize="11" Foreground="#9CA3AF" Margin="0,2,0,0"
-                                                                   Text="{Binding CreatedAt, StringFormat='Requested: {0:d}'}" />
+                                                        <TextBlock FontSize="11" Foreground="#9CA3AF" Margin="0,2,0,0">
+                                                            <Run Text="{Binding [Student_RequestedAt_Label], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}" />
+                                                            <Run Text=" " />
+                                                            <Run Text="{Binding CreatedAt, StringFormat='{}{0:d}'}" />
+                                                        </TextBlock>
                                                     </StackPanel>
                                                 </DockPanel>
                                             </Border>

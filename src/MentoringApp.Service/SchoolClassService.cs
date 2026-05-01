@@ -45,6 +45,13 @@ namespace MentoringApp.Service
 
         public async Task<Result<int>> AddClassAsync(int gradeId, int classNum)
         {
+            if (classNum <= 0 || classNum > 99)
+                return Result<int>.Failure("Class number must be between 1 and 99.");
+
+            var allGrades = await _gradeRepo.GetAllGradesAsync();
+            if (!allGrades.Any(g => g.Id == gradeId))
+                return Result<int>.Failure("Invalid grade selected.");
+
             bool ok = await _repo.AddAsync(gradeId, classNum);
             if (!ok) return Result<int>.Failure("Class already exists or failed to add.");
             // Fetch the newly added id

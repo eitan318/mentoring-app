@@ -9,7 +9,10 @@ public abstract class ApiClientBase(HttpClient http)
 {
     protected readonly HttpClient Http = http;
 
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver()
+    };
 
     protected async Task<T> GetAsync<T>(string url)
     {

@@ -26,7 +26,10 @@ namespace MentoringApp.Service
             => _settingsRepo.GetDoubleAsync(MeetingHoursBarrierKey, 10);
 
         public Task SetMeetingHoursBarrierAsync(double hours)
-            => _settingsRepo.SetDoubleAsync(MeetingHoursBarrierKey, hours);
+        {
+            if (hours <= 0) throw new ArgumentException("Meeting hours barrier must be greater than zero.");
+            return _settingsRepo.SetDoubleAsync(MeetingHoursBarrierKey, hours);
+        }
 
         // ── Language ──────────────────────────────────────────────────────────
 
@@ -34,7 +37,10 @@ namespace MentoringApp.Service
             => _settingsRepo.GetStringAsync(GlobalLanguageKey, "en");
 
         public Task SetGlobalLanguageAsync(string lang)
-            => _settingsRepo.SetStringAsync(GlobalLanguageKey, lang);
+        {
+            if (lang != "en" && lang != "he") throw new ArgumentException("Unsupported language.");
+            return _settingsRepo.SetStringAsync(GlobalLanguageKey, lang);
+        }
 
         // ── Phase 1 Deadline ──────────────────────────────────────────────────
 
@@ -45,7 +51,10 @@ namespace MentoringApp.Service
         }
 
         public Task SetPhase1DeadlineAsync(DateTime date)
-            => _settingsRepo.SetStringAsync(Phase1DeadlineKey, date.ToString("o"));
+        {
+            if (date.Date < DateTime.Now.Date) throw new ArgumentException("Deadline cannot be in the past.");
+            return _settingsRepo.SetStringAsync(Phase1DeadlineKey, date.ToString("o"));
+        }
 
         public Task ClearPhase1DeadlineAsync()
             => _settingsRepo.SetStringAsync(Phase1DeadlineKey, "");
@@ -59,7 +68,10 @@ namespace MentoringApp.Service
         }
 
         public Task SetPhase2DeadlineAsync(DateTime date)
-            => _settingsRepo.SetStringAsync(Phase2DeadlineKey, date.ToString("o"));
+        {
+            if (date.Date < DateTime.Now.Date) throw new ArgumentException("Deadline cannot be in the past.");
+            return _settingsRepo.SetStringAsync(Phase2DeadlineKey, date.ToString("o"));
+        }
 
         public Task ClearPhase2DeadlineAsync()
             => _settingsRepo.SetStringAsync(Phase2DeadlineKey, "");

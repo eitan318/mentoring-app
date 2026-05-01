@@ -17,6 +17,9 @@ public class WebNavigationService : INavigationService
 {
     private readonly NavigationManager _navManager;
     private readonly NavigationParameterStore _paramStore;
+    private readonly Stack<string> _history = new();
+
+    public event Action? CanGoBackChanged;
 
     private static readonly Dictionary<Type, string> _routes = new()
     {
@@ -44,7 +47,13 @@ public class WebNavigationService : INavigationService
     public Task NavigateToAsync<TViewModel>() where TViewModel : class, INavigatable
     {
         if (_routes.TryGetValue(typeof(TViewModel), out var url))
+        {
+            if (IsRootRoute(url)) _history.Clear();
+            else _history.Push(_navManager.Uri);
+
             _navManager.NavigateTo(url);
+            CanGoBackChanged?.Invoke();
+        }
         return Task.CompletedTask;
     }
 
@@ -53,28 +62,62 @@ public class WebNavigationService : INavigationService
     {
         _paramStore.Set(typeof(TViewModel), parameter!);
         if (_routes.TryGetValue(typeof(TViewModel), out var url))
+        {
+            if (IsRootRoute(url)) _history.Clear();
+            else _history.Push(_navManager.Uri);
+
             _navManager.NavigateTo(url);
+            CanGoBackChanged?.Invoke();
+        }
         return Task.CompletedTask;
+    }
+
+    public Task NavigateToRootAsync<TViewModel>() where TViewModel : class, INavigatable
+    {
+        if (_routes.TryGetValue(typeof(TViewModel), out var url))
+        {
+            _history.Clear();
+            _navManager.NavigateTo(url);
+            CanGoBackChanged?.Invoke();
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task NavigateToRootAsync<TViewModel, TParameter>(TParameter parameter)
+        where TViewModel : class, INavigatable<TParameter>
+    {
+        _paramStore.Set(typeof(TViewModel), parameter!);
+        if (_routes.TryGetValue(typeof(TViewModel), out var url))
+        {
+            _history.Clear();
+            _navManager.NavigateTo(url);
+            CanGoBackChanged?.Invoke();
+        }
+        return Task.CompletedTask;
+    }
+
+    private bool IsRootRoute(string url)
+    {
+        return url == "/student" || url == "/supervisor" || url == "/admin" || url == "/login";
     }
 
     public IDisposable UseContext(Action<INavigatable> contextSetter)
     {
-        // In Blazor, navigation context is the URL itself — each route maps to its own page.
         return new EmptyDisposable();
     }
 
-    public async Task GoBackAsync()
+    public Task GoBackAsync()
     {
-        // Browser-history back; falls back to /student if there's nothing to pop.
-        if (_js != null)
+        if (_history.Count > 0)
         {
-            try { await _js.InvokeVoidAsync("history.back"); return; }
-            catch { /* prerender or no JS — fall through */ }
+            var url = _history.Pop();
+            _navManager.NavigateTo(url);
+            CanGoBackChanged?.Invoke();
         }
-        _navManager.NavigateTo("/student");
+        return Task.CompletedTask;
     }
 
-    public bool CanGoBack() => true;
+    public bool CanGoBack() => _history.Count > 0;
 
     private sealed class EmptyDisposable : IDisposable
     {

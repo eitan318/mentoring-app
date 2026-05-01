@@ -92,7 +92,14 @@
                 Padding="12,8"
                 HorizontalAlignment="Left"
                 Margin="0,0,0,20">
-                <TextBlock FontSize="14" Foreground="#374151" Text="{Binding CurrentIssue.Category.Name}" />
+                <TextBlock FontSize="14" Foreground="#374151">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Category_">
+                            <Binding Path="CurrentIssue.Category.Name"/>
+                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
             </Border>
 
             <!-- Description -->

@@ -57,6 +57,7 @@ public static class UserEndpoints
                 .OfType<StudentModel>()
                 .Where(s => s.Grade != null && assignedSlots.Contains((s.Grade.Id, s.ClassNum)))
                 .ToList();
+           
 
             return Results.Ok<IEnumerable<StudentModel>>(myStudents);
         })

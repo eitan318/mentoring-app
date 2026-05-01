@@ -1,4 +1,4 @@
-﻿using MentoringApp.ViewModel.Navigation;
+using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +16,8 @@ using Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public class NavigationService : INavigationService
 {
+    /// <summary>Raised whenever the CanGoBack state may have changed.</summary>
+    public event Action? CanGoBackChanged;
     private readonly IServiceProvider _serviceProvider;
 
     // Parallel stacks — index N of each corresponds to the same context level.
@@ -53,7 +55,7 @@ public class NavigationService : INavigationService
         });
     }
 
-    private async Task NavigateCoreAsync<TViewModel>(TViewModel vm, Func<Task> onNavigatedTo)
+    private async Task NavigateCoreAsync<TViewModel>(TViewModel vm, Func<Task> onNavigatedTo, bool clearHistory = false)
         where TViewModel : class, INavigatable
     {
         if (!_storeStack.TryPeek(out var currentStore)) return;
@@ -63,14 +65,31 @@ public class NavigationService : INavigationService
             await currentStore.CurrentViewModel.OnNavigatedFromAsync();
         }
 
+        if (clearHistory)
+            currentStore.ClearHistory();
+
         currentStore.CurrentViewModel = vm;
         await onNavigatedTo();
+        CanGoBackChanged?.Invoke();
     }
 
     public async Task NavigateToAsync<TViewModel>() where TViewModel : class, INavigatable
     {
         var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
         await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync());
+    }
+
+    public async Task NavigateToRootAsync<TViewModel>() where TViewModel : class, INavigatable
+    {
+        var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
+        await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync(), clearHistory: true);
+    }
+
+    public async Task NavigateToRootAsync<TViewModel, TParameter>(TParameter parameter)
+        where TViewModel : class, INavigatable<TParameter>
+    {
+        var vm = ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
+        await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync(parameter), clearHistory: true);
     }
 
     public async Task NavigateToAsync<TViewModel, TParameter>(TParameter parameter)
@@ -93,6 +112,7 @@ public class NavigationService : INavigationService
             {
                 await store.CurrentViewModel.OnNavigatedToAsync();
             }
+            CanGoBackChanged?.Invoke();
         }
     }
     private class ContextReliever : IDisposable
@@ -113,11 +133,19 @@ public class NavigationService : INavigationService
         private readonly Stack<INavigatable> _navigationHistory = new();
         private INavigatable _currentViewModel;
         public bool CanGoBack() => _navigationHistory.Count > 0;
+
+        public void ClearHistory() => _navigationHistory.Clear();
+
         public void GoBack()
         {
             if (CanGoBack())
             {
-                CurrentViewModel = _navigationHistory.Peek();
+                // Pop (not Peek) so the history shrinks on each back press.
+                // Setting CurrentViewModel directly (bypassing the push logic)
+                // because we are unwinding, not forward-navigating.
+                _currentViewModel = _navigationHistory.Pop();
+                OnPropertyChanged(nameof(CurrentViewModel));
+                CurrentViewModelChanged?.Invoke();
             }
         }
 
@@ -132,7 +160,9 @@ public class NavigationService : INavigationService
                     {
                         // Navigating back to a VM already in history: unwind the stack
                         // up to (but not including) that entry so GoBack() stays correct.
-                        while (_navigationHistory.Pop() != value) { }
+                        while (_navigationHistory.Peek() != value)
+                            _navigationHistory.Pop();
+                        _navigationHistory.Pop(); // pop the target itself; it becomes current
                     }
                     else
                     {
@@ -147,6 +177,5 @@ public class NavigationService : INavigationService
         }
 
         public event Action CurrentViewModelChanged;
-
     }
 }

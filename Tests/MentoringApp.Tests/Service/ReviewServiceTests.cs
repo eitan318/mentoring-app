@@ -15,7 +15,7 @@ namespace MentoringApp.Tests.Service
         [Fact]
         public async Task CreateReview_Fails_WhenContentIsEmpty()
         {
-            var sut = new ReviewService(new Mock<IReviewRepo>().Object);
+            var sut = new ReviewService(new Mock<IReviewRepo>().Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.CreateReviewAsync("", pairId: 1, authorUserId: 1, amountOfHours: 1.5);
 
@@ -26,7 +26,7 @@ namespace MentoringApp.Tests.Service
         [Fact]
         public async Task CreateReview_Fails_WhenContentIsWhitespace()
         {
-            var sut = new ReviewService(new Mock<IReviewRepo>().Object);
+            var sut = new ReviewService(new Mock<IReviewRepo>().Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.CreateReviewAsync("   ", pairId: 1, authorUserId: 1, amountOfHours: 1.5);
 
@@ -36,7 +36,7 @@ namespace MentoringApp.Tests.Service
         [Fact]
         public async Task CreateReview_Fails_WhenHoursIsZero()
         {
-            var sut = new ReviewService(new Mock<IReviewRepo>().Object);
+            var sut = new ReviewService(new Mock<IReviewRepo>().Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.CreateReviewAsync("Good session", pairId: 1, authorUserId: 1, amountOfHours: 0);
 
@@ -47,7 +47,7 @@ namespace MentoringApp.Tests.Service
         [Fact]
         public async Task CreateReview_Fails_WhenHoursIsNegative()
         {
-            var sut = new ReviewService(new Mock<IReviewRepo>().Object);
+            var sut = new ReviewService(new Mock<IReviewRepo>().Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.CreateReviewAsync("Good session", pairId: 1, authorUserId: 1, amountOfHours: -1);
 
@@ -61,7 +61,7 @@ namespace MentoringApp.Tests.Service
             reviewRepo.Setup(r => r.CreateAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<double>()))
                       .ReturnsAsync(false);
 
-            var sut = new ReviewService(reviewRepo.Object);
+            var sut = new ReviewService(reviewRepo.Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.CreateReviewAsync("Good session", pairId: 1, authorUserId: 1, amountOfHours: 1.5);
 
@@ -76,7 +76,7 @@ namespace MentoringApp.Tests.Service
             reviewRepo.Setup(r => r.CreateAsync(It.IsAny<string>(), It.IsAny<DateTime>(), 1, 2, 1.5))
                       .ReturnsAsync(true);
 
-            var sut = new ReviewService(reviewRepo.Object);
+            var sut = new ReviewService(reviewRepo.Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.CreateReviewAsync("Great meeting", pairId: 1, authorUserId: 2, amountOfHours: 1.5);
 
@@ -97,7 +97,7 @@ namespace MentoringApp.Tests.Service
             var reviewRepo = new Mock<IReviewRepo>();
             reviewRepo.Setup(r => r.GetByPairAsync(5)).ReturnsAsync(dtos);
 
-            var sut = new ReviewService(reviewRepo.Object);
+            var sut = new ReviewService(reviewRepo.Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.GetReviewsByPairAsync(5);
 
@@ -112,7 +112,7 @@ namespace MentoringApp.Tests.Service
             var reviewRepo = new Mock<IReviewRepo>();
             reviewRepo.Setup(r => r.GetByPairAsync(99)).ReturnsAsync(Array.Empty<ReviewDao>());
 
-            var sut = new ReviewService(reviewRepo.Object);
+            var sut = new ReviewService(reviewRepo.Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.GetReviewsByPairAsync(99);
 
@@ -133,7 +133,7 @@ namespace MentoringApp.Tests.Service
             var reviewRepo = new Mock<IReviewRepo>();
             reviewRepo.Setup(r => r.GetByAuthorAsync(7)).ReturnsAsync(dtos);
 
-            var sut = new ReviewService(reviewRepo.Object);
+            var sut = new ReviewService(reviewRepo.Object, new Mock<IPairRepo>().Object);
 
             var result = await sut.GetReviewsByAuthorAsync(7);
 

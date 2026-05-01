@@ -87,7 +87,7 @@
                                 <StackPanel Grid.Row="0" Grid.Column="1">
                                     <TextBlock FontSize="15" FontWeight="SemiBold" Text="{Binding MenteeName}"/>
                                     <TextBlock Foreground="#555" FontSize="12" Margin="0,2,0,0">
-                                        <Run Text="{Binding [MentorReq_WantsToLearn_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                        <Run Text="{Binding [MentorReq_WantsToLearn_Label], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
                                         <Run Text="{Binding MenteeSubjectName}" FontWeight="Medium"/>
                                     </TextBlock>
                                     <TextBlock Foreground="#888" FontSize="11" Margin="0,2,0,0"

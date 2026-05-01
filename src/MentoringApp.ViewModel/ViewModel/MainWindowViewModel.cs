@@ -14,7 +14,7 @@ public partial class MainWindowViewModel : ObservableObject, INavigatable
     public MainWindowViewModel(INavigationService navigationService)
     {
         _navigationService = navigationService;
-        navigationService.UseContext(vm => CurrentViewModel = vm);
+        _navContext = navigationService.UseContext(vm => CurrentViewModel = vm);
         // Initial navigation is handled by App.xaml.cs after the window is shown,
         // so the nav context already exists when it fires.
     }

@@ -17,12 +17,14 @@ namespace MentoringApp.Service
         private readonly IIssueRepo _issueRepo;
         private readonly IIssueCategoryRepo _issueCategoryRepo;
         private readonly NotificationService _notificationService;
+        private readonly UserService _userService;
 
-        public IssueService(IIssueRepo issueRepo, IIssueCategoryRepo issueCategoryRepo, NotificationService notificationService)
+        public IssueService(IIssueRepo issueRepo, IIssueCategoryRepo issueCategoryRepo, NotificationService notificationService, UserService userService)
         {
             _issueRepo = issueRepo;
             _issueCategoryRepo = issueCategoryRepo;
             _notificationService = notificationService;
+            _userService = userService;
         }
 
         public async Task<Result<IEnumerable<IssueModel>>> GetAllIssuesAsync()
@@ -62,6 +64,14 @@ namespace MentoringApp.Service
             if (string.IsNullOrWhiteSpace(description))
                 return Result.Failure("Description cannot be empty.");
 
+            var categoryDto = await _issueCategoryRepo.GetByIdAsync(categoryId);
+            if (categoryDto == null)
+                return Result.Failure("Invalid issue category.");
+
+            var reporterResult = await _userService.GetUserByIdAsync(reportedByUserId);
+            if (!reporterResult.Success)
+                return Result.Failure("Reporter user does not exist.");
+
             bool created = await _issueRepo.CreateAsync(description, categoryId, reportedByUserId);
             if (!created) return Result.Failure("Failed to create issue.");
 
@@ -71,12 +81,33 @@ namespace MentoringApp.Service
 
         public async Task<Result> ResolveIssueAsync(int issueId)
         {
+            var issueDto = await _issueRepo.GetByIdAsync(issueId);
+            if (issueDto == null)
+                return Result.Failure("Issue not found.");
+
+            if (issueDto.IsResolved == 1)
+                return Result.Failure("Issue is already resolved.");
+
             bool resolved = await _issueRepo.ResolveAsync(issueId);
             return resolved ? Result.Ok() : Result.Failure("Issue not found or could not be resolved.");
         }
 
         public async Task<Result> ForwardIssueAsync(int issueId, int supervisorId)
         {
+            var issueDto = await _issueRepo.GetByIdAsync(issueId);
+            if (issueDto == null)
+                return Result.Failure("Issue not found.");
+
+            if (issueDto.ForwardedBySupervisorId.HasValue)
+                return Result.Failure("Issue is already forwarded.");
+
+            if (issueDto.IsResolved == 1)
+                return Result.Failure("Cannot forward a resolved issue.");
+
+            var supervisorResult = await _userService.GetUserByIdAsync(supervisorId);
+            if (!supervisorResult.Success || !supervisorResult.Data.IsSupervisor)
+                return Result.Failure("Selected supervisor is not valid.");
+
             bool forwarded = await _issueRepo.ForwardAsync(issueId, supervisorId);
             if (!forwarded) return Result.Failure("Issue not found or could not be forwarded.");
 

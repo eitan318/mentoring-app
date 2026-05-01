@@ -8,6 +8,7 @@
     <conv:InverseBoolConverter x:Key="InverseBoolConverter" />
     <conv:StringToImageSourceConverter x:Key="StringToImage" />
     <conv:DbTranslationConverter x:Key="DbTranslation" />
+    <conv:LocalizedFormatConverter x:Key="LocalizedFormat" />
     <conv:LocalizedClassCountConverter x:Key="LocalizedClassCount" />
     <conv:GradeClassDisplayConverter x:Key="GradeClassDisplay" />
     <conv:PercentToStrokeDashArrayConverter x:Key="PercentToStrokeDash" />

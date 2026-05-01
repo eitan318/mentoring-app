@@ -14,6 +14,13 @@ builder.Services.AddDataLayer(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
 builder.Services.AddTransient<DummyDataSeeder>();
 
+// Configure JSON to emit $type discriminators for polymorphic UserModel
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0,
+        new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver());
+});
+
 // JWT settings
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSection);

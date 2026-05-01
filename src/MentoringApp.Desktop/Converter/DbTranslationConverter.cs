@@ -24,7 +24,7 @@ namespace MentoringApp.Converter
             if (values == null || values.Length < 1)
                 return null;
 
-            var valueFromDb = values[0] as string;
+            var valueFromDb = values[0]?.ToString();
             if (string.IsNullOrEmpty(valueFromDb))
                 return valueFromDb;
 

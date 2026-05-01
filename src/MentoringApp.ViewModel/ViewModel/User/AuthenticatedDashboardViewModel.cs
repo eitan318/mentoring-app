@@ -42,7 +42,11 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         _userClient = userClient;
         _sessionService = sessionService;
         _authTokenStore = authTokenStore;
+
+        _navigationService.CanGoBackChanged += OnCanGoBackChanged;
     }
+
+    private void OnCanGoBackChanged() => OnPropertyChanged(nameof(IsBackVisible));
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBackVisible))]
@@ -68,7 +72,7 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
     public async Task Back()
     {
         await _navigationService.GoBackAsync();
-        OnPropertyChanged(nameof(IsBackVisible));
+        // IsBackVisible is updated reactively via CanGoBackChanged
     }
 
     public async Task OnNavigatedToAsync()
@@ -119,20 +123,19 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         return false;
     }
 
-    [RelayCommand] private void NavigateProfile() => _navigationService.NavigateToAsync<MyProfileViewModel>();
+    [RelayCommand] private async Task NavigateProfile() => await _navigationService.NavigateToAsync<MyProfileViewModel>();
 
     [RelayCommand]
     private async Task Logout()
     {
         if (_navContext == null) return;
 
+        _navigationService.CanGoBackChanged -= OnCanGoBackChanged;
         _sessionService.ClearSession();
         _authTokenStore.Clear();
         _userStore.User = null;
 
         // Cascade: let the child role dashboard pop its own nav context first.
-        // Otherwise our disposer (which pops the top blindly) tears down the wrong
-        // level and leaves the stacks misaligned for subsequent navigations.
         if (ActiveSubPage != null)
             await ActiveSubPage.OnNavigatedFromAsync();
 

@@ -51,13 +51,21 @@ namespace MentoringApp.Service
         }
         public async Task<Result> CreateUserAsync(UserModel user)
         {
-            bool res = await _userRepo.CreateUserAsync(user);
-            if (!res)
-            {
-                Result.Failure("user failed to creat");
-            }
-            return Result.Ok();
+            if (user == null) return Result.Failure("User data is null.");
+            if (string.IsNullOrWhiteSpace(user.UserName) || user.UserName.Length < 3)
+                return Result.Failure("Username must be at least 3 characters.");
+            if (string.IsNullOrWhiteSpace(user.Email) || !user.Email.Contains('@'))
+                return Result.Failure("A valid email address is required.");
+            if (string.IsNullOrWhiteSpace(user.NationalId) || user.NationalId.Length > 9 || !user.NationalId.All(char.IsDigit))
+                return Result.Failure("National ID must be valid and up to 9 digits.");
 
+            // Prevent duplicate national ID
+            var existing = await _userRepo.GetUserDtoByNationalIdAsync(user.NationalId);
+            if (existing != null)
+                return Result.Failure("A user with this National ID already exists.");
+
+            bool res = await _userRepo.CreateUserAsync(user);
+            return res ? Result.Ok() : Result.Failure("Failed to create user.");
         }
 
         public async Task<IEnumerable<UserModel>> GetProblematicSupervisorsAsync(int count)
@@ -193,6 +201,18 @@ namespace MentoringApp.Service
 
         public async Task<Result> DeleteUserAsync(int userId)
         {
+            var userDto = await _userRepo.GetUserDtoByIdAsync(userId);
+            if (userDto == null) return Result.Failure("User not found.");
+
+            if (userDto.Role == UserRoleType.Admin)
+            {
+                var allUsers = await _userRepo.GetAllUserDtosAsync();
+                int adminCount = allUsers.Count(u => u.Role == UserRoleType.Admin);
+                if (adminCount <= 1)
+                {
+                    return Result.Failure("Cannot delete the last admin.");
+                }
+            }
 
             bool deleted = await _userRepo.DeleteUserAsync(userId);
 
@@ -204,6 +224,16 @@ namespace MentoringApp.Service
         public async Task<Result> UpdateUserAsync(UserModel user)
         {
             if (user == null) return Result.Failure("User data is null.");
+            if (string.IsNullOrWhiteSpace(user.UserName) || user.UserName.Length < 3)
+                return Result.Failure("Username must be at least 3 characters.");
+            if (string.IsNullOrWhiteSpace(user.Email) || !user.Email.Contains('@'))
+                return Result.Failure("A valid email address is required.");
+            if (string.IsNullOrWhiteSpace(user.NationalId) || user.NationalId.Length > 9 || !user.NationalId.All(char.IsDigit))
+                return Result.Failure("National ID must be valid and up to 9 digits.");
+
+            var existing = await _userRepo.GetUserDtoByNationalIdAsync(user.NationalId);
+            if (existing != null && existing.Id != user.Id)
+                return Result.Failure("A user with this National ID already exists.");
 
             bool baseUpdated = await _userRepo.UpdateBaseInfoAsync(
                 user.Id, user.UserName, user.Email, user.NationalId, user.PhoneNumber, (int)user.Gender);
@@ -249,6 +279,9 @@ namespace MentoringApp.Service
 
         public async Task<Result> UpdateLanguageAsync(int userId, string language)
         {
+            if (language != "en" && language != "he")
+                return Result.Failure("Unsupported language.");
+
             bool updated = await _userRepo.UpdateLanguageAsync(userId, language);
             return updated ? Result.Ok() : Result.Failure("Failed to update language.");
         }
