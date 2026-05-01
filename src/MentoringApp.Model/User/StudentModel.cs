@@ -10,7 +10,7 @@ namespace MentoringApp.Model.User
 {
     public class StudentModel : UserModel
     {
-        public required GradeModel Grade { get; set; }
+        public GradeModel? Grade { get; set; }
         public int ClassNum { get; set; }
         public MentorProfile? MentorProfile { get; set; }
         public MenteeProfile? MenteeProfile { get; set; }
@@ -26,8 +26,7 @@ namespace MentoringApp.Model.User
 
         public StudentModel() : base() { }
 
-        [SetsRequiredMembers]
-        public StudentModel(int id, string email, string userName, string nationalId, GradeModel grade)
+        public StudentModel(int id, string email, string userName, string nationalId, GradeModel? grade)
             : base(id, email, userName, nationalId)
         {
             Grade = grade;
@@ -36,7 +35,7 @@ namespace MentoringApp.Model.User
         public bool CanHaveMentorProfile()
         {
             // Business Rule: Students below grade 9 can't be mentors
-            return Grade.Num >= 9;
+            return Grade?.Num >= 9;
         }
 
 

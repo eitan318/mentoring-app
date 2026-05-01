@@ -55,7 +55,7 @@
             }
 
             <button class="btn-logout"
-                    @onclick="async () => await Vm.LogoutCommand.ExecuteAsync(null)">
+                    @onclick="ExecuteLogout">
                 @Loc.Get("Nav_Logout")
             </button>
         </div>
@@ -163,6 +163,13 @@
 
     private void OnLocChanged(object? sender, PropertyChangedEventArgs e) =>
         InvokeAsync(StateHasChanged);
+
+        
+    private async Task ExecuteLogout()
+    {
+        try { await Vm.LogoutCommand.ExecuteAsync(null); }
+        finally { StateHasChanged(); }
+    }
 
     public void Dispose()
     {

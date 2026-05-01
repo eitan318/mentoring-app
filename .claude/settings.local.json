@@ -51,7 +51,8 @@
       "PowerShell(Stop-Process *)",
       "PowerShell(Get-Process *)",
       "Bash(Get-Content \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\src\\\\MentoringApp.Api\\\\Properties\\\\launchSettings.json\")",
-      "Bash(Remove-Item *)"
+      "Bash(Remove-Item *)",
+      "Bash(git commit *)"
     ]
   }
 }

@@ -88,10 +88,13 @@
                         <TextBlock DockPanel.Dock="Right" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right">
                             <Run Text="{Binding TotalMeetingHours, StringFormat='{}{0:0.#}'}"/>
                             <Run Text=" / "/>
-                            <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0} hrs'}"/>
+                            <Run Text="{Binding RequiredMeetingHours, StringFormat='{}{0:0}'}"/>
+                            <Run Text=" "/>
+                            <Run Text="{Binding [Common_HoursUnit], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
                         </TextBlock>
                     </DockPanel>
-                    <ProgressBar Height="10" Minimum="0" Maximum="100" Value="{Binding HoursProgress, Mode=OneWay}" ToolTip="Meeting hours progress toward the required goal"/>
+                    <ProgressBar Height="10" Minimum="0" Maximum="100" Value="{Binding HoursProgress, Mode=OneWay}"
+                                 ToolTip="{Binding [PairDetails_Hours_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -127,8 +130,11 @@
                                 <StackPanel Margin="5,8,5,8">
                                     <DockPanel>
                                         <TextBlock DockPanel.Dock="Left" Text="{Binding Date, StringFormat='{}{0:MMM dd, yyyy}'}" FontWeight="Medium" Foreground="#666" FontSize="12"/>
-                                        <TextBlock DockPanel.Dock="Right" FontSize="11" Foreground="#2E7D32" HorizontalAlignment="Right"
-                                                   Text="{Binding AmountOfHours, StringFormat='{}{0:0.#} hrs'}"/>
+                                        <TextBlock DockPanel.Dock="Right" FontSize="11" Foreground="#2E7D32" HorizontalAlignment="Right">
+                                            <Run Text="{Binding AmountOfHours, StringFormat='{}{0:0.#}'}"/>
+                                            <Run Text=" "/>
+                                            <Run Text="{Binding [Common_HoursUnit], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
+                                        </TextBlock>
                                     </DockPanel>
                                     <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Margin="0,5,0,0" FontSize="13"/>
                                 </StackPanel>
@@ -161,7 +167,11 @@
                                                     </TextBlock.Text>
                                                 </TextBlock>
                                             </Border>
-                                            <TextBlock Text="{Binding CreationDate, StringFormat='{}Created: {0:MMM dd}'}" VerticalAlignment="Center" FontSize="12" Foreground="Gray"/>
+                                            <TextBlock VerticalAlignment="Center" FontSize="12" Foreground="Gray">
+                                                <Run Text="{Binding [IssueItem_Created_Label], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
+                                                <Run Text=" "/>
+                                                <Run Text="{Binding CreationDate, StringFormat='{}{0:MMM dd}'}"/>
+                                            </TextBlock>
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>

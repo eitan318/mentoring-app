@@ -7,10 +7,12 @@ namespace MentoringApp.Service
     public class ReviewService
     {
         private readonly IReviewRepo _reviewRepo;
+        private readonly IPairRepo _pairRepo;
 
-        public ReviewService(IReviewRepo reviewRepo)
+        public ReviewService(IReviewRepo reviewRepo, IPairRepo pairRepo)
         {
             _reviewRepo = reviewRepo;
+            _pairRepo = pairRepo;
         }
 
         public async Task<Result<IEnumerable<Review>>> GetReviewsByPairAsync(int pairId)
@@ -31,8 +33,15 @@ namespace MentoringApp.Service
         {
             if (string.IsNullOrWhiteSpace(content))
                 return Result.Failure("Review content cannot be empty.");
-            if (amountOfHours <= 0)
-                return Result.Failure("Please enter a valid number of meeting hours.");
+            if (amountOfHours <= 0 || amountOfHours > 24)
+                return Result.Failure("Please enter a valid number of meeting hours (between 0 and 24).");
+
+            var pair = await _pairRepo.GetByIdAsync(pairId);
+            if (pair == null)
+                return Result.Failure("Pair not found.");
+
+            if (pair.MentorId != authorUserId && pair.MenteeId != authorUserId)
+                return Result.Failure("Only the mentor or mentee of this pair can create a review.");
 
             bool created = await _reviewRepo.CreateAsync(content, DateTime.UtcNow, pairId, authorUserId, amountOfHours);
             return created ? Result.Ok() : Result.Failure("Failed to save review.");

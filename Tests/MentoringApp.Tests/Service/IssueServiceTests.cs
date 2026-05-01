@@ -41,7 +41,7 @@ namespace MentoringApp.Tests.Service
                 userService,
                 pairRepo.Object);
 
-            return new IssueService(issueRepo.Object, categoryRepo.Object, notificationService);
+            return new IssueService(issueRepo.Object, categoryRepo.Object, notificationService, userService);
         }
 
         private static IssueCategoryDao MakeCategoryDto(int id = 1, string name = "General") =>

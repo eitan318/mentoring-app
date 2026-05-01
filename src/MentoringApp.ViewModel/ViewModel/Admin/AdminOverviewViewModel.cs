@@ -11,6 +11,7 @@ using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 using System.Threading;
+using MentoringApp.ViewModel.Localization;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
@@ -149,6 +150,33 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             : $"{remaining.Days}d {remaining.Hours:D2}h {remaining.Minutes:D2}m {remaining.Seconds:D2}s";
     }
 
+    [RelayCommand]
+    private void ShowPhaseInfo(string phase)
+    {
+        string title = TranslationSource.Instance["Admin_PhaseGuide_Title"] ?? "Phase Guide";
+        string body = "";
+
+        switch (phase)
+        {
+            case "Import":
+                body = TranslationSource.Instance["Admin_PhaseGuide_Import"] ?? "Import Users";
+                break;
+            case "Phase1":
+                body = TranslationSource.Instance["Admin_PhaseGuide_Phase1"] ?? "Phase 1: Registration";
+                break;
+            case "Phase2":
+                body = TranslationSource.Instance["Admin_PhaseGuide_Phase2"] ?? "Phase 2: Selection";
+                break;
+            case "Phase3":
+                body = TranslationSource.Instance["Admin_PhaseGuide_Phase3"] ?? "Phase 3: Active Mentoring";
+                break;
+            default:
+                return;
+        }
+                      
+        _windowService.ShowMessage(body, title);
+    }
+
     public async Task OnNavigatedToAsync()
     {
         if (_timerCts == null || _timerCts.IsCancellationRequested)
@@ -194,10 +222,18 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         {
             statsMap.TryGetValue(supervisor.Id, out var stats);
 
+            var supervisorStudents = allStudents.Where(s => 
+                s.Grade != null && 
+                supervisor.AssignedClasses.Any(ac => ac.Grade?.Id == s.Grade.Id && ac.ClassNum == s.ClassNum)
+            ).ToList();
+
+            int supervisorFilled = supervisorStudents.Count(s => IsStudentInfoFilled(s));
+            int supervisorTotal = supervisorStudents.Count;
+
             var item = new AdminSupervisorItem(supervisor)
             {
-                FilledStudentsCount  = globalFilled,
-                TotalStudentsCount   = globalTotal,
+                FilledStudentsCount  = supervisorFilled,
+                TotalStudentsCount   = supervisorTotal,
                 SupervisedPairsCount = stats?.PairsCount ?? 0,
                 PendingIssuesCount   = stats?.PendingIssuesCount ?? 0,
                 ResolvedIssuesCount  = stats?.ResolvedIssuesCount ?? 0,

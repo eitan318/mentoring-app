@@ -243,7 +243,15 @@
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate DataType="{x:Type model:SchoolClassModel}">
-                                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" Foreground="#111827"/>
+                                        <TextBlock FontWeight="Medium" Foreground="#111827">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                                    <Binding Path="Grade.Name"/>
+                                                    <Binding Path="ClassNum"/>
+                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
@@ -280,7 +288,15 @@
                                             <DataTemplate>
                                                 <Border Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,8" Cursor="Hand"
                                                         PreviewMouseLeftButtonDown="ClassChip_MouseDown" PreviewMouseMove="ClassChip_MouseMove">
-                                                    <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#0369A1" Text="{Binding DisplayName}" HorizontalAlignment="Center"/>
+                                                    <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#0369A1" HorizontalAlignment="Center">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                                                <Binding Path="Grade.Name"/>
+                                                                <Binding Path="ClassNum"/>
+                                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -311,7 +327,15 @@
                                                         <DataTemplate>
                                                             <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,8" Cursor="Hand"
                                                                     PreviewMouseLeftButtonDown="ClassChip_MouseDown" PreviewMouseMove="ClassChip_MouseMove">
-                                                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#047857" Text="{Binding DisplayName}" HorizontalAlignment="Center"/>
+                                                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#047857" HorizontalAlignment="Center">
+                                                                    <TextBlock.Text>
+                                                                        <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                                                            <Binding Path="Grade.Name"/>
+                                                                            <Binding Path="ClassNum"/>
+                                                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                                        </MultiBinding>
+                                                                    </TextBlock.Text>
+                                                                </TextBlock>
                                                             </Border>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>

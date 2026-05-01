@@ -81,7 +81,7 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#x25A6;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Dashboard" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_Menu_Dashboard], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -106,7 +106,7 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#x1F4DA;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Manage Pairs" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_Menu_ManagePairs], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -131,7 +131,7 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#x1F393;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Manage Users" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_Menu_ManageUsers], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -156,7 +156,7 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#x2699;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="System Settings" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_Menu_SystemSettings], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 

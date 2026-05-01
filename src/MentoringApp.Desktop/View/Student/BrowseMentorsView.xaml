@@ -85,10 +85,19 @@
                                 <!-- Info -->
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding MentorName}"/>
-                                    <TextBlock Foreground="#555" FontSize="12" Margin="0,2,0,0">
-                                        <Run Text="{Binding [Browse_Teaches_Label], Source={x:Static loc:TranslationSource.Instance}}"/>
-                                        <Run Text="{Binding SubjectName}" FontWeight="Medium"/>
-                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0"
+                                                Visibility="{Binding SubjectName, Converter={StaticResource NullToVis}}">
+                                        <TextBlock Text="{Binding [Browse_Teaches_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                                                   Foreground="#555" FontSize="12" Margin="0,0,4,0"/>
+                                        <TextBlock FontWeight="Medium" Foreground="#555" FontSize="12">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                                    <Binding Path="SubjectName"/>
+                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </StackPanel>
                                     <TextBlock Foreground="#777" FontSize="12" Margin="0,2,0,0">
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{StaticResource GradeClassDisplay}">

@@ -40,8 +40,8 @@ public partial class AdminDashboardViewModel : ObservableObject, INavigatable
         return Task.CompletedTask;
     }
 
-    [RelayCommand] private async Task GoToDashboard()      => await _navigationService.NavigateToAsync<AdminOverviewViewModel>();
-    [RelayCommand] private async Task ManagePairs()        => await _navigationService.NavigateToAsync<ManagePairsViewModel>();
-    [RelayCommand] private async Task ManageUsers()        => await _navigationService.NavigateToAsync<ManageUsersViewModel>();
-    [RelayCommand] private async Task SystemSettings()     => await _navigationService.NavigateToAsync<SystemSettingsViewModel>();
+    [RelayCommand] private async Task GoToDashboard()  => await _navigationService.NavigateToRootAsync<AdminOverviewViewModel>();
+    [RelayCommand] private async Task ManagePairs()    => await _navigationService.NavigateToRootAsync<ManagePairsViewModel>();
+    [RelayCommand] private async Task ManageUsers()    => await _navigationService.NavigateToRootAsync<ManageUsersViewModel>();
+    [RelayCommand] private async Task SystemSettings() => await _navigationService.NavigateToRootAsync<SystemSettingsViewModel>();
 }

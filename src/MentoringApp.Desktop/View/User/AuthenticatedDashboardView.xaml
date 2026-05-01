@@ -49,7 +49,7 @@
                 Orientation="Horizontal">
 
                 <!--  Language toggle  -->
-                <TextBlock Text="Language:" VerticalAlignment="Center" Margin="0,0,4,0" />
+                <TextBlock Text="{Binding [Common_Language], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center" Margin="0,0,4,0" />
                 <ComboBox
                     Margin="0,0,8,0"
                     Width="55"

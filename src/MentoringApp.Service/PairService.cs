@@ -73,18 +73,39 @@ namespace MentoringApp.Service
 
         public async Task<Result> CreatePairAsync(int supervisorId, int mentorId, int menteeId)
         {
+            if (mentorId == menteeId)
+                return Result.Failure("Mentor and mentee cannot be the same person.");
+
             // Verify users exist and have correct roles
             var supervisor = await _userService.GetUserByIdAsync(supervisorId);
-            if (supervisor.Data is not SupervisorModel)
+            if (supervisor.Data is not SupervisorModel supervisorModel)
                 return Result.Failure("Selected supervisor is not valid.");
 
             var mentor = await _userService.GetUserByIdAsync(mentorId);
-            if (mentor.Data is not StudentModel { IsMentor: true })
+            if (mentor.Data is not StudentModel { IsMentor: true } mentorModel)
                 return Result.Failure("Selected mentor is not a valid mentor.");
 
             var mentee = await _userService.GetUserByIdAsync(menteeId);
-            if (mentee.Data is not StudentModel { IsMentee: true })
+            if (mentee.Data is not StudentModel { IsMentee: true } menteeModel)
                 return Result.Failure("Selected mentee is not a valid mentee.");
+
+            // Check if mentor or mentee is already in a pair
+            var mentorPair = await _pairRepo.GetByMentorIdAsync(mentorId);
+            if (mentorPair != null)
+                return Result.Failure("The mentor is already in a pair.");
+
+            var menteePair = await _pairRepo.GetByMenteeIdAsync(menteeId);
+            if (menteePair != null)
+                return Result.Failure("The mentee is already in a pair.");
+
+            // Check if supervisor owns both students' classes
+            bool mentorInClass = mentorModel.Grade != null && 
+                                 supervisorModel.AssignedClasses.Any(c => c.Grade.Id == mentorModel.Grade.Id && c.ClassNum == mentorModel.ClassNum);
+            bool menteeInClass = menteeModel.Grade != null && 
+                                 supervisorModel.AssignedClasses.Any(c => c.Grade.Id == menteeModel.Grade.Id && c.ClassNum == menteeModel.ClassNum);
+
+            if (!mentorInClass || !menteeInClass)
+                return Result.Failure("The supervisor does not manage the classes for both students.");
 
             bool created = await _pairRepo.CreateAsync(supervisorId, mentorId, menteeId);
             return created ? Result.Ok() : Result.Failure("Failed to create pair.");

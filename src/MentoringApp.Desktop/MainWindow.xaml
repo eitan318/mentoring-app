@@ -4,9 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:components="clr-namespace:MentoringApp.View.Components"
+        xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
         mc:Ignorable="d"
         MinWidth="800" MinHeight="550" Width="1050" Height="650"
-        Title="Mentoring App" WindowStartupLocation="CenterScreen">
+        Title="Mentoring App" WindowStartupLocation="CenterScreen"
+        FlowDirection="{Binding FlowDirection, Source={x:Static loc:TranslationSource.Instance}}">
 
     <Grid>
         <!-- Main navigable content -->

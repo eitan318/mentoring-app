@@ -43,6 +43,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     [ObservableProperty] private string _bannerTimer = string.Empty;
     [ObservableProperty] private string _bannerColor = "#E3F2FD";
     [ObservableProperty] private string _bannerTextColor = "#1565C0";
+    [ObservableProperty] private string _phaseInstructions = string.Empty;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ArePairsAndIssuesVisible))]
     private bool _isPhase1Active;
@@ -73,8 +74,8 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     private PairProgressItem? _issueFilterPair;
 
     public string IssuesSectionContextTitle => IssueFilterPair == null
-        ? "Issues"
-        : $"Issues of {IssueFilterPair.Pair.Mentor.UserName} & {IssueFilterPair.Pair.Mentee.UserName}";
+        ? _loc.Get("Supervisor_Issues_Title")
+        : _loc.Format("Supervisor_IssuesOf_Format", IssueFilterPair.Pair.Mentor.UserName, IssueFilterPair.Pair.Mentee.UserName);
 
     partial void OnIssueFilterPairChanged(PairProgressItem? value)
     {
@@ -169,7 +170,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         var reviewResults = await Task.WhenAll(reviewTasks);
 
         var progressItems = reviewResults
-            .Select(r => new PairProgressItem(r.pair, r.hours, requiredHours))
+            .Select(r => new PairProgressItem(r.pair, r.hours, requiredHours, _loc))
             .ToList();
 
         PairsSupervised = new ObservableCollection<PairProgressItem>(
@@ -190,7 +191,6 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
         // Load students in the supervisor's assigned classes to track registration progress
         var myStudents = (await _userClient.GetStudentsBySupervisorAsync(supervisorId))
-            .OfType<StudentModel>()
             .ToList();
 
         int totalStudents = myStudents.Count;
@@ -318,6 +318,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
             BannerTitle = _loc.Get("Supervisor_BannerComplete_Title");
             BannerSubtitle = _loc.Get("Supervisor_BannerComplete_Subtitle");
             BannerTimer = string.Empty;
+            PhaseInstructions = _loc.Get("Supervisor_PhaseComplete_Info_Body");
             return;
         }
 
@@ -329,6 +330,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
             IsPhase2Active = false;
             BannerTitle = _loc.Get("Supervisor_BannerPhase1_Title");
             BannerSubtitle = _loc.Get("Supervisor_BannerPhase1_Subtitle");
+            PhaseInstructions = _loc.Get("Supervisor_Phase1Info_Body");
             if (_tier1Deadline.HasValue)
             {
                 var diff = _tier1Deadline.Value - DateTime.Now;
@@ -344,6 +346,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
             IsPhase2Active = true;
             BannerTitle = _loc.Get("Supervisor_BannerPhase2_Title");
             BannerSubtitle = _loc.Get("Supervisor_BannerPhase2_Subtitle");
+            PhaseInstructions = _loc.Get("Supervisor_Phase2Info_Body");
             if (_tier3Deadline.HasValue)
             {
                 var diff = _tier3Deadline.Value - DateTime.Now;

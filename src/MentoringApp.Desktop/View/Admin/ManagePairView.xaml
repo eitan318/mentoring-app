@@ -107,7 +107,7 @@
         <!-- ── TOP BAR ── -->
         <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,24" Padding="20,16">
             <DockPanel>
-                <TextBlock Text="Manage Pairs" FontWeight="Bold" FontSize="18" Foreground="#111827" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding [ManagePairs_Title], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827" VerticalAlignment="Center"/>
                 <Button Command="{Binding CreatePairCommand}" Content="{Binding [Admin_ManagePair_Create], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource PrimaryBtn}" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
             </DockPanel>
         </Border>
@@ -144,8 +144,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Mentor" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
-                            <TextBlock Grid.Column="2" Text="Mentee" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
+                            <TextBlock Grid.Column="0" Text="{Binding [Table_Mentor], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
+                            <TextBlock Grid.Column="2" Text="{Binding [Table_Mentee], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="42,0,0,0"/>
                         </Grid>
                         <Rectangle Grid.Row="0" Height="1" Fill="#F3F4F6" VerticalAlignment="Bottom"/>
 
