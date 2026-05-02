@@ -1,4 +1,4 @@
-using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 

@@ -1,4 +1,5 @@
 using MentoringApp.Service;
+using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
@@ -77,5 +78,3 @@ public static class SettingsEndpoints
     }
 }
 
-record DeadlineBody(DateTime? Deadline);
-record BoolBody(bool Value);

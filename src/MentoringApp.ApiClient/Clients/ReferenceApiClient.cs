@@ -1,4 +1,4 @@
-using MentoringApp.ApiClient.Models;
+
 using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
@@ -36,5 +36,4 @@ public class ReferenceApiClient(HttpClient http) : ApiClientBase(http)
         }
     }
 
-    private record SupervisorIdResponse(int SupervisorId);
 }

@@ -1,4 +1,4 @@
-using MentoringApp.Api.Helpers;
+using MentoringApp.Service;
 using MentoringApp.Data.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -13,10 +13,10 @@ public static class DevEndpoints
         var group = routes.MapGroup("/api/dev");
 
         // Allow unauthenticated access for simplicity during dev DB recreation
-        group.MapPost("/recreate-db", async (IDbRepo dbRepo, DummyDataSeeder seeder) =>
+        group.MapPost("/recreate-db", async (SystemAdminService adminService) =>
         {
-            dbRepo.Recreate();
-            await seeder.SeedAsync();
+            await adminService.RecreateDatabaseAsync();
+            await adminService.SeedDatabaseAsync();
             return Results.Ok(new { message = "Database recreated and seeded successfully." });
         }).AllowAnonymous();
 

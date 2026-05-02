@@ -1,6 +1,7 @@
 using MentoringApp.Api.Helpers;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
+using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
@@ -45,9 +46,9 @@ public static class ReferenceEndpoints
         .WithOpenApi();
 
         // GET /api/reference/supervisor-for-student/{studentId}
-        group.MapGet("/supervisor-for-student/{studentId:int}", async (int studentId, ISchoolClassRepo classRepo) =>
+        group.MapGet("/supervisor-for-student/{studentId:int}", async (int studentId, SchoolClassService schoolClassService) =>
         {
-            var supervisorId = await classRepo.GetSupervisorIdForStudentAsync(studentId);
+            var supervisorId = await schoolClassService.GetSupervisorIdForStudentAsync(studentId);
             return supervisorId.HasValue
                 ? Results.Ok(new { supervisorId = supervisorId.Value })
                 : Results.NotFound(new { error = "No supervisor found for this student's class." });
@@ -74,4 +75,3 @@ public static class ReferenceEndpoints
     }
 }
 
-record AddSchoolClassBody(int GradeId, int ClassNum);

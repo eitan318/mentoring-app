@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Data + service layers
 builder.Services.AddDataLayer(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
-builder.Services.AddTransient<DummyDataSeeder>();
 
 // Configure JSON to emit $type discriminators for polymorphic UserModel
 builder.Services.ConfigureHttpJsonOptions(options =>

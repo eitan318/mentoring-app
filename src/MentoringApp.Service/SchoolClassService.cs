@@ -72,6 +72,11 @@ namespace MentoringApp.Service
             return Result.Ok();
         }
 
+        public async Task<int?> GetSupervisorIdForStudentAsync(int studentId)
+        {
+            return await _repo.GetSupervisorIdForStudentAsync(studentId);
+        }
+
         private SchoolClassModel? Map(SchoolClassDao dto, Dictionary<int, GradeDao> grades)
         {
             if (!grades.TryGetValue(dto.GradeId, out var g)) return null;

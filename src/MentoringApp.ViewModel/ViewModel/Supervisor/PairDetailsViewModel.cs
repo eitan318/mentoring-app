@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.ApiClient.Clients;
-using MentoringApp.ApiClient.Models;
 using MentoringApp.Model;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;

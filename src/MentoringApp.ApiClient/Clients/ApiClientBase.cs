@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using MentoringApp.ApiClient.Exceptions;
+using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 
@@ -75,5 +76,4 @@ public abstract class ApiClientBase(HttpClient http)
             response.StatusCode);
     }
 
-    private record ErrorBody(string? Error);
 }

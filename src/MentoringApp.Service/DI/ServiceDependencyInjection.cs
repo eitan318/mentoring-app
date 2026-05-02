@@ -22,6 +22,8 @@ namespace MentoringApp.Service.DI
             services.AddScoped<MatchingFlowService>();
             services.AddScoped<CompatibilityScorer>();
             services.AddScoped<SupervisorAssignmentService>();
+            services.AddScoped<SystemAdminService>();
+            services.AddScoped<DummyDataSeeder>();
 
             services.AddScoped<NotificationService>();
 

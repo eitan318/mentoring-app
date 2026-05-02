@@ -1,7 +1,6 @@
-using DocumentFormat.OpenXml.Office2010.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
 using MentoringApp.Api.Helpers;
 using MentoringApp.Service;
+using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
@@ -69,6 +68,3 @@ public static class IssueEndpoints
         .WithOpenApi();
     }
 }
-
-record CreateIssueRequest(string Description, int CategoryId, int ReportedByUserId);
-record ForwardIssueRequest(int SupervisorId);

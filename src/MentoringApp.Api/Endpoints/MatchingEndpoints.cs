@@ -1,6 +1,7 @@
 using MentoringApp.Api.Helpers;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
+using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
@@ -91,10 +92,10 @@ public static class MatchingEndpoints
         .WithOpenApi();
 
         // DELETE /api/matching/requests/{requestId} — Student (cancel)
-        group.MapDelete("/requests/{requestId:int}", async (int requestId, IPairRequestRepo pairRequestRepo) =>
+        group.MapDelete("/requests/{requestId:int}", async (int requestId, MatchingFlowService matchingService) =>
         {
-            bool ok = await pairRequestRepo.UpdateStatusAsync(requestId, "Cancelled");
-            return ok ? Results.NoContent() : Results.NotFound();
+            var result = await matchingService.CancelPairRequestAsync(requestId);
+            return result.Success ? Results.NoContent() : Results.NotFound();
         })
         .WithOpenApi();
 
@@ -146,7 +147,3 @@ public static class MatchingEndpoints
         .WithOpenApi();
     }
 }
-
-record SendRequestBody(int MenteeId, int MentorId);
-record AcceptRequestBody(int SupervisorId);
-record GalleryPickBody(int MenteeId, int MentorId, int SupervisorId);
