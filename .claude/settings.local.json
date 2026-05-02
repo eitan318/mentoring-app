@@ -52,7 +52,17 @@
       "PowerShell(Get-Process *)",
       "Bash(Get-Content \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\src\\\\MentoringApp.Api\\\\Properties\\\\launchSettings.json\")",
       "Bash(Remove-Item *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(dir *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\src\\\\MentoringApp.Data\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Format-List)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\src\\\\MentoringApp.Service\" -Recurse -Force)",
+      "Bash(Get-ChildItem -Recurse -Path \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\src\\\\MentoringApp.ViewModel\" -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(Get-ChildItem -Path C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\src\\\\MentoringApp.Desktop -Recurse -Directory)",
+      "Bash(Get-ChildItem *)"
     ]
   }
 }
