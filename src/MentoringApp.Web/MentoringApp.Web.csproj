@@ -13,7 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\MentoringApp.Model\MentoringApp.Model.csproj" />
     <ProjectReference Include="..\MentoringApp.ViewModel\MentoringApp.ViewModel.csproj" />
-    <ProjectReference Include="..\MentoringApp.ApiClient\MentoringApp.ApiClient.csproj" />
   </ItemGroup>
 
 </Project>
