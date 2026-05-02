@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MentoringApp.ApiClient.Clients;
-using MentoringApp.ApiClient.Models;
 using MentoringApp.Model;
 using MentoringApp.Model.User;
 using MentoringApp.ViewModel.IService;

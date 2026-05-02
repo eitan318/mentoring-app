@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Office2010.Excel;
 using MentoringApp.Api.Helpers;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
+using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
@@ -60,4 +61,3 @@ public static class PairEndpoints
     }
 }
 
-record CreatePairRequest(int SupervisorId, int MentorId, int MenteeId);

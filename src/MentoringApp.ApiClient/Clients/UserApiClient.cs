@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using MentoringApp.ApiClient.Models;
+using MentoringApp.Model;
 using MentoringApp.Model.User;
 
 namespace MentoringApp.ApiClient.Clients;
@@ -87,6 +87,4 @@ public class UserApiClient(HttpClient http) : ApiClientBase(http)
         await File.WriteAllBytesAsync(savePath, bytes);
     }
 
-    private record UploadResult(string Path);
-    private record ImportResult(int Imported);
 }

@@ -426,5 +426,11 @@ namespace MentoringApp.Service
             var subjects = await _subjectRepo.GetAllSubjectsAsync();
             return subjects.FirstOrDefault(s => s.Id == subjectId)?.Name ?? "Unknown";
         }
+
+        public async Task<Result> CancelPairRequestAsync(int requestId)
+        {
+            bool ok = await _pairRequestRepo.UpdateStatusAsync(requestId, "Cancelled");
+            return ok ? Result.Ok() : Result.Failure("Failed to cancel request.");
+        }
     }
 }

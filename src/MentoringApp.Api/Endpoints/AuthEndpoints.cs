@@ -14,28 +14,23 @@ public static class AuthEndpoints
         app.MapPost("/api/auth/send-code", async (
             SendCodeRequest request,
             AuthService authService,
-            IWebHostEnvironment env,
-            IUserRepo userRepo,
-            IVerificationCodeRepo codeRepo) =>
+            IWebHostEnvironment env) =>
         {
             if (string.IsNullOrWhiteSpace(request.NationalId))
                 return Results.BadRequest(new { error = "NationalId is required." });
 
-            var result = await authService.SendVerificationCodeAsync(request.NationalId);
+            var result = await authService.SendVerificationCodeAsync(request.NationalId, env.IsDevelopment());
 
-            if (env.IsDevelopment())
+            if (result.Success)
             {
-                // In dev, return the saved code even when email delivery fails.
-                var userDto = await userRepo.GetUserDtoByNationalIdAsync(request.NationalId);
-                if (userDto is not null)
+                if (env.IsDevelopment() && !string.IsNullOrEmpty(result.Data))
                 {
-                    var devCode = await codeRepo.GetCodeByUserIdAsync(userDto.Id);
-                    if (devCode is not null)
-                        return Results.Ok(new { devCode });
+                    return Results.Ok(new { devCode = result.Data });
                 }
+                return Results.Ok();
             }
 
-            return result.Success ? Results.Ok() : Results.BadRequest(new { error = result.ErrorMessage });
+            return Results.BadRequest(new { error = result.ErrorMessage });
         })
         .WithName("SendVerificationCode")
         .WithOpenApi()
@@ -68,37 +63,7 @@ public static class AuthEndpoints
         // POST /api/auth/register — public self-registration
         app.MapPost("/api/auth/register", async (RegisterRequest req, UserService userService) =>
         {
-            UserModel user;
-            if (req.Role.Equals("supervisor", StringComparison.OrdinalIgnoreCase))
-            {
-                user = new SupervisorModel { UserName = req.UserName, Email = req.Email, NationalId = req.NationalId };
-            }
-            else
-            {
-                var student = new StudentModel
-                {
-                    UserName = req.UserName,
-                    Email = req.Email,
-                    NationalId = req.NationalId,
-                    Grade = new GradeModel { Id = req.GradeId ?? 0, Name = string.Empty, Num = 0 },
-                    ClassNum = req.ClassNum ?? 0,
-                };
-                if (req.PreferredMentorGender.HasValue)
-                    student.PreferredMentorGender = (MentoringApp.Model.User.GenderPreference)req.PreferredMentorGender.Value;
-                if (req.PreferredMenteeGender.HasValue)
-                    student.PreferredMenteeGender = (MentoringApp.Model.User.GenderPreference)req.PreferredMenteeGender.Value;
-                if (req.MentorSubjectId.HasValue)
-                    student.MentorProfile = new MentoringApp.Model.User.StudentProfiles.MentorProfile
-                        { SubjectToTeach = req.MentorSubjectId.Value, MaxMentees = req.MaxMentees ?? 1 };
-                if (req.MenteeSubjectId.HasValue)
-                    student.MenteeProfile = new MentoringApp.Model.User.StudentProfiles.MenteeProfile
-                        { SubjectToLearn = req.MenteeSubjectId.Value };
-                user = student;
-            }
-            user.PhoneNumber = req.PhoneNumber;
-            user.Gender = (Gender)req.Gender;
-
-            var result = await userService.CreateUserAsync(user);
+            var result = await userService.RegisterUserAsync(req);
             return result.Success ? Results.StatusCode(201) : Results.BadRequest(new { error = result.ErrorMessage });
         })
         .AllowAnonymous()
@@ -109,12 +74,3 @@ public static class AuthEndpoints
     }
 }
 
-public record LoginRequest(string NationalId, string Password);
-public record SendCodeRequest(string NationalId);
-public record RegisterRequest(
-    string UserName, string Email, string NationalId, string? PhoneNumber,
-    int Gender, string Role,
-    int? GradeId, int? ClassNum,
-    int? PreferredMentorGender, int? PreferredMenteeGender,
-    int? MentorSubjectId, int? MaxMentees,
-    int? MenteeSubjectId);

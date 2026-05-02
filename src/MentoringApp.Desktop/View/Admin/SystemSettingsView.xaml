@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
     xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
-    xmlns:apiModel="clr-namespace:MentoringApp.ApiClient.Models;assembly=MentoringApp.ApiClient"
     xmlns:adminVm="clr-namespace:MentoringApp.ViewModel.ViewModel.Admin;assembly=MentoringApp.ViewModel"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 

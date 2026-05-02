@@ -308,6 +308,96 @@ namespace MentoringApp.Service
 
             return destPath;
         }
+        public async Task<Result> CreateUserAsync(CreateUserRequest req)
+        {
+            UserModel user = req.Role.ToLowerInvariant() switch
+            {
+                "admin" => new AdminModel(0, req.Email, req.UserName, req.NationalId),
+                "supervisor" => new SupervisorModel(0, req.Email, req.UserName, req.NationalId),
+                _ => new StudentModel
+                {
+                    Email = req.Email,
+                    UserName = req.UserName,
+                    NationalId = req.NationalId,
+                    Grade = new GradeModel { Id = 0, Name = string.Empty, Num = 0 }
+                }
+            };
+            user.PhoneNumber = req.PhoneNumber;
+            user.Gender = (MentoringApp.Model.User.Gender)req.Gender;
+
+            return await CreateUserAsync(user);
+        }
+
+        public async Task<Result> RegisterUserAsync(RegisterRequest req)
+        {
+            UserModel user;
+            if (req.Role.Equals("supervisor", StringComparison.OrdinalIgnoreCase))
+            {
+                user = new SupervisorModel { UserName = req.UserName, Email = req.Email, NationalId = req.NationalId };
+            }
+            else
+            {
+                var student = new StudentModel
+                {
+                    UserName = req.UserName,
+                    Email = req.Email,
+                    NationalId = req.NationalId,
+                    Grade = new GradeModel { Id = req.GradeId ?? 0, Name = string.Empty, Num = 0 },
+                    ClassNum = req.ClassNum ?? 0,
+                };
+                if (req.PreferredMentorGender.HasValue)
+                    student.PreferredMentorGender = (MentoringApp.Model.User.GenderPreference)req.PreferredMentorGender.Value;
+                if (req.PreferredMenteeGender.HasValue)
+                    student.PreferredMenteeGender = (MentoringApp.Model.User.GenderPreference)req.PreferredMenteeGender.Value;
+                if (req.MentorSubjectId.HasValue)
+                    student.MentorProfile = new MentoringApp.Model.User.StudentProfiles.MentorProfile
+                        { SubjectToTeach = req.MentorSubjectId.Value, MaxMentees = req.MaxMentees ?? 1 };
+                if (req.MenteeSubjectId.HasValue)
+                    student.MenteeProfile = new MentoringApp.Model.User.StudentProfiles.MenteeProfile
+                        { SubjectToLearn = req.MenteeSubjectId.Value };
+                user = student;
+            }
+            user.PhoneNumber = req.PhoneNumber;
+            user.Gender = (MentoringApp.Model.User.Gender)req.Gender;
+
+            return await CreateUserAsync(user);
+        }
+
+        public async Task<IEnumerable<SupervisorStatsResponse>> GetSupervisorStatisticsAsync()
+        {
+            var dtos = await _userRepo.GetSupervisorStatisticsAsync();
+            return dtos.Select(d => new SupervisorStatsResponse(d.Id, d.UserName, d.PendingIssuesCount, d.ResolvedIssuesCount, d.PairsCount));
+        }
+
+        public async Task<bool> UpdateBaseInfoAsync(int id, string userName, string email, string nationalId, string? phoneNumber, int gender)
+        {
+            return await _userRepo.UpdateBaseInfoAsync(id, userName, email, nationalId, phoneNumber, gender);
+        }
+
+        public async Task UpdateStudentGradeAndClassAsync(int id, int gradeId, int classNum)
+        {
+            await _userRepo.UpdateStudentGradeAndClassAsync(id, gradeId, classNum);
+        }
+
+        public async Task UpdateStudentPreferredGendersAsync(int id, int preferredMentorGender, int preferredMenteeGender)
+        {
+            await _userRepo.UpdateStudentPreferredGendersAsync(id, preferredMentorGender, preferredMenteeGender);
+        }
+
+        public async Task UpsertMentorProfileAsync(int id, int subjectId)
+        {
+            await _userRepo.UpsertMentorProfileAsync(id, subjectId);
+        }
+
+        public async Task UpsertMenteeProfileAsync(int id, int subjectId)
+        {
+            await _userRepo.UpsertMenteeProfileAsync(id, subjectId);
+        }
+
+        public async Task UpdateProfilePicturePathAsync(int id, string path)
+        {
+            await _userRepo.UpdateProfilePictureAsync(id, path);
+        }
     }
 }
 

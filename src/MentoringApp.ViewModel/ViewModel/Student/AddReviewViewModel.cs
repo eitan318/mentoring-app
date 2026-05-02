@@ -1,9 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
-using MentoringApp.ApiClient.Models;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
+using MentoringApp.Model;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.ComponentModel.DataAnnotations;
 

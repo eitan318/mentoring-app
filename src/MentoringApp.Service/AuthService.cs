@@ -32,12 +32,12 @@ namespace MentoringApp.Service
             _userValidator = userValidator;
         }
 
-        public async Task<Result> SendVerificationCodeAsync(string nationalId)
+        public async Task<Result<string>> SendVerificationCodeAsync(string nationalId, bool isDev = false)
         {
             var userResult = await _userService.GetUserByNationalIdAsync(nationalId);
 
             if (!userResult.Success)
-                return Result.Failure("User does not exist.");
+                return Result<string>.Failure("User does not exist.");
 
             var user = userResult.Data;
 
@@ -47,13 +47,19 @@ namespace MentoringApp.Service
         
             bool saved = await _verificationCodeRepository.SaveAsync(user.Id, code, creationDate);
             if (!saved) 
-                return Result.Failure("System error: Could not save verification code.");
+                return Result<string>.Failure("System error: Could not save verification code.");
+
+            if (isDev)
+            {
+                var devCode = await _verificationCodeRepository.GetCodeByUserIdAsync(user.Id);
+                return Result<string>.Ok(devCode ?? code);
+            }
 
             // Send Email
             string body = $"<h1>Your code is {code}</h1>";
             bool sent = await _emailService.SendEmailAsync(user.Email, "Verification code", body);
         
-            return sent ? Result.Ok() : Result.Failure("Failed to send email. Please check your connection.");
+            return sent ? Result<string>.Ok(string.Empty) : Result<string>.Failure("Failed to send email. Please check your connection.");
         }
 
         public async Task<Result<UserModel>> LoginAsync(string nationalId)

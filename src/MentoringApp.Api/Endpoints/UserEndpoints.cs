@@ -25,9 +25,9 @@ public static class UserEndpoints
         .WithOpenApi();
 
         // GET /api/users/supervisors/stats — Admin only (must be before /{id})
-        group.MapGet("/supervisors/stats", async (IUserRepo userRepo) =>
+        group.MapGet("/supervisors/stats", async (UserService userService) =>
         {
-            var stats = await userRepo.GetSupervisorStatisticsAsync();
+            var stats = await userService.GetSupervisorStatisticsAsync();
             return Results.Ok(stats);
         })
         .RequireAuthorization("AdminOnly")
@@ -66,22 +66,7 @@ public static class UserEndpoints
         // POST /api/users — Admin only
         group.MapPost("/", async (CreateUserRequest req, UserService userService) =>
         {
-            UserModel user = req.Role.ToLowerInvariant() switch
-            {
-                "admin" => new AdminModel(0, req.Email, req.UserName, req.NationalId),
-                "supervisor" => new SupervisorModel(0, req.Email, req.UserName, req.NationalId),
-                _ => new StudentModel
-                {
-                    Email = req.Email,
-                    UserName = req.UserName,
-                    NationalId = req.NationalId,
-                    Grade = new GradeModel { Id = 0, Name = string.Empty, Num = 0 }
-                }
-            };
-            user.PhoneNumber = req.PhoneNumber;
-            user.Gender = (Gender)req.Gender;
-
-            var result = await userService.CreateUserAsync(user);
+            var result = await userService.CreateUserAsync(req);
             return result.Success ? Results.StatusCode(201) : Results.BadRequest(new { error = result.ErrorMessage });
         })
         .RequireAuthorization("AdminOnly")
@@ -97,9 +82,9 @@ public static class UserEndpoints
         .WithOpenApi();
 
         // PUT /api/users/{id}/base-info
-        group.MapPut("/{id:int}/base-info", async (int id, UpdateBaseInfoRequest req, IUserRepo userRepo) =>
+        group.MapPut("/{id:int}/base-info", async (int id, UpdateBaseInfoRequest req, UserService userService) =>
         {
-            bool ok = await userRepo.UpdateBaseInfoAsync(id, req.UserName, req.Email, req.NationalId, req.PhoneNumber, req.Gender);
+            bool ok = await userService.UpdateBaseInfoAsync(id, req.UserName, req.Email, req.NationalId, req.PhoneNumber, req.Gender);
             return ok ? Results.Ok() : Results.NotFound();
         })
         .WithOpenApi();
@@ -113,33 +98,33 @@ public static class UserEndpoints
         .WithOpenApi();
 
         // PUT /api/users/{id}/grade-class
-        group.MapPut("/{id:int}/grade-class", async (int id, UpdateGradeClassRequest req, IUserRepo userRepo) =>
+        group.MapPut("/{id:int}/grade-class", async (int id, UpdateGradeClassRequest req, UserService userService) =>
         {
-            await userRepo.UpdateStudentGradeAndClassAsync(id, req.GradeId, req.ClassNum);
+            await userService.UpdateStudentGradeAndClassAsync(id, req.GradeId, req.ClassNum);
             return Results.Ok();
         })
         .WithOpenApi();
 
         // PUT /api/users/{id}/gender-preferences
-        group.MapPut("/{id:int}/gender-preferences", async (int id, UpdateGenderPreferencesRequest req, IUserRepo userRepo) =>
+        group.MapPut("/{id:int}/gender-preferences", async (int id, UpdateGenderPreferencesRequest req, UserService userService) =>
         {
-            await userRepo.UpdateStudentPreferredGendersAsync(id, req.PreferredMentorGender, req.PreferredMenteeGender);
+            await userService.UpdateStudentPreferredGendersAsync(id, req.PreferredMentorGender, req.PreferredMenteeGender);
             return Results.Ok();
         })
         .WithOpenApi();
 
         // PUT /api/users/{id}/mentor-profile
-        group.MapPut("/{id:int}/mentor-profile", async (int id, UpdateMentorProfileRequest req, IUserRepo userRepo) =>
+        group.MapPut("/{id:int}/mentor-profile", async (int id, UpdateMentorProfileRequest req, UserService userService) =>
         {
-            await userRepo.UpsertMentorProfileAsync(id, req.SubjectId);
+            await userService.UpsertMentorProfileAsync(id, req.SubjectId);
             return Results.Ok();
         })
         .WithOpenApi();
 
         // PUT /api/users/{id}/mentee-profile
-        group.MapPut("/{id:int}/mentee-profile", async (int id, UpdateMenteeProfileRequest req, IUserRepo userRepo) =>
+        group.MapPut("/{id:int}/mentee-profile", async (int id, UpdateMenteeProfileRequest req, UserService userService) =>
         {
-            await userRepo.UpsertMenteeProfileAsync(id, req.SubjectId);
+            await userService.UpsertMenteeProfileAsync(id, req.SubjectId);
             return Results.Ok();
         })
         .WithOpenApi();
@@ -154,7 +139,7 @@ public static class UserEndpoints
         .WithOpenApi();
 
         // POST /api/users/{id}/profile-picture (multipart)
-        group.MapPost("/{id:int}/profile-picture", async (int id, IFormFile file, IUserRepo userRepo, IWebHostEnvironment env) =>
+        group.MapPost("/{id:int}/profile-picture", async (int id, IFormFile file, UserService userService, IWebHostEnvironment env) =>
         {
             var uploadsDir = Path.Combine(env.WebRootPath ?? env.ContentRootPath, "uploads", "profile-pictures");
             Directory.CreateDirectory(uploadsDir);
@@ -164,7 +149,7 @@ public static class UserEndpoints
             using var stream = File.Create(filePath);
             await file.CopyToAsync(stream);
             var relativePath = Path.Combine("uploads", "profile-pictures", fileName);
-            await userRepo.UpdateProfilePictureAsync(id, relativePath);
+            await userService.UpdateProfilePicturePathAsync(id, relativePath);
             return Results.Ok(new { path = relativePath });
         })
         .WithOpenApi()
@@ -219,11 +204,4 @@ public static class UserEndpoints
     }
 }
 
-record CreateUserRequest(string UserName, string Email, string NationalId, string? PhoneNumber, int Gender, string Role);
-record UpdateBaseInfoRequest(string UserName, string Email, string NationalId, string? PhoneNumber, int Gender);
-record UpdateLanguageRequest(string Language);
-record UpdateGradeClassRequest(int GradeId, int ClassNum);
-record UpdateGenderPreferencesRequest(int PreferredMentorGender, int PreferredMenteeGender);
-record UpdateMentorProfileRequest(int SubjectId);
-record UpdateMenteeProfileRequest(int SubjectId);
-record UpdateSupervisorClassesRequest(IEnumerable<int> ClassIds);
+
