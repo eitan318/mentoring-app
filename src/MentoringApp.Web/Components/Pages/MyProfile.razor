@@ -1,0 +1,337 @@
+@page "/profile"
+@rendermode InteractiveServer
+@layout MentoringApp.Web.Components.Layout.AuthenticatedLayout
+@implements IDisposable
+@using System.ComponentModel
+@using MentoringApp.Model.User
+@using MentoringApp.ViewModel.ViewModel.User
+@using MentoringApp.ViewModel.IService
+@using MentoringApp.ViewModel.Localization
+@inject MyProfileViewModel Vm
+@inject ILocalizationService Loc
+
+@*
+    Mirrors MyProfileView.xaml — bound 1:1 to MyProfileViewModel.
+    All bindings (UserName, Email, Gender, Grade, Subject, etc.) come from VM proxy properties.
+*@
+
+<div class="profile-root" dir="@Dir">
+    <div class="profile-card">
+
+        @* ── Profile picture + change photo (camera button is no-op on web for now) ── *@
+        <div class="pic-wrap">
+            <div class="pic" style="background:@PicBg(Vm.Gender)">
+                @(string.IsNullOrEmpty(Vm.UserName) ? "?" : Vm.UserName[0].ToString().ToUpper())
+            </div>
+            <button class="pic-camera" disabled
+                    title="@Loc.Get("Profile_ChangePhoto_Tooltip")">📷</button>
+        </div>
+        <div class="pic-hint">@Loc.Get("Profile_ChangePhoto_Hint")</div>
+
+        @* ── Role badge ───────────────────────────────────────────────────── *@
+        <div class="role-badge">@Vm.RoleBadge</div>
+
+        @* ── Common fields ────────────────────────────────────────────────── *@
+        <div class="field-label">@Loc.Get("Profile_Username_Label")</div>
+        <input class="field-input"
+               readonly="@Vm.IsReadOnly"
+               value="@Vm.UserName"
+               @oninput="e => Vm.UserName = e.Value?.ToString() ?? string.Empty" />
+
+        <div class="field-label">@Loc.Get("Profile_Email_Label")</div>
+        <input class="field-input"
+               readonly="@Vm.IsReadOnly"
+               value="@Vm.Email"
+               @oninput="e => Vm.Email = e.Value?.ToString() ?? string.Empty" />
+
+        <div class="field-label">@Loc.Get("Profile_NationalId_Label")</div>
+        <input class="field-input field-readonly" readonly value="@Vm.NationalId" />
+
+        <div class="field-label">@Loc.Get("Profile_Phone_Label")</div>
+        <input class="field-input"
+               readonly="@Vm.IsReadOnly"
+               value="@(Vm.PhoneNumber ?? "")"
+               @oninput="e => Vm.PhoneNumber = e.Value?.ToString() ?? string.Empty" />
+
+        <div class="field-label">@Loc.Get("Profile_Gender_Label")</div>
+        <select class="field-input"
+                disabled="@(!Vm.IsEditMode)"
+                value="@Vm.SelectedGenderValue"
+                @onchange="OnGenderChanged">
+            @foreach (var opt in MyProfileViewModel.GenderOptions)
+            {
+                <option value="@opt.Value" selected="@(opt.Value == Vm.SelectedGenderValue)">@opt.Display</option>
+            }
+        </select>
+
+        @* ── Student section (everything except supervisor) ───────────────── *@
+        @if (!Vm.IsSupervisor)
+        {
+            <hr class="divider" />
+            <div class="section-header">@Loc.Get("Profile_Grade_Label")</div>
+
+            <div class="field-label">@Loc.Get("Profile_Grade_Label")</div>
+            <select class="field-input"
+                    disabled="@(!Vm.IsEditMode)"
+                    value="@(Vm.SelectedGrade?.Id.ToString() ?? "")"
+                    @onchange="OnGradeChanged">
+                <option value=""></option>
+                @foreach (var g in Vm.Grades)
+                {
+                    <option value="@g.Id" selected="@(Vm.SelectedGrade?.Id == g.Id)">@g.Name</option>
+                }
+            </select>
+
+            <div class="field-label">@Loc.Get("Profile_ClassNum_Label")</div>
+            <input class="field-input"
+                   type="number"
+                   readonly="@Vm.IsReadOnly"
+                   value="@Vm.ClassNum"
+                   @oninput="e => Vm.ClassNum = int.TryParse(e.Value?.ToString(), out var n) ? n : 0" />
+
+            @* ── Mentor section ──────────────────────────────────────────── *@
+            @if (Vm.HasMentorProfile)
+            {
+                <hr class="divider" />
+                <div class="section-header">@Loc.Get("Profile_SubjectToTeach_Label")</div>
+
+                <div class="field-label">@Loc.Get("Profile_SubjectToTeach_Label")</div>
+                <select class="field-input"
+                        disabled="@(!Vm.IsEditMode)"
+                        value="@Vm.SubjectToTeach"
+                        @onchange="e => Vm.SubjectToTeach = int.TryParse(e.Value?.ToString(), out var n) ? n : 0">
+                    <option value="0"></option>
+                    @foreach (var s in Vm.Subjects)
+                    {
+                        <option value="@s.Id" selected="@(s.Id == Vm.SubjectToTeach)">@s.Name</option>
+                    }
+                </select>
+
+                <div class="field-label">@Loc.Get("Profile_MaxMentees_Label")</div>
+                <input class="field-input"
+                       type="number"
+                       readonly="@Vm.IsReadOnly"
+                       value="@Vm.MaxMentees"
+                       @oninput="e => Vm.MaxMentees = int.TryParse(e.Value?.ToString(), out var n) ? n : 1" />
+
+                <div class="field-label">@Loc.Get("Profile_PreferredMenteeGender_Label")</div>
+                <select class="field-input"
+                        disabled="@(!Vm.IsEditMode)"
+                        value="@Vm.SelectedPreferredMenteeGenderValue"
+                        @onchange="OnPreferredMenteeChanged">
+                    @foreach (var opt in MyProfileViewModel.GenderPreferenceOptions)
+                    {
+                        <option value="@opt.Value" selected="@(opt.Value == Vm.SelectedPreferredMenteeGenderValue)">@opt.Display</option>
+                    }
+                </select>
+            }
+
+            @* ── Mentee section ──────────────────────────────────────────── *@
+            @if (Vm.HasMenteeProfile)
+            {
+                <hr class="divider" />
+                <div class="section-header">@Loc.Get("Profile_SubjectToLearn_Label")</div>
+
+                <div class="field-label">@Loc.Get("Profile_SubjectToLearn_Label")</div>
+                <select class="field-input"
+                        disabled="@(!Vm.IsEditMode)"
+                        value="@Vm.SubjectToLearn"
+                        @onchange="e => Vm.SubjectToLearn = int.TryParse(e.Value?.ToString(), out var n) ? n : 0">
+                    <option value="0"></option>
+                    @foreach (var s in Vm.Subjects)
+                    {
+                        <option value="@s.Id" selected="@(s.Id == Vm.SubjectToLearn)">@s.Name</option>
+                    }
+                </select>
+
+                <div class="field-label">@Loc.Get("Profile_PreferredMentorGender_Label")</div>
+                <select class="field-input"
+                        disabled="@(!Vm.IsEditMode)"
+                        value="@Vm.SelectedPreferredMentorGenderValue"
+                        @onchange="OnPreferredMentorChanged">
+                    @foreach (var opt in MyProfileViewModel.GenderPreferenceOptions)
+                    {
+                        <option value="@opt.Value" selected="@(opt.Value == Vm.SelectedPreferredMentorGenderValue)">@opt.Display</option>
+                    }
+                </select>
+            }
+        }
+
+        @* ── Action buttons ───────────────────────────────────────────────── *@
+        <hr class="divider" />
+        <div class="actions">
+            @if (Vm.IsReadOnly)
+            {
+                <button class="btn-edit"
+                        title="@Loc.Get("Profile_EditProfile_Tooltip")"
+                        @onclick="() => Vm.ToggleEditCommand.Execute(null)">
+                    @Loc.Get("Profile_EditProfile_Button")
+                </button>
+            }
+            @if (Vm.IsEditMode)
+            {
+                <button class="btn-save"
+                        title="@Loc.Get("Profile_SaveChanges_Tooltip")"
+                        @onclick="async () => await Vm.SaveCommand.ExecuteAsync(null)">
+                    @Loc.Get("Profile_SaveChanges_Button")
+                </button>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Vm.ErrorMessage))
+        {
+            <div class="error-msg">@Vm.ErrorMessage</div>
+        }
+    </div>
+</div>
+
+<style>
+    .profile-root {
+        background: #F4F7FE;
+        min-height: 100%;
+        padding: 32px 40px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        max-width: 520px;
+        margin: 0 auto;
+        box-shadow: 0 2px 15px rgba(0,0,0,.03);
+    }
+
+    .pic-wrap {
+        position: relative;
+        width: 100px; height: 100px;
+        margin: 0 auto 6px;
+    }
+    .pic {
+        width: 100%; height: 100%; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 32px; color: #1F2937;
+    }
+    .pic-camera {
+        position: absolute;
+        bottom: 0; right: 0;
+        width: 28px; height: 28px;
+        background: #111827; color: white;
+        border: 0; border-radius: 50%;
+        cursor: pointer; font-size: 14px;
+    }
+    .pic-hint {
+        text-align: center;
+        font-size: 12px; color: #6B7280;
+        margin-bottom: 16px;
+    }
+
+    .role-badge {
+        display: inline-block;
+        background: #F0F4FF;
+        border: 1px solid #C7D4F5;
+        color: #3B5BDB;
+        font-size: 13px; font-weight: 600;
+        padding: 4px 14px; border-radius: 12px;
+        margin: 0 auto 24px;
+    }
+    .profile-card { text-align: center; }
+    .profile-card > * { text-align: left; }
+    .profile-card > .role-badge,
+    .profile-card > .pic-hint,
+    .profile-card > .pic-wrap,
+    .profile-card > .actions { text-align: center; }
+
+    .field-label {
+        font-size: 12px; font-weight: 600;
+        color: #374151; margin: 8px 0 4px;
+    }
+    .field-input {
+        width: 100%;
+        padding: 10px 8px; font-size: 14px;
+        border: 1px solid #E5E7EB; border-radius: 6px;
+        outline: none; box-sizing: border-box;
+        margin-bottom: 16px;
+        background: white;
+    }
+    .field-input:focus { border-color: #4E6EF2; }
+    .field-readonly { background: #F9FAFB; color: #6B7280; }
+
+    .section-header {
+        font-size: 14px; font-weight: 600;
+        color: #374151; margin: 8px 0 4px;
+    }
+    .divider {
+        border: 0; border-top: 1px solid #F3F4F6;
+        margin: 8px 0 16px;
+    }
+
+    .actions {
+        display: flex; justify-content: flex-end;
+        gap: 8px; margin-top: 8px;
+    }
+    .btn-edit, .btn-save {
+        color: white; font-weight: 600;
+        border: 0; padding: 10px 16px;
+        border-radius: 8px; cursor: pointer;
+        font-size: 14px;
+    }
+    .btn-edit { background: #A855F7; }
+    .btn-edit:hover { background: #9333EA; }
+    .btn-save { background: #10B981; }
+    .btn-save:hover { background: #059669; }
+
+    .error-msg {
+        text-align: center;
+        color: #DC2626;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+</style>
+
+@code {
+    private string Dir => TranslationSource.Instance.IsRtl ? "rtl" : "ltr";
+
+    private static string PicBg(MentoringApp.Model.User.Gender g) =>
+        g == MentoringApp.Model.User.Gender.Female ? "#FBCFE8" : "#BFDBFE";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Vm.PropertyChanged += OnVmChanged;
+        TranslationSource.Instance.PropertyChanged += OnLocChanged;
+        await Vm.OnNavigatedToAsync();
+    }
+
+    private void OnVmChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private void OnLocChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private void OnGradeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+            Vm.SelectedGrade = Vm.Grades.FirstOrDefault(g => g.Id == id);
+    }
+
+    private void OnGenderChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var v)) Vm.SelectedGenderValue = v;
+    }
+
+    private void OnPreferredMenteeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var v)) Vm.SelectedPreferredMenteeGenderValue = v;
+    }
+
+    private void OnPreferredMentorChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var v)) Vm.SelectedPreferredMentorGenderValue = v;
+    }
+
+    public void Dispose()
+    {
+        Vm.PropertyChanged -= OnVmChanged;
+        TranslationSource.Instance.PropertyChanged -= OnLocChanged;
+    }
+}

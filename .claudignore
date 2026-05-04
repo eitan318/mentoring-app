@@ -1,0 +1,7 @@
+﻿bin/
+obj/
+.git/
+*.db
+*.exe
+*.dll
+*.pdb

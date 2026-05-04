@@ -1,0 +1,44 @@
+stages:
+  - build
+  - migrate
+  - deploy
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:9.0
+  script:
+    - dotnet restore MentoringApp.sln
+    - dotnet build MentoringApp.sln -c Release --no-restore
+    - dotnet test Tests/MentoringApp.Tests.csproj -c Release --no-build || true
+    - dotnet publish MentoringApp.Api/MentoringApp.Api.csproj -c Release -o publish/
+  artifacts:
+    paths:
+      - publish/
+    expire_in: 1 hour
+  only:
+    - main
+    - develop
+
+migrate:
+  stage: migrate
+  image: mcr.microsoft.com/dotnet/sdk:9.0
+  variables:
+    ConnectionStrings__Postgres: $PROD_POSTGRES_CONNECTION
+  script:
+    - dotnet tool install --global dotnet-ef
+    - export PATH="$PATH:$HOME/.dotnet/tools"
+    - dotnet ef database update
+        --project Data/MentoringApp.Data.csproj
+        --context MentoringDbContext
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  needs:
+    - build
+    - migrate
+  script:
+    - echo "Deploy publish/ to your server — configure SSH/kubectl/docker stack here"
+  only:
+    - main

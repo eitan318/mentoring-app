@@ -1,0 +1,22 @@
+<UserControl x:Class="MentoringApp.View.Components.ProfilePictureControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="root">
+    <Grid>
+        <Ellipse Fill="{Binding DefaultFill, ElementName=root}" />
+        <Viewbox Margin="5"
+                 Visibility="{Binding ShowDefaultAvatar, ElementName=root, Converter={StaticResource BoolToVis}}">
+            <TextBlock
+                Text="&#xE77B;"
+                FontFamily="Segoe MDL2 Assets"
+                Foreground="White" />
+        </Viewbox>
+        <Ellipse>
+            <Ellipse.Fill>
+                <ImageBrush
+                    ImageSource="{Binding ImagePath, ElementName=root, Converter={StaticResource StringToImage}, TargetNullValue={x:Null}}"
+                    Stretch="UniformToFill" />
+            </Ellipse.Fill>
+        </Ellipse>
+    </Grid>
+</UserControl>

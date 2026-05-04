@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug API",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-api",
+            "program": "${workspaceFolder}/MentoringApp.Api/bin/Debug/net9.0/MentoringApp.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/MentoringApp.Api",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5035"
+            }
+        }
+    ]
+}

@@ -1,0 +1,327 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@implements IDisposable
+@using MentoringApp.ViewModel.ViewModel.User
+@using MentoringApp.ViewModel.IService
+@inject LoginViewModel ViewModel
+@inject ILocalizationService Loc
+
+@* 
+    Blazor equivalent of LoginView.xaml
+    
+    Binding strategy:
+    - INotifyPropertyChanged  → ViewModel.PropertyChanged += StateHasChanged
+    - IRelayCommand           → @onclick="async () => await cmd.ExecuteAsync(null)"
+    - CanExecute              → disabled="@(!cmd.CanExecute(null))"
+    - Converters              → inline C# expressions
+    - FlowDirection (RTL/LTR) → dir="@Dir" on root element
+    - ObservableCollection    → bound via @foreach (re-renders on PropertyChanged)
+*@
+
+<div class="login-root" dir="@Dir">
+
+    @* ── Language Picker (top-right, mirrors ComboBox HorizontalAlignment=Right) ── *@
+    <div class="lang-picker">
+        <select value="@ViewModel.SelectedLanguage"
+                @onchange="e => ViewModel.SelectedLanguage = e.Value?.ToString() ?? ViewModel.SelectedLanguage">
+            @foreach (var lang in ViewModel.AvailableLanguages)
+            {
+                <option value="@lang" selected="@(lang == ViewModel.SelectedLanguage)">@lang</option>
+            }
+        </select>
+    </div>
+
+    @* ── Centered Form ── *@
+    <div class="form-center">
+
+        @* ── Step 1: Enter National ID (visible when WasCodeSent == false) ── *@
+        @if (!ViewModel.WasCodeSent)
+        {
+            <div class="form-card" @key='"step1"'>
+                <p class="step-label">@T("Login_Step1")</p>
+
+                <label class="field-label">@T("Login_NationalId_Label")</label>
+                <input class="field-input @(HasError(nameof(ViewModel.NationalId)) ? "input-error" : "")"
+                       type="text"
+                       value="@ViewModel.NationalId"
+                       @oninput="e => ViewModel.NationalId = e.Value?.ToString() ?? string.Empty"
+                       @onkeydown="OnKeyDown_Step1"
+                       autofocus />
+
+                @* Validation error for NationalId *@
+                @if (HasError(nameof(ViewModel.NationalId)))
+                {
+                    <span class="validation-msg">@GetError(nameof(ViewModel.NationalId))</span>
+                }
+
+                <button class="btn-primary"
+                        title="@T("Login_SendCode_Tooltip")"
+                        disabled="@(!ViewModel.SendVerificationCodeCommand.CanExecute(null))"
+                        @onclick="ExecuteSendCode">
+                    @if (_step1Busy)
+                    {
+                        <span class="spinner" aria-hidden="true"></span>
+                    }
+                    @T("Login_SendCode_Button")
+                </button>
+
+                @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+                {
+                    <p class="error-msg">@ViewModel.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        @* ── Step 2: Enter Verification Code (visible when WasCodeSent == true) ── *@
+        @if (ViewModel.WasCodeSent)
+        {
+            <div class="form-card" @key='"step2"'>
+                <p class="step-label">@T("Login_Step2")</p>
+
+                <label class="field-label">@T("Login_VerificationCode_Label")</label>
+                <input class="field-input @(HasError(nameof(ViewModel.VerificationCode)) ? "input-error" : "")"
+                       type="text"
+                       value="@ViewModel.VerificationCode"
+                       @oninput="e => ViewModel.VerificationCode = e.Value?.ToString() ?? string.Empty"
+                       @onkeydown="OnKeyDown_Step2"
+                       autofocus />
+
+                @if (HasError(nameof(ViewModel.VerificationCode)))
+                {
+                    <span class="validation-msg">@GetError(nameof(ViewModel.VerificationCode))</span>
+                }
+
+                <button class="btn-primary"
+                        title="@T("Login_VerifyCode_Tooltip")"
+                        disabled="@(!ViewModel.LoginCommand.CanExecute(null))"
+                        @onclick="ExecuteLogin">
+                    @if (_step2Busy)
+                    {
+                        <span class="spinner" aria-hidden="true"></span>
+                    }
+                    @T("Login_Login_Button")
+                </button>
+
+                @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+                {
+                    <p class="error-msg">@ViewModel.ErrorMessage</p>
+                }
+            </div>
+        }
+
+    </div>
+</div>
+
+@* ─────────────────────────────────────────────────────────────────────────── *@
+@*  Scoped styles — no stylesheet dependency                                   *@
+@* ─────────────────────────────────────────────────────────────────────────── *@
+<style>
+    .login-root {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: #f5f6fa;
+    }
+
+    /* RTL support — mirrors WPF FlowDirection */
+    [dir="rtl"] .lang-picker { left: 16px; right: auto; }
+    [dir="rtl"] .btn-primary  { align-self: flex-start; }
+
+    .lang-picker {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+    }
+
+    .lang-picker select {
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        background: white;
+    }
+
+    .form-center {
+        width: 100%;
+        max-width: 320px;
+        padding: 0 20px;
+    }
+
+    .form-card {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        background: white;
+        border-radius: 10px;
+        padding: 32px 28px;
+        box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    }
+
+    .step-label {
+        margin: 0 0 10px;
+        font-weight: 600;
+        font-size: 15px;
+        color: #333;
+    }
+
+    .field-label {
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 2px;
+    }
+
+    .field-input {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 14px;
+        border: 1px solid #d0d5dd;
+        border-radius: 6px;
+        outline: none;
+        transition: border-color .15s;
+        box-sizing: border-box;
+        margin-bottom: 6px;
+    }
+
+    .field-input:focus { border-color: #4e6ef2; }
+    .field-input.input-error { border-color: #e03e3e; }
+
+    .validation-msg {
+        font-size: 12px;
+        color: #e03e3e;
+        margin-top: -4px;
+        margin-bottom: 4px;
+    }
+
+    .btn-primary {
+        align-self: flex-end;
+        padding: 8px 18px;
+        font-size: 14px;
+        font-weight: 500;
+        color: white;
+        background: #4e6ef2;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background .15s, opacity .15s;
+        margin-top: 4px;
+    }
+
+    .btn-primary:hover:not(:disabled) { background: #3a58d4; }
+    .btn-primary:disabled { opacity: .55; cursor: default; }
+
+    .error-msg {
+        margin: 6px 0 0;
+        font-size: 13px;
+        color: #e03e3e;
+        max-width: 200px;
+        word-break: break-word;
+    }
+
+    /* Spinner — mirrors the loading indication */
+    .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255,255,255,.4);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin .7s linear infinite;
+        display: inline-block;
+    }
+
+    @@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+@* ─────────────────────────────────────────────────────────────────────────── *@
+@*  Code-behind                                                                *@
+@* ─────────────────────────────────────────────────────────────────────────── *@
+@code {
+    // ── busy flags for spinner (IAsyncRelayCommand has IsRunning, but we track
+    //    locally so we can call StateHasChanged reliably without extra interfaces) ──
+    private bool _step1Busy;
+    private bool _step2Busy;
+
+    // ── RTL/LTR: mirror WPF FlowDirection binding ──────────────────────────
+    private string Dir =>
+        ViewModel.SelectedLanguage?.Equals("he", StringComparison.OrdinalIgnoreCase) == true
+            ? "rtl" : "ltr";
+
+    // ── INotifyPropertyChanged → Blazor re-render ──────────────────────────
+    //    Equivalent of every "{Binding Foo}" in XAML; Blazor needs an explicit
+    //    subscribe so that external VM mutations (e.g. WasCodeSent = true inside
+    //    SendVerificationCode) propagate to the UI.
+    protected override void OnInitialized()
+    {
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        MentoringApp.ViewModel.Localization.TranslationSource.Instance.PropertyChanged += OnLocalizationChanged;
+        // Mirror OnNavigatedToAsync — reset state when the page mounts
+        _ = ViewModel.OnNavigatedToAsync();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        // Marshal back to the Blazor sync context (same as Dispatcher.Invoke in WPF)
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnLocalizationChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        // Re-render when language changes so localization strings update
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        MentoringApp.ViewModel.Localization.TranslationSource.Instance.PropertyChanged -= OnLocalizationChanged;
+    }
+
+    // ── IRelayCommand.Execute — mirrors Command="{Binding ...}" ───────────
+    //    We call the underlying async command so CanExecute / IsRunning work.
+    private async Task ExecuteSendCode()
+    {
+        if (!ViewModel.SendVerificationCodeCommand.CanExecute(null)) return;
+        _step1Busy = true;
+        StateHasChanged();
+        try   { await ViewModel.SendVerificationCodeCommand.ExecuteAsync(null); }
+        finally { _step1Busy = false; StateHasChanged(); }
+    }
+
+    private async Task ExecuteLogin()
+    {
+        if (!ViewModel.LoginCommand.CanExecute(null)) return;
+        _step2Busy = true;
+        StateHasChanged();
+        try   { await ViewModel.LoginCommand.ExecuteAsync(null); }
+        finally { _step2Busy = false; StateHasChanged(); }
+    }
+
+    // ── Enter-key support — mirrors IsDefault="True" on WPF buttons ───────
+    private async Task OnKeyDown_Step1(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await ExecuteSendCode();
+    }
+
+    private async Task OnKeyDown_Step2(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await ExecuteLogin();
+    }
+
+    // ── Validation helpers (ObservableValidator writes to GetErrors) ───────
+    private bool HasError(string propertyName) =>
+        ViewModel.GetErrors(propertyName).Cast<System.ComponentModel.DataAnnotations.ValidationResult>().Any();
+
+    private string GetError(string propertyName) =>
+        ViewModel.GetErrors(propertyName)
+                 .Cast<System.ComponentModel.DataAnnotations.ValidationResult>()
+                 .FirstOrDefault()?.ErrorMessage ?? string.Empty;
+
+    // ── Localization helper — mirrors {Binding [Key], Source=TranslationSource} ─
+    private string T(string key) => Loc.Get(key);
+}

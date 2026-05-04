@@ -1,0 +1,1303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Title" xml:space="preserve">
+    <value>אפליקציית מנטורינג</value>
+  </data>
+  <data name="Nav_Back" xml:space="preserve">
+    <value>← חזרה</value>
+  </data>
+  <data name="Nav_Logout" xml:space="preserve">
+    <value>יציאה</value>
+  </data>
+  <data name="Language_Label" xml:space="preserve">
+    <value>שפה</value>
+  </data>
+  <data name="Login_NationalId_Label" xml:space="preserve">
+    <value>תעודת זהות:</value>
+  </data>
+  <data name="Login_SendCode_Button" xml:space="preserve">
+    <value>שלח קוד אימות</value>
+  </data>
+  <data name="Login_VerificationCode_Label" xml:space="preserve">
+    <value>קוד אימות:</value>
+  </data>
+  <data name="Login_Login_Button" xml:space="preserve">
+    <value>כניסה</value>
+  </data>
+  <data name="Register_Username_Tag" xml:space="preserve">
+    <value>שם משתמש *</value>
+  </data>
+  <data name="Register_Email_Tag" xml:space="preserve">
+    <value>כתובת אימייל *</value>
+  </data>
+  <data name="Register_NationalId_Tag" xml:space="preserve">
+    <value>תעודת זהות *</value>
+  </data>
+  <data name="Register_SupervisorNoData" xml:space="preserve">
+    <value>נתוני מדריך: אין נתונים</value>
+  </data>
+  <data name="Register_Grade_Tag" xml:space="preserve">
+    <value>כיתה (לדוגמה: י׳)</value>
+  </data>
+  <data name="Register_IsMentor_Check" xml:space="preserve">
+    <value>מנטור</value>
+  </data>
+  <data name="Register_IsMentee_Check" xml:space="preserve">
+    <value>מתאמן</value>
+  </data>
+  <data name="Register_SubjectToTeach_Tag" xml:space="preserve">
+    <value>מקצוע ללמד</value>
+  </data>
+  <data name="Register_SubjectToLearn_Tag" xml:space="preserve">
+    <value>מקצוע ללמוד</value>
+  </data>
+  <data name="Register_Submit_Button" xml:space="preserve">
+    <value>שלח הרשמה</value>
+  </data>
+  <data name="Profile_ChangePhoto_Tooltip" xml:space="preserve">
+    <value>העלה / שנה תמונת פרופיל</value>
+  </data>
+  <data name="Profile_ChangePhoto_Hint" xml:space="preserve">
+    <value>לחץ 📷 לשינוי תמונה</value>
+  </data>
+  <data name="Profile_Username_Label" xml:space="preserve">
+    <value>שם משתמש</value>
+  </data>
+  <data name="Profile_Email_Label" xml:space="preserve">
+    <value>כתובת אימייל</value>
+  </data>
+  <data name="Profile_NationalId_Label" xml:space="preserve">
+    <value>תעודת זהות (נעולה)</value>
+  </data>
+  <data name="Profile_Grade_Label" xml:space="preserve">
+    <value>כיתה</value>
+  </data>
+  <data name="Profile_SubjectToTeach_Label" xml:space="preserve">
+    <value>מקצוע ללמד</value>
+  </data>
+  <data name="Profile_SubjectToLearn_Label" xml:space="preserve">
+    <value>מקצוע ללמוד</value>
+  </data>
+  <data name="Profile_Language_Label" xml:space="preserve">
+    <value>שפה מועדפת</value>
+  </data>
+  <data name="Profile_EditProfile_Button" xml:space="preserve">
+    <value>עריכת פרופיל</value>
+  </data>
+  <data name="Profile_SaveChanges_Button" xml:space="preserve">
+    <value>שמור שינויים</value>
+  </data>
+  <data name="Admin_ManagePairs_Button" xml:space="preserve">
+    <value>ניהול זוגות</value>
+  </data>
+  <data name="Admin_ManageUsers_Button" xml:space="preserve">
+    <value>ניהול משתמשים</value>
+  </data>
+  <data name="Admin_SupervisorHeader_Name" xml:space="preserve">
+    <value>שם</value>
+  </data>
+  <data name="Admin_SupervisorHeader_Pairs" xml:space="preserve">
+    <value>זוגות</value>
+  </data>
+  <data name="Admin_SupervisorHeader_Pending" xml:space="preserve">
+    <value>ממתינות</value>
+  </data>
+  <data name="Admin_SupervisorHeader_Resolved" xml:space="preserve">
+    <value>טופלו</value>
+  </data>
+  <data name="Admin_SupervisorHeader_FillProgress" xml:space="preserve">
+    <value>מילאו פרטים</value>
+  </data>
+  <data name="Admin_TotalFillProgress_Label" xml:space="preserve">
+    <value>סך כל מילוי פרטי תלמידים:</value>
+  </data>
+  <data name="Admin_Inspect_Button" xml:space="preserve">
+    <value>בדיקה</value>
+  </data>
+  <data name="Admin_NoClasses" xml:space="preserve">
+    <value>אין</value>
+  </data>
+  <data name="Admin_ForwardedIssues_Header" xml:space="preserve">
+    <value>בעיות שהועברו</value>
+  </data>
+  <data name="Admin_ForwardedIssues_SelectHint" xml:space="preserve">
+    <value>בחר בעיה לבדיקה</value>
+  </data>
+  <data name="Admin_ForwardedIssues_Empty" xml:space="preserve">
+    <value>אין בעיות שהועברו</value>
+  </data>
+  <data name="Student_YourMentee_Label" xml:space="preserve">
+    <value>החניך שלך</value>
+  </data>
+  <data name="Student_MeetingHours_Label" xml:space="preserve">
+    <value>שעות פגישות</value>
+  </data>
+  <data name="Student_RecentReviews_Label" xml:space="preserve">
+    <value>סקירות פגישות אחרונות</value>
+  </data>
+  <data name="Student_WriteReview_Button" xml:space="preserve">
+    <value>כתוב סקירת פגישה</value>
+  </data>
+  <data name="Student_ReportIssue_Button" xml:space="preserve">
+    <value>דווח על בעיה</value>
+  </data>
+  <data name="Student_RaiseIssue_Button" xml:space="preserve">
+    <value>הגש בעיה למדריך</value>
+  </data>
+  <data name="Student_MentorFeedback_Label" xml:space="preserve">
+    <value>משוב פגישות מהמנטור</value>
+  </data>
+  <data name="Student_MyIssues_Label" xml:space="preserve">
+    <value>הבעיות הפעילות שלי</value>
+  </data>
+  <data name="Student_NoAssignment_Title" xml:space="preserve">
+    <value>לא שובצת עם מנטור או מתאמן</value>
+  </data>
+  <data name="Student_NoAssignment_Hint" xml:space="preserve">
+    <value>פנה אל המדריך או מנהל המערכת לשיבוץ.</value>
+  </data>
+  <data name="Student_Supervisor_Label" xml:space="preserve">
+    <value>המפקח שלך</value>
+  </data>
+  <data name="Review_Content_Label" xml:space="preserve">
+    <value>תוכן הסקירה</value>
+  </data>
+  <data name="Review_Hours_Label" xml:space="preserve">
+    <value>שעות שהושקעו</value>
+  </data>
+  <data name="Review_Submit_Button" xml:space="preserve">
+    <value>שלח סקירה</value>
+  </data>
+  <data name="Issue_Category_Label" xml:space="preserve">
+    <value>קטגוריה</value>
+  </data>
+  <data name="Issue_Description_Label" xml:space="preserve">
+    <value>תיאור</value>
+  </data>
+  <data name="Issue_Submit_Button" xml:space="preserve">
+    <value>שלח בעיה</value>
+  </data>
+  <data name="Issue_Resolve_Button" xml:space="preserve">
+    <value>סמן כטופל</value>
+  </data>
+  <data name="OtherProfile_Username_Label" xml:space="preserve">
+    <value>שם משתמש</value>
+  </data>
+  <data name="OtherProfile_Email_Label" xml:space="preserve">
+    <value>כתובת אימייל</value>
+  </data>
+  <data name="OtherProfile_Grade_Label" xml:space="preserve">
+    <value>כיתה ומספר</value>
+  </data>
+  <data name="OtherProfile_MentoringDetails_Label" xml:space="preserve">
+    <value>פרטי מנטורינג</value>
+  </data>
+  <data name="Issue_Title" xml:space="preserve">
+    <value>פרטי הבעיה</value>
+  </data>
+  <data name="Supervisor_PendingIssues_Label" xml:space="preserve">
+    <value>בעיות ממתינות</value>
+  </data>
+  <data name="Supervisor_ResolvedIssues_Label" xml:space="preserve">
+    <value>בעיות שטופלו</value>
+  </data>
+  <data name="Supervisor_TotalPairs_Label" xml:space="preserve">
+    <value>סה"כ זוגות מנוהלים: </value>
+  </data>
+  <data name="Supervisor_IssuePending" xml:space="preserve">
+    <value>ממתין</value>
+  </data>
+  <data name="Supervisor_IssueResolved" xml:space="preserve">
+    <value>טופל</value>
+  </data>
+  <data name="Supervisor_TotalResolved_Label" xml:space="preserve">
+    <value>סה"כ טופלו: </value>
+  </data>
+  <data name="Supervisor_ViewResolved_Button" xml:space="preserve">
+    <value>הצג בעיות שטופלו</value>
+  </data>
+  <data name="Supervisor_HideResolved_Button" xml:space="preserve">
+    <value>הסתר בעיות שטופלו</value>
+  </data>
+  <data name="Supervisor_ManagedPairs_Label" xml:space="preserve">
+    <value>זוגות מנטורינג מנוהלים</value>
+  </data>
+  <data name="Supervisor_MentorPrefix" xml:space="preserve">
+    <value>מנטור: </value>
+  </data>
+  <data name="Supervisor_MenteePrefix" xml:space="preserve">
+    <value>מתאמן: </value>
+  </data>
+  <data name="PairDetails_Title" xml:space="preserve">
+    <value>פרטי זוג</value>
+  </data>
+  <data name="PairDetails_MeetingProgress_Label" xml:space="preserve">
+    <value>התקדמות שעות פגישה</value>
+  </data>
+  <data name="PairDetails_RecentReviews_Label" xml:space="preserve">
+    <value>סקירות אחרונות</value>
+  </data>
+  <data name="PairDetails_ActiveIssues_Label" xml:space="preserve">
+    <value>בעיות פעילות ועבר</value>
+  </data>
+  <data name="Admin_CreatePair_SearchSupervisor" xml:space="preserve">
+    <value>חיפוש מפקח:</value>
+  </data>
+  <data name="Admin_CreatePair_SearchMentor" xml:space="preserve">
+    <value>חיפוש חונך:</value>
+  </data>
+  <data name="Admin_CreatePair_SearchMentee" xml:space="preserve">
+    <value>חיפוש חניך:</value>
+  </data>
+  <data name="Admin_CreatePair_Button" xml:space="preserve">
+    <value>צור זוג</value>
+  </data>
+  <data name="Admin_ManagePair_Create" xml:space="preserve">
+    <value>+ צור זוג חדש</value>
+  </data>
+  <data name="Admin_ManagePair_SearchHint" xml:space="preserve">
+    <value>חיפוש לפי שם חונך או חניך</value>
+  </data>
+  <data name="Admin_ManagePair_SelectHint" xml:space="preserve">
+    <value>בחר זוג מהרשימה כדי לראות פרטים.</value>
+  </data>
+  <data name="Admin_ManagePair_Mentor" xml:space="preserve">
+    <value>חונך</value>
+  </data>
+  <data name="Admin_ManagePair_Grade" xml:space="preserve">
+    <value>כיתה:</value>
+  </data>
+  <data name="Admin_ManagePair_Mentee" xml:space="preserve">
+    <value>חניך</value>
+  </data>
+  <data name="Admin_ManagePair_RecentActivity" xml:space="preserve">
+    <value>פעילות אחרונה</value>
+  </data>
+  <data name="Admin_ManagePair_TotalReviews" xml:space="preserve">
+    <value>סך סקירות: </value>
+  </data>
+  <data name="Admin_ManagePair_ActiveIssues" xml:space="preserve">
+    <value>בעיות פעילות: </value>
+  </data>
+  <data name="Admin_ManagePair_Actions" xml:space="preserve">
+    <value>פעולות</value>
+  </data>
+  <data name="Admin_ManagePair_ViewDetails" xml:space="preserve">
+    <value>הצג פרטי חונכות</value>
+  </data>
+  <data name="Admin_ManagePair_Separate" xml:space="preserve">
+    <value>הפרד זוג</value>
+  </data>
+  <data name="Admin_ManagePair_DetailsHeader" xml:space="preserve">
+    <value>פרטי הזוג הנבחר</value>
+  </data>
+  <data name="Admin_ManageUsers_AddImportHeader" xml:space="preserve">
+    <value>הוספה וייבוא משתמשים</value>
+  </data>
+  <data name="Admin_ManageUsers_AddSupervisor" xml:space="preserve">
+    <value>הוסף מפקח</value>
+  </data>
+  <data name="Admin_ManageUsers_AddStudent" xml:space="preserve">
+    <value>הוסף תלמיד</value>
+  </data>
+  <data name="Admin_ManageUsers_BulkImport" xml:space="preserve">
+    <value>ייבוא המוני:</value>
+  </data>
+  <data name="Admin_ManageUsers_ImportStudents" xml:space="preserve">
+    <value>ייבוא תלמידים מ-Excel</value>
+  </data>
+  <data name="Admin_ManageUsers_Help" xml:space="preserve">
+    <value>?</value>
+  </data>
+  <data name="Admin_ManageUsers_ImportStudentsHelp" xml:space="preserve">
+    <value>הוראות ייבוא תלמידים</value>
+  </data>
+  <data name="Admin_ManageUsers_ImportSupervisors" xml:space="preserve">
+    <value>ייבוא מפקחים מ-Excel</value>
+  </data>
+  <data name="Admin_ManageUsers_ImportSupervisorsHelp" xml:space="preserve">
+    <value>הוראות ייבוא מפקחים</value>
+  </data>
+  <data name="Admin_ManageUsers_SearchHint" xml:space="preserve">
+    <value>חיפוש לפי שם / דוא"ל</value>
+  </data>
+  <data name="Admin_ManageUsers_Profile" xml:space="preserve">
+    <value>פרופיל:</value>
+  </data>
+  <data name="Admin_ManageUsers_Mentor" xml:space="preserve">
+    <value>חונך</value>
+  </data>
+  <data name="Admin_ManageUsers_Mentee" xml:space="preserve">
+    <value>חניך</value>
+  </data>
+  <data name="Admin_ManageUsers_UnpairedOnly" xml:space="preserve">
+    <value>ללא זוג בלבד</value>
+  </data>
+  <data name="Admin_ManageUsers_Grade" xml:space="preserve">
+    <value>כיתה:</value>
+  </data>
+  <data name="Admin_ManageUsers_To" xml:space="preserve">
+    <value>עד</value>
+  </data>
+  <data name="Admin_ManageUsers_DetailsHeader" xml:space="preserve">
+    <value>פרטי המשתמש הנבחר</value>
+  </data>
+  <data name="Admin_ManageUsers_SelectHint" xml:space="preserve">
+    <value>בחר משתמש מהרשימה כדי לראות פרטים.</value>
+  </data>
+  <data name="Admin_ManageUsers_AccountInfo" xml:space="preserve">
+    <value>מידע חשבון</value>
+  </data>
+  <data name="Admin_ManageUsers_NationalId" xml:space="preserve">
+    <value>תעודת זהות:</value>
+  </data>
+  <data name="Admin_ManageUsers_Actions" xml:space="preserve">
+    <value>פעולות</value>
+  </data>
+  <data name="Admin_ManageUsers_FullProfile" xml:space="preserve">
+    <value>עבור לפרופיל המלא</value>
+  </data>
+  <data name="Admin_ManageUsers_DeleteUser" xml:space="preserve">
+    <value>מחק משתמש</value>
+  </data>
+  <data name="Admin_ManageUsers_StudentInstructions" xml:space="preserve">
+    <value>הוראות ייבוא תלמידים</value>
+  </data>
+  <data name="Admin_ManageUsers_ExcelFormat" xml:space="preserve">
+    <value>פורמט Excel: שורה 1 היא כותרת (מדלגים).</value>
+  </data>
+  <data name="Admin_ManageUsers_ColANationalId" xml:space="preserve">
+    <value>עמודה A: ת.ז.</value>
+  </data>
+  <data name="Admin_ManageUsers_ColBEmail" xml:space="preserve">
+    <value>עמודה B: דואר אלקטרוני</value>
+  </data>
+  <data name="Admin_ManageUsers_ColCUserName" xml:space="preserve">
+    <value>עמודה C: שם משתמש</value>
+  </data>
+  <data name="Admin_ManageUsers_DownloadTemplate" xml:space="preserve">
+    <value>הורד תבנית</value>
+  </data>
+  <data name="Admin_ManageUsers_Close" xml:space="preserve">
+    <value>סגור</value>
+  </data>
+  <data name="Admin_ManageUsers_SupervisorInstructions" xml:space="preserve">
+    <value>הוראות ייבוא מפקחים</value>
+  </data>
+  <data name="Toast_OK_Button" xml:space="preserve">
+    <value>אישור</value>
+  </data>
+  <data name="Confirm_Yes" xml:space="preserve">
+    <value>כן</value>
+  </data>
+  <data name="Confirm_No" xml:space="preserve">
+    <value>לא</value>
+  </data>
+  <data name="Admin_SystemSettings_Button" xml:space="preserve">
+    <value>⚙ הגדרות מערכת</value>
+  </data>
+  <data name="Admin_Phase_Deadline_Label" xml:space="preserve">
+    <value>מועד אחרון:</value>
+  </data>
+  <data name="Admin_Phase_SetDeadline_Button" xml:space="preserve">
+    <value>קבע מועד אחרון</value>
+  </data>
+  <data name="Admin_Phase_TimeRemaining_Label" xml:space="preserve">
+    <value>זמן שנותר</value>
+  </data>
+  <data name="Admin_Phase_CancelDeadline_Button" xml:space="preserve">
+    <value>בטל מועד אחרון</value>
+  </data>
+  <data name="Admin_Phase1_Title" xml:space="preserve">
+    <value>שלב 1 — רישום והתאמה ידנית</value>
+  </data>
+  <data name="Admin_Phase2_Title" xml:space="preserve">
+    <value>שלב 2 — גלריית בחירה והתאמה אוטומטית</value>
+  </data>
+  <data name="Admin_Phase_StartPhase2_Button" xml:space="preserve">
+    <value>▶ התחל שלב 2 עכשיו</value>
+  </data>
+  <data name="Admin_Phase_RunAutoMatch_Button" xml:space="preserve">
+    <value>▶ הפעל התאמה אוטומטית עכשיו</value>
+  </data>
+  <data name="Admin_Phase_Complete_Text" xml:space="preserve">
+    <value>כל הזוגות הוקצו. תהליך ההתאמה הושלם.</value>
+  </data>
+  <data name="Admin_Phase1_Summary" xml:space="preserve">
+    <value>תלמידים מתחברים וממלאים את פרטיהם. חניכים יכולים לשלוח בקשות לחונכים, שיכולים לקבל ולהיות מותאמים.</value>
+  </data>
+  <data name="Admin_Phase2_Summary" xml:space="preserve">
+    <value>חניכים שלא הותאמו רואים את 3 ההתאמות המובילות שלהם ובוחרים אחת. שאר המשתמשים שלא הותאמו יותאמו אוטומטית במועד האחרון.</value>
+  </data>
+  <data name="Admin_Supervisors_Classes_Header" xml:space="preserve">
+    <value>כיתות</value>
+  </data>
+  <data name="Admin_Supervisors_None_Label" xml:space="preserve">
+    <value>אין</value>
+  </data>
+  <data name="Admin_Phase1Info_Title" xml:space="preserve">
+    <value>שלב 1 — רישום והתאמה ידנית</value>
+  </data>
+  <data name="Admin_Phase1Info_Body" xml:space="preserve">
+    <value>תלמידים מתחברים וממלאים את פרטיהם.
+
+חניכים יכולים לעיין ב��ונכים הזמינים ולשלוח בקשות להתאמה. חונך שמקבל מותאם עם אותו חניך, והמפקח של הזוג נקבע אוטומטית למורה הכיתה של החניך.
+
+כאשר אתה מרוצה מההתאמות הידניות (או כשמגיע המועד האחרון), עבור לשלב 2 לטיפול בחניכים שלא הותאמו.</value>
+  </data>
+  <data name="Admin_Phase2Info_Title" xml:space="preserve">
+    <value>שלב 2 — גלריית בחירה והתאמה אוטומטית</value>
+  </data>
+  <data name="Admin_Phase2Info_Body" xml:space="preserve">
+    <value>כל חניך שהשלים את פרופילו ועדיין לא הותאם רואה את 3 ההתאמות המדורגות אלגוריתמית ויכול לבחור אחת.
+
+כאשר מגיע המועד האחרון (או לחיצה על 'הפעל עכשיו'), חניכים שעדיין לא בחרו מותאמים אוטומטית על ידי האלגוריתם. מעבר נוסף מטפל במקרי קצה שנותרו.</value>
+  </data>
+  <data name="Admin_Timer_Pending" xml:space="preserve">
+    <value>00:00:00 — ממתין</value>
+  </data>
+  <data name="SysSettings_Title" xml:space="preserve">
+    <value>⚙ הגדרות מערכת</value>
+  </data>
+  <data name="SysSettings_Description" xml:space="preserve">
+    <value>הגדר את הכיתות המשתתפות למסגרת חינוכית זו.</value>
+  </data>
+  <data name="SysSettings_Welcome_Title" xml:space="preserve">
+    <value>ברוך הבא! לפני השימוש בלוח הבקרה, אנא הגדר את שכבות הלימוד והכיתות המשתתפות.</value>
+  </data>
+  <data name="SysSettings_Welcome_Subtitle" xml:space="preserve">
+    <value>בחר שכבות (1–12) והוסף מספרי כיתות לכל אחת. ניתן לערוך זאת בכל עת.</value>
+  </data>
+  <data name="SysSettings_Continue_Button" xml:space="preserve">
+    <value>✓ המשך ללוח הבקרה</value>
+  </data>
+  <data name="SysSettings_AddClass_Header" xml:space="preserve">
+    <value>הוסף כיתה משתתפת</value>
+  </data>
+  <data name="SysSettings_Grade_Label" xml:space="preserve">
+    <value>שכבה</value>
+  </data>
+  <data name="SysSettings_ClassNumber_Label" xml:space="preserve">
+    <value>מספר כיתה</value>
+  </data>
+  <data name="SysSettings_ClassNumber_Tag" xml:space="preserve">
+    <value>לדוגמה: 1, 2, 3 …</value>
+  </data>
+  <data name="SysSettings_AddClass_Button" xml:space="preserve">
+    <value>➕ הוסף כיתה</value>
+  </data>
+  <data name="SysSettings_ParticipatingClasses_Header" xml:space="preserve">
+    <value>כיתות משתתפות</value>
+  </data>
+  <data name="SysSettings_RemoveSelected_Button" xml:space="preserve">
+    <value>🗑 הסר נבחר</value>
+  </data>
+  <data name="SysSettings_ClassSeparator" xml:space="preserve">
+    <value>– כיתה </value>
+  </data>
+  <data name="SysSettings_Tip" xml:space="preserve">
+    <value>טיפ: גרור את צ'יפי הכיתות בחלק שלהלן לשיוך מפקחים.</value>
+  </data>
+  <data name="SysSettings_AssignClasses_Header" xml:space="preserve">
+    <value>שיוך כיתות למפקחים</value>
+  </data>
+  <data name="SysSettings_AssignClasses_Description" xml:space="preserve">
+    <value>גרור צ'יפ כיתה אל כרטיס מפקח כדי לשייך אותה. גרור חזרה לבריכה לביטול השיוך.</value>
+  </data>
+  <data name="SysSettings_UnassignedPool_Header" xml:space="preserve">
+    <value>לא משויך</value>
+  </data>
+  <data name="SysSettings_Validation_SelectGrade" xml:space="preserve">
+    <value>אנא בחר שכבה תחילה.</value>
+  </data>
+  <data name="SysSettings_Validation_InvalidClassNum" xml:space="preserve">
+    <value>אנא הזן מספר כיתה חיובי תקין.</value>
+  </data>
+  <data name="SysSettings_Validation_SelectClass" xml:space="preserve">
+    <value>אנא בחר כיתה מהרשימה להסרה.</value>
+  </data>
+  <data name="SysSettings_Confirm_RemoveClass_Title" xml:space="preserve">
+    <value>אישור הסרה</value>
+  </data>
+  <data name="SysSettings_Confirm_RemoveClass_Body" xml:space="preserve">
+    <value>להסיר את {0} מהמערכת? כל המפקחים המשויכים לכיתה זו יאבדו את השיוך.</value>
+  </data>
+  <data name="SysSettings_SchoolConfig_Tab" xml:space="preserve">
+    <value>הגדרות בית הספר</value>
+  </data>
+  <data name="SysSettings_SupervisorConfig_Tab" xml:space="preserve">
+    <value>הקצאות מפקחים</value>
+  </data>
+  <data name="ManageUsers_AssignedClasses_Header" xml:space="preserve">
+    <value>כיתות מש��יכות</value>
+  </data>
+  <data name="ManageUsers_SaveClasses_Button" xml:space="preserve">
+    <value>שמור כיתות</value>
+  </data>
+  <data name="ManageUsers_ClassesAssigned_Format" xml:space="preserve">
+    <value>{0} כיתות משויכות</value>
+  </data>
+  <data name="ManageUsers_NoClassesAssigned" xml:space="preserve">
+    <value>אין כיתות משויכות</value>
+  </data>
+  <data name="ManageUsers_ImportStudents_Success" xml:space="preserve">
+    <value>יובאו בהצלחה {0} תלמיד(ים).</value>
+  </data>
+  <data name="ManageUsers_ImportStudents_Error" xml:space="preserve">
+    <value>הייבוא נכשל: {0}</value>
+  </data>
+  <data name="ManageUsers_ImportSupervisors_Success" xml:space="preserve">
+    <value>יובאו בהצלחה {0} מפקח(ים).</value>
+  </data>
+  <data name="ManageUsers_ImportSupervisors_Error" xml:space="preserve">
+    <value>הייבוא נכשל: {0}</value>
+  </data>
+  <data name="ManageUsers_TemplateSaved_Success" xml:space="preserve">
+    <value>התבנית נשמרה בהצלחה.</value>
+  </data>
+  <data name="ManageUsers_TemplateSaved_Error" xml:space="preserve">
+    <value>לא ניתן לשמור את התבנית: {0}</value>
+  </data>
+  <data name="Student_AvailableMentors_Header" xml:space="preserve">
+    <value>חונכים זמינים</value>
+  </data>
+  <data name="Student_AvailableMentors_Desc" xml:space="preserve">
+    <value>שלח בקשה לחונך שתרצה להיות מותאם איתו.</value>
+  </data>
+  <data name="Student_Loading" xml:space="preserve">
+    <value>טוען…</value>
+  </data>
+  <data name="Student_SendRequest_Button" xml:space="preserve">
+    <value>שלח בקשה</value>
+  </data>
+  <data name="Student_TopMatches_Header" xml:space="preserve">
+    <value>ההתאמות המובילות שלך</value>
+  </data>
+  <data name="Student_TopMatches_Desc" xml:space="preserve">
+    <value>מדורגות לפי תאימות. בחר אחת — הבחירה סופית.</value>
+  </data>
+  <data name="Student_AlreadyMatched_Banner" xml:space="preserve">
+    <value>הותאמת! בדוק את הלשונית החדשה.</value>
+  </data>
+  <data name="Student_Match_Label" xml:space="preserve">
+    <value>התאמה</value>
+  </data>
+  <data name="Student_ChooseMentor_Button" xml:space="preserve">
+    <value>בחר חונך זה</value>
+  </data>
+  <data name="Student_MentoringRequests_Header" xml:space="preserve">
+    <value>בקשות חניכה</value>
+  </data>
+  <data name="Student_MentoringRequests_Desc" xml:space="preserve">
+    <value>תלמידים שביקשו אותך כחונך שלהם.</value>
+  </data>
+  <data name="Student_Phase2_NoAction" xml:space="preserve">
+    <value>אין צורך בפעולה — תיודע ברגע שתותאם.</value>
+  </data>
+  <data name="Student_AcceptCreates_Footnote" xml:space="preserve">
+    <value>קבלת בקשה תיצור זוג פעיל.</value>
+  </data>
+  <data name="Student_Phase_ShowInfo_Tooltip" xml:space="preserve">
+    <value>הצג מידע על השלב</value>
+  </data>
+  <data name="Student_Accept_Button" xml:space="preserve">
+    <value>קבל</value>
+  </data>
+  <data name="Student_Decline_Button" xml:space="preserve">
+    <value>דחה</value>
+  </data>
+  <data name="Student_BannerPhase1_Title" xml:space="preserve">
+    <value>שלב 1: רישום</value>
+  </data>
+  <data name="Student_BannerPhase1_Subtitle" xml:space="preserve">
+    <value>חניכים יכולים לשלוח בקשות ישירות לחונכים. אם לא תותאם עד המועד האחרון, תותאם אוטומטית בשלב 2.</value>
+  </data>
+  <data name="Student_BannerPhase2_Title" xml:space="preserve">
+    <value>שלב 2: התאמה אלגוריתמית</value>
+  </data>
+  <data name="Student_BannerPhase2_Subtitle" xml:space="preserve">
+    <value>חניכים שלא הותאמו יותאמו אוטומטית.</value>
+  </data>
+  <data name="Student_BannerTimer_PendingActivation" xml:space="preserve">
+    <value>ממתין להפעלת המערכת</value>
+  </data>
+  <data name="Student_BannerTimer_PendingAlgorithm" xml:space="preserve">
+    <value>ממתין להפעלת האלגוריתם</value>
+  </data>
+  <data name="Student_BannerTimer_DeadlineReached" xml:space="preserve">
+    <value>המועד הגיע (ממתין להפעלת המערכת)</value>
+  </data>
+  <data name="Student_BannerTimer_EndsIn" xml:space="preserve">
+    <value>מסתיים בעוד: {0}</value>
+  </data>
+  <data name="Student_BannerTimer_RunsIn" xml:space="preserve">
+    <value>מופעל בעוד: {0}</value>
+  </data>
+  <data name="Student_Phase1Info_Title" xml:space="preserve">
+    <value>מידע שלב 1</value>
+  </data>
+  <data name="Student_Phase1Info_Body" xml:space="preserve">
+    <value>שלב 1: הרשמת חניכים.
+
+חניכים צריכים לבחור ולשלוח בקשות לחונכים. אם לא תותאם עד המועד האחרון, תותאם אוטומטית בשלב 2.</value>
+  </data>
+  <data name="Student_Phase2Info_Title" xml:space="preserve">
+    <value>מידע שלב 2</value>
+  </data>
+  <data name="Student_Phase2Info_Body" xml:space="preserve">
+    <value>שלב 2: התאמה אלגוריתמית.
+
+המערכת מעבדת כעת התאמות על בסיס תאימות. אנא המתן עד להשלמת השלב.</value>
+  </data>
+  <data name="Browse_Header" xml:space="preserve">
+    <value>🔍 עיין בחונכים</value>
+  </data>
+  <data name="Browse_Description" xml:space="preserve">
+    <value>עיין בחונכים הזמינים ושלח בקשה. לאחר שחונך מקבל, תותאמו.</value>
+  </data>
+  <data name="Browse_Loading" xml:space="preserve">
+    <value>טוען חונכים…</value>
+  </data>
+  <data name="Browse_Teaches_Label" xml:space="preserve">
+    <value>📘 מלמד: </value>
+  </data>
+  <data name="Browse_Grade_Label" xml:space="preserve">
+    <value>🎓 שכבה: </value>
+  </data>
+  <data name="Browse_SendRequest_Button" xml:space="preserve">
+    <value>שלח בקשה</value>
+  </data>
+  <data name="Browse_CancelRequest_Button" xml:space="preserve">
+    <value>בטל בקשה</value>
+  </data>
+  <data name="Student_RequestCancelled_Message" xml:space="preserve">
+    <value>✓ הבקשה אל {0} בוטלה.</value>
+  </data>
+  <data name="MentorReq_Header" xml:space="preserve">
+    <value>📬 בקשות חניכה</value>
+  </data>
+  <data name="MentorReq_Description" xml:space="preserve">
+    <value>תלמידים שרוצים אותך כחונך שלהם. עיין בפרופיל שלהם והחלט.</value>
+  </data>
+  <data name="MentorReq_Loading" xml:space="preserve">
+    <value>טוען בקשות…</value>
+  </data>
+  <data name="MentorReq_Accept_Button" xml:space="preserve">
+    <value>✓ קבל</value>
+  </data>
+  <data name="MentorReq_Decline_Button" xml:space="preserve">
+    <value>✗ דחה</value>
+  </data>
+  <data name="MentorReq_WantsToLearn_Label" xml:space="preserve">
+    <value>📗 רוצה ללמוד: </value>
+  </data>
+  <data name="Selection_Header" xml:space="preserve">
+    <value>⭐ ההתאמות המובילות שלך</value>
+  </data>
+  <data name="Selection_Description" xml:space="preserve">
+    <value>בהתבסס על תחומי הלמידה שלך, הנה 3 החונכים התואמים ביותר. בחר אחד להתאמה מיידית.</value>
+  </data>
+  <data name="Selection_AlreadyMatched" xml:space="preserve">
+    <value>🎉 כבר הותאמת! בדוק את לוח הבקרה שלך.</value>
+  </data>
+  <data name="Selection_Loading" xml:space="preserve">
+    <value>טוען המלצות…</value>
+  </data>
+  <data name="Selection_Choose_Button" xml:space="preserve">
+    <value>✓ בחר חונך זה</value>
+  </data>
+  <data name="Supervisor_InactiveStudents_Header" xml:space="preserve">
+    <value>תלמידים עם פרופילים לא שלמים:</value>
+  </data>
+  <data name="Supervisor_ClassRegistration_Title" xml:space="preserve">
+    <value>רישום כיתה</value>
+  </data>
+  <data name="Supervisor_Registered_Label" xml:space="preserve">
+    <value>רשומים</value>
+  </data>
+  <data name="Supervisor_AllRegistered_Label" xml:space="preserve">
+    <value>כל התלמידים נרשמו!</value>
+  </data>
+  <data name="Supervisor_Role_Mentor" xml:space="preserve">
+    <value>חונך</value>
+  </data>
+  <data name="Supervisor_Role_Mentee" xml:space="preserve">
+    <value>מודרך</value>
+  </data>
+  <data name="Supervisor_Role_NoRole" xml:space="preserve">
+    <value>אין תפקיד</value>
+  </data>
+  <data name="Admin_ManageUsers_Name_Column" xml:space="preserve">
+    <value>שם</value>
+  </data>
+  <data name="Admin_ManageUsers_Email_Column" xml:space="preserve">
+    <value>אימייל</value>
+  </data>
+  <data name="Admin_ManageUsers_Class_Column" xml:space="preserve">
+    <value>כיתה</value>
+  </data>
+  <data name="Admin_ManageUsers_Status_Column" xml:space="preserve">
+    <value>סטטוס</value>
+  </data>
+  <data name="Supervisor_ClearSelection_Button" xml:space="preserve">
+    <value>נקה בחירה</value>
+  </data>
+  <data name="Supervisor_ShowPhaseInfo_Tooltip" xml:space="preserve">
+    <value>הצג מידע על השלב</value>
+  </data>
+  <data name="Supervisor_BannerComplete_Title" xml:space="preserve">
+    <value>ההתאמה הושלמה</value>
+  </data>
+  <data name="Supervisor_BannerComplete_Subtitle" xml:space="preserve">
+    <value>כל התלמידים הותאמו. אין צורך בפעולה נוספת.</value>
+  </data>
+  <data name="Supervisor_BannerPhase1_Title" xml:space="preserve">
+    <value>שלב הרישום</value>
+  </data>
+  <data name="Supervisor_BannerPhase1_Subtitle" xml:space="preserve">
+    <value>תלמידים נרשמים ומשלימים פרופילים. חניכים יכולים לשלוח בקשות התאמה ישירות לחונכים.</value>
+  </data>
+  <data name="Supervisor_BannerPhase2_Title" xml:space="preserve">
+    <value>שלב בחירת החונך</value>
+  </data>
+  <data name="Supervisor_BannerPhase2_Subtitle" xml:space="preserve">
+    <value>חניכים שלא הותאמו בוחרים מבין החונכים המוצעים. תלמידים שלא הותאמו יותאמו אוטומטית בסיום המועד.</value>
+  </data>
+  <data name="Supervisor_BannerTimer_NoDeadline" xml:space="preserve">
+    <value>לא נקבע מועד אחרון</value>
+  </data>
+  <data name="Supervisor_BannerTimer_RegClosesIn" xml:space="preserve">
+    <value>ההרשמה נסגרת בעוד: {0}</value>
+  </data>
+  <data name="Supervisor_BannerTimer_RegDeadlineReached" xml:space="preserve">
+    <value>מועד ההרשמה הגיע — ממתין לפעולת מנהל</value>
+  </data>
+  <data name="Supervisor_BannerTimer_AutoMatchIn" xml:space="preserve">
+    <value>התאמה אוטומטית תתחיל בעוד: {0}</value>
+  </data>
+  <data name="Supervisor_BannerTimer_SelectionDeadlineReached" xml:space="preserve">
+    <value>מועד הבחירה הגיע — ממתין לפעולת מנהל</value>
+  </data>
+  <data name="Supervisor_PhaseComplete_Info_Title" xml:space="preserve">
+    <value>ההתאמה הושלמה</value>
+  </data>
+  <data name="Supervisor_PhaseComplete_Info_Body" xml:space="preserve">
+    <value>תהליך ההתאמה הושלם. כל התלמידים הוקצו לזוג.
+
+עדיין ניתן לנהל בעיות ולסקור פעילות זוגות ��לוח בקרה זה.</value>
+  </data>
+  <data name="Supervisor_Phase1Info_Title" xml:space="preserve">
+    <value>שלב הרישום</value>
+  </data>
+  <data name="Supervisor_Phase1Info_Body" xml:space="preserve">
+    <value>תלמידים מתחברים ומשלימים פרופילים.
+
+חניכים יכולים לעיין בחונכים הזמינים ולשלוח בקשת התאמה ישירה. אם חונך מקבל, הם מותאמים מיד.
+
+שים לב לרשימת התלמידים הלא פעילים — תלמידים שלא ה��לימו פרופיל לא יופיעו במאגר ההתאמה.</value>
+  </data>
+  <data name="Supervisor_Phase2Info_Title" xml:space="preserve">
+    <value>שלב בחירת החונך</value>
+  </data>
+  <data name="Supervisor_Phase2Info_Body" xml:space="preserve">
+    <value>כל חניך שעדיין לא הותאם רואה את ההמלצות המדורגות אלגוריתמית ויכול לבחור אחת.
+
+כאשר מגיע המועד האחרון (או כשהמנהל מפעיל התאמה ידנית), חניכים שעדיין לא בחרו מותאמים אוטומטית. מעבר נוסף מטפל במקרי קצה.
+
+ייתכן שתראה זוגות חדשים מופיעים ברשימתך כשתלמידים עושים את בחירותיהם.</value>
+  </data>
+  <data name="Register_InfoBanner" xml:space="preserve">
+    <value>יש למלא רק את השדות הנדרשים (מסומנים ב-*). שאר השדות אופציונליים — המשתמש יוכל להשלים את פרופי��ו לאחר הכניסה הראשונה.</value>
+  </data>
+  <data name="Register_Phone_Tag" xml:space="preserve">
+    <value>מספר טלפון (אופציונלי)</value>
+  </data>
+  <data name="Register_Gender_Label" xml:space="preserve">
+    <value>מגדר (אופציונלי)</value>
+  </data>
+  <data name="Register_ClassNum_Tag" xml:space="preserve">
+    <value>מספר כיתה (אופציונלי)</value>
+  </data>
+  <data name="Register_MaxMentees_Label" xml:space="preserve">
+    <value>מקסימום חניכים (אופציונלי)</value>
+  </data>
+  <data name="Register_PreferredMenteeGender_Label" xml:space="preserve">
+    <value>מגדר מועדף לחניך (אופציונלי)</value>
+  </data>
+  <data name="Register_PreferredMentorGender_Label" xml:space="preserve">
+    <value>מגדר מועדף לחונך (אופציונלי)</value>
+  </data>
+  <data name="Register_RequiredField" xml:space="preserve">
+    <value>* שדה חובה</value>
+  </data>
+  <data name="Profile_Phone_Label" xml:space="preserve">
+    <value>מספר טלפון</value>
+  </data>
+  <data name="Profile_Gender_Label" xml:space="preserve">
+    <value>מגדר</value>
+  </data>
+  <data name="Profile_ClassNum_Label" xml:space="preserve">
+    <value>מספר כיתה</value>
+  </data>
+  <data name="Profile_MaxMentees_Label" xml:space="preserve">
+    <value>מקסימום חניכים</value>
+  </data>
+  <data name="Profile_PreferredMenteeGender_Label" xml:space="preserve">
+    <value>מגדר מועדף לחניך</value>
+  </data>
+  <data name="Profile_PreferredMentorGender_Label" xml:space="preserve">
+    <value>מגדר מועדף לחונך</value>
+  </data>
+  <data name="OtherProfile_PhoneNumber_Label" xml:space="preserve">
+    <value>מספר טלפון</value>
+  </data>
+  <data name="OtherProfile_Gender_Label" xml:space="preserve">
+    <value>מגדר</value>
+  </data>
+  <data name="OtherProfile_PreferredMentorGender_Label" xml:space="preserve">
+    <value>מגדר מועדף לחונך</value>
+  </data>
+  <data name="OtherProfile_PreferredMenteeGender_Label" xml:space="preserve">
+    <value>מגדר מועדף לחניך</value>
+  </data>
+  <data name="Role_Admin" xml:space="preserve">
+    <value>מנהל</value>
+  </data>
+  <data name="Role_Supervisor" xml:space="preserve">
+    <value>מפקח</value>
+  </data>
+  <data name="Role_Student" xml:space="preserve">
+    <value>תלמיד</value>
+  </data>
+  <data name="Role_StudentMentor" xml:space="preserve">
+    <value>תלמיד · חונך</value>
+  </data>
+  <data name="Role_StudentMentee" xml:space="preserve">
+    <value>תלמיד · חניך</value>
+  </data>
+  <data name="Role_StudentBoth" xml:space="preserve">
+    <value>תלמיד · חונך וחניך</value>
+  </data>
+  <data name="OtherProfile_None" xml:space="preserve">
+    <value>אין</value>
+  </data>
+  <data name="OtherProfile_Teaching_Format" xml:space="preserve">
+    <value>מלמד: {0}</value>
+  </data>
+  <data name="OtherProfile_Learning_Format" xml:space="preserve">
+    <value>לומד: {0}</value>
+  </data>
+  <data name="GradeClass_Format" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
+  <data name="DB_Grade_9th" xml:space="preserve">
+    <value>כיתה ט'</value>
+  </data>
+  <data name="DB_Grade_10th" xml:space="preserve">
+    <value>כיתה י'</value>
+  </data>
+  <data name="DB_Grade_11th" xml:space="preserve">
+    <value>כיתה י"א</value>
+  </data>
+  <data name="DB_Grade_12th" xml:space="preserve">
+    <value>כיתה י"ב</value>
+  </data>
+  <data name="DB_Subject_Math" xml:space="preserve">
+    <value>מתמטיקה</value>
+  </data>
+  <data name="DB_Subject_Physics" xml:space="preserve">
+    <value>פיזיקה</value>
+  </data>
+  <data name="DB_Subject_ComputerScience" xml:space="preserve">
+    <value>מדעי המחשב</value>
+  </data>
+  <data name="DB_Subject_English" xml:space="preserve">
+    <value>אנגלית</value>
+  </data>
+  <data name="DB_Subject_Chemistry" xml:space="preserve">
+    <value>כימיה</value>
+  </data>
+  <data name="DB_Subject_Biology" xml:space="preserve">
+    <value>ביולוגיה</value>
+  </data>
+  <data name="DB_Category_TechnicalIssue" xml:space="preserve">
+    <value>בעיה טכנית</value>
+  </data>
+  <data name="DB_Category_BehavioralIssue" xml:space="preserve">
+    <value>בעיית התנהגות</value>
+  </data>
+  <data name="DB_Category_GeneralHelp" xml:space="preserve">
+    <value>עזרה כללית</value>
+  </data>
+  <data name="Browse_NoMentors" xml:space="preserve">
+    <value>אין מנטורים זמינים כרגע.</value>
+  </data>
+  <data name="MentorReq_NoPendingRequests" xml:space="preserve">
+    <value>אין בקשות חניכה ממתינות.</value>
+  </data>
+  <data name="Selection_Choose_Tooltip" xml:space="preserve">
+    <value>בחר מנטור זה כהתאמה שלך (הבחירה סופית)</value>
+  </data>
+  <data name="SysSettings_Continue_Tooltip" xml:space="preserve">
+    <value>המשך ללוח הבקרה הראשי</value>
+  </data>
+  <data name="Admin_Step_ImportUsers" xml:space="preserve">
+    <value>ייבוא משתמשים</value>
+  </data>
+  <data name="Admin_Step_Registration" xml:space="preserve">
+    <value>הרשמה</value>
+  </data>
+  <data name="Admin_Step_Selection" xml:space="preserve">
+    <value>בחירה</value>
+  </data>
+  <data name="Admin_Step_Complete" xml:space="preserve">
+    <value>הושלם</value>
+  </data>
+  <data name="Admin_ConfirmAction_Title" xml:space="preserve">
+    <value>אשר פעולה</value>
+  </data>
+  <data name="Admin_ConfirmStartPhase2_Body" xml:space="preserve">
+    <value>האם אתה בטוח שברצונך להתחיל שלב 2? פעולה זו תסיים את שלב 1 ולא ניתן לבטלה.</value>
+  </data>
+  <data name="Admin_GeneratingScores_Message" xml:space="preserve">
+    <value>מייצר ציוני התאמה ופותח את גלריית הבחירה…</value>
+  </data>
+  <data name="Admin_ScoresGenerated_Message" xml:space="preserve">
+    <value>✓ ציונים נוצרו. חניכים יכולים כעת לבחור מ-3 ההתאמות הטובות ביותר.</value>
+  </data>
+  <data name="Admin_Phase2Failed_Message" xml:space="preserve">
+    <value>✗ נכשל בהתחלת שלב 2: {0}</value>
+  </data>
+  <data name="Admin_ConfirmAutoMatch_Body" xml:space="preserve">
+    <value>האם אתה בטוח שברצונך להפעיל התאמה אוטומטית? פעולה זו תזווג אלגוריתמית את כל החניכים שטרם הותאמו ולא ניתן לבטלה.</value>
+  </data>
+  <data name="Admin_RunningAutoMatch_Message" xml:space="preserve">
+    <value>מפעיל התאמה אוטומטית אלגוריתמית סופית…</value>
+  </data>
+  <data name="Admin_FallbackAssigned_Text" xml:space="preserve">
+    <value>{0} זוגות גיבוי הוקצו.</value>
+  </data>
+  <data name="Admin_FallbackFailed_Text" xml:space="preserve">
+    <value>שלב הגיבוי נכשל.</value>
+  </data>
+  <data name="Admin_ProcessComplete_Message" xml:space="preserve">
+    <value>✓ התהליך הושלם. {0} זוגות אלגוריתמיים נוצרו. {1}</value>
+  </data>
+  <data name="Admin_AutoMatchFailed_Message" xml:space="preserve">
+    <value>✗ ההתאמה האוטומטית נכשלה: {0}</value>
+  </data>
+  <data name="Admin_EmailNotification_Failed_Title" xml:space="preserve">
+    <value>שגיאה בשליחת דואר</value>
+  </data>
+  <data name="Admin_EmailNotification_Failed_Body" xml:space="preserve">
+    <value>חלק מהודעות הדואר לא נשלחו. בדוק את הגדרות הדואר.</value>
+  </data>
+  <data name="ManagePairs_ConfirmSeparate_Title" xml:space="preserve">
+    <value>אשר הפרדה</value>
+  </data>
+  <data name="ManagePairs_ConfirmSeparate_Body" xml:space="preserve">
+    <value>האם אתה בטוח שברצונך להפריד זוג זה? פעולה זו לא ניתנת לביטול.</value>
+  </data>
+  <data name="ManagePairs_Separate_Tooltip" xml:space="preserve">
+    <value>פרק לצמיתות את הזוג החונך הזה</value>
+  </data>
+  <data name="ManageUsers_DeleteUser_Tooltip" xml:space="preserve">
+    <value>מחק לצמיתות את חשבון המשתמש</value>
+  </data>
+  <data name="ManageUsers_DownloadComplete_Title" xml:space="preserve">
+    <value>ההורדה הושלמה</value>
+  </data>
+  <data name="Common_Error_Title" xml:space="preserve">
+    <value>שגיאה</value>
+  </data>
+  <data name="Issue_Resolve_Tooltip" xml:space="preserve">
+    <value>סמן בעיה זו כפתורה</value>
+  </data>
+  <data name="Login_Step1" xml:space="preserve">
+    <value>שלב 1 מתוך 2</value>
+  </data>
+  <data name="Login_Step2" xml:space="preserve">
+    <value>שלב 2 מתוך 2</value>
+  </data>
+  <data name="Login_SendCode_Tooltip" xml:space="preserve">
+    <value>שלח קוד אימות לדואר האלקטרוני שלך</value>
+  </data>
+  <data name="Login_VerifyCode_Tooltip" xml:space="preserve">
+    <value>אמת את הקוד והיכנס</value>
+  </data>
+  <data name="Profile_EditProfile_Tooltip" xml:space="preserve">
+    <value>ערוך את הפרופיל שלך</value>
+  </data>
+  <data name="Profile_SaveChanges_Tooltip" xml:space="preserve">
+    <value>שמור את השינויים שלך</value>
+  </data>
+  <data name="Supervisor_NoPairs" xml:space="preserve">
+    <value>לא הוקצו זוגות עדיין.</value>
+  </data>
+  <data name="Supervisor_NoPendingIssues" xml:space="preserve">
+    <value>אין בעיות ממתינות.</value>
+  </data>
+  <data name="Supervisor_NoResolvedIssues" xml:space="preserve">
+    <value>אין בעיות שנפתרו.</value>
+  </data>
+  <data name="Supervisor_SelectHint" xml:space="preserve">
+    <value>בחר זוג או בעיה מהרשימות כדי לראות את הפרטים.</value>
+  </data>
+  <data name="Supervisor_ShowPending_Tooltip" xml:space="preserve">
+    <value>הצג בעיות שלא נפתרו</value>
+  </data>
+  <data name="Supervisor_ShowResolved_Tooltip" xml:space="preserve">
+    <value>הצג בעיות שנפתרו</value>
+  </data>
+  <data name="Supervisor_RelatedPairName_Format" xml:space="preserve">
+    <value>מקור הזוג: {0} ו-{1}</value>
+  </data>
+  <data name="Student_TabLabel_TopMatches" xml:space="preserve">
+    <value>ההתאמות המובילות שלי</value>
+  </data>
+  <data name="Student_TabLabel_MentoringRequests" xml:space="preserve">
+    <value>בקשות חניכה</value>
+  </data>
+  <data name="Student_TabLabel_BrowseMentors" xml:space="preserve">
+    <value>עיין במנטורים</value>
+  </data>
+  <data name="Student_MatchedWith_Message" xml:space="preserve">
+    <value>✓ אתה כעת מותאם עם {0}!</value>
+  </data>
+  <data name="Student_AcceptedPaired_Message" xml:space="preserve">
+    <value>✓ התקבל! אתה כעת מזווג עם {0}.</value>
+  </data>
+  <data name="Student_RequestRejected_Message" xml:space="preserve">
+    <value>הבקשה מ-{0} נדחתה.</value>
+  </data>
+  <data name="Student_RequestWindowClosesIn" xml:space="preserve">
+    <value>חלון הבקשות נסגר בעוד: {0}</value>
+  </data>
+  <data name="Student_RequestWindowClosed" xml:space="preserve">
+    <value>חלון הבקשות סגור</value>
+  </data>
+  <data name="Student_RequestSent_Message" xml:space="preserve">
+    <value>✓ הבקשה נשלחה אל {0}! ממתין לתגובה.</value>
+  </data>
+  <data name="DB_Grade_8th" xml:space="preserve">
+    <value>כיתה ח'</value>
+  </data>
+  <data name="DB_Grade_7th" xml:space="preserve">
+    <value>כיתה ז'</value>
+  </data>
+  <data name="DB_Grade_6th" xml:space="preserve">
+    <value>כיתה ו'</value>
+  </data>
+  <data name="DB_Grade_5th" xml:space="preserve">
+    <value>כיתה ה'</value>
+  </data>
+  <data name="DB_Grade_4th" xml:space="preserve">
+    <value>כיתה ד'</value>
+  </data>
+  <data name="DB_Grade_3rd" xml:space="preserve">
+    <value>כיתה ג'</value>
+  </data>
+  <data name="DB_Grade_2nd" xml:space="preserve">
+    <value>כיתה ב'</value>
+  </data>
+  <data name="DB_Grade_1st" xml:space="preserve">
+    <value>כיתה א'</value>
+  </data>
+  <data name="Student_YourMentor_Label" xml:space="preserve">
+    <value>החונך שלך</value>
+  </data>
+  <data name="Issue_Forward_Button" xml:space="preserve">
+    <value>קדם בעיה לאדמין</value>
+  </data>
+  <data name="Admin_ManageUsers_PhoneNumber" xml:space="preserve">
+    <value>מספר טלפון:</value>
+  </data>
+  <data name="Sונחקבא אם אקשבי שמג דונחקבא אם ךקש" xml:space="preserve">
+    <value>כיתה</value>
+  </data>
+  <data name="/mode." xml:space="preserve">
+    <value>כיתה</value>
+  </data>
+  <data name="Admin_ManageUsers_Class" xml:space="preserve">
+    <value>כיתה</value>
+  </data>
+  <data name="Admin_CurrentPhase_Label" xml:space="preserve"><value>שלב נוכחי</value></data>
+  <data name="Admin_PhaseProgress_Label" xml:space="preserve"><value>התקדמות השלב</value></data>
+  <data name="Admin_PhaseDeadlines_Label" xml:space="preserve"><value>תאריכי יעד</value></data>
+  <data name="Admin_ProcessComplete_NoDeadlines_Label" xml:space="preserve"><value>התהליך הושלם. אין תאריכי יעד פעילים.</value></data>
+  <data name="Admin_PhaseActions_Label" xml:space="preserve"><value>פעולות השלב</value></data>
+  <data name="Admin_GoToManageUsers_Button" xml:space="preserve"><value>עבור לניהול משתמשים</value></data>
+  <data name="Admin_BeginRegistration_Button" xml:space="preserve"><value>✓ התחל הרשמה</value></data>
+  <data name="Admin_ProcessComplete_Label" xml:space="preserve"><value>תהליך הושלם</value></data>
+  <data name="Admin_NoticeBoard_Label" xml:space="preserve"><value>לוח מודעות</value></data>
+  <data name="Admin_NewIssue_Label" xml:space="preserve"><value>פנייה חדשה</value></data>
+  <data name="Admin_NoNotices_Label" xml:space="preserve"><value>אין הודעות להצגה.</value></data>
+  <data name="Admin_ByAuthor_Format" xml:space="preserve"><value>מאת - {0}</value></data>
+  <data name="Admin_Menu_Dashboard" xml:space="preserve"><value>לוח בקרה</value></data>
+  <data name="Admin_Menu_ManagePairs" xml:space="preserve"><value>ניהול זוגות</value></data>
+  <data name="Admin_Menu_ManageUsers" xml:space="preserve"><value>ניהול משתמשים</value></data>
+  <data name="Admin_Menu_SystemSettings" xml:space="preserve"><value>הגדרות מערכת</value></data>
+  <data name="Admin_PhaseGuide_Title" xml:space="preserve"><value>מדריך שלבים</value></data>
+  <data name="Admin_PhaseGuide_Import" xml:space="preserve"><value>ייבוא משתמשים:\nהעלה קבצי אקסל לייבוא מדריכים וחניכים למערכת. חובה להשלים שלב זה לפני תחילת ההתאמה.</value></data>
+  <data name="Admin_PhaseGuide_Phase1" xml:space="preserve"><value>שלב 1: הרשמה והתאמה ידנית\nחניכים מתחברים וממלאים את פרטיהם. חניכים יכולים לדפדף במנטורים ולשלוח בקשות. קבע תאריך יעד לשלב זה.</value></data>
+  <data name="Admin_PhaseGuide_Phase2" xml:space="preserve"><value>שלב 2: גלריית בחירה והתאמה אוטומטית\nחניכים ללא זוג רואים את המנטורים המתאימים להם ביותר ויכולים לבחור. כשהיעד חולף, מי שלא בחר מותאם אוטומטית.</value></data>
+  <data name="Admin_PhaseGuide_Phase3" xml:space="preserve"><value>שלב 3: חניכה פעילה (הושלם)\nתהליך ההתאמה הסתיים. הזוגות מתחילים פגישות ומדווחים על שעות. מדריכים עוקבים אחר התקדמות.</value></data>
+  <data name="Admin_StartSelectionStage_Button" xml:space="preserve"><value>▶ התחל שלב בחירה</value></data>
+  <data name="Admin_StartActiveMentoring_Button" xml:space="preserve"><value>▶ התחל שלב חניכה פעילה</value></data>
+  <data name="Admin_ImportUsersInfo_Tooltip" xml:space="preserve"><value>מידע על ייבוא משתמשים</value></data>
+  <data name="Admin_Phase1Info_Tooltip" xml:space="preserve"><value>מידע על שלב 1</value></data>
+  <data name="Admin_Phase2Info_Tooltip" xml:space="preserve"><value>מידע על שלב 2</value></data>
+  <data name="Admin_Phase3Info_Tooltip" xml:space="preserve"><value>מידע על שלב 3</value></data>
+  <data name="Table_Supervisor" xml:space="preserve"><value>מדריך</value></data>
+  <data name="Table_Pairs" xml:space="preserve"><value>זוגות</value></data>
+  <data name="Table_Pending" xml:space="preserve"><value>ממתין</value></data>
+  <data name="Table_Resolved" xml:space="preserve"><value>טופל</value></data>
+  <data name="Table_FillProgress" xml:space="preserve"><value>התקדמות</value></data>
+  <data name="Table_Action" xml:space="preserve"><value>פעולה</value></data>
+  <data name="Table_Inspect" xml:space="preserve"><value>בדוק</value></data>
+  <data name="Table_Role" xml:space="preserve"><value>תפקיד</value></data>
+  <data name="Table_Mentor" xml:space="preserve"><value>חונך</value></data>
+  <data name="Table_Mentee" xml:space="preserve"><value>חניך</value></data>
+  <data name="ManagePairs_Title" xml:space="preserve"><value>ניהול זוגות</value></data>
+  <data name="Common_Language" xml:space="preserve"><value>שפה:</value></data>
+  <data name="Common_Instructions" xml:space="preserve"><value>הוראות:</value></data>
+  <data name="Common_Pair" xml:space="preserve"><value>זוג</value></data>
+  <data name="Common_Progress" xml:space="preserve"><value>התקדמות</value></data>
+  <data name="Common_HoursUnit" xml:space="preserve"><value>שע'</value></data>
+  <data name="IssueItem_Created_Label" xml:space="preserve"><value>נוצר:</value></data>
+  <data name="PairDetails_Hours_Tooltip" xml:space="preserve"><value>התקדמות שעות הפגישות לעבר היעד הנדרש</value></data>
+  <data name="Supervisor_RandomlyMatched_Warning" xml:space="preserve"><value>⚠ {0} הותאם אקראית – פרופיל לא מלא</value></data>
+  <data name="Supervisor_Issues_Title" xml:space="preserve"><value>פניות</value></data>
+  <data name="Supervisor_IssuesOf_Format" xml:space="preserve"><value>פניות של {0} ו-{1}</value></data>
+  <data name="ManageUsers_GradeClass_Format" xml:space="preserve"><value>{0} · כיתה {1}</value></data>
+  <data name="ManageUsers_RoleFilter_All" xml:space="preserve"><value>הכל</value></data>
+  <data name="ManageUsers_RoleFilter_Supervisor" xml:space="preserve"><value>מדריך</value></data>
+  <data name="ManageUsers_RoleFilter_Student" xml:space="preserve"><value>תלמיד</value></data>
+  <data name="DB_Role_Admin" xml:space="preserve"><value>מנהל</value></data>
+  <data name="DB_Role_Supervisor" xml:space="preserve"><value>מדריך</value></data>
+  <data name="DB_Role_Student" xml:space="preserve"><value>תלמיד</value></data>
+  <data name="MatchTier_Direct" xml:space="preserve"><value>בקשה ישירה</value></data>
+  <data name="MatchTier_GalleryChoice" xml:space="preserve"><value>בחירה מגלריה</value></data>
+  <data name="MatchTier_AutoMatch" xml:space="preserve"><value>הותאם אוטומטית</value></data>
+  <data name="MatchTier_FallbackRandom" xml:space="preserve"><value>התאמה אקראית</value></data>
+  <data name="MatchTier_AdminManual" xml:space="preserve"><value>התאמה ידנית</value></data>
+  <data name="Student_RequestedAt_Label" xml:space="preserve"><value>נשלח ב:</value></data>
+  <data name="Student_ExpertIn_Label" xml:space="preserve"><value>מומחה ב</value></data>
+</root>

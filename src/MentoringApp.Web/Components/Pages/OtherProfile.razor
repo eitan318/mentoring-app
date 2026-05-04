@@ -1,0 +1,158 @@
+@page "/profile/other"
+@rendermode InteractiveServer
+@layout MentoringApp.Web.Components.Layout.AuthenticatedLayout
+@implements IDisposable
+@using System.ComponentModel
+@using MentoringApp.Model.User
+@using MentoringApp.ViewModel.ViewModel.User
+@using MentoringApp.ViewModel.IService
+@using MentoringApp.ViewModel.Localization
+@using MentoringApp.Web.Services
+@inject OtherProfileViewModel Vm
+@inject ILocalizationService Loc
+@inject NavigationParameterStore ParamStore
+
+@*
+    Mirrors OtherProfileView.xaml (read-only).
+    Receives userId via NavigationParameterStore (set by INavigationService.NavigateToAsync<VM,int>(id)).
+*@
+
+<div class="other-root" dir="@Dir">
+    <div class="other-card">
+
+        @if (Vm.Loading || Vm.User == null)
+        {
+            <div class="loading">Loading…</div>
+        }
+        else
+        {
+            @* ── Avatar ───────────────────────────────────────────────────────── *@
+            <div class="avatar" style="background:@PicBg(Vm.User.Gender)">
+                @(string.IsNullOrEmpty(Vm.User.UserName) ? "?" : Vm.User.UserName[0].ToString().ToUpper())
+            </div>
+
+            <div class="name">@Vm.User.UserName</div>
+            <div class="role">@Vm.RoleName</div>
+
+            <hr class="divider" />
+
+            @* ── Email ───────────────────────────────────────────────────────── *@
+            <div class="field-label">@Loc.Get("OtherProfile_Email_Label")</div>
+            <div class="field-value">@Vm.User.Email</div>
+
+            @* ── Phone (supervisors only) ────────────────────────────────────── *@
+            @if (Vm.IsSupervisor)
+            {
+                <div class="field-label">@Loc.Get("OtherProfile_PhoneNumber_Label")</div>
+                <div class="field-value">@Vm.User.PhoneNumber</div>
+            }
+
+            @* ── Gender ──────────────────────────────────────────────────────── *@
+            <div class="field-label">@Loc.Get("OtherProfile_Gender_Label")</div>
+            <div class="field-value">@Vm.GenderDisplay</div>
+
+            @* ── Student-only details ────────────────────────────────────────── *@
+            @if (Vm.IsStudent)
+            {
+                <div class="field-label">@Loc.Get("OtherProfile_Grade_Label")</div>
+                <div class="field-value">@Vm.GradeName · Class @Vm.ClassNum</div>
+
+                @if (Vm.HasMentorProfile)
+                {
+                    <div class="field-label">@Loc.Get("Register_SubjectToTeach_Tag")</div>
+                    <div class="field-value">@Vm.TeachingSubject</div>
+
+                    <div class="field-label">@Loc.Get("OtherProfile_PreferredMenteeGender_Label")</div>
+                    <div class="field-value">@Vm.PreferredMenteeGenderDisplay</div>
+                }
+
+                @if (Vm.HasMenteeProfile)
+                {
+                    <div class="field-label">@Loc.Get("Register_SubjectToLearn_Tag")</div>
+                    <div class="field-value">@Vm.LearningSubject</div>
+
+                    <div class="field-label">@Loc.Get("OtherProfile_PreferredMentorGender_Label")</div>
+                    <div class="field-value">@Vm.PreferredMentorGenderDisplay</div>
+                }
+            }
+        }
+    </div>
+</div>
+
+<style>
+    .other-root {
+        background: #F4F7FE;
+        min-height: 100%;
+        padding: 40px 24px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .other-card {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        max-width: 420px;
+        margin: 0 auto;
+        box-shadow: 0 2px 15px rgba(0,0,0,.03);
+        text-align: center;
+    }
+    .other-card > .field-label,
+    .other-card > .field-value { text-align: left; }
+
+    .loading { color: #6B7280; padding: 40px 0; }
+
+    .avatar {
+        width: 96px; height: 96px;
+        border-radius: 50%;
+        margin: 0 auto 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 36px; color: #1F2937;
+    }
+    .name {
+        font-size: 24px; font-weight: bold;
+        color: #111827; margin-bottom: 4px;
+    }
+    .role {
+        font-size: 14px; color: #6B7280;
+        margin-bottom: 20px;
+    }
+
+    .divider { border: 0; border-top: 1px solid #F3F4F6; margin: 0 0 16px; }
+
+    .field-label {
+        font-size: 11px; font-weight: 600;
+        color: #6B7280; margin: 16px 0 4px;
+    }
+    .field-value {
+        font-size: 15px; color: #374151; font-weight: 500;
+    }
+</style>
+
+@code {
+    private string Dir => TranslationSource.Instance.IsRtl ? "rtl" : "ltr";
+
+    private static string PicBg(MentoringApp.Model.User.Gender g) =>
+        g == MentoringApp.Model.User.Gender.Female ? "#FBCFE8" : "#BFDBFE";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Vm.PropertyChanged += OnVmChanged;
+        TranslationSource.Instance.PropertyChanged += OnLocChanged;
+
+        // Take the userId set by WebNavigationService.NavigateToAsync<OtherProfileViewModel, int>(id)
+        var userId = ParamStore.Take<int>(typeof(OtherProfileViewModel));
+        if (userId > 0)
+            await Vm.OnNavigatedToAsync(userId);
+    }
+
+    private void OnVmChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private void OnLocChanged(object? sender, PropertyChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Vm.PropertyChanged -= OnVmChanged;
+        TranslationSource.Instance.PropertyChanged -= OnLocChanged;
+    }
+}

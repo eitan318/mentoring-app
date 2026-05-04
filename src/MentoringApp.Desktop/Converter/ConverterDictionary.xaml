@@ -1,0 +1,16 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:MentoringApp.Converter">
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+    <conv:NullToVisibilityConverter x:Key="NullToVis" />
+    <conv:InverseBoolConverter x:Key="InverseBoolConverter" />
+    <conv:StringToImageSourceConverter x:Key="StringToImage" />
+    <conv:DbTranslationConverter x:Key="DbTranslation" />
+    <conv:LocalizedFormatConverter x:Key="LocalizedFormat" />
+    <conv:LocalizedClassCountConverter x:Key="LocalizedClassCount" />
+    <conv:GradeClassDisplayConverter x:Key="GradeClassDisplay" />
+    <conv:PercentToStrokeDashArrayConverter x:Key="PercentToStrokeDash" />
+    <conv:StringToFlowDirectionConverter x:Key="FlowConverter" />
+</ResourceDictionary>

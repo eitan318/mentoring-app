@@ -1,0 +1,71 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run API + Web",
+            "dependsOn": ["run-api", "run-web"],
+            "dependsOrder": "parallel",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "run-api",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--project", "${workspaceFolder}/MentoringApp.Api/MentoringApp.Api.csproj",
+                "--launch-profile", "http"
+            ],
+            "options": { "env": { "ASPNETCORE_ENVIRONMENT": "Development" } },
+            "problemMatcher": [],
+            "presentation": { "group": "servers", "panel": "new", "reveal": "always" }
+        },
+        {
+            "label": "run-web",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--project", "${workspaceFolder}/MentoringApp.Web/MentoringApp.Web.csproj",
+                "--launch-profile", "http"
+            ],
+            "options": { "env": { "ASPNETCORE_ENVIRONMENT": "Development" } },
+            "problemMatcher": [],
+            "presentation": { "group": "servers", "panel": "new", "reveal": "always" }
+        },
+        {
+            "label": "build-api",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["build", "${workspaceFolder}/MentoringApp.Api/MentoringApp.Api.csproj"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build-web",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["build", "${workspaceFolder}/MentoringApp.Web/MentoringApp.Web.csproj"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Launch Swarm",
+            "dependsOn": ["Agent: Implementer", "Agent: Docs Architect"],
+            "dependsOrder": "parallel"
+        },
+        {
+            "label": "Agent: Implementer",
+            "type": "shell",
+            "command": "claude",
+            "presentation": { "group": "swarm", "panel": "dedicated", "index": 1 }
+        },
+        {
+            "label": "Agent: Docs Architect",
+            "type": "shell",
+            "command": "claude",
+            "presentation": { "group": "swarm", "panel": "dedicated", "index": 2 }
+        }
+    ]
+}
