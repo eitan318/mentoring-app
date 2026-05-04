@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Primary palette -->
+    <SolidColorBrush x:Key="PrimaryBrush"       Color="#1976D2"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush"    Color="#1565C0"/>
+    <SolidColorBrush x:Key="PrimaryDarkerBrush"  Color="#0D47A1"/>
+
+    <!-- Status palette -->
+    <SolidColorBrush x:Key="SuccessBrush"        Color="#2E7D32"/>
+    <SolidColorBrush x:Key="WarningColorBrush"   Color="#F57C00"/>
+    <SolidColorBrush x:Key="ErrorBrush"          Color="#C62828"/>
+
+    <!-- Surface & border -->
+    <SolidColorBrush x:Key="SurfaceBrush"        Color="#FAFAFA"/>
+    <SolidColorBrush x:Key="BorderLightBrush"    Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="BorderMediumBrush"   Color="#CCCCCC"/>
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="TextPrimaryBrush"    Color="#1A1A2E"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush"  Color="#555555"/>
+    <SolidColorBrush x:Key="TextHintBrush"       Color="#AAAAAA"/>
+
+    <!-- Interactive surfaces -->
+    <SolidColorBrush x:Key="HoverLightBrush"     Color="#F0F4FF"/>
+    <SolidColorBrush x:Key="OverlayBrush"        Color="#80000000"/>
+
+    <!-- Phase banners -->
+    <SolidColorBrush x:Key="Phase1BackBrush"     Color="#E3F2FD"/>
+    <SolidColorBrush x:Key="Phase1ForeBrush"     Color="#1565C0"/>
+    <SolidColorBrush x:Key="Phase2BackBrush"     Color="#F3E5F5"/>
+    <SolidColorBrush x:Key="Phase2ForeBrush"     Color="#6A1B9A"/>
+    <SolidColorBrush x:Key="PhaseCompleteBackBrush" Color="#E8F5E9"/>
+    <SolidColorBrush x:Key="PhaseCompleteForeBrush" Color="#1B5E20"/>
+
+    <!-- Shared avatar dimensions -->
+    <sys:Double x:Key="AvatarSizeSmall">32</sys:Double>
+    <sys:Double x:Key="AvatarSizeMedium">52</sys:Double>
+    <sys:Double x:Key="AvatarSizeLarge">80</sys:Double>
+
+</ResourceDictionary>

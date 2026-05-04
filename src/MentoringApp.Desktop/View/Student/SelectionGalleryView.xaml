@@ -1,0 +1,125 @@
+<UserControl
+    x:Class="MentoringApp.View.Student.SelectionGalleryView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:components="clr-namespace:MentoringApp.View.Components"
+    xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
+    mc:Ignorable="d"
+    d:DesignHeight="600" d:DesignWidth="700"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock FontSize="26" FontWeight="Bold" Text="{Binding [Selection_Header], Source={x:Static loc:TranslationSource.Instance}}"/>
+            <TextBlock Foreground="#666" FontSize="13" TextWrapping="Wrap"
+                       Text="{Binding [Selection_Description], Source={x:Static loc:TranslationSource.Instance}}"/>
+        </StackPanel>
+
+        <!-- Already matched banner -->
+        <Border Grid.Row="1" Visibility="{Binding AlreadyMatched, Converter={StaticResource BoolToVis}}"
+                Background="#E3F2FD" BorderBrush="#1976D2" BorderThickness="1"
+                CornerRadius="4" Padding="12,8" Margin="0,0,0,12">
+            <TextBlock Text="{Binding [Selection_AlreadyMatched], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#0D47A1" FontWeight="SemiBold"/>
+        </Border>
+
+        <!-- Status message -->
+        <Border Grid.Row="2" Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}"
+                Background="#E8F5E9" BorderBrush="#4CAF50" BorderThickness="1"
+                CornerRadius="4" Padding="12,8" Margin="0,0,0,12">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="#1B5E20" FontWeight="SemiBold" TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- Recommendation cards -->
+        <ItemsControl Grid.Row="3" ItemsSource="{Binding Recommendations}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0,0,0,14" Padding="20" CornerRadius="10"
+                            BorderThickness="2" BorderBrush="#E3F2FD" Background="White">
+                        <Border.Effect>
+                            <DropShadowEffect ShadowDepth="3" BlurRadius="10" Opacity="0.1"/>
+                        </Border.Effect>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Avatar -->
+                            <components:ProfilePictureControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                                Width="64" Height="64" Margin="0,0,16,0" VerticalAlignment="Center"
+                                ImagePath="{Binding MentorProfilePicturePath}"
+                                Gender="{Binding MentorGender}"/>
+
+                            <!-- Info -->
+                            <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="{Binding MentorName}"/>
+                                <TextBlock Foreground="#2E7D32" FontSize="12" Margin="0,4,0,0">
+                                    <Run Text="📘 "/>
+                                    <Run Text="{Binding MentorSubjectName}" FontWeight="Medium"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Score bar -->
+                            <Grid Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ProgressBar Height="8" Minimum="0" Maximum="100"
+                                             Value="{Binding ScorePercent}"
+                                             Background="#E0E0E0" Foreground="#1976D2" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Margin="8,0,0,0" FontWeight="Bold" Foreground="#1976D2"
+                                           Text="{Binding ScorePercent, StringFormat='{}{0:0}% match'}"/>
+                            </Grid>
+
+                            <!-- Choose button -->
+                            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                    Margin="0,12,0,0" Padding="0,10"
+                                    FontSize="14" FontWeight="SemiBold"
+                                    Background="#1976D2" Foreground="White" BorderThickness="0"
+                                    Command="{Binding DataContext.ChooseMentorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
+                                    Cursor="Hand"
+                                    ToolTip="{Binding [Selection_Choose_Tooltip], Source={x:Static loc:TranslationSource.Instance}}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="{Binding [Selection_Choose_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Empty state -->
+        <StackPanel Grid.Row="4" HorizontalAlignment="Center" Margin="0,20,0,0"
+                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{Binding [Selection_Loading], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#999" FontSize="14"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,135 @@
+@using MentoringApp.ViewModel.ViewModel.Student
+@using MentoringApp.ViewModel.IService
+@inject ILocalizationService Loc
+
+@*
+    Mirrors the MenteeDashboardViewModel DataTemplate from StudentDashboardView.xaml.
+    The mentee sees: counterpart (mentor) header, mentor feedback (reviews), my issues.
+*@
+
+<div class="scroll">
+    <div class="card">
+        <div class="card-row">
+            <div class="card-left">
+                <a class="counterpart-link"
+                   @onclick="async () => await Vm.NavigateToProfileCommand.ExecuteAsync(null)"
+                   @onclick:preventDefault>
+                    @Vm.Counterpart?.UserName
+                </a>
+                <div class="muted">@T("Student_YourMentor_Label")</div>
+
+                <div class="subject-pill">@($"Expert in: {Vm.MentorSubject}")</div>
+
+                <div class="hours-label">@T("Student_MeetingHours_Label")</div>
+                <div class="progress-row">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:@(Vm.HoursProgress)%"></div>
+                    </div>
+                    <span class="progress-text">@($"{Vm.TotalMeetingHours:0.#} / {Vm.RequiredMeetingHours:0} hrs")</span>
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <button class="btn-secondary"
+                        @onclick="async () => await Vm.IssueToSupervisorCommand.ExecuteAsync(null)">
+                    @T("Student_RaiseIssue_Button")
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">@T("Student_MentorFeedback_Label")</div>
+        @foreach (var review in Vm.RecentReviews)
+        {
+            <div class="review-row">
+                <div class="review-text">@review.Content</div>
+                <div class="review-date">@FormatDate(review.Date)</div>
+            </div>
+        }
+    </div>
+
+    <div class="card">
+        <div class="card-title">@T("Student_MyIssues_Label")</div>
+        @foreach (var issue in Vm.MyIssues)
+        {
+            <div class="issue-row">
+                <span class="issue-dot"></span>
+                <span class="issue-text">@issue.Description</span>
+                <span class="issue-category">@issue.Category?.Name</span>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .scroll { overflow-y: auto; }
+    .card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 15px rgba(0,0,0,.03);
+    }
+    .card-row { display: flex; justify-content: space-between; gap: 16px; }
+    .card-left { flex: 1; }
+    .card-actions { display: flex; flex-direction: column; gap: 8px; min-width: 140px; }
+    .counterpart-link {
+        font-size: 20px; font-weight: bold; color: #A855F7;
+        cursor: pointer; text-decoration: none;
+    }
+    .counterpart-link:hover { text-decoration: underline; }
+    .muted { color: #6B7280; font-size: 13px; margin: 2px 0 8px; }
+    .subject-pill {
+        background: #ECFDF5; color: #059669;
+        font-size: 12px; font-weight: 600;
+        padding: 4px 10px; border-radius: 8px;
+        display: inline-block; margin-bottom: 16px;
+    }
+    .hours-label { font-size: 12px; color: #6B7280; margin-bottom: 6px; }
+    .progress-row { display: flex; align-items: center; gap: 12px; }
+    .progress-bar {
+        flex: 1; height: 8px; background: #F3F4F6;
+        border-radius: 4px; overflow: hidden;
+    }
+    .progress-fill { height: 100%; background: #A855F7; }
+    .progress-text { font-size: 12px; font-weight: 600; color: #6B7280; }
+    .btn-secondary {
+        background: #F3F4F6; color: #4B5563; border: 0;
+        padding: 8px 14px; border-radius: 8px; font-weight: 600;
+        font-size: 13px; cursor: pointer; min-width: 140px;
+    }
+    .btn-secondary:hover { background: #E5E7EB; }
+    .card-title {
+        font-size: 16px; font-weight: bold; color: #111827;
+        margin-bottom: 16px;
+    }
+    .review-row {
+        padding: 12px 0; border-bottom: 1px solid #F3F4F6;
+    }
+    .review-text { color: #374151; font-size: 14px; }
+    .review-date { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+    .issue-row {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 0; border-bottom: 1px solid #F3F4F6;
+    }
+    .issue-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%; background: #DC2626;
+    }
+    .issue-text { color: #374151; font-size: 14px; flex: 1; }
+    .issue-category {
+        background: #F3F4F6; color: #374151;
+        font-size: 11px; font-weight: 600;
+        padding: 4px 8px; border-radius: 8px;
+    }
+</style>
+
+@code {
+    [Parameter, EditorRequired] public MenteeDashboardViewModel Vm { get; set; } = default!;
+
+    private string T(string key) => Loc.Get(key);
+
+    private static string FormatDate(string raw) =>
+        DateTime.TryParse(raw, out var dt) ? dt.ToString("MMM d, yyyy") : raw;
+}
