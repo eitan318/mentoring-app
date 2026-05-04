@@ -62,7 +62,9 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
       "Bash(Get-ChildItem -Path C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoringapp\\\\src\\\\MentoringApp.Desktop -Recurse -Directory)",
-      "Bash(Get-ChildItem *)"
+      "Bash(Get-ChildItem *)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\eitan\\\\source\\\\repos\\\\mentoring-app\" | ForEach-Object { $_.Name + $\\(if\\($_.PSIsContainer\\) { \" [DIR]\" } else { \"\" }\\) })"
     ]
   }
 }
