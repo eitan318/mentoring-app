@@ -1,93 +1,295 @@
 # MentoringApp
 
+A full-stack mentoring management platform for schools that automates mentor-mentee pairing, session tracking, and issue escalation — available as both a native Windows desktop app and a cross-platform web client.
 
+---
 
-## Getting started
+## Table of Contents
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- [Overview](#overview)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Run with Docker](#run-with-docker)
+  - [Run Locally](#run-locally)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [CI/CD](#cicd)
+- [Documentation](#documentation)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## Overview
 
-* [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+MentoringApp manages peer-mentoring programs within schools. It automates the process of pairing student mentors with student mentees, provides supervisors with oversight tools, and gives administrators full control over users, pairs, and system settings.
+
+**Three client interfaces ship from one codebase:**
+
+| Client | Technology | Primary Users |
+|--------|-----------|---------------|
+| Desktop | WPF (.NET 9, Windows) | Admins, Supervisors |
+| Web | Blazor WebAssembly | Students, Supervisors |
+| API | ASP.NET Core 9 | Shared backend |
+
+---
+
+## Features
+
+### User Roles
+- **Students** — can be a mentor (teach), a mentee (learn), or both
+- **Supervisors** — oversee assigned pairs and handle escalated issues
+- **Admins** — manage users, pairs, settings, and bulk-import via Excel
+
+### 5-Tier Matching Algorithm
+Pairs are created through a cascade:
+1. **Direct Request** — mentee explicitly requests a mentor
+2. **Auto-Match** — `CompatibilityScorer` ranks mentors by subject, grade, and gender preference
+3. **Supervisor-Assisted** — supervisor manually selects from candidate list
+4. **Admin Manual** — administrator creates a pair directly
+5. **Flagged** — incomplete profiles are queued for review
+
+### Sessions & Reviews
+- Mentors log session hours and submit feedback per session
+- Supervisors review session quality
+
+### Issue Tracking
+- Any user can report a problem against a pair
+- Issues escalate: Student → Supervisor → Admin
+
+### Internationalization
+- Full English and Hebrew (RTL) support via `.resx` resource files
+- Flow direction bound dynamically in XAML
+
+### Bulk Import
+- Admins import users from Excel via ClosedXML
+
+---
+
+## Architecture
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/eitan318/mentoringapp.git
-git branch -M main
-git push -uf origin main
+Desktop (WPF) ──────────────────────────────┐
+                                             │
+Web (Blazor WASM) ──▶ ApiClient ──▶ REST API ──▶ PostgreSQL / SQLite
+                                             │
+                               Service Layer─┘
+                              (Matching, Email, Validation)
 ```
 
-## Integrate with your tools
+**Layered dependency flow:**
 
-* [Set up project integrations](https://gitlab.com/eitan318/mentoringapp/-/settings/integrations)
+```
+View → ViewModel → Service → Repository → Database
+```
 
-## Collaborate with your team
+| Layer | Project | Responsibility |
+|-------|---------|----------------|
+| View | `MentoringApp.Desktop`, `MentoringApp.Web` | UI, DI bootstrap |
+| ViewModel | `MentoringApp.ViewModel` | MVVM state, navigation, commands |
+| Service | `MentoringApp.Service` | Business rules, matching, email, Excel |
+| Model | `MentoringApp.Model` | Domain entities, enums, Result pattern |
+| Data | `MentoringApp.Data` | Repository interfaces + SQLite/ADO.NET impl |
+| API | `MentoringApp.Api` | REST endpoints, JWT auth, Swagger |
+| ApiClient | `MentoringApp.ApiClient` | Typed HTTP client for web/desktop |
 
-* [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+**Key design decisions:**
+- **No ORM** — raw ADO.NET with typed repository interfaces; EF Core used only for schema management
+- **Result\<T\>** — services return explicit success/failure instead of exceptions
+- **Stack-based navigation** — `INavigationService` with `OnNavigatedTo`/`OnNavigatedFrom` lifecycle hooks; identical interface on WPF and Blazor
+- **CommunityToolkit.Mvvm** — source-generator-based ViewModels (zero reflection at runtime)
+- **Scoped repositories, Transient ViewModels, Singleton services** — DI lifetimes enforced in `App.xaml.cs`
 
-## Test and Deploy
+---
 
-Use the built-in continuous integration in GitLab.
+## Project Structure
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```
+MentoringApp.sln
+├── src/
+│   ├── MentoringApp.Model/          Domain models & enums
+│   ├── MentoringApp.Data/           Repository pattern & SQLite access
+│   │   └── Resources/Database/      mentoring.db (checked in)
+│   ├── MentoringApp.Service/        Business logic, matching, email, Excel
+│   ├── MentoringApp.ViewModel/      MVVM ViewModels, navigation, localization
+│   ├── MentoringApp.Desktop/        WPF app (Views, Styles, DI, appsettings)
+│   ├── MentoringApp.Api/            ASP.NET Core REST API
+│   ├── MentoringApp.ApiClient/      Typed HTTP client
+│   ├── MentoringApp.Components/     Shared Blazor components
+│   └── MentoringApp.Web/            Blazor WebAssembly client
+├── Tests/
+│   ├── MentoringApp.Tests/          Unit tests (Service, Model, Data)
+│   ├── MentoringApp.ViewModel.Tests/ Unit tests (ViewModels)
+│   └── MentoringApp.E2eTests/       Playwright E2E tests (Web client)
+├── docs/architecture/               Architecture decision records
+├── docker-compose.yml
+├── Dockerfile
+└── .gitlab-ci.yml
+```
 
-***
+---
 
-# Editing this README
+## Tech Stack
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+| Concern | Library / Framework | Version |
+|---------|-------------------|---------|
+| Runtime | .NET | 9.0 |
+| Desktop UI | WPF | net9.0-windows |
+| Web UI | Blazor WebAssembly | net9.0 |
+| API | ASP.NET Core | 9.0 |
+| MVVM | CommunityToolkit.Mvvm | 8.4.0 |
+| Authentication | JWT Bearer | 9.0.4 |
+| API Docs | Swashbuckle (Swagger) | 6.9.0 |
+| Validation | FluentValidation | 12.1.1 |
+| Excel | ClosedXML | 0.105.0 |
+| Database | SQLite (dev) / PostgreSQL (prod) | — |
+| Unit Tests | xUnit + Moq + FluentAssertions | 2.9.3 / 4.20.72 / 7.0.0 |
+| E2E Tests | Playwright + NUnit | 1.59.0 |
 
-## Suggestions for a good README
+---
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Getting Started
 
-## Name
-Choose a self-explaining name for your project.
+### Prerequisites
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9)
+- Windows (required for the WPF desktop client)
+- Docker & Docker Compose (optional, for containerized API + PostgreSQL)
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### Run with Docker
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```bash
+# Start PostgreSQL + API
+docker-compose up --build
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+# API available at http://localhost:8080
+# Swagger UI at http://localhost:8080/swagger
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Copy `.env.example` (or set environment variables) for secrets before running:
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```
+JWT_SECRET=your-32-char-minimum-secret-here
+SMTP_FROM_EMAIL=you@gmail.com
+SMTP_FROM_PASSWORD=your-app-password
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Run Locally
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+**1. Start the API**
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+```bash
+dotnet run --project src/MentoringApp.Api/MentoringApp.Api.csproj
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+**2. Run the Web client**
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```bash
+dotnet run --project src/MentoringApp.Web/MentoringApp.Web.csproj
+```
 
-## License
-For open source projects, say how it is licensed.
+**3. Run the Desktop client** (Windows only)
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```bash
+dotnet run --project src/MentoringApp.Desktop/MentoringApp.csproj
+```
+
+The desktop app reads `src/MentoringApp.Desktop/appsettings.json` for the API base URL (`https://localhost:7233` by default).
+
+> **Note:** On first launch, the application drops and recreates the SQLite database, then seeds it with demo data. This is controlled by the `recreateInitialDb` flag in `App.xaml.cs`.
+
+---
+
+## Configuration
+
+### API — `src/MentoringApp.Api/appsettings.json`
+
+```jsonc
+{
+  "DataProvider": "postgres",          // "sqlite" for local dev
+  "ConnectionStrings": {
+    "Postgres": "Host=localhost;Port=5432;Database=mentoringapp;Username=postgres;Password=postgres"
+  },
+  "JwtSettings": {
+    "Secret": "CHANGE_ME_TO_A_32_CHAR_MIN_SECRET",
+    "Issuer": "MentoringApp",
+    "Audience": "MentoringApp",
+    "ExpiryHours": 8
+  },
+  "AllowedOrigins": "http://localhost:5173,http://localhost:5041",
+  "EmailSettings": {
+    "SmtpHost": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "FromEmail": "",
+    "FromPassword": ""       // Use a Gmail App Password
+  }
+}
+```
+
+### Desktop — `src/MentoringApp.Desktop/appsettings.json`
+
+```json
+{
+  "ApiSettings": {
+    "BaseUrl": "https://localhost:7233"
+  }
+}
+```
+
+---
+
+## Testing
+
+```bash
+# Unit tests (Service, Model, Data layers)
+dotnet test Tests/MentoringApp.Tests/MentoringApp.Tests.csproj
+
+# ViewModel unit tests
+dotnet test Tests/MentoringApp.ViewModel.Tests/MentoringApp.ViewModel.Tests.csproj
+
+# E2E tests — requires the API and Web client running first
+dotnet test Tests/MentoringApp.E2eTests/MentoringApp.E2eTests.csproj
+```
+
+**Unit test coverage includes:**
+- `CompatibilityScorerTests` — matching algorithm scoring
+- `MatchingFlowServiceTests` — 5-tier cascade logic
+- `PairServiceTests`, `AuthServiceTests`, `IssueServiceTests`, `ReviewServiceTests`
+- `Result<T>` pattern, domain model invariants, data mappers
+
+**E2E test coverage (Playwright):**
+- Login flow
+- Admin dashboard, pair creation, pair management
+- Student dashboard
+- Supervisor dashboard
+
+---
+
+## CI/CD
+
+GitLab CI pipeline (`.gitlab-ci.yml`) runs on `main` and `develop`:
+
+| Stage | What it does |
+|-------|-------------|
+| **build** | `dotnet build`, `dotnet test`, publishes API artifact |
+| **migrate** | Runs EF Core migrations against PostgreSQL |
+| **deploy** | Placeholder for SSH / kubectl / Docker stack deployment |
+
+Docker image: `mcr.microsoft.com/dotnet/sdk:9.0`
+
+---
+
+## Documentation
+
+Detailed architecture documentation lives in [`docs/architecture/`](docs/architecture/):
+
+| Document | Topic |
+|----------|-------|
+| `00-overview.md` | System purpose, solution topology, layer flow |
+| `01-design-patterns.md` | MVVM, CommunityToolkit patterns, service philosophy |
+| `02-data-persistence.md` | Repository pattern, DAOs, mappers, validators |
+| `03-navigation-and-ui.md` | Stack-based navigation, WPF/Blazor parity |
+| `04-networking-integrations.md` | API client, HTTP layer, email subsystem |
+| `05-engineering-tooling.md` | DI wiring, project independence, testing strategy |
