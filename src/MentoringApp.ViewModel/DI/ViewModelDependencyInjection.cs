@@ -27,6 +27,7 @@ public static class ViewModelDependencyInjection
 
         // Stores
         services.AddSingleton<UserStore>();
+        services.AddSingleton<AdminProgressStore>();
 
         // HTTP clients with bearer-token handler
         services.AddApiClientsWithAuth<BearerTokenHandler>(apiBaseUrl);
@@ -52,6 +53,7 @@ public static class ViewModelDependencyInjection
         services.AddTransient<SelectionGalleryViewModel>();
         services.AddTransient<MentorRequestsViewModel>();
         services.AddTransient<SystemSettingsViewModel>();
+        services.AddTransient<SchoolConfigViewModel>();
 
         return services;
     }

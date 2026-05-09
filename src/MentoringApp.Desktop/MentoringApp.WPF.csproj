@@ -22,6 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\Images\male.png" />
+    <Resource Include="Resources\Images\female.png" />
+    <Resource Include="Resources\Images\neutral.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

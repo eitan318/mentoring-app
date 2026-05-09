@@ -5,13 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:MentoringApp.View.Admin"
+    xmlns:overview="clr-namespace:MentoringApp.View.Admin.Overview"
     mc:Ignorable="d"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
-        <!-- Base Card Style -->
+        <!-- Base Card Style (used by inline import-instruction and supervisor-assignment cards) -->
         <Style x:Key="CardStyle" TargetType="Border">
             <Setter Property="CornerRadius" Value="16"/>
             <Setter Property="Background" Value="#FFFFFF"/>
@@ -22,61 +22,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- Stat Card Title -->
-        <Style x:Key="StatCardTitle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#4B5563"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,12,0,4"/>
-        </Style>
-
-        <!-- Stat Card Value -->
-        <Style x:Key="StatCardValue" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#111827"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-        </Style>
-
-        <!-- ── Shared deadline DataTemplate ── -->
-        <DataTemplate x:Key="DeadlineTemplate">
-            <StackPanel>
-                <!-- No deadline -->
-                <StackPanel Visibility="{Binding IsDeadlineNotScheduled, Converter={StaticResource BoolToVis}}" Margin="0,0,0,6">
-                    <TextBlock Text="{Binding [Admin_Phase_Deadline_Label], Source={x:Static loc:TranslationSource.Instance}}" 
-                               Foreground="#6B7280" FontSize="12" Margin="0,0,0,8"/>
-                    <DatePicker SelectedDate="{Binding DeadlineInput, Mode=TwoWay}" Margin="0,0,0,12"/>
-                    <Button Content="{Binding [Admin_Phase_SetDeadline_Button], Source={x:Static loc:TranslationSource.Instance}}" 
-                            Background="#7C3AED" Foreground="White" FontWeight="SemiBold" Padding="0,8" BorderThickness="0"
-                            Command="{Binding SaveDeadlineCommand}">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="8"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                </StackPanel>
-
-                <!-- Deadline active -->
-                <StackPanel Visibility="{Binding IsDeadlineScheduled, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="{Binding [Admin_Phase_TimeRemaining_Label], Source={x:Static loc:TranslationSource.Instance}}"
-                               Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding DeadlineTimeRemaining}"
-                               FontSize="22" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,12"/>
-                    <Button Content="{Binding [Admin_Phase_CancelDeadline_Button], Source={x:Static loc:TranslationSource.Instance}}" 
-                            Background="#F3F4F6" Foreground="#4B5563" FontWeight="Medium" Padding="0,8" BorderThickness="0"
-                            Command="{Binding CancelDeadlineCommand}">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="8"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                </StackPanel>
-            </StackPanel>
-        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Margin="30,24,30,24">
@@ -90,253 +35,52 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Header -->
                 <RowDefinition Height="Auto"/> <!-- Stat Cards -->
-                <RowDefinition Height="Auto"/> <!-- Middle area: Stepper/Charts -->
-                <RowDefinition Height="*"/>    <!-- Table -->
+                <RowDefinition Height="Auto"/> <!-- Phase Stepper -->
+                <RowDefinition Height="*"/>    <!-- Step content -->
             </Grid.RowDefinitions>
 
-            <!-- 4 Stat Cards Row --><!--
-            <UniformGrid Grid.Row="1" Columns="4" Margin="-8,0,-8,24">
-                --><!-- Total Students / Fill Progress --><!--
-                <Border Style="{StaticResource CardStyle}" Background="#F3E8FF" Margin="8" Padding="16,24">
-                    <StackPanel>
-                        <TextBlock Text="&#x1F393;" FontSize="32" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{Binding [Admin_TotalFillProgress_Label], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource StatCardTitle}"/>
-                        <TextBlock Text="{Binding TotalFillLabel}" Style="{StaticResource StatCardValue}"/>
+            <!-- Phase Stepper -->
+            <overview:PhaseStepperView Grid.Row="2"/>
+
+            <!-- Bottom Row: Step-specific content -->
+            <Grid Grid.Row="3">
+                <!-- Step 1: School configuration (inline) -->
+                <local:SchoolConfigView DataContext="{Binding SchoolConfig}"
+                                        Visibility="{Binding DataContext.Progress.IsSchoolConfigStepActive, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Step 2: Import users instruction -->
+                <Border Style="{StaticResource CardStyle}"
+                        Visibility="{Binding Progress.IsImportStepActive, Converter={StaticResource BoolToVis}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40">
+                        <TextBlock Text="&#x1F393;" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <TextBlock Text="{Binding [Admin_ImportUsers_Instruction_Title], Source={x:Static loc:TranslationSource.Instance}}"
+                                   FontSize="20" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                        <TextBlock Text="{Binding [Admin_ImportUsers_Instruction_Body], Source={x:Static loc:TranslationSource.Instance}}"
+                                   FontSize="14" Foreground="#6B7280" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="500"/>
                     </StackPanel>
                 </Border>
-                --><!-- Total Teachers / Supervisors --><!--
-                <Border Style="{StaticResource CardStyle}" Background="#FCE7F3" Margin="8" Padding="16,24">
-                    <StackPanel>
-                        <TextBlock Text="&#x1F468;&#x200D;&#x1F3EB;" FontSize="32" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{Binding [Admin_SupervisorHeader_Name], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource StatCardTitle}"/>
-                        <TextBlock Text="{Binding SupervisorsCount}" Style="{StaticResource StatCardValue}"/>
-                    </StackPanel>
-                </Border>
-                --><!-- Pending Issues --><!--
-                <Border Style="{StaticResource CardStyle}" Background="#E0F2FE" Margin="8" Padding="16,24">
-                    <StackPanel>
-                        <TextBlock Text="&#x1F4DA;" FontSize="32" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{Binding [Admin_SupervisorHeader_Pending], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource StatCardTitle}"/>
-                        <TextBlock Text="{Binding PendingIssuesTotal}" Style="{StaticResource StatCardValue}"/>
-                    </StackPanel>
-                </Border>
-                --><!-- Current Phase --><!--
-                <Border Style="{StaticResource CardStyle}" Background="#FFEDD5" Margin="8" Padding="16,24">
-                    <StackPanel>
-                        <TextBlock Text="&#x1F3EB;" FontSize="32" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Current Phase" Style="{StaticResource StatCardTitle}"/>
-                        <TextBlock Text="{Binding CurrentPhaseLabel}" Style="{StaticResource StatCardValue}"/>
-                    </StackPanel>
-                </Border>
-            </UniformGrid>-->
 
-            <!-- Middle Row: Phase Stepper & Summary (replaces sample charts) -->
-            <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="0,0,0,24">
-                <StackPanel>
-                        <TextBlock Text="{Binding [Admin_PhaseProgress_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="16" Margin="0,0,0,20"/>
-                        
-                        <!-- Simplified Horizontal Stepper -->
-                        <Grid Margin="12,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <!-- Connecting Lines -->
-                            <Rectangle Grid.Column="1" Height="3" Fill="#F3F4F6"/>
-                            <Rectangle Grid.Column="3" Height="3" Fill="#F3F4F6"/>
-                            <Rectangle Grid.Column="5" Height="3" Fill="#F3F4F6"/>
-
-                            <Rectangle Grid.Column="1" Height="3" Fill="#A855F7" Visibility="{Binding IsUsersImported, Converter={StaticResource BoolToVis}}"/>
-                            <Rectangle Grid.Column="3" Height="3" Fill="#A855F7" Visibility="{Binding IsSelectionPhaseActive, Converter={StaticResource BoolToVis}}"/>
-                            <Rectangle Grid.Column="5" Height="3" Fill="#A855F7" Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
-
-                            <!-- Step 1 -->
-                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" HorizontalAlignment="Center" Background="#A855F7">
-                                <TextBlock Text="✓" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"
-                                           Visibility="{Binding IsUsersImported, Converter={StaticResource BoolToVis}}"/>
-                            </Border>
-
-                            <!-- Step 2 -->
-                            <Border Grid.Column="2" Width="36" Height="36" CornerRadius="18" HorizontalAlignment="Center">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#F3F4F6"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsPhase1Active}" Value="True">
-                                                <Setter Property="Background" Value="#A855F7"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsSelectionPhaseActive}" Value="True">
-                                                <Setter Property="Background" Value="#A855F7"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <TextBlock Text="✓" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"
-                                           Visibility="{Binding IsSelectionPhaseActive, Converter={StaticResource BoolToVis}}"/>
-                            </Border>
-
-                            <!-- Step 3 -->
-                            <Border Grid.Column="4" Width="36" Height="36" CornerRadius="18" HorizontalAlignment="Center">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#F3F4F6"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsPhase2Active}" Value="True">
-                                                <Setter Property="Background" Value="#A855F7"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsProcessComplete}" Value="True">
-                                                <Setter Property="Background" Value="#A855F7"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <TextBlock Text="✓" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"
-                                           Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
-                            </Border>
-
-                            <!-- Step 4 -->
-                            <Border Grid.Column="6" Width="36" Height="36" CornerRadius="18" HorizontalAlignment="Center">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#F3F4F6"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsProcessComplete}" Value="True">
-                                                <Setter Property="Background" Value="#A855F7"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <TextBlock Text="✓" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"
-                                           Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
-                            </Border>
-                        </Grid>
-
-                        <Grid Margin="12,12,12,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding [Admin_Step_ImportUsers], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" TextWrapping="Wrap" Foreground="#6B7280" VerticalAlignment="Center"/>
-                                <Button Content="?" Width="16" Height="16" FontSize="10" Margin="4,0,0,0" Padding="0" Background="#E5E7EB" Foreground="#4B5563" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Command="{Binding ShowPhaseInfoCommand}" CommandParameter="Import" ToolTip="{Binding [Admin_ImportUsersInfo_Tooltip], Source={x:Static loc:TranslationSource.Instance}}">
-                                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                                </Button>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding [Admin_Step_Registration], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" TextWrapping="Wrap" Foreground="#6B7280" VerticalAlignment="Center"/>
-                                <Button Content="?" Width="16" Height="16" FontSize="10" Margin="4,0,0,0" Padding="0" Background="#E5E7EB" Foreground="#4B5563" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Command="{Binding ShowPhaseInfoCommand}" CommandParameter="Phase1" ToolTip="{Binding [Admin_Phase1Info_Tooltip], Source={x:Static loc:TranslationSource.Instance}}">
-                                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                                </Button>
-                            </StackPanel>
-                            <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding [Admin_Step_Selection], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" TextWrapping="Wrap" Foreground="#6B7280" VerticalAlignment="Center"/>
-                                <Button Content="?" Width="16" Height="16" FontSize="10" Margin="4,0,0,0" Padding="0" Background="#E5E7EB" Foreground="#4B5563" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Command="{Binding ShowPhaseInfoCommand}" CommandParameter="Phase2" ToolTip="{Binding [Admin_Phase2Info_Tooltip], Source={x:Static loc:TranslationSource.Instance}}">
-                                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                                </Button>
-                            </StackPanel>
-                            <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding [Admin_Step_Complete], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" TextWrapping="Wrap" Foreground="#6B7280" VerticalAlignment="Center"/>
-                                <Button Content="?" Width="16" Height="16" FontSize="10" Margin="4,0,0,0" Padding="0" Background="#E5E7EB" Foreground="#4B5563" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Command="{Binding ShowPhaseInfoCommand}" CommandParameter="Phase3" ToolTip="{Binding [Admin_Phase3Info_Tooltip], Source={x:Static loc:TranslationSource.Instance}}">
-                                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-            </Border>
-
-            <!-- Bottom Row: Table (Database) -->
-            <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="20,20,20,0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <!-- Table Header -->
-                    <Grid Grid.Row="1" Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="1.5*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding [Table_Supervisor], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="13" Foreground="#6B7280"/>
-                        <TextBlock Grid.Column="1" Text="{Binding [Table_Pairs], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="13" Foreground="#6B7280" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Column="2" Text="{Binding [Table_Pending], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="13" Foreground="#6B7280" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Column="3" Text="{Binding [Table_Resolved], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="13" Foreground="#6B7280" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Column="4" Text="{Binding [Table_FillProgress], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="13" Foreground="#6B7280" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Column="5" Text="{Binding [Table_Action], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="13" Foreground="#6B7280" Width="80" TextAlignment="Center"/>
+                <!-- Step 3: Assign Supervisors -->
+                <Border Style="{StaticResource CardStyle}"
+                        Visibility="{Binding Progress.IsSupervisorAssignmentStepActive, Converter={StaticResource BoolToVis}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <local:SupervisorAssignmentView Grid.Row="0" DataContext="{Binding SupervisorAssignment}"/>
+                        <Button Grid.Row="1" Content="{Binding [Admin_Continue_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10" Margin="0,20,0,0"
+                                Background="#A855F7" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
+                                IsEnabled="{Binding SupervisorAssignment.AllClassesAssigned}"
+                                Command="{Binding CompleteSupervisorAssignmentCommand}">
+                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
+                        </Button>
                     </Grid>
+                </Border>
 
-                    <Rectangle Grid.Row="1" Height="1" Fill="#F3F4F6" VerticalAlignment="Bottom" Margin="-20,0,-20,0"/>
-
-                    <!-- Supervisors List -->
-                    <ListView Grid.Row="2" ItemsSource="{Binding SupervisorsListPreview}" 
-                              BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                <Setter Property="Padding" Value="0,16"/>
-                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                <Setter Property="BorderBrush" Value="#F3F4F6"/>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="2*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1.5*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    
-                                    <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                        <Border Width="32" Height="32" CornerRadius="16" Background="#E5E7EB" Margin="0,0,12,0">
-                                            <TextBlock Text="&#x1F464;" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <TextBlock Text="{Binding UserName}" VerticalAlignment="Center" FontWeight="Medium" Foreground="#111827"/>
-                                    </StackPanel>
-
-                                    <TextBlock Grid.Column="1" Text="{Binding SupervisedPairsCount}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#4B5563"/>
-                                    
-                                    <TextBlock Grid.Column="2" Text="{Binding PendingIssuesCount}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#EF4444" FontWeight="Medium"/>
-                                    
-                                    <TextBlock Grid.Column="3" Text="{Binding ResolvedIssuesCount}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#10B981" FontWeight="Medium"/>
-
-                                    <!-- Fill Progress Badge Style -->
-                                    <Border Grid.Column="4" Background="#ECFDF5" CornerRadius="12" Padding="12,6" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding FillProgressPercent, StringFormat={}{0:F0}%}" Foreground="#059669" FontWeight="SemiBold" FontSize="12"/>
-                                    </Border>
-
-                                    <Button Grid.Column="5" Content="{Binding [Table_Inspect], Source={x:Static loc:TranslationSource.Instance}}" Width="80" Padding="0,6"
-                                            Background="#F3F4F6" Foreground="#4B5563" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"
-                                            Command="{Binding DataContext.InspectSupervisorCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                            CommandParameter="{Binding}">
-                                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
-                                    </Button>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </Grid>
-            </Border>
+                <!-- Step 4: Supervisors list (Registration, Mentor Selection, and Completed phases) -->
+                <overview:SupervisorsListView/>
+            </Grid>
         </Grid>
 
         <!-- ── Right Column (Sidebar) ── -->
@@ -346,104 +90,11 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Calendar / Deadlines (matches top right module) -->
-            <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,24">
-                <StackPanel>
-                    <TextBlock Text="{Binding [Admin_PhaseDeadlines_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827" Margin="0,0,0,20"/>
-                    
-                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource DeadlineTemplate}"
-                                    Visibility="{Binding IsProcessComplete, Converter={StaticResource InverseBoolToVis}}"/>
-                                    
-                    <TextBlock Text="{Binding [Admin_ProcessComplete_NoDeadlines_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280" FontStyle="Italic" TextWrapping="Wrap"
-                               Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
+            <!-- Calendar / Deadlines / Phase Actions -->
+            <overview:PhaseActionsView Grid.Row="0"/>
 
-                    <Rectangle Height="1" Fill="#E5E7EB" Margin="0,20"/>
-                    <TextBlock Text="{Binding [Admin_PhaseActions_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="16" Foreground="#111827" Margin="0,0,0,16"/>
-                        
-                    <Button Content="{Binding [Admin_GoToManageUsers_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10" Margin="0,0,0,10"
-                            Background="#F3F4F6" Foreground="#4B5563" FontWeight="SemiBold" BorderThickness="0"
-                            Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}"
-                            Command="{Binding ManageUsersCommand}">
-                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                    </Button>
-                    <Button Content="{Binding [Admin_BeginRegistration_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10"
-                            Background="#10B981" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                            Visibility="{Binding IsImportStepActive, Converter={StaticResource BoolToVis}}"
-                            Command="{Binding MarkUsersImportedCommand}">
-                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                    </Button>
-
-                    <Button Content="{Binding [Admin_StartSelectionStage_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10"
-                            Background="#3B82F6" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                            Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}"
-                            Command="{Binding StartSelectionPhaseCommand}">
-                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                    </Button>
-
-                    <Button Content="{Binding [Admin_StartActiveMentoring_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10"
-                            Background="#8B5CF6" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                            Visibility="{Binding IsPhase2Active, Converter={StaticResource BoolToVis}}"
-                            Command="{Binding RunAutoMatchCommand}">
-                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                    </Button>
-
-                    <TextBlock Text="{Binding [Admin_ProcessComplete_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#10B981" FontWeight="Bold" HorizontalAlignment="Center"
-                                Visibility="{Binding IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
-
-                </StackPanel>
-            </Border>
-
-            <!-- Notice Board (Matches Forwarded Issues) -->
-            <Border Grid.Row="1" Style="{StaticResource CardStyle}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <DockPanel Grid.Row="0" Margin="0,0,0,20">
-                        <TextBlock Text="{Binding [Admin_NoticeBoard_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827" VerticalAlignment="Center"/>
-                        <Border Background="#EF4444" CornerRadius="10" Padding="6,2" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                Visibility="{Binding HasForwardedIssues, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{Binding ForwardedIssues.Count}" Foreground="White" FontSize="11" FontWeight="Bold"/>
-                        </Border>
-                    </DockPanel>
-
-                    <ListView Grid.Row="1" ItemsSource="{Binding ForwardedIssues}" BorderThickness="0" Background="Transparent"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                <Setter Property="Padding" Value="0"/>
-                                <Setter Property="Margin" Value="0,0,0,16"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Cursor" Value="Hand"/>
-                                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="OnForwardedIssueClick"/>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="#F9FAFB" CornerRadius="12" Padding="16">
-                                    <StackPanel>
-                                        <DockPanel Margin="0,0,0,8">
-                                            <Border Background="#FEF3C7" CornerRadius="4" Padding="6,2" DockPanel.Dock="Left">
-                                                <TextBlock Text="{Binding Category.Name}" Foreground="#D97706" FontSize="11" FontWeight="SemiBold"/>
-                                            </Border>
-                                            <TextBlock Text="{Binding [Admin_NewIssue_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#9CA3AF" FontSize="11" HorizontalAlignment="Right"/>
-                                        </DockPanel>
-                                        <TextBlock Text="{Binding Description}" FontSize="13" Foreground="#374151" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Margin="0,0,0,8"/>
-                                        <TextBlock Text="{Binding AuthorName, StringFormat='By - {0}'}" FontSize="12" Foreground="#6B7280"/>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                    
-                    <TextBlock Grid.Row="1" Text="{Binding [Admin_NoNotices_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Visibility="{Binding HasForwardedIssues, Converter={StaticResource InverseBoolToVis}}"/>
-
-                </Grid>
-            </Border>
+            <!-- Notice Board (Forwarded Issues) -->
+            <overview:NoticeBoardView Grid.Row="1"/>
         </Grid>
     </Grid>
 </UserControl>

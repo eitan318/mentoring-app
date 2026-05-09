@@ -54,7 +54,27 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
     private INavigatable? _activeSubPage;
 
     public bool IsProfileButtonVisible => ActiveSubPage is not MyProfileViewModel;
-    public bool IsBackVisible => _navigationService.CanGoBack();
+    public bool IsBackVisible => _navigationService.CanGoBack() && IsSubView(ActiveSubPage);
+
+    private static bool IsSubView(INavigatable? view)
+    {
+        if (view == null) return false;
+        var type = view.GetType();
+
+        // Main navigation views where back button should not appear
+        var mainViews = new[]
+        {
+            typeof(AdminDashboardViewModel),
+            typeof(AdminOverviewViewModel),
+            typeof(SupervisorDashboardViewModel),
+            typeof(StudentDashboardViewModel),
+            typeof(ManagePairsViewModel),
+            typeof(ManageUsersViewModel),
+            typeof(SystemSettingsViewModel),
+        };
+
+        return !mainViews.Contains(type);
+    }
 
     [ObservableProperty] private UserModel? _currentUser;
 

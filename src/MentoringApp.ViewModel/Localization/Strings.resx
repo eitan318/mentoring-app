@@ -907,21 +907,13 @@ You can still manage issues and review pair activity from this dashboard.</value
     <value>Registration Phase</value>
   </data>
   <data name="Supervisor_Phase1Info_Body" xml:space="preserve">
-    <value>Students are logging in and completing their profiles.
-
-Mentees can browse available mentors and send a direct pairing request. If a mentor accepts, they become paired immediately.
-
-Watch the inactive students list — students who haven't completed their profiles will not appear in the matching pool.</value>
+    <value>Students complete profiles. Mentees can request mentors directly. Only students with complete profiles can be matched.</value>
   </data>
   <data name="Supervisor_Phase2Info_Title" xml:space="preserve">
     <value>Mentor Selection Phase</value>
   </data>
   <data name="Supervisor_Phase2Info_Body" xml:space="preserve">
-    <value>Each mentee who is still unmatched is shown their top algorithmically ranked mentor suggestions and can choose one.
-
-When the deadline passes (or the admin runs the auto-match manually), any mentee who still hasn't chosen is paired automatically by the algorithm. A fallback pass then handles any remaining edge cases.
-
-You may see new pairs appear in your list as students make their selections.</value>
+    <value>Unmatched mentees see ranked mentor suggestions. Remaining students are matched automatically when the deadline passes.</value>
   </data>
   <data name="Register_InfoBanner" xml:space="preserve">
     <value>Only the required fields (marked with *) must be filled. Everything else is optional — the user can complete their profile after their first login.</value>
@@ -1057,6 +1049,18 @@ You may see new pairs appear in your list as students make their selections.</va
   </data>
   <data name="SysSettings_Continue_Tooltip" xml:space="preserve">
     <value>Continue to the main dashboard</value>
+  </data>
+  <data name="SysSettings_ContinueToDashboard_Button" xml:space="preserve">
+    <value>Continue to Dashboard →</value>
+  </data>
+  <data name="SysSettings_ContinueToDashboard_Hint" xml:space="preserve">
+    <value>School configured! You can now continue to the dashboard and add students.</value>
+  </data>
+  <data name="Admin_Step_SchoolConfig" xml:space="preserve">
+    <value>School Setup</value>
+  </data>
+  <data name="Admin_Step_AssignSupervisors" xml:space="preserve">
+    <value>Assign Supervisors</value>
   </data>
   <data name="Admin_Step_ImportUsers" xml:space="preserve">
     <value>Import Users</value>
@@ -1237,8 +1241,20 @@ You may see new pairs appear in your list as students make their selections.</va
   <data name="Admin_PhaseDeadlines_Label" xml:space="preserve"><value>Phase Deadlines</value></data>
   <data name="Admin_ProcessComplete_NoDeadlines_Label" xml:space="preserve"><value>Process Complete. No active deadlines.</value></data>
   <data name="Admin_PhaseActions_Label" xml:space="preserve"><value>Phase Actions</value></data>
+  <data name="Admin_GoToSystemSettings_Button" xml:space="preserve"><value>Go to System Settings</value></data>
+  <data name="Admin_SchoolConfig_Required_Label" xml:space="preserve"><value>Configure your school in Settings before adding students.</value></data>
+  <data name="Admin_SchoolConfig_InProgress_Hint" xml:space="preserve"><value>Add at least one class to unlock the next step.</value></data>
+  <data name="Admin_CompleteSchoolConfig_Button" xml:space="preserve"><value>✓ Complete School Setup</value></data>
+  <data name="Admin_CompleteSupervisorAssignment_Button" xml:space="preserve"><value>✓ Complete Supervisor Assignment</value></data>
+  <data name="Admin_SchoolConfig_NoClasses_Error" xml:space="preserve"><value>Please add at least one class before completing school setup.</value></data>
+  <data name="Admin_SupervisorAssignment_Incomplete_Error" xml:space="preserve"><value>Please assign all classes to supervisors before continuing.</value></data>
+  <data name="Admin_NoDeadlinesYet_Label" xml:space="preserve"><value>Deadlines become available once registration starts.</value></data>
+  <data name="Admin_ImportUsers_Instruction_Title" xml:space="preserve"><value>Import users to continue</value></data>
+  <data name="Admin_ImportUsers_Instruction_Body" xml:space="preserve"><value>Open the "Manage Users" tab from the sidebar to import supervisors and students. Once they are imported, click "Begin Registration" on the right.</value></data>
+  <data name="Admin_PhaseGuide_SchoolConfig" xml:space="preserve"><value>School Setup:\nAdd the grades and classes that participate in the program. This must be completed before importing users.</value></data>
   <data name="Admin_GoToManageUsers_Button" xml:space="preserve"><value>Go to Manage Users</value></data>
   <data name="Admin_BeginRegistration_Button" xml:space="preserve"><value>✓ Begin Registration</value></data>
+  <data name="Admin_Continue_Button" xml:space="preserve"><value>Continue</value></data>
   <data name="Admin_ProcessComplete_Label" xml:space="preserve"><value>Process Complete</value></data>
   <data name="Admin_NoticeBoard_Label" xml:space="preserve"><value>Notice Board</value></data>
   <data name="Admin_NewIssue_Label" xml:space="preserve"><value>New Issue</value></data>
@@ -1294,4 +1310,15 @@ You may see new pairs appear in your list as students make their selections.</va
   <data name="MatchTier_AdminManual" xml:space="preserve"><value>Admin Manual</value></data>
   <data name="Student_RequestedAt_Label" xml:space="preserve"><value>Requested:</value></data>
   <data name="Student_ExpertIn_Label" xml:space="preserve"><value>Expert in</value></data>
+  <data name="SysSettings_AdvanceYear_Button" xml:space="preserve"><value>📅 Next Year</value></data>
+  <data name="SysSettings_AdvanceYear_Tooltip" xml:space="preserve"><value>Advance to the next academic year: graduate the top grade, promote all others, and reset the admin wizard</value></data>
+  <data name="SysSettings_AdvanceYear_Confirm_Title" xml:space="preserve"><value>Advance to Next Academic Year?</value></data>
+  <data name="SysSettings_AdvanceYear_Confirm_Body" xml:space="preserve"><value>This will permanently:
+• Remove all students in the highest grade (they graduate)
+• Promote every other student to the next grade
+• Delete all pairs, reviews, and pairing requests
+• Reset all admin settings to step 1
+
+This action cannot be undone. Continue?</value></data>
+  <data name="SysSettings_AdvanceYear_Success" xml:space="preserve"><value>✓ Advanced to the next academic year successfully.</value></data>
 </root>

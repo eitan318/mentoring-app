@@ -1,0 +1,29 @@
+<UserControl
+    x:Class="MentoringApp.View.Supervisor.Dashboard.IncompleteWarningView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+
+    <Border Visibility="{Binding HasIncompleteProfileWarnings, Converter={StaticResource BoolToVis}}" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="12" Padding="20,16" Margin="0,0,0,24">
+        <StackPanel>
+            <TextBlock FontWeight="Bold" FontSize="16" Foreground="#991B1B" Margin="0,0,0,8">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource LocalizedFormat}" ConverterParameter="Supervisor_RandomlyMatched_Warning">
+                        <Binding Path="IncompleteProfileCount"/>
+                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+            <ItemsControl ItemsSource="{Binding IncompleteProfilePairs}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock FontSize="13" Foreground="#B91C1C" Margin="0,2,0,0">
+                            <Run Text="• "/><Run Text="{Binding Pair.Mentor.UserName}"/><Run Text=" ↔ "/><Run Text="{Binding Pair.Mentee.UserName}"/>
+                        </TextBlock>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Border>
+</UserControl>

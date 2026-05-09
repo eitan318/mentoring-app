@@ -66,6 +66,9 @@ namespace MentoringApp.Data.Interfaces
 
         /// <summary>Returns all pairs flagged as profile-incomplete (Tier 5).</summary>
         Task<IEnumerable<PairDao>> GetProfileIncompleteAsync();
+
+        /// <summary>Deletes all pairs and their associated reviews and pair requests.</summary>
+        Task DeleteAllAsync();
     }
 
     public interface IIssueRepo
@@ -112,6 +115,21 @@ namespace MentoringApp.Data.Interfaces
 
         Task<IEnumerable<GradeDao>> GetAllGradesAsync();
 
+    }
+
+    public interface IYearAdvanceRepo
+    {
+        /// <summary>
+        /// Returns user IDs of all students enrolled in the grade with the highest Num value.
+        /// These are the graduating students who will be removed at year-end.
+        /// </summary>
+        Task<IEnumerable<int>> GetGraduatingStudentIdsAsync();
+
+        /// <summary>
+        /// For every student, moves their GradeId to the next grade (ordered by Num).
+        /// Students already in the highest grade are unaffected (they should be deleted first).
+        /// </summary>
+        Task AdvanceStudentGradesAsync();
     }
 
     // ── NEW: pair request repo ────────────────────────────────────────────────

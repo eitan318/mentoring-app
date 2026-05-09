@@ -96,7 +96,7 @@ namespace MentoringApp.Service
             int sc11_2 = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g11} AND ClassNum=2");
 
             // Mark school config as done so the admin lands on the dashboard directly.
-            await _settingsService.SetIsSchoolConfiguredAsync(true);
+            await _settingsService.SetIsSchoolConfiguredAsync(false);
 
             // ── Step 3: Settings ──────────────────────────────────────────────
             Console.WriteLine("Seeding Settings...");
@@ -104,7 +104,7 @@ namespace MentoringApp.Service
             await _settingsService.SetGlobalLanguageAsync("en");
             await _settingsService.ClearPhase1DeadlineAsync();
             await _settingsService.ClearPhase2DeadlineAsync();
-            await _settingsService.SetIsUsersImportedAsync(true);
+            await _settingsService.SetIsUsersImportedAsync(false);
             await _settingsService.SetIsPhase1CompleteAsync(false);
             await _settingsService.SetIsProcessCompleteAsync(false);
 

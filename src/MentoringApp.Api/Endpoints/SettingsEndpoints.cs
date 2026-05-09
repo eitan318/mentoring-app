@@ -23,6 +23,7 @@ public static class SettingsEndpoints
                 IsPhase1Complete    = await settings.GetIsPhase1CompleteAsync(),
                 IsProcessComplete   = await settings.GetIsProcessCompleteAsync(),
                 IsSchoolConfigured  = await settings.GetIsSchoolConfiguredAsync(),
+                IsSupervisorsAssigned = await settings.GetIsSupervisorsAssignedAsync(),
                 IsUsersImported     = await settings.GetIsUsersImportedAsync(),
                 MeetingHoursBarrier = await settings.GetMeetingHoursBarrierAsync()
             });
@@ -69,10 +70,25 @@ public static class SettingsEndpoints
             return Results.NoContent();
         }).RequireAuthorization("AdminOnly").WithOpenApi();
 
+        // PUT /api/settings/is-supervisors-assigned
+        group.MapPut("/is-supervisors-assigned", async (BoolBody body, SettingsService settings) =>
+        {
+            await settings.SetIsSupervisorsAssignedAsync(body.Value);
+            return Results.NoContent();
+        }).RequireAuthorization("AdminOnly").WithOpenApi();
+
         // PUT /api/settings/is-users-imported
         group.MapPut("/is-users-imported", async (BoolBody body, SettingsService settings) =>
         {
             await settings.SetIsUsersImportedAsync(body.Value);
+            return Results.NoContent();
+        }).RequireAuthorization("AdminOnly").WithOpenApi();
+
+        // POST /api/settings/advance-year
+        // Graduates the highest-grade students, promotes all others, wipes pairs, resets wizard.
+        group.MapPost("/advance-year", async (SystemAdminService adminService) =>
+        {
+            await adminService.AdvanceYearAsync();
             return Results.NoContent();
         }).RequireAuthorization("AdminOnly").WithOpenApi();
     }

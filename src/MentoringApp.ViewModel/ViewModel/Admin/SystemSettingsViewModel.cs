@@ -5,6 +5,7 @@ using MentoringApp.Model;
 using MentoringApp.Model.User;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 
@@ -23,32 +24,26 @@ public partial class SystemSettingsViewModel : ObservableObject, INavigatable
     private readonly ReferenceApiClient _referenceClient;
     private readonly SettingsApiClient _settingsClient;
     private readonly UserApiClient _userClient;
-    private readonly INavigationService _navigationService;
+    private readonly AdminProgressStore _progress;
     private readonly IToastService _toastService;
     private readonly ILocalizationService _loc;
 
-    public ObservableCollection<SchoolClassModel> AllClasses { get; set; } = new();
-    public ObservableCollection<GradeModel> AvailableGrades { get; set; } = new();
+    public SchoolConfigViewModel SchoolConfig { get; }
+
     public ObservableCollection<SupervisorSlot> SupervisorSlots { get; } = [];
     public ObservableCollection<SchoolClassModel> UnassignedClasses { get; } = [];
 
-    [ObservableProperty] private GradeModel? _selectedGrade;
-    [ObservableProperty] private string _classNumInput = "";
-    [ObservableProperty] private SchoolClassModel? _selectedClass;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanContinueToDashboard))]
-    private bool _isFirstTimeSetup;
+    public bool AllClassesAssigned => UnassignedClasses.Count == 0;
 
     [ObservableProperty]
     private bool _isSchoolConfigTabSelected = true;
-
-    public bool CanContinueToDashboard => IsFirstTimeSetup && AllClasses.Count > 0;
 
     public SystemSettingsViewModel(
         ReferenceApiClient referenceClient,
         SettingsApiClient settingsClient,
         UserApiClient userClient,
+        AdminProgressStore progress,
+        SchoolConfigViewModel schoolConfig,
         INavigationService navigationService,
         IToastService toastService,
         ILocalizationService loc)
@@ -56,33 +51,19 @@ public partial class SystemSettingsViewModel : ObservableObject, INavigatable
         _referenceClient = referenceClient;
         _settingsClient = settingsClient;
         _userClient = userClient;
-        _navigationService = navigationService;
+        _progress = progress;
+        SchoolConfig = schoolConfig;
         _toastService = toastService;
         _loc = loc;
     }
 
     public async Task OnNavigatedToAsync()
     {
-        var settings = await _settingsClient.GetAllAsync();
-        IsFirstTimeSetup = !settings.IsSchoolConfigured;
-
-        var grades = await _referenceClient.GetGradesAsync();
-        AvailableGrades.Clear();
-        foreach (var g in grades) AvailableGrades.Add(g);
-
-        await RefreshClassesAsync();
-    }
-
-    private async Task RefreshClassesAsync()
-    {
-        var classes = await _referenceClient.GetSchoolClassesAsync();
-        AllClasses.Clear();
-        foreach (var c in classes) AllClasses.Add(c);
-        OnPropertyChanged(nameof(CanContinueToDashboard));
+        await SchoolConfig.LoadAsync();
         await RefreshSupervisorAssignmentsAsync();
     }
 
-    private async Task RefreshSupervisorAssignmentsAsync()
+    public async Task RefreshSupervisorAssignmentsAsync()
     {
         SupervisorSlots.Clear();
         UnassignedClasses.Clear();
@@ -106,7 +87,7 @@ public partial class SystemSettingsViewModel : ObservableObject, INavigatable
             SupervisorSlots.Add(slot);
         }
 
-        foreach (var c in AllClasses.Where(c => !assignedIds.Contains(c.Id)))
+        foreach (var c in SchoolConfig.AllClasses.Where(c => !assignedIds.Contains(c.Id)))
             UnassignedClasses.Add(c);
     }
 
@@ -158,65 +139,6 @@ public partial class SystemSettingsViewModel : ObservableObject, INavigatable
     }
 
     [RelayCommand]
-    private async Task AddClass()
-    {
-        if (SelectedGrade == null)
-        {
-            _toastService.Warning(_loc.Get("SysSettings_Validation_SelectGrade"));
-            return;
-        }
-        if (!int.TryParse(ClassNumInput, out int num) || num <= 0)
-        {
-            _toastService.Warning(_loc.Get("SysSettings_Validation_InvalidClassNum"));
-            return;
-        }
-
-        try
-        {
-            await _referenceClient.AddSchoolClassAsync(new AddSchoolClassRequest(SelectedGrade.Id, num));
-            ClassNumInput = "";
-            await RefreshClassesAsync();
-
-            var settings = await _settingsClient.GetAllAsync();
-            if (!settings.IsSchoolConfigured)
-                await _settingsClient.SetIsSchoolConfiguredAsync(true);
-        }
-        catch (Exception ex)
-        {
-            _toastService.Error(ex.Message);
-        }
-    }
-
-    [RelayCommand]
-    private async Task GoToDashboard() => await _navigationService.GoBackAsync();
-
-    [RelayCommand]
-    private async Task DeleteClass()
-    {
-        if (SelectedClass == null)
-        {
-            _toastService.Warning(_loc.Get("SysSettings_Validation_SelectClass"));
-            return;
-        }
-
-        bool confirmed = await _toastService.ConfirmAsync(
-            _loc.Get("SysSettings_Confirm_RemoveClass_Title"),
-            _loc.Format("SysSettings_Confirm_RemoveClass_Body", $"Grade {SelectedClass.Grade.Id} Class {SelectedClass.ClassNum}"));
-        if (!confirmed) return;
-
-        try
-        {
-            await _referenceClient.DeleteSchoolClassAsync(SelectedClass.Id);
-            SelectedClass = null;
-            await RefreshClassesAsync();
-        }
-        catch (Exception ex)
-        {
-            _toastService.Error(ex.Message);
-        }
-    }
-
-    [RelayCommand]
     private void SelectTab(string parameter)
     {
         if (parameter == "0")
@@ -224,4 +146,26 @@ public partial class SystemSettingsViewModel : ObservableObject, INavigatable
         else if (parameter == "1")
             IsSchoolConfigTabSelected = false;
     }
+
+    [RelayCommand]
+    private async Task AdvanceYear()
+    {
+        bool confirmed = await _toastService.ConfirmAsync(
+            _loc.Get("SysSettings_AdvanceYear_Confirm_Title"),
+            _loc.Get("SysSettings_AdvanceYear_Confirm_Body"));
+        if (!confirmed) return;
+
+        try
+        {
+            await _settingsClient.AdvanceYearAsync();
+            await _progress.RefreshAsync();
+            _toastService.Success(_loc.Get("SysSettings_AdvanceYear_Success"));
+            await OnNavigatedToAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+        }
+    }
+
 }

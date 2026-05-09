@@ -45,7 +45,7 @@ public partial class IssueViewModel : ObservableObject, INavigatable<int>
     [RelayCommand]
     private async Task ResolveIssue()
     {
-        if (CurrentIssue == null || CurrentIssue.IsResolved) return;
+        if (CurrentIssue == null || CurrentIssue.IsResolved || CurrentIssue.IsForwardedToAdmin) return;
         try
         {
             await _issueClient.ResolveAsync(CurrentIssue.Id);
@@ -58,7 +58,7 @@ public partial class IssueViewModel : ObservableObject, INavigatable<int>
     [RelayCommand]
     private async Task ForwardToAdmin()
     {
-        if (CurrentIssue == null || !CanForward || CurrentIssue.IsForwardedToAdmin) return;
+        if (CurrentIssue == null || !CanForward || CurrentIssue.IsForwardedToAdmin || CurrentIssue.IsResolved) return;
         try
         {
             await _issueClient.ForwardAsync(CurrentIssue.Id, new ForwardIssueRequest(ForwardingsupervisorId!.Value));
