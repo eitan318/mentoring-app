@@ -10,8 +10,8 @@ using MentoringApp.ViewModel.ViewModel.Supervisor;
 using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
-using System.Threading;
 using MentoringApp.ViewModel.Localization;
+using MentoringApp.ViewModel.Helpers;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
@@ -52,7 +52,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     private readonly NotificationApiClient _notificationClient;
     private readonly IToastService _toastService;
     private readonly ILocalizationService _loc;
-    private CancellationTokenSource? _timerCts;
+    private readonly OneSecondTicker _ticker;
     private bool _schoolConfigSubscribed;
 
     public AdminProgressStore Progress { get; }
@@ -121,19 +121,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         Progress = progress;
         SchoolConfig = schoolConfig;
         SupervisorAssignment = supervisorAssignment;
-    }
-
-    private async Task RunTimerAsync(CancellationToken token)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-        try
-        {
-            while (await timer.WaitForNextTickAsync(token))
-            {
-                OnTimerTick();
-            }
-        }
-        catch (OperationCanceledException) { }
+        _ticker = new OneSecondTicker(OnTimerTick);
     }
 
     private void OnTimerTick()
@@ -177,15 +165,11 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
 
     public async Task OnNavigatedToAsync()
     {
-        if (_timerCts == null || _timerCts.IsCancellationRequested)
-        {
-            _timerCts = new CancellationTokenSource();
-            _ = RunTimerAsync(_timerCts.Token);
-        }
+        _ticker.Start();
         await LoadDataAsync();
     }
 
-    public Task OnNavigatedFromAsync() { _timerCts?.Cancel(); return Task.CompletedTask; }
+    public Task OnNavigatedFromAsync() { _ticker.Stop(); return Task.CompletedTask; }
 
     private async Task LoadDataAsync()
     {
