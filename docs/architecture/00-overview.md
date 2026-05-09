@@ -59,14 +59,37 @@ The crucial inversion: **clients never reach a repository directly**; they cross
 
 ## 4. Document Map
 
+### 4.1 Core architecture (read first)
+
 | File | Theme |
 |---|---|
-| [`01-design-patterns.md`](01-design-patterns.md) | MVVM toolkit, Service Layer separation, modeling philosophy, inheritance vs. records |
-| [`02-data-persistence.md`](02-data-persistence.md) | Repository pattern, DAO separation, mappers, validators, configuration storage |
-| [`03-navigation-and-ui.md`](03-navigation-and-ui.md) | Stack-of-stacks navigation, WPF/Web parity, DataTemplates, shared ViewModels |
-| [`04-networking-integrations.md`](04-networking-integrations.md) | API client base, HTTP conversion logic, email subsystem |
-| [`05-engineering-tooling.md`](05-engineering-tooling.md) | DI container wiring, project independence, advanced C#, testing strategy |
+| [`01-design-patterns.md`](01-design-patterns.md) | MVVM toolkit, Service Layer separation, modelling philosophy, inheritance vs. records, **events & delegates** |
+| [`02-data-persistence.md`](02-data-persistence.md) | Repository pattern, DAO separation, mappers, validators, configuration storage, **DB normalisation, async DB, SQL injection prevention** |
+| [`03-navigation-and-ui.md`](03-navigation-and-ui.md) | Stack-of-stacks navigation, WPF/Web parity, DataTemplates, shared ViewModels, **user controls, value converters, permission-aware UI** |
+| [`04-networking-integrations.md`](04-networking-integrations.md) | API client base, HTTP conversion logic, email subsystem, **stateless architecture, file transfer, external services** |
+| [`05-engineering-tooling.md`](05-engineering-tooling.md) | DI container wiring, project independence, advanced C#, testing strategy, **async tooling** |
+
+### 4.2 Deep-dive modules (rubric-mapped)
+
+| File | Curriculum touchpoint |
+|---|---|
+| [`06-async-and-delegates.md`](06-async-and-delegates.md) | Async-track requirement: "asynchronous mechanism using delegates" |
+| [`07-authorization-and-permissions.md`](07-authorization-and-permissions.md) | Mandatory #8: "multiple permission levels with role-aware UI" |
+| [`08-validation-and-converters.md`](08-validation-and-converters.md) | Extension §10: "value converter classes" + "validation classes" |
+| [`09-file-management.md`](09-file-management.md) | Extension §9: "file transfer between server and client" + §10: "XML storage" |
+| [`10-security.md`](10-security.md) | Mandatory #8 + Extension §10 ("encryption", "SQL injection prevention") |
+| [`11-system-analysis.md`](11-system-analysis.md) | Administrative-Systems track: initiation doc, ERD, Use-Case, Activity Diagram |
+| [`12-bonus-and-extensions.md`](12-bonus-and-extensions.md) | Bonus 10 pts: matching cascade + ML.NET / MAUI / async-timer roadmap |
 
 ## 5. Reading Order
 
-Read `00` then `01`. After that the other documents are independent and may be consumed in any order driven by your task — e.g. front-end work pulls from `03`, back-end work pulls from `02` and `04`.
+Read `00` then `01`. After that the other documents are independent and may be consumed in any order driven by your task:
+
+- **Front-end work** → `03`, `08`, `09`
+- **Back-end work** → `02`, `04`, `06`
+- **Security review** → `07`, `10`
+- **Examiner / project review** → `11`, `12` plus the alignment tables in every chapter
+
+## 6. Curriculum Alignment Index
+
+Every chapter ends with a *Curriculum Alignment* table mapping the chapter's content to specific clauses of the *Eval_Int_Async_DB* rubric (Network-Services + Async + Administrative-Systems tracks). The fastest way to verify rubric coverage is to scan those tables in order.
