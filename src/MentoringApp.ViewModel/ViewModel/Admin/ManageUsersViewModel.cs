@@ -110,11 +110,19 @@ public partial class ManageUsersViewModel : ObservableObject, INavigatable
                 if (FilterUnpairedOnly)
                     students = students.Where(s => !_pairedUserIds.Contains(s.Id));
 
-                if (!string.IsNullOrEmpty(FilterMinGrade) && int.TryParse(FilterMinGrade, out int min))
-                    students = students.Where(s => s.Grade != null && s.Grade.Id >= min);
+                if (!string.IsNullOrEmpty(FilterMinGrade))
+                {
+                    var minNumStr = new string(FilterMinGrade.TakeWhile(char.IsDigit).ToArray());
+                    if (int.TryParse(minNumStr, out int min))
+                        students = students.Where(s => s.Grade != null && s.Grade.Num >= min);
+                }
 
-                if (!string.IsNullOrEmpty(FilterMaxGrade) && int.TryParse(FilterMaxGrade, out int max))
-                    students = students.Where(s => s.Grade != null && s.Grade.Id <= max);
+                if (!string.IsNullOrEmpty(FilterMaxGrade))
+                {
+                    var maxNumStr = new string(FilterMaxGrade.TakeWhile(char.IsDigit).ToArray());
+                    if (int.TryParse(maxNumStr, out int max))
+                        students = students.Where(s => s.Grade != null && s.Grade.Num <= max);
+                }
 
                 return students;
             }

@@ -41,7 +41,10 @@ public class SystemAdminService
     /// <summary>
     /// Advances the system to the next academic year:
     /// <list type="number">
-    ///   <item>Removes all students in the highest grade (they graduate).</item>
+    ///   <item>Removes all students in the highest grade (they graduate),
+    ///         along with their related data — role rows, verification codes,
+    ///         pairs, reviews, and reported issues — via
+    ///         <see cref="IUserRepo.DeleteUserAsync"/>.</item>
     ///   <item>Moves every remaining student up one grade.</item>
     ///   <item>Deletes all pairs, reviews, and pair requests.</item>
     ///   <item>Resets all admin settings flags to their initial values so the
@@ -50,7 +53,9 @@ public class SystemAdminService
     /// </summary>
     public async Task AdvanceYearAsync()
     {
-        // 1. Find and delete graduating students (highest grade)
+        // 1. Find and fully delete graduating students. DeleteUserAsync
+        // cascades through role tables, verification codes, the user's
+        // reviews/issues, plus pairs they're in.
         var graduatingIds = await _yearAdvanceRepo.GetGraduatingStudentIdsAsync();
         foreach (var userId in graduatingIds)
             await _userRepo.DeleteUserAsync(userId);
