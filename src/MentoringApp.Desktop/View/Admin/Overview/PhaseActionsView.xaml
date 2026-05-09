@@ -57,43 +57,16 @@
             </Style>
         </Border.Style>
         <StackPanel>
-            <TextBlock Text="{Binding [Admin_PhaseDeadlines_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827" Margin="0,0,0,20"/>
+            <TextBlock Text="{Binding [Admin_PhaseDeadlines_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827" Margin="0,0,0,20"
+                       Visibility="{Binding HasDeadlineOption, Converter={StaticResource BoolToVis}}"/>
 
             <!-- Deadline section: only meaningful once registration starts -->
-            <ContentControl Content="{Binding}" ContentTemplate="{StaticResource DeadlineTemplate}">
-                <ContentControl.Style>
-                    <Style TargetType="ContentControl">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Progress.IsRegistrationStepActive}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Progress.IsMentorSelectionStepActive}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ContentControl.Style>
-            </ContentControl>
+            <ContentControl Content="{Binding}" ContentTemplate="{StaticResource DeadlineTemplate}"
+                            Visibility="{Binding HasDeadlineOption, Converter={StaticResource BoolToVis}}"/>
 
             <TextBlock Text="{Binding [Admin_ProcessComplete_NoDeadlines_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280" FontStyle="Italic" TextWrapping="Wrap"
                        Visibility="{Binding Progress.IsProcessComplete, Converter={StaticResource BoolToVis}}"/>
 
-            <TextBlock Text="{Binding [Admin_NoDeadlinesYet_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280" FontStyle="Italic" TextWrapping="Wrap">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Progress.IsSchoolConfigStepActive}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Progress.IsImportStepActive}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
 
             <Rectangle Height="1" Fill="#E5E7EB" Margin="0,20">
                 <Rectangle.Style>
@@ -103,10 +76,14 @@
                             <DataTrigger Binding="{Binding Progress.IsProcessComplete}" Value="True">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding HasDeadlineOption}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Rectangle.Style>
             </Rectangle>
+            
             <TextBlock Text="{Binding [Admin_PhaseActions_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="16" Foreground="#111827" Margin="0,0,0,16">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
