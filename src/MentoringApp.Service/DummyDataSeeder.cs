@@ -32,8 +32,8 @@ namespace MentoringApp.Service
             { "gray.png",   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkaPkPAAILAYzofg2wAAAAAElFTkSuQmCC" }
         };
 
-        private readonly string[] _firstNames = { "James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Daniel", "Lisa", "Matthew", "Betty", "Anthony", "Margaret" };
-        private readonly string[] _lastNames = { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin" };
+        private readonly string[] _firstNames = { "Shimi", "Dror", "Rona", "Omer", "Yoav", "Yogev", "Maor", "Yaniv", "Eden", "Elizabeth", "David", "Daniel", "Amit", "Susan", "Joseph", "Noa", "Jonatan", "Lian", "Liel", "Karen", "Daniel", "Rotem", "Maaian", "Naor", "Anthony", "Margaret" };
+        private readonly string[] _lastNames = { "Baruch", "Shukrun", "Speicer", "Syuniakov", "Leybovits", "Harel-Zeleznik", "Ben-amram", "Mordechai", "Hahmon", "Elkalay", "Kurtz", "Macluf", "Keinan", "Vahaba", "Taylor", "Lachmish", "Elazar", "Adaniahu", "Lavi", "Vana" };
         private static readonly Gender[] _genders = { Gender.Male, Gender.Female, Gender.Other, Gender.PreferNoAnswer };
         private static readonly GenderPreference[] _genderPrefs = { GenderPreference.Male, GenderPreference.Female, GenderPreference.NoPreference };
         private readonly string[] _reviewTexts = { "Great progress so far!", "Needs to work more on practical exercises.", "Brilliant understanding of the core concepts.", "Always on time and very attentive.", "Struggling a bit with the latest chapter, but improving.", "Excellent sessions, very communicative.", "Could use some more independent practice.", "A pleasure to mentor!", "Very proactive in asking questions.", "Making steady improvements every week." };

@@ -94,7 +94,7 @@
             <overview:PhaseActionsView Grid.Row="0"/>
 
             <!-- Notice Board (Forwarded Issues) -->
-            <overview:NoticeBoardView Grid.Row="1"/>
+            <overview:NoticeBoardView Grid.Row="1" Visibility="{Binding Progress.IsSupervisorsAssigned, Converter={StaticResource BoolToVis}}"/>
         </Grid>
     </Grid>
 </UserControl>

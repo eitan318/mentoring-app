@@ -76,6 +76,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
 
     public bool IsDeadlineScheduled => ActiveDeadline.HasValue;
     public bool IsDeadlineNotScheduled => !ActiveDeadline.HasValue;
+    public bool HasDeadlineOption => Progress.IsRegistrationStepActive || Progress.IsMentorSelectionStepActive;
 
     public ObservableCollection<AdminSupervisorItem> SupervisorsListPreview { get; } = new();
 
@@ -122,6 +123,12 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         SchoolConfig = schoolConfig;
         SupervisorAssignment = supervisorAssignment;
         _ticker = new OneSecondTicker(OnTimerTick);
+
+        Progress.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName is nameof(AdminProgressStore.IsRegistrationStepActive) or nameof(AdminProgressStore.IsMentorSelectionStepActive))
+                OnPropertyChanged(nameof(HasDeadlineOption));
+        };
     }
 
     private void OnTimerTick()
