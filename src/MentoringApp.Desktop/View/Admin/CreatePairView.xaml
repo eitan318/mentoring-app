@@ -142,27 +142,10 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Supervisor Column -->
-            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,8,0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="{Binding [Admin_CreatePair_SearchSupervisor], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#4B5563" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                    <TextBox Grid.Row="1" Style="{StaticResource SearchTextBox}" Tag="{Binding [Admin_ManageUsers_SearchHint], Source={x:Static loc:TranslationSource.Instance}}" Text="{Binding SupervisorSearchText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
-                    <ListBox Grid.Row="2" DisplayMemberPath="UserName"
-                             ItemsSource="{Binding FilteredSupervisors}"
-                             SelectedItem="{Binding SelectedSupervisor}" />
-                </Grid>
-            </Border>
-
             <!-- Mentor Column -->
-            <Border Grid.Column="1" Style="{StaticResource CardStyle}" Margin="8,0,8,0">
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,8,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -178,7 +161,7 @@
             </Border>
 
             <!-- Mentee Column -->
-            <Border Grid.Column="2" Style="{StaticResource CardStyle}" Margin="8,0,0,0">
+            <Border Grid.Column="1" Style="{StaticResource CardStyle}" Margin="8,0,0,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -200,7 +183,7 @@
                     Command="{Binding CreatePairCommand}"
                     HorizontalAlignment="Right"
                     IsDefault="True"
-                    ToolTip="Create a pair with the selected supervisor, mentor, and mentee"/>
+                    ToolTip="Create a pair from the selected mentor and mentee. The supervisor is assigned automatically based on the mentee's class."/>
         </Border>
     </Grid>
 </UserControl>

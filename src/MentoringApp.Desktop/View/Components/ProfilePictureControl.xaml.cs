@@ -2,11 +2,29 @@ using MentoringApp.Model.User;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace MentoringApp.View.Components
 {
     public partial class ProfilePictureControl : UserControl
     {
+        private static readonly BitmapImage MaleDefault   = LoadPacked("male.png");
+        private static readonly BitmapImage FemaleDefault = LoadPacked("female.png");
+        private static readonly BitmapImage NeutralDefault = LoadPacked("neutral.png");
+
+        private static BitmapImage LoadPacked(string filename)
+        {
+            var img = new BitmapImage();
+            img.BeginInit();
+            img.CacheOption = BitmapCacheOption.OnLoad;
+            img.UriSource = new Uri(
+                $"pack://application:,,,/MentoringApp.WPF;component/Resources/Images/{filename}",
+                UriKind.Absolute);
+            img.EndInit();
+            img.Freeze();
+            return img;
+        }
+
         public static readonly DependencyProperty ImagePathProperty =
             DependencyProperty.Register("ImagePath", typeof(string), typeof(ProfilePictureControl),
                 new PropertyMetadata(null, OnImagePathOrGenderChanged));
@@ -41,6 +59,13 @@ namespace MentoringApp.View.Components
         public static readonly DependencyProperty ShowDefaultAvatarProperty = ShowDefaultAvatarPropertyKey.DependencyProperty;
         public bool ShowDefaultAvatar => (bool)GetValue(ShowDefaultAvatarProperty);
 
+        private static readonly DependencyPropertyKey DefaultImageSourcePropertyKey =
+            DependencyProperty.RegisterReadOnly("DefaultImageSource", typeof(ImageSource), typeof(ProfilePictureControl),
+                new PropertyMetadata(null));
+
+        public static readonly DependencyProperty DefaultImageSourceProperty = DefaultImageSourcePropertyKey.DependencyProperty;
+        public ImageSource DefaultImageSource => (ImageSource)GetValue(DefaultImageSourceProperty);
+
         private static void OnImagePathOrGenderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
             => ((ProfilePictureControl)d).UpdateDefaultAvatar();
 
@@ -48,6 +73,14 @@ namespace MentoringApp.View.Components
         {
             bool noImage = string.IsNullOrWhiteSpace(ImagePath) || !System.IO.File.Exists(ImagePath);
             SetValue(ShowDefaultAvatarPropertyKey, noImage);
+
+            var defaultImage = Gender switch
+            {
+                Gender.Male   => MaleDefault,
+                Gender.Female => FemaleDefault,
+                _             => NeutralDefault
+            };
+            SetValue(DefaultImageSourcePropertyKey, defaultImage);
 
             var color = Gender switch
             {

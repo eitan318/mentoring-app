@@ -17,6 +17,9 @@ namespace MentoringApp.Tests.Service
 
         private static UserService BuildUserService(Mock<IUserRepo> userRepo)
         {
+            // SupervisorAssignmentService walks all users, so the repo must return *something* here.
+            userRepo.Setup(r => r.GetAllUserDtosAsync()).ReturnsAsync(Array.Empty<UserDao>());
+
             var gradeRepo = new Mock<IGradeRepo>();
             gradeRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
                      .ReturnsAsync(new GradeDao { Id = 1, Name = "Grade 9", Num = 9 });
@@ -31,8 +34,8 @@ namespace MentoringApp.Tests.Service
                 new Mock<ISchoolClassRepo>().Object);
         }
 
-        private static UserDao MakeSupervisorDto(int id) =>
-            new UserDao { Id = id, UserName = $"Sup{id}", Email = $"s{id}@test.com", NationalId = $"S{id}", Role = UserRoleType.Supervisor, GradeId = 1, ClassNum = 1, Gender = 1 };
+        private static PairService BuildPairService(IPairRepo pairRepo, UserService userService) =>
+            new(pairRepo, userService, new SupervisorAssignmentService(userService));
 
         private static UserDao MakeMentorDto(int id) =>
             new UserDao { Id = id, UserName = $"Mentor{id}", Email = $"m{id}@test.com", NationalId = $"M{id}", Role = UserRoleType.Student, GradeId = 1, ClassNum = 1, Gender = 1, MentorSubjectId = 1 };
@@ -43,54 +46,32 @@ namespace MentoringApp.Tests.Service
         // ── CreatePairAsync ────────────────────────────────────────────────────
 
         [Fact]
-        public async Task CreatePair_Fails_WhenSupervisorNotFound()
+        public async Task CreatePair_Fails_WhenMentorAndMenteeAreSamePerson()
         {
-            var userRepo = new Mock<IUserRepo>();
-            userRepo.Setup(r => r.GetUserDtoByIdAsync(It.IsAny<int>())).ReturnsAsync((UserDao?)null);
             var pairRepo = new Mock<IPairRepo>();
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
 
-            var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
-
-            var result = await sut.CreatePairAsync(1, 2, 3);
+            var result = await sut.CreatePairAsync(1, 1);
 
             result.Success.Should().BeFalse();
-            result.ErrorMessage.Should().Contain("supervisor");
-        }
-
-        [Fact]
-        public async Task CreatePair_Fails_WhenSupervisorIsAStudent()
-        {
-            const int supervisorId = 1, mentorId = 2, menteeId = 3;
-
-            var userRepo = new Mock<IUserRepo>();
-            // Returns a Student for the supervisor slot → wrong role
-            userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(MakeMentorDto(supervisorId));
-
-            var pairRepo = new Mock<IPairRepo>();
-            var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
-
-            var result = await sut.CreatePairAsync(supervisorId, mentorId, menteeId);
-
-            result.Success.Should().BeFalse();
-            result.ErrorMessage.Should().Contain("supervisor");
+            result.ErrorMessage.Should().Contain("same person");
         }
 
         [Fact]
         public async Task CreatePair_Fails_WhenMentorHasNoMentorProfile()
         {
-            const int supervisorId = 1, mentorId = 2, menteeId = 3;
+            const int mentorId = 2, menteeId = 3;
 
             // mentorDto has no MentorSubjectId → not a mentor
             var notAMentorDto = MakeMenteeDto(mentorId);
 
             var userRepo = new Mock<IUserRepo>();
-            userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(MakeSupervisorDto(supervisorId));
             userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId)).ReturnsAsync(notAMentorDto);
 
             var pairRepo = new Mock<IPairRepo>();
-            var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(userRepo));
 
-            var result = await sut.CreatePairAsync(supervisorId, mentorId, menteeId);
+            var result = await sut.CreatePairAsync(mentorId, menteeId);
 
             result.Success.Should().BeFalse();
             result.ErrorMessage.Should().Contain("mentor");
@@ -99,20 +80,19 @@ namespace MentoringApp.Tests.Service
         [Fact]
         public async Task CreatePair_Fails_WhenMenteeHasNoMenteeProfile()
         {
-            const int supervisorId = 1, mentorId = 2, menteeId = 3;
+            const int mentorId = 2, menteeId = 3;
 
             // menteeDto has no MenteeSubjectId → not a mentee
             var notAMenteeDto = MakeMentorDto(menteeId);
 
             var userRepo = new Mock<IUserRepo>();
-            userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(MakeSupervisorDto(supervisorId));
             userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId)).ReturnsAsync(MakeMentorDto(mentorId));
             userRepo.Setup(r => r.GetUserDtoByIdAsync(menteeId)).ReturnsAsync(notAMenteeDto);
 
             var pairRepo = new Mock<IPairRepo>();
-            var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(userRepo));
 
-            var result = await sut.CreatePairAsync(supervisorId, mentorId, menteeId);
+            var result = await sut.CreatePairAsync(mentorId, menteeId);
 
             result.Success.Should().BeFalse();
             result.ErrorMessage.Should().Contain("mentee");
@@ -121,43 +101,42 @@ namespace MentoringApp.Tests.Service
         [Fact]
         public async Task CreatePair_Fails_WhenRepoCreateReturnsFalse()
         {
-            const int supervisorId = 1, mentorId = 2, menteeId = 3;
+            const int mentorId = 2, menteeId = 3;
 
             var userRepo = new Mock<IUserRepo>();
-            userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(MakeSupervisorDto(supervisorId));
             userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId)).ReturnsAsync(MakeMentorDto(mentorId));
             userRepo.Setup(r => r.GetUserDtoByIdAsync(menteeId)).ReturnsAsync(MakeMenteeDto(menteeId));
 
             var pairRepo = new Mock<IPairRepo>();
-            pairRepo.Setup(r => r.CreateAsync(supervisorId, mentorId, menteeId)).ReturnsAsync(false);
+            pairRepo.Setup(r => r.CreateAsync(It.IsAny<int>(), mentorId, menteeId)).ReturnsAsync(false);
 
-            var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(userRepo));
 
-            var result = await sut.CreatePairAsync(supervisorId, mentorId, menteeId);
+            var result = await sut.CreatePairAsync(mentorId, menteeId);
 
             result.Success.Should().BeFalse();
             result.ErrorMessage.Should().Contain("Failed to create");
         }
 
         [Fact]
-        public async Task CreatePair_Succeeds_WhenAllRolesValidAndRepoSucceeds()
+        public async Task CreatePair_Succeeds_AndAutoResolvesSupervisor()
         {
-            const int supervisorId = 1, mentorId = 2, menteeId = 3;
+            const int mentorId = 2, menteeId = 3;
 
             var userRepo = new Mock<IUserRepo>();
-            userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(MakeSupervisorDto(supervisorId));
             userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId)).ReturnsAsync(MakeMentorDto(mentorId));
             userRepo.Setup(r => r.GetUserDtoByIdAsync(menteeId)).ReturnsAsync(MakeMenteeDto(menteeId));
 
             var pairRepo = new Mock<IPairRepo>();
-            pairRepo.Setup(r => r.CreateAsync(supervisorId, mentorId, menteeId)).ReturnsAsync(true);
+            pairRepo.Setup(r => r.CreateAsync(It.IsAny<int>(), mentorId, menteeId)).ReturnsAsync(true);
 
-            var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(userRepo));
 
-            var result = await sut.CreatePairAsync(supervisorId, mentorId, menteeId);
+            var result = await sut.CreatePairAsync(mentorId, menteeId);
 
             result.Success.Should().BeTrue();
-            pairRepo.Verify(r => r.CreateAsync(supervisorId, mentorId, menteeId), Times.Once);
+            // Caller no longer passes a supervisorId — service derives it from the mentee.
+            pairRepo.Verify(r => r.CreateAsync(It.IsAny<int>(), mentorId, menteeId), Times.Once);
         }
 
         // ── SeparatePairAsync ──────────────────────────────────────────────────
@@ -168,7 +147,7 @@ namespace MentoringApp.Tests.Service
             var pairRepo = new Mock<IPairRepo>();
             pairRepo.Setup(r => r.DeleteAsync(99)).ReturnsAsync(false);
 
-            var sut = new PairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
 
             var result = await sut.SeparatePairAsync(99);
 
@@ -182,7 +161,7 @@ namespace MentoringApp.Tests.Service
             var pairRepo = new Mock<IPairRepo>();
             pairRepo.Setup(r => r.DeleteAsync(5)).ReturnsAsync(true);
 
-            var sut = new PairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
 
             var result = await sut.SeparatePairAsync(5);
 
@@ -197,7 +176,7 @@ namespace MentoringApp.Tests.Service
             var pairRepo = new Mock<IPairRepo>();
             pairRepo.Setup(r => r.GetByIdAsync(7)).ReturnsAsync((PairDao?)null);
 
-            var sut = new PairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(new Mock<IUserRepo>()));
 
             var result = await sut.GetPairByIdAsync(7);
 
@@ -212,15 +191,17 @@ namespace MentoringApp.Tests.Service
 
             var pairDto = new PairDao { Id = pairId, MentorId = mentorId, MenteeId = menteeId, SupervisorId = supervisorId };
 
+            var supervisorDto = new UserDao { Id = supervisorId, UserName = $"Sup{supervisorId}", Email = $"s{supervisorId}@test.com", NationalId = $"S{supervisorId}", Role = UserRoleType.Supervisor, GradeId = 1, ClassNum = 1, Gender = 1 };
+
             var userRepo = new Mock<IUserRepo>();
             userRepo.Setup(r => r.GetUserDtoByIdAsync(mentorId)).ReturnsAsync(MakeMentorDto(mentorId));
             userRepo.Setup(r => r.GetUserDtoByIdAsync(menteeId)).ReturnsAsync(MakeMenteeDto(menteeId));
-            userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(MakeSupervisorDto(supervisorId));
+            userRepo.Setup(r => r.GetUserDtoByIdAsync(supervisorId)).ReturnsAsync(supervisorDto);
 
             var pairRepo = new Mock<IPairRepo>();
             pairRepo.Setup(r => r.GetByIdAsync(pairId)).ReturnsAsync(pairDto);
 
-            var sut = new PairService(pairRepo.Object, BuildUserService(userRepo));
+            var sut = BuildPairService(pairRepo.Object, BuildUserService(userRepo));
 
             var result = await sut.GetPairByIdAsync(pairId);
 

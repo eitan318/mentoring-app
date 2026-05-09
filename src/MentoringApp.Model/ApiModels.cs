@@ -38,7 +38,7 @@ public record UpdateMentorProfileRequest(int SubjectId);
 public record UpdateMenteeProfileRequest(int SubjectId);
 public record UpdateSupervisorClassesRequest(IEnumerable<int> ClassIds);
 
-public record CreatePairRequest(int SupervisorId, int MentorId, int MenteeId);
+public record CreatePairRequest(int MentorId, int MenteeId);
 
 
 
@@ -106,6 +106,7 @@ public record SettingsResponse(
     bool IsPhase1Complete,
     bool IsProcessComplete,
     bool IsSchoolConfigured,
+    bool IsSupervisorsAssigned,
     bool IsUsersImported,
     double MeetingHoursBarrier);
 

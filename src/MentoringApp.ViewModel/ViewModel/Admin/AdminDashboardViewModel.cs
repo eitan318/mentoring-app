@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ViewModel.Navigation;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModelHelper;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
@@ -9,6 +10,8 @@ public partial class AdminDashboardViewModel : ObservableObject, INavigatable
 {
     private readonly INavigationService _navigationService;
     private IDisposable? _navContext;
+
+    public AdminProgressStore Progress { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOnDashboard))]
@@ -22,14 +25,16 @@ public partial class AdminDashboardViewModel : ObservableObject, INavigatable
     public bool IsOnManageUsers    => ActiveSubPage is ManageUsersViewModel;
     public bool IsOnSystemSettings => ActiveSubPage is SystemSettingsViewModel;
 
-    public AdminDashboardViewModel(INavigationService navigationService)
+    public AdminDashboardViewModel(INavigationService navigationService, AdminProgressStore progress)
     {
         _navigationService = navigationService;
+        Progress = progress;
     }
 
     public async Task OnNavigatedToAsync()
     {
         _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
+        await Progress.RefreshAsync();
         await _navigationService.NavigateToAsync<AdminOverviewViewModel>();
     }
 

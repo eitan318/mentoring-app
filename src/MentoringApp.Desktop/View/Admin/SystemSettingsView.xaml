@@ -5,6 +5,7 @@
     xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
     xmlns:model="clr-namespace:MentoringApp.Model;assembly=MentoringApp.Model"
     xmlns:adminVm="clr-namespace:MentoringApp.ViewModel.ViewModel.Admin;assembly=MentoringApp.ViewModel"
+    xmlns:local="clr-namespace:MentoringApp.View.Admin"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
@@ -76,6 +77,18 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="AdvanceYearBtn" TargetType="Button" BasedOn="{StaticResource ModernBtn}">
+            <Setter Property="Background" Value="#FEF3C7"/>
+            <Setter Property="Foreground" Value="#92400E"/>
+            <Setter Property="BorderBrush" Value="#FCD34D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FDE68A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <!-- Input Style -->
         <Style x:Key="ModernInput" TargetType="TextBox">
             <Setter Property="Background" Value="White"/>
@@ -113,24 +126,18 @@
         </Grid.RowDefinitions>
 
         <!-- ── HEADER ── -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,24">
-            <TextBlock Text="{Binding [SysSettings_Title], Source={x:Static loc:TranslationSource.Instance}}" FontSize="28" FontWeight="Bold" Foreground="#111827"/>
-            <TextBlock Text="{Binding [SysSettings_Description], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280" Margin="0,8,0,0" FontSize="14"/>
-        </StackPanel>
-
-        <!-- ── FIRST TIME SETUP BANNER ── -->
-        <Border Grid.Row="1" Visibility="{Binding IsFirstTimeSetup, Converter={StaticResource BoolToVis}}"
-                Background="#FEF3C7" BorderBrush="#FCD34D" BorderThickness="1" CornerRadius="12" Padding="20,16" Margin="0,0,0,24">
-            <DockPanel>
-                <Button DockPanel.Dock="Right" Content="{Binding [SysSettings_Continue_Button], Source={x:Static loc:TranslationSource.Instance}}"
-                        Command="{Binding GoToDashboardCommand}" IsEnabled="{Binding CanContinueToDashboard}"
-                        Style="{StaticResource PrimaryBtn}" VerticalAlignment="Center" ToolTip="{Binding [SysSettings_Continue_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"/>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="{Binding [SysSettings_Welcome_Title], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="16" Foreground="#92400E" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding [SysSettings_Welcome_Subtitle], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#B45309" FontSize="13" TextWrapping="Wrap"/>
-                </StackPanel>
-            </DockPanel>
-        </Border>
+        <DockPanel Grid.Row="0" Margin="0,0,0,24">
+            <Button DockPanel.Dock="Right"
+                    Content="{Binding [SysSettings_AdvanceYear_Button], Source={x:Static loc:TranslationSource.Instance}}"
+                    Command="{Binding AdvanceYearCommand}"
+                    Style="{StaticResource AdvanceYearBtn}"
+                    VerticalAlignment="Top"
+                    ToolTip="{Binding [SysSettings_AdvanceYear_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"/>
+            <StackPanel>
+                <TextBlock Text="{Binding [SysSettings_Title], Source={x:Static loc:TranslationSource.Instance}}" FontSize="28" FontWeight="Bold" Foreground="#111827"/>
+                <TextBlock Text="{Binding [SysSettings_Description], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280" Margin="0,8,0,0" FontSize="14"/>
+            </StackPanel>
+        </DockPanel>
 
         <!-- ── TABS ── -->
         <Border Grid.Row="2" Background="#F3F4F6" CornerRadius="12" Padding="4" HorizontalAlignment="Left" Margin="0,0,0,24">
@@ -180,175 +187,12 @@
         <Grid Grid.Row="3">
             
             <!-- ── TAB 1: SCHOOL CONFIG ── -->
-            <Grid Visibility="{Binding IsSchoolConfigTabSelected, Converter={StaticResource BoolToVis}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="2*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Add Class -->
-                <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,24,0" VerticalAlignment="Top">
-                    <StackPanel>
-                        <TextBlock Text="{Binding [SysSettings_AddClass_Header], Source={x:Static loc:TranslationSource.Instance}}" FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,24"/>
-                        
-                        <TextBlock Text="{Binding [SysSettings_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,8"/>
-                        <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="12,4" Margin="0,0,0,16">
-                            <ComboBox ItemsSource="{Binding AvailableGrades}" SelectedItem="{Binding SelectedGrade}" BorderThickness="0" Background="Transparent">
-                                <ComboBox.ItemTemplate><DataTemplate><TextBlock><TextBlock.Text><MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_"><Binding Path="Name"/><Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/></MultiBinding></TextBlock.Text></TextBlock></DataTemplate></ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </Border>
-
-                        <TextBlock Text="{Binding [SysSettings_ClassNumber_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,8"/>
-                        <TextBox Style="{StaticResource ModernInput}" Text="{Binding ClassNumInput, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,24" Tag="{Binding [SysSettings_ClassNumber_Tag], Source={x:Static loc:TranslationSource.Instance}}"/>
-
-                        <Button Content="{Binding [SysSettings_AddClass_Button], Source={x:Static loc:TranslationSource.Instance}}" Command="{Binding AddClassCommand}" Style="{StaticResource PrimaryBtn}" HorizontalAlignment="Left"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Current Classes List -->
-                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <DockPanel Grid.Row="0" Margin="0,0,0,20">
-                            <TextBlock Text="{Binding [SysSettings_ParticipatingClasses_Header], Source={x:Static loc:TranslationSource.Instance}}" FontSize="18" FontWeight="Bold" Foreground="#111827" VerticalAlignment="Center"/>
-                            <Button DockPanel.Dock="Right" Content="{Binding [SysSettings_RemoveSelected_Button], Source={x:Static loc:TranslationSource.Instance}}" Command="{Binding DeleteClassCommand}" Style="{StaticResource DangerBtn}" HorizontalAlignment="Right" Padding="12,6"/>
-                        </DockPanel>
-
-                        <Border Grid.Row="1" Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="12" Padding="8">
-                            <ListBox ItemsSource="{Binding AllClasses}" SelectedItem="{Binding SelectedClass}" BorderThickness="0" Background="Transparent" MinHeight="200">
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="Padding" Value="16,12"/>
-                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                        <Setter Property="BorderBrush" Value="#F3F4F6"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ListBoxItem">
-                                                    <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" CornerRadius="8" Margin="0,2">
-                                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="#E5E7EB"/></Trigger>
-                                                        <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="#D1D5DB"/></Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type model:SchoolClassModel}">
-                                        <TextBlock FontWeight="Medium" Foreground="#111827">
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource GradeClassDisplay}">
-                                                    <Binding Path="Grade.Name"/>
-                                                    <Binding Path="ClassNum"/>
-                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Border>
-                    </Grid>
-                </Border>
-            </Grid>
+            <local:SchoolConfigView DataContext="{Binding SchoolConfig}"
+                                    Visibility="{Binding DataContext.IsSchoolConfigTabSelected, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!-- ── TAB 2: SUPERVISOR ASSIGNMENT ── -->
             <Grid Style="{StaticResource InverseVisibilityStyle}">
-                <Border Style="{StaticResource CardStyle}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Grid.Row="0" Margin="0,0,0,24">
-                        <TextBlock Text="{Binding [SysSettings_AssignClasses_Header], Source={x:Static loc:TranslationSource.Instance}}" FontSize="18" FontWeight="Bold" Foreground="#111827"/>
-                        <TextBlock Text="{Binding [SysSettings_AssignClasses_Description], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#6B7280" FontSize="14" Margin="0,4,0,0"/>
-                    </StackPanel>
-
-                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-
-                            <!-- Unassigned Classes DropZone -->
-                            <Border x:Name="PoolDropZone" AllowDrop="True" Drop="PoolDropZone_Drop" DragEnter="DropZone_DragEnter" DragLeave="DropZone_DragLeave" DragOver="DropZone_DragOver"
-                                    Width="220" MinHeight="200" VerticalAlignment="Top" Margin="0,0,16,0"
-                                    Background="#F9FAFB" BorderBrush="#D1D5DB" BorderThickness="2" CornerRadius="12" Padding="16">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding [SysSettings_UnassignedPool_Header], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" Foreground="#4B5563" Margin="0,0,0,16" FontSize="14"/>
-                                    <ItemsControl ItemsSource="{Binding UnassignedClasses}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,8" Cursor="Hand"
-                                                        PreviewMouseLeftButtonDown="ClassChip_MouseDown" PreviewMouseMove="ClassChip_MouseMove">
-                                                    <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#0369A1" HorizontalAlignment="Center">
-                                                        <TextBlock.Text>
-                                                            <MultiBinding Converter="{StaticResource GradeClassDisplay}">
-                                                                <Binding Path="Grade.Name"/>
-                                                                <Binding Path="ClassNum"/>
-                                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
-                                                            </MultiBinding>
-                                                        </TextBlock.Text>
-                                                    </TextBlock>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Supervisor DropZones -->
-                            <ItemsControl ItemsSource="{Binding SupervisorSlots}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type adminVm:SupervisorSlot}">
-                                        <Border AllowDrop="True" Drop="SupervisorCard_Drop" DragEnter="DropZone_DragEnter" DragLeave="DropZone_DragLeave" DragOver="DropZone_DragOver"
-                                                Width="220" MinHeight="200" VerticalAlignment="Top" Margin="0,0,16,0"
-                                                Background="#FFFFFF" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="12" Padding="16">
-                                            <Border.Effect><DropShadowEffect BlurRadius="10" Color="#000000" Opacity="0.02" ShadowDepth="1" Direction="270"/></Border.Effect>
-                                            <StackPanel>
-                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                                    <TextBlock Text="👤" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="14" Foreground="#111827" TextTrimming="CharacterEllipsis" ToolTip="{Binding DisplayName}" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                                <ItemsControl ItemsSource="{Binding AssignedClasses}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,8" Cursor="Hand"
-                                                                    PreviewMouseLeftButtonDown="ClassChip_MouseDown" PreviewMouseMove="ClassChip_MouseMove">
-                                                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#047857" HorizontalAlignment="Center">
-                                                                    <TextBlock.Text>
-                                                                        <MultiBinding Converter="{StaticResource GradeClassDisplay}">
-                                                                            <Binding Path="Grade.Name"/>
-                                                                            <Binding Path="ClassNum"/>
-                                                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
-                                                                        </MultiBinding>
-                                                                    </TextBlock.Text>
-                                                                </TextBlock>
-                                                            </Border>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                        </StackPanel>
-                    </ScrollViewer>
-                </Grid>
-            </Border>
+                <local:SupervisorAssignmentView DataContext="{Binding}"/>
             </Grid>
         </Grid>
     </Grid>

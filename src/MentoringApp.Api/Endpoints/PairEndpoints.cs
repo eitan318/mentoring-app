@@ -45,9 +45,9 @@ public static class PairEndpoints
             (await svc.GetPairsBySupervisorAsync(id))
             .ToHttp());
 
-        // POST /api/pairs — Admin only
+        // POST /api/pairs — Admin only. Supervisor is auto-resolved from the mentee's class.
         group.MapPost("/", async (CreatePairRequest req, PairService pairService) =>
-            (await pairService.CreatePairAsync(req.SupervisorId, req.MentorId, req.MenteeId))
+            (await pairService.CreatePairAsync(req.MentorId, req.MenteeId))
             .ToHttp())
             .RequireAuthorization("AdminOnly")
             .WithOpenApi();

@@ -85,8 +85,9 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- Manage Pairs -->
-                    <Button Command="{Binding ManagePairsCommand}">
+                    <!-- Manage Pairs (visible from mentor selection step onward) -->
+                    <Button Command="{Binding ManagePairsCommand}"
+                            Visibility="{Binding Progress.ShowManagePairs, Converter={StaticResource BoolToVis}}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
                                 <Style.Triggers>
@@ -110,8 +111,9 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- Manage Users -->
-                    <Button Command="{Binding ManageUsersCommand}">
+                    <!-- Manage Users (visible once school is configured) -->
+                    <Button Command="{Binding ManageUsersCommand}"
+                            Visibility="{Binding Progress.ShowManageUsers, Converter={StaticResource BoolToVis}}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
                                 <Style.Triggers>
@@ -135,8 +137,9 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- System Settings -->
-                    <Button Command="{Binding SystemSettingsCommand}">
+                    <!-- System Settings (visible once school is configured) -->
+                    <Button Command="{Binding SystemSettingsCommand}"
+                            Visibility="{Binding Progress.ShowSystemSettings, Converter={StaticResource BoolToVis}}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
                                 <Style.Triggers>

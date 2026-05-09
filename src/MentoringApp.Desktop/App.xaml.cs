@@ -76,6 +76,13 @@ public partial class App : Application
         var userStore      = _serviceProvider.GetRequiredService<UserStore>();
         var authTokenStore = _serviceProvider.GetRequiredService<AuthTokenStore>();
 
+        authTokenStore.SessionExpired += () =>
+        {
+            sessionService.ClearSession();
+            Application.Current.Dispatcher.InvokeAsync(async () =>
+                await navService.NavigateToAsync<LoginViewModel>());
+        };
+
         var session = sessionService.LoadSession();
         if (session != null && TokenHasRoleClaim(session.Token))
         {
