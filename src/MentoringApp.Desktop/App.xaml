@@ -10,6 +10,8 @@
                 <ResourceDictionary Source="/Converter/ConverterDictionary.xaml" />
                 <ResourceDictionary Source="/Styles/Colors.xaml" />
                 <ResourceDictionary Source="/Styles/Buttons.xaml" />
+                <ResourceDictionary Source="/Styles/Cards.xaml" />
+                <ResourceDictionary Source="/Styles/Spacing.xaml" />
                 <ResourceDictionary Source="/Styles/TextBox.xaml" />
                 <ResourceDictionary Source="/ViewModelViewMap.xaml" />
             </ResourceDictionary.MergedDictionaries>

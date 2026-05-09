@@ -11,7 +11,6 @@ using MentoringApp.ViewModel.ViewModel.Admin;
 using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
-using System.Threading;
 
 namespace MentoringApp.ViewModel.ViewModel.Supervisor;
 
@@ -50,7 +49,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
     public bool ArePairsAndIssuesVisible => !IsPhase1Active;
 
-    private CancellationTokenSource? _timerCts;
+    private readonly OneSecondTicker _ticker;
     private DateTime? _tier1Deadline;
     private DateTime? _tier3Deadline;
     private bool _isPhase1Complete;
@@ -141,7 +140,10 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         _userStore = userStore;
         _toastService = toastService;
         _loc = loc;
+        _ticker = new OneSecondTicker(UpdatePhaseTimer);
     }
+
+    public Task OnNavigatedFromAsync() { _ticker.Stop(); return Task.CompletedTask; }
 
     public async Task OnNavigatedToAsync()
     {
@@ -263,7 +265,8 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         _tier3Deadline = settings.Phase2Deadline != null ? DateTime.Parse(settings.Phase2Deadline) : null;
         _isPhase1Complete = settings.IsPhase1Complete;
         _isProcessComplete = settings.IsProcessComplete;
-        SetupTimer();
+        UpdatePhaseTimer();
+        _ticker.Start();
     }
 
 
@@ -284,27 +287,6 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
             await _toastService.ShowInfoAsync(_loc.Get("Supervisor_Phase1Info_Title"), _loc.Get("Supervisor_Phase1Info_Body"));
         else if (IsPhase2Active)
             await _toastService.ShowInfoAsync(_loc.Get("Supervisor_Phase2Info_Title"), _loc.Get("Supervisor_Phase2Info_Body"));
-    }
-
-    private void SetupTimer()
-    {
-        _timerCts?.Cancel();
-        _timerCts = new CancellationTokenSource();
-        _ = RunTimerAsync(_timerCts.Token);
-    }
-
-    private async Task RunTimerAsync(CancellationToken token)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-        UpdatePhaseTimer();
-        try
-        {
-            while (await timer.WaitForNextTickAsync(token))
-            {
-                UpdatePhaseTimer();
-            }
-        }
-        catch (OperationCanceledException) { }
     }
 
     private void UpdatePhaseTimer()

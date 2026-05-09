@@ -10,28 +10,15 @@
     mc:Ignorable="d"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
-    <UserControl.Resources>
-        <!-- Base Card Style (used by inline import-instruction and supervisor-assignment cards) -->
-        <Style x:Key="CardStyle" TargetType="Border">
-            <Setter Property="CornerRadius" Value="16"/>
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="15" Color="#000000" Opacity="0.03" ShadowDepth="2" Direction="270"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
-
-    <Grid Margin="30,24,30,24">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <Grid Margin="{StaticResource PageMargin}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="320"/>
+            <ColumnDefinition Width="*" MinWidth="320"/>
+            <ColumnDefinition Width="280"/>
         </Grid.ColumnDefinitions>
 
         <!-- ── Left Column (Main Content) ── -->
-        <Grid Grid.Column="0" Margin="0,0,30,0">
+        <Grid Grid.Column="0" Margin="{StaticResource ColumnGap}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Header -->
                 <RowDefinition Height="Auto"/> <!-- Stat Cards -->
@@ -97,4 +84,5 @@
             <overview:NoticeBoardView Grid.Row="1"/>
         </Grid>
     </Grid>
+    </ScrollViewer>
 </UserControl>
