@@ -66,9 +66,10 @@ public class NavigationService : INavigationService
         }
 
         if (clearHistory)
-            currentStore.ClearHistory();
+            currentStore.ResetTo(vm);
+        else
+            currentStore.CurrentViewModel = vm;
 
-        currentStore.CurrentViewModel = vm;
         await onNavigatedTo();
         CanGoBackChanged?.Invoke();
     }
@@ -135,6 +136,18 @@ public class NavigationService : INavigationService
         public bool CanGoBack() => _navigationHistory.Count > 0;
 
         public void ClearHistory() => _navigationHistory.Clear();
+
+        /// <summary>
+        /// Replace the current view with <paramref name="vm"/> and discard all back-history.
+        /// Bypasses the push-on-set behavior of <see cref="CurrentViewModel"/>'s setter.
+        /// </summary>
+        public void ResetTo(INavigatable vm)
+        {
+            _navigationHistory.Clear();
+            _currentViewModel = vm;
+            OnPropertyChanged(nameof(CurrentViewModel));
+            CurrentViewModelChanged?.Invoke();
+        }
 
         public void GoBack()
         {

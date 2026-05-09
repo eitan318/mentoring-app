@@ -49,32 +49,17 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
     private void OnCanGoBackChanged() => OnPropertyChanged(nameof(IsBackVisible));
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBackVisible))]
     [NotifyPropertyChangedFor(nameof(IsProfileButtonVisible))]
     private INavigatable? _activeSubPage;
 
     public bool IsProfileButtonVisible => ActiveSubPage is not MyProfileViewModel;
-    public bool IsBackVisible => _navigationService.CanGoBack() && IsSubView(ActiveSubPage);
 
-    private static bool IsSubView(INavigatable? view)
-    {
-        if (view == null) return false;
-        var type = view.GetType();
-
-        // Main navigation views where back button should not appear
-        var mainViews = new[]
-        {
-            typeof(AdminDashboardViewModel),
-            typeof(AdminOverviewViewModel),
-            typeof(SupervisorDashboardViewModel),
-            typeof(StudentDashboardViewModel),
-            typeof(ManagePairsViewModel),
-            typeof(ManageUsersViewModel),
-            typeof(SystemSettingsViewModel),
-        };
-
-        return !mainViews.Contains(type);
-    }
+    /// <summary>
+    /// The back button shows whenever the active navigation context has back-history.
+    /// Sidebar items use NavigateToRootAsync (which clears history), so they leave
+    /// CanGoBack false; subview navigations use NavigateToAsync, which pushes history.
+    /// </summary>
+    public bool IsBackVisible => _navigationService.CanGoBack();
 
     [ObservableProperty] private UserModel? _currentUser;
 

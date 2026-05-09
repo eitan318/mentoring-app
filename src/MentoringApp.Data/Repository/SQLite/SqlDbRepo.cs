@@ -53,7 +53,7 @@ namespace MentoringApp.Data.Acess.SQLite
                 CREATE TABLE Grades (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Name TEXT NOT NULL,
-                    Num TEXT NOT NULL
+                    Num INTEGER NOT NULL
                 );
 
                 CREATE TABLE Subjects (
