@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
-    public class PairModel
+    public class PairModel : BaseModel
     {
         public required StudentModel Mentee { get; set; }
         public required StudentModel Mentor { get; set; }
-        public required int Id { get; set; }
 
         /// <summary>The supervisor overseeing this pair.</summary>
         public SupervisorModel? Supervisor { get; set; }

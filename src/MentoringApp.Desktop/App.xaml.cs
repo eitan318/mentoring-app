@@ -39,7 +39,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        bool recreateInitialDb = true;
+        bool recreateInitialDb = false;
 
         if (recreateInitialDb)
         {

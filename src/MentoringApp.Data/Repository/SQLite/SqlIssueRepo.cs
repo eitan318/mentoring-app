@@ -7,6 +7,7 @@ namespace MentoringApp.Data.Acess.SQLite
     internal class SqlIssueRepo : IIssueRepo
     {
         private readonly ISQLiteConnectionService _db;
+        private const string SelectCols = "Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId";
 
         public SqlIssueRepo(ISQLiteConnectionService db)
         {
@@ -16,14 +17,14 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<IssueDao>> GetAllAsync()
         {
             var rows = await _db.QueryAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues");
+                $"SELECT {SelectCols} FROM Issues");
             return rows.Select(MapToDto).ToList();
         }
 
         public async Task<IssueDao?> GetByIdAsync(int id)
         {
             var row = await _db.QuerySingleAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE Id = @Id",
+                $"SELECT {SelectCols} FROM Issues WHERE Id = @Id",
                 new { Id = id });
             return row == null ? null : MapToDto(row);
         }
@@ -31,30 +32,22 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<IssueDao>> GetByReporterAsync(int userId)
         {
             var rows = await _db.QueryAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE ReportedByUserId = @UserId",
+                $"SELECT {SelectCols} FROM Issues WHERE ReportedByUserId = @UserId",
                 new { UserId = userId });
             return rows.Select(MapToDto).ToList();
         }
 
         public async Task<IEnumerable<IssueDao>> GetBySupervisorAsync(int supervisorId)
         {
-            var studentRows = await _db.QueryAsync<StudentIdRow>(
-                @"SELECT MentorId AS UserId FROM Pairs WHERE SupervisorId = @SupervisorId
-                  UNION
-                  SELECT MenteeId AS UserId FROM Pairs WHERE SupervisorId = @SupervisorId",
+            var rows = await _db.QueryAsync<IssueRow>(
+                $@"SELECT {SelectCols} FROM Issues
+                   WHERE ReportedByUserId IN (
+                     SELECT MentorId FROM Pairs WHERE SupervisorId = @SupervisorId
+                     UNION
+                     SELECT MenteeId FROM Pairs WHERE SupervisorId = @SupervisorId
+                   )",
                 new { SupervisorId = supervisorId });
-
-            var studentIds = studentRows.Select(r => r.UserId).Distinct().ToList();
-            if (!studentIds.Any())
-                return Enumerable.Empty<IssueDao>();
-
-            var allIssues = await _db.QueryAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues");
-
-            return allIssues
-                .Where(i => studentIds.Contains(i.ReportedByUserId))
-                .Select(MapToDto)
-                .ToList();
+            return rows.Select(MapToDto).ToList();
         }
 
 
@@ -114,7 +107,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<IssueDao>> GetForwardedAsync()
         {
             var rows = await _db.QueryAsync<IssueRow>(
-                "SELECT Id, Description, CategoryId, ReportedByUserId, IsResolved, CreationDate, ForwardedBySupervisorId FROM Issues WHERE ForwardedBySupervisorId IS NOT NULL");
+                $"SELECT {SelectCols} FROM Issues WHERE ForwardedBySupervisorId IS NOT NULL");
             return rows.Select(MapToDto).ToList();
         }
 
@@ -138,13 +131,6 @@ namespace MentoringApp.Data.Acess.SQLite
             public int IsResolved { get; set; }
             public string CreationDate { get; set; } = string.Empty;
             public int? ForwardedBySupervisorId { get; set; }
-        }
-
-
-
-        private class StudentIdRow
-        {
-            public int UserId { get; set; }
         }
     }
 }

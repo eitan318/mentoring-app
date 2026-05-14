@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
-    public class IssueCategoryModel
+    public class IssueCategoryModel : BaseModel
     {
-        public required int Id { get; set; }
         public required string Name { get; set; }
 
         [SetsRequiredMembers]

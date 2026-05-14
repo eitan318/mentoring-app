@@ -182,7 +182,14 @@
                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                             <components:ProfilePictureControl Width="32" Height="32" Margin="0,0,12,0" ImagePath="{Binding Mentee.ProfilePicturePath}" Gender="{Binding Mentee.Gender}"/>
                                             <TextBlock Text="{Binding Mentee.UserName}" FontWeight="Medium" Foreground="#111827" VerticalAlignment="Center"/>
+
+
+                                            <!-- Supervisor -->
+                                            <TextBlock Text="{Binding Supervisor.UserName}" Foreground="#9CA3AF" FontSize="16" FontWeight="Bold" Margin="16,0" VerticalAlignment="Center"/>
+
                                         </StackPanel>
+
+
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>

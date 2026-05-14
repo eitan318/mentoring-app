@@ -67,25 +67,25 @@ namespace MentoringApp.Data.Acess.SQLite
                     ClassNum INTEGER NOT NULL DEFAULT 0,
                     PreferredMentorGender INTEGER NOT NULL DEFAULT 2,
                     PreferredMenteeGender INTEGER NOT NULL DEFAULT 2,
-                    FOREIGN KEY (UserId) REFERENCES Users(Id)
+                    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE UserMentors (
                     UserId INTEGER PRIMARY KEY,
                     SubjectToTeach INTEGER NOT NULL,
                     MaxMentees INTEGER NOT NULL DEFAULT 1,
-                    FOREIGN KEY (UserId) REFERENCES Users(Id)
+                    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE UserMentees (
                     UserId INTEGER PRIMARY KEY,
                     SubjectToLearn INTEGER NOT NULL,
-                    FOREIGN KEY (UserId) REFERENCES Users(Id)
+                    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE UserSupervisors (
                     UserId INTEGER PRIMARY KEY,
-                    FOREIGN KEY (UserId) REFERENCES Users(Id)
+                    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE SchoolClasses (
@@ -106,7 +106,7 @@ namespace MentoringApp.Data.Acess.SQLite
 
                 CREATE TABLE UserAdmins (
                     UserId INTEGER PRIMARY KEY,
-                    FOREIGN KEY (UserId) REFERENCES Users(Id)
+                    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE VerificationCodes (
@@ -124,9 +124,9 @@ namespace MentoringApp.Data.Acess.SQLite
                     CreatedAt TEXT NOT NULL,
                     MatchTier INTEGER NOT NULL DEFAULT 0,
                     IsProfileIncomplete INTEGER NOT NULL DEFAULT 0,
-                    FOREIGN KEY (MentorId) REFERENCES Users(Id),
-                    FOREIGN KEY (MenteeId) REFERENCES Users(Id),
-                    FOREIGN KEY (SupervisorId) REFERENCES Users(Id)
+                    FOREIGN KEY (MentorId) REFERENCES Users(Id) ON DELETE CASCADE,
+                    FOREIGN KEY (MenteeId) REFERENCES Users(Id) ON DELETE CASCADE,
+                    FOREIGN KEY (SupervisorId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE IssueCategories (
@@ -144,7 +144,7 @@ namespace MentoringApp.Data.Acess.SQLite
                     ForwardedBySupervisorId INTEGER NULL,
                     FOREIGN KEY (ReportedByUserId) REFERENCES Users(Id) ON DELETE CASCADE,
                     FOREIGN KEY (CategoryId) REFERENCES IssueCategories(Id),
-                    FOREIGN KEY (ForwardedBySupervisorId) REFERENCES Users(Id)
+                    FOREIGN KEY (ForwardedBySupervisorId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE Reviews (
@@ -155,7 +155,7 @@ namespace MentoringApp.Data.Acess.SQLite
                     Date TEXT NOT NULL,
                     AmountOfHours REAL NOT NULL DEFAULT 0,
                     FOREIGN KEY (PairId) REFERENCES Pairs(Id) ON DELETE CASCADE,
-                    FOREIGN KEY (AuthorUserId) REFERENCES Users(Id)
+                    FOREIGN KEY (AuthorUserId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
                 CREATE TABLE PairRequests (

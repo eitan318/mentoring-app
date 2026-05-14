@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="MentoringApp.Model.GradeModel">
+    <Position X="9.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GradeModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.MatchScore">
+    <Position X="5.75" Y="5.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AgQCEAAAAAAAAAAAAAAAAAAABABAAAAAAAAAIAEAEAA=</HashCode>
+      <FileName>MatchScore.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.VerificationCode">
+    <Position X="7.5" Y="8.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>VerificationCode.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.PairRequest">
+    <Position X="11.25" Y="8.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAQAMAAAAAEAAACAAAAAABABAAAAAAAAAoAAAEAA=</HashCode>
+      <FileName>PairRequest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.Review">
+    <Position X="11.25" Y="5.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAgAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
+      <FileName>Review.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.SchoolClassModel">
+    <Position X="13.5" Y="6.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>SchoolClassModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.SubjectModel">
+    <Position X="5.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SubjectModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.User.StudentProfiles.MenteeProfile" Collapsed="true">
+    <Position X="4.5" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>User\StudentProfiles\MenteeProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.User.StudentProfiles.MentorProfile" Collapsed="true">
+    <Position X="2.75" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>User\StudentProfiles\MentorProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.User.AdminModel" Collapsed="true">
+    <Position X="6" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>User\AdminModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.User.StudentModel" Collapsed="true">
+    <Position X="4.25" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgCIAgAQAAAAAAAAAQAAAAAAAACAAEAAEAAAA=</HashCode>
+      <FileName>User\StudentModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.User.SupervisorModel" Collapsed="true">
+    <Position X="2.5" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAACIAABAAAAAYQQAAAAAkAAAAAAAIABAAAiAA=</HashCode>
+      <FileName>User\SupervisorModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.User.UserModel" Collapsed="true">
+    <Position X="4.25" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABUAAECGAAAQAAEAAEAAAACCAAAAAACAIAACAAAAA=</HashCode>
+      <FileName>User\UserModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Model.BaseModel" Collapsed="true">
+    <Position X="4.25" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BaseModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="MentoringApp.Model.User.Gender">
+    <Position X="2.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>User\Gender.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="MentoringApp.Model.User.GenderPreference">
+    <Position X="0.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>User\Gender.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="MentoringApp.Model.MatchTier">
+    <Position X="0.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAIAAAABAAAAAAAQBAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MatchTier.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="MentoringApp.Model.PairRequestStatus">
+    <Position X="2.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>PairRequest.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
