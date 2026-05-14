@@ -266,19 +266,23 @@ namespace MentoringApp.Data.Acess.SQLite
             var users = await _db.QueryAsync<UserRow>(
                 "SELECT * FROM Users WHERE Id NOT IN (SELECT UserId FROM UserAdmins)");
 
-            // Load all role tables once and index by UserId for O(1) lookups below
+            // Load all role tables once and index by UserId for O(1) lookups
             var students = (await _db.QueryAsync<StudentRow>("SELECT * FROM UserStudents")).ToDictionary(s => s.UserId);
             var mentors = (await _db.QueryAsync<MentorRow>("SELECT * FROM UserMentors")).ToDictionary(m => m.UserId);
             var mentees = (await _db.QueryAsync<MenteeRow>("SELECT * FROM UserMentees")).ToDictionary(m => m.UserId);
             var supervisors = (await _db.QueryAsync<SupervisorRow>("SELECT * FROM UserSupervisors")).ToDictionary(s => s.UserId);
+            var admins = (await _db.QueryAsync<AdminRow>("SELECT UserId FROM UserAdmins")).ToDictionary(a => a.UserId);
 
-            var tasks = users.Select(async u =>
+            return users.Select(u =>
             {
-                var role = await DetermineRoleAsync(u.Id);
+                UserRoleType role = admins.ContainsKey(u.Id) ? UserRoleType.Admin
+                                  : supervisors.ContainsKey(u.Id) ? UserRoleType.Supervisor
+                                  : UserRoleType.Student;
                 bool isSupervisor = role == UserRoleType.Supervisor;
                 students.TryGetValue(u.Id, out var studentRow);
                 mentors.TryGetValue(u.Id, out var mentorRow);
                 mentees.TryGetValue(u.Id, out var menteeRow);
+
                 return new UserDao
                 {
                     Id = u.Id,
@@ -297,32 +301,12 @@ namespace MentoringApp.Data.Acess.SQLite
                     MaxMentees = mentorRow?.MaxMentees,
                     MenteeSubjectId = menteeRow?.SubjectToLearn
                 };
-            });
-
-            return await Task.WhenAll(tasks);
+            }).ToList();
         }
 
         public async Task<bool> DeleteUserAsync(int userId)
         {
-            const string sql = @"
-                DELETE FROM UserStudents WHERE UserId = @Id;
-                DELETE FROM UserMentors WHERE UserId = @Id;
-                DELETE FROM UserMentees WHERE UserId = @Id;
-                DELETE FROM UserSupervisors WHERE UserId = @Id;
-                DELETE FROM UserAdmins WHERE UserId = @Id;
-                DELETE FROM VerificationCodes WHERE UserId = @Id;
-                
-                DELETE FROM Reviews WHERE AuthorUserId = @Id;
-                DELETE FROM Issues WHERE ReportedByUserId = @Id;
-
-                DELETE FROM Reviews WHERE PairId IN (SELECT Id FROM Pairs WHERE MentorId = @Id OR MenteeId = @Id OR SupervisorId = @Id);
-                
-                /* Some schema versions might have PairId in Issues, so we try to delete them if they exist. We'll just ignore errors if column doesn't exist, but it's easier to just do simple cleans. However since SQLite allows multiple statements, we can delete the pairs and anything depending on them will cascade if PRAGMA is ON. But wait, if we delete pairs first, we must catch any potential PairId without ON DELETE CASCADE */
-                
-                DELETE FROM Pairs WHERE MentorId = @Id OR MenteeId = @Id OR SupervisorId = @Id;
-
-                DELETE FROM Users WHERE Id = @Id;";
-
+            const string sql = "DELETE FROM Users WHERE Id = @Id;";
             int rows = await _db.ExecuteAsync(sql, new { Id = userId });
             return rows > 0;
         }
@@ -392,6 +376,11 @@ namespace MentoringApp.Data.Acess.SQLite
             public int UserId { get; set; }
             public int GradeId { get; set; }
             public int ClassNum { get; set; }
+        }
+
+        private class AdminRow
+        {
+            public int UserId { get; set; }
         }
 
         private class MenteeRow

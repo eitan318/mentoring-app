@@ -7,6 +7,7 @@ namespace MentoringApp.Data.Acess.SQLite
     internal class SqlPairRequestRepo : IPairRequestRepo
     {
         private readonly ISQLiteConnectionService _db;
+        private const string SelectCols = "Id, MenteeId, MentorId, Status, Tier, CreatedAt";
 
         public SqlPairRequestRepo(ISQLiteConnectionService db) => _db = db;
 
@@ -26,7 +27,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<PairRequestDao>> GetByMentorAsync(int mentorId)
         {
             var rows = await _db.QueryAsync<RequestRow>(
-                "SELECT Id, MenteeId, MentorId, Status, Tier, CreatedAt FROM PairRequests WHERE MentorId = @MentorId AND Status = 'Pending'",
+                $"SELECT {SelectCols} FROM PairRequests WHERE MentorId = @MentorId AND Status = 'Pending'",
                 new { MentorId = mentorId });
             return rows.Select(MapToDto).ToList();
         }
@@ -34,7 +35,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<PairRequestDao>> GetByMenteeAsync(int menteeId)
         {
             var rows = await _db.QueryAsync<RequestRow>(
-                "SELECT Id, MenteeId, MentorId, Status, Tier, CreatedAt FROM PairRequests WHERE MenteeId = @MenteeId",
+                $"SELECT {SelectCols} FROM PairRequests WHERE MenteeId = @MenteeId",
                 new { MenteeId = menteeId });
             return rows.Select(MapToDto).ToList();
         }

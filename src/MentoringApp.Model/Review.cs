@@ -7,17 +7,14 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
-    public class Review
+    public class Review : BaseModel
     {
-
-
         [SetsRequiredMembers]
         public Review(string content, DateTime date, double amountOfHours = 0) {
             Content = content;
             Date = date;
             AmountOfHours = amountOfHours;
         }
-        public int Id { get; set; }
         public required string Content { get; set; }
         public required DateTime Date { get; set; }
         public double AmountOfHours { get; set; }
