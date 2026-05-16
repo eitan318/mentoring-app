@@ -32,6 +32,15 @@ namespace MentoringApp.Service.DI
             // Validator
             services.AddSingleton<UserValidator>();
 
+            // Pull settings from the "AppSettings" section of appsettings.json
+            var appSection = configuration.GetSection("AppSettings");
+            services.AddSingleton(new AppSettings
+            {
+                RecreateDbOnStartup  = bool.TryParse(appSection["RecreateDbOnStartup"],  out var rec)  && rec,
+                SkipVerificationCode = bool.TryParse(appSection["SkipVerificationCode"], out var skip) && skip,
+                AdminEmail           = appSection["AdminEmail"] ?? "admin@school.edu"
+            });
+
             // Pull settings from the "EmailSettings" section of appsettings.json
             var emailSection = configuration.GetSection("EmailSettings");
 

@@ -26,6 +26,7 @@ namespace MentoringApp.Service
         private readonly IVerificationCodeRepo _verificationCodeRepo;
         private readonly ISQLiteConnectionService _db;
         private readonly SettingsService _settingsService;
+        private readonly AppSettings _appSettings;
         private readonly Random _rand;
 
         private readonly Dictionary<string, string> _placeholderImages = new()
@@ -51,7 +52,8 @@ namespace MentoringApp.Service
             IReviewRepo reviewRepo,
             IVerificationCodeRepo verificationCodeRepo,
             ISQLiteConnectionService db,
-            SettingsService settingsService)
+            SettingsService settingsService,
+            AppSettings appSettings)
         {
             _userService = userService;
             _pairRepo = pairRepo;
@@ -60,6 +62,7 @@ namespace MentoringApp.Service
             _verificationCodeRepo = verificationCodeRepo;
             _db = db;
             _settingsService = settingsService;
+            _appSettings = appSettings;
             _rand = new Random((int)DateTime.Now.Ticks);
         }
 
@@ -116,7 +119,7 @@ namespace MentoringApp.Service
             // ── Step 4: Users — Admin ─────────────────────────────────────────
             Console.WriteLine("Generating Users...");
 
-            var admin = new AdminModel { Email = "eitanamir09@gmail.com", NationalId = "100", UserName = "Admin User" };
+            var admin = new AdminModel { Email = _appSettings.AdminEmail, NationalId = "100", UserName = "Admin User" };
             await _userService.CreateUserAsync(admin);
 
             // ── Step 5: Users — Supervisors ───────────────────────────────────

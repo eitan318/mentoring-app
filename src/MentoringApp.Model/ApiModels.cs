@@ -1,5 +1,8 @@
 namespace MentoringApp.Model;
 
+// ── App config (fetched by clients on startup) ────────────────────────────────
+public record AppConfigResponse(bool RecreateDbOnStartup, bool SkipVerificationCode);
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 public record SendCodeRequest(string NationalId);
 /// <param name="DevCode">Populated only in dev mode; empty string in production.</param>
