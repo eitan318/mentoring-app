@@ -26,7 +26,7 @@ public partial class LoginViewModel : ObservableValidator, INavigatable
     private readonly AuthTokenStore _authTokenStore;
 
     // In debug mode verification code step is skipped.
-    private static readonly bool _debugWithoutVerification = true;
+    private static readonly bool _debugWithoutVerification = false;
 
     public LoginViewModel(
         AuthApiClient authClient,

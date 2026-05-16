@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MentoringApp.ApiClient.Clients.ApiClientBase" Collapsed="true">
+    <Position X="15.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAgAAAAAAAAAAAABAAAAAAAAAAAQIIAAAAIA=</HashCode>
+      <FileName>Clients\ApiClientBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.AuthApiClient">
+    <Position X="14.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAIAAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>Clients\AuthApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.IssueApiClient">
+    <Position X="16" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAQIAABAAAAAgAAAAAAAAAAAgAAAAAAAAAIAgIAA=</HashCode>
+      <FileName>Clients\IssueApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.MatchingApiClient">
+    <Position X="12.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAgjoAAAAQgAAAAAAAAAAAAAEQCQAAAAAAAAAAA=</HashCode>
+      <FileName>Clients\MatchingApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.NotificationApiClient">
+    <Position X="14.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Clients\NotificationApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.PairApiClient">
+    <Position X="16" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAEAAAAAAAAAAAAAQAAAAAAAAAAgAAAAAAAAAIAAIIA=</HashCode>
+      <FileName>Clients\PairApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.ReferenceApiClient">
+    <Position X="14.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAACAAAAAAACQAAIAAACAACAAAA=</HashCode>
+      <FileName>Clients\ReferenceApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.ReviewApiClient">
+    <Position X="17.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAYAAAAA=</HashCode>
+      <FileName>Clients\ReviewApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.SettingsApiClient">
+    <Position X="12.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEKAAAAAAAAAACAAAAAAAAAAAACIAAgAAAAAAQAAAA=</HashCode>
+      <FileName>Clients\SettingsApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.ApiClient.Clients.UserApiClient">
+    <Position X="17.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAgAAAAAAAAAAEEAJAAAkAAAAQgBIIAAKIA=</HashCode>
+      <FileName>Clients\UserApiClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -4,6 +4,10 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Manages school class slots (Grade + Class number) and their supervisor assignments.
+    /// Joins class DTOs with grade data so callers receive fully hydrated <see cref="SchoolClassModel"/> objects.
+    /// </summary>
     public class SchoolClassService
     {
         private readonly ISchoolClassRepo _repo;
