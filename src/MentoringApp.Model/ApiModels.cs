@@ -2,6 +2,7 @@ namespace MentoringApp.Model;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 public record SendCodeRequest(string NationalId);
+/// <param name="DevCode">Populated only in dev mode; empty string in production.</param>
 public record SendCodeResponse(string? DevCode);
 public record LoginRequest(string NationalId, string Password);
 public record LoginResponse(string Token, DateTime ExpiresAt);
@@ -59,6 +60,7 @@ public record PairRequestResponse(
     int MenteeGender,
     string MenteeSubjectName);
 
+/// <summary>Body sent when a supervisor accepts a pending pair request.</summary>
 public record AcceptRequestBody(int SupervisorId);
 
 public record MatchRecommendationResponse(
@@ -73,6 +75,7 @@ public record MatchRecommendationResponse(
     string MenteeSubjectName);
 
 public record GalleryPickRequest(int MenteeId, int MentorId, int SupervisorId);
+/// <summary>Result of running the full matching pipeline (Tiers 1–5).</summary>
 public record PipelineMatchResponse(int PairsCreated);
 
 

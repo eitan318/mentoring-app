@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
+    /// <summary>A time window a user has marked as available for mentoring sessions.</summary>
     public class AvailabilitySlot
     {
         public DateTime StartTime { get; set; }

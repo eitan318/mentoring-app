@@ -4,6 +4,10 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Manages session reviews written by mentors and mentees.
+    /// Validates that only pair members may create reviews and that hours fall within 0–24.
+    /// </summary>
     public class ReviewService
     {
         private readonly IReviewRepo _reviewRepo;

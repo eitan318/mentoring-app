@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Service
 {
+    /// <summary>Maps <see cref="GradeDao"/> DTOs to <see cref="GradeModel"/> domain objects.</summary>
     public class GradeService
     {
         private readonly IGradeRepo _gradeRepo;

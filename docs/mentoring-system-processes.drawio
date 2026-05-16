@@ -1,0 +1,178 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="24.0.0">
+  <diagram name="תהליכי מערכת חונכות" id="mentoring-processes">
+    <mxGraphModel dx="2400" dy="2400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="3000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============ ROOT ============ -->
+        <mxCell id="root" value="מערכת חונכות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1430" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ============ LEVEL 1: CATEGORIES ============ -->
+        <mxCell id="c1" value="1. ניהול משתמשים" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="340" y="235" width="220" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" value="2. התאמת זוגות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="340" y="735" width="220" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" value="3. ניהול מפגשים" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1235" width="220" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="4. מעקב התקדמות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1712" width="220" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="5. ניהול בעיות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="340" y="2167" width="220" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="6. דוחות וניתוחים" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B0E3E6;strokeColor=#0E8088;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="340" y="2645" width="220" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Edges Root -> Categories -->
+        <mxCell id="e_root_c1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="root" target="c1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_root_c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="root" target="c2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_root_c3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="root" target="c3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_root_c4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="root" target="c4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_root_c5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="root" target="c5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_root_c6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="root" target="c6"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ CATEGORY 1: USERS (10 sub-processes) ============ -->
+        <mxCell id="c1_01" value="יצירת משתמש חדש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="40" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_02" value="עריכת פרטי משתמש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="85" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_03" value="ייבוא משתמשים בכמות מ-Excel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="130" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_04" value="השעיית משתמש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="175" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_05" value="הפעלה מחדש לאחר השעיה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="220" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_06" value="אימות אימייל בקוד חד-פעמי" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="265" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_07" value="שחזור סיסמה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="310" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_08" value="הקצאת תפקידים (חניך/חונך/מפקח)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="355" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_09" value="ניהול הרשאות וגישות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="400" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c1_10" value="מחיקת משתמש מהמערכת" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF3FE;strokeColor=#6C8EBF;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="445" width="240" height="35" as="geometry" /></mxCell>
+
+        <mxCell id="e_c1_01" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_01"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_02" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_02"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_03" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_03"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_04" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_04"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_05" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_05"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_06" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_06"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_07" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_07"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_08" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_08"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_09" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_09"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c1_10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;endArrow=none;" edge="1" parent="1" source="c1" target="c1_10"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ CATEGORY 2: PAIR MATCHING (10) ============ -->
+        <mxCell id="c2_01" value="בקשת חניך לחונך מסוים" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="540" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_02" value="התאמה אוטומטית (אלגוריתם)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="585" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_03" value="סיוע מפקח בהתאמה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="630" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_04" value="יצירה ידנית ע&quot;י אדמין" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="675" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_05" value="חישוב ציון תאימות (CompatibilityScorer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="720" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_06" value="אישור התאמה ע&quot;י שני הצדדים" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="765" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_07" value="פירוק זוג קיים" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="810" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_08" value="החלפת חונך לחניך" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="855" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_09" value="דחיית הצעת התאמה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="900" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c2_10" value="סקירת פרופילים חסרי מידע" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5E9;strokeColor=#82B366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="945" width="240" height="35" as="geometry" /></mxCell>
+
+        <mxCell id="e_c2_01" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_01"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_02" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_02"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_03" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_03"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_04" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_04"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_05" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_05"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_06" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_06"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_07" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_07"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_08" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_08"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_09" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_09"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c2_10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#82B366;endArrow=none;" edge="1" parent="1" source="c2" target="c2_10"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ CATEGORY 3: MEETINGS (10) ============ -->
+        <mxCell id="c3_01" value="קביעת מפגש חדש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1040" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_02" value="ביטול מפגש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1085" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_03" value="דחיית מפגש למועד אחר" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1130" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_04" value="תיעוד שעות מפגש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1175" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_05" value="כתיבת סיכום והערות מפגש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1220" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_06" value="שליחת תזכורות אוטומטיות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1265" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_07" value="אישור השתתפות במפגש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1310" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_08" value="בחירת מיקום: פיזי / מקוון" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1355" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_09" value="הצגת לוח מפגשים חודשי" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1400" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c3_10" value="מעקב נוכחות וכמות שעות מצטברת" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E0;strokeColor=#D6B656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1445" width="240" height="35" as="geometry" /></mxCell>
+
+        <mxCell id="e_c3_01" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_01"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_02" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_02"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_03" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_03"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_04" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_04"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_05" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_05"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_06" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_06"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_07" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_07"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_08" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_08"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_09" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_09"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c3_10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#D6B656;endArrow=none;" edge="1" parent="1" source="c3" target="c3_10"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ CATEGORY 4: PROGRESS (9) ============ -->
+        <mxCell id="c4_01" value="הגדרת יעדים אישיים לחניך" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1540" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c4_02" value="חלוקת יעד לאבני דרך" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1585" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c4_03" value="עדכון סטטוס יעד" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1630" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c4_04" value="ביקורות תקופתיות (Review)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1675" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c4_05" value="דיווח התקדמות תקופתי" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1720" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c4_06" value="הערכת חונך על חניך" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1765" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c4_07" value="משוב חניך על חונך" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1810" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c4_08" value="גרף התקדמות ויזואלי" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1855" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c4_09" value="סיכום הישגים בסוף תקופה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8F2;strokeColor=#9673A6;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1900" width="240" height="35" as="geometry" /></mxCell>
+
+        <mxCell id="e_c4_01" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_01"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4_02" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_02"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4_03" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_03"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4_04" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_04"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4_05" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_05"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4_06" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_06"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4_07" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_07"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4_08" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_08"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c4_09" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;endArrow=none;" edge="1" parent="1" source="c4" target="c4_09"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ CATEGORY 5: ISSUES (9) ============ -->
+        <mxCell id="c5_01" value="דיווח בעיה ע&quot;י משתמש" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="1995" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c5_02" value="סיווג רמת חומרה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2040" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c5_03" value="שיוך לאחראי טיפול" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2085" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c5_04" value="העברה לדרג גבוה (Escalation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2130" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c5_05" value="מעקב טיפול ועדכוני סטטוס" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2175" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c5_06" value="הוספת הערות פנימיות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2220" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c5_07" value="סגירת בעיה ופתרון" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2265" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c5_08" value="פתיחה מחדש של בעיה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2310" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c5_09" value="צפייה בהיסטוריית פניות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE6E5;strokeColor=#B85450;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2355" width="240" height="35" as="geometry" /></mxCell>
+
+        <mxCell id="e_c5_01" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_01"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5_02" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_02"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5_03" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_03"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5_04" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_04"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5_05" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_05"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5_06" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_06"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5_07" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_07"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5_08" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_08"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c5_09" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;endArrow=none;" edge="1" parent="1" source="c5" target="c5_09"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ CATEGORY 6: REPORTS (10) ============ -->
+        <mxCell id="c6_01" value="דוח לפי כיתה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2450" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_02" value="דוח לפי שכבת גיל" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2495" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_03" value="דוח לפי מקצוע / תחום ידע" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2540" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_04" value="דוח שעות מפגש מצטברות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2585" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_05" value="דוח התאמות שבוצעו" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2630" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_06" value="דוח בעיות פתוחות / סגורות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2675" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_07" value="ייצוא ל-Excel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2720" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_08" value="ייצוא ל-PDF להדפסה" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2765" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_09" value="גרפים סטטיסטיים והשוואות" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2810" width="240" height="35" as="geometry" /></mxCell>
+        <mxCell id="c6_10" value="דוח שביעות רצון משתמשים" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBF1F3;strokeColor=#0E8088;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="2855" width="240" height="35" as="geometry" /></mxCell>
+
+        <mxCell id="e_c6_01" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_01"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_02" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_02"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_03" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_03"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_04" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_04"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_05" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_05"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_06" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_06"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_07" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_07"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_08" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_08"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_09" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_09"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_c6_10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#0E8088;endArrow=none;" edge="1" parent="1" source="c6" target="c6_10"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

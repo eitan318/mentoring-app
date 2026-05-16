@@ -2,6 +2,10 @@ using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Service;
 
+/// <summary>
+/// Developer/admin operations: drops and recreates the SQLite database and triggers the dummy-data seed.
+/// Not intended for use in production workflows.
+/// </summary>
 public class SystemAdminService
 {
     private readonly IDbRepo _dbRepo;

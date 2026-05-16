@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="MentoringApp.Data.Dao.GradeDao">
+    <Position X="13" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dao\GradeDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.Dao.IssueCategoryDao">
+    <Position X="9.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dao\IssueCategoryDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.DTO.IssueDao">
+    <Position X="13" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAACBAAAAAAgAgAAAAAAAAAAAAABAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dao\IssueDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.DTO.MatchScoreDao">
+    <Position X="7.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgACAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAEAA=</HashCode>
+      <FileName>Dao\MatchScoreDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.DTO.PairDao">
+    <Position X="9.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAgAAAAAAACAAAAAAAABAAAAAAQAAAAAAkAA=</HashCode>
+      <FileName>Dao\PairDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.DTO.PairRequestDao">
+    <Position X="13" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAEAAAAAAAAACAAAAAAAABAAAAAAAAAgAAAEAA=</HashCode>
+      <FileName>Dao\PairRequestDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.DTO.ReviewDao">
+    <Position X="9.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAECAAAIAgAAAAAAAAAAAAAAAAAAAAABAAAAEAAAAAA=</HashCode>
+      <FileName>Dao\ReviewDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.Dao.SchoolClassDao">
+    <Position X="11.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAACAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>Dao\SchoolClassDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.DTO.SubjectDao">
+    <Position X="11.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dao\SubjectDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.Dao.UserDao">
+    <Position X="7.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAECCIgAACAEAAAQAAQAAAABAAgEQAEIAIAAAA=</HashCode>
+      <FileName>Dao\UserDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.DTO.VerificationCodeDao">
+    <Position X="11.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAgAAgAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dao\VerificationCodeDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MentoringApp.Data.DTO.SupervisorStatsDao">
+    <Position X="11.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAgEAAAAAAAAAAAQAAAAAAAAg=</HashCode>
+      <FileName>Dao\SupervisorStatsDao.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="MentoringApp.Data.Interfaces.IDbRepo">
+    <Position X="18.25" Y="6" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IUserRepo">
+    <Position X="36.75" Y="2.5" Width="6.25" />
+    <TypeIdentifier>
+      <HashCode>CAIAAAAAAAgAAAkAAAAAAEAAAAgAgBBAAAAACIQACAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IVerificationCodeRepo">
+    <Position X="22.75" Y="8.75" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAQAACAAAAAIAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IPairRepo">
+    <Position X="36.75" Y="6.5" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>AAPEAAAAAAAAAAAAAAAAAABAAAAAABAAgAAAAIBAIIA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IIssueRepo">
+    <Position X="29.25" Y="1.5" Width="5.75" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAIAAAAAAAAgAAQAAAAAAAAgAAAAAAAAAIAgIAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IIssueCategoryRepo">
+    <Position X="29.25" Y="4.25" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IReviewRepo">
+    <Position X="29.25" Y="8" Width="5.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAYAAAAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.ISettingsRepo">
+    <Position X="22.75" Y="4.75" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAACAAAAIAAAAAAAAAAAAAAQAQAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.ISubjectRepo">
+    <Position X="18.25" Y="4.75" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IGradeRepo">
+    <Position X="22.75" Y="3.25" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IYearAdvanceRepo">
+    <Position X="18.25" Y="3.25" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IPairRequestRepo">
+    <Position X="29.25" Y="5.75" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>gAAAAIAAAABAAAAAQAAAAAAAAAAAAIAAAAAAAIAAAAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.IMatchScoreRepo">
+    <Position X="22.75" Y="6.75" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAIAAAAAAAAAAAAAAQAAAAAAAAAAAAACAAAA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Interfaces.ISchoolClassRepo">
+    <Position X="36.75" Y="10" Width="5.25" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAACAAAAACAAEAAAAgAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>Interfaces\Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MentoringApp.Data.Acess.SQLite.ConnectionsService.ISQLiteConnectionService">
+    <Position X="15" Y="8" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAABAAAgAQAAAAAAACEA=</HashCode>
+      <FileName>Repository\SQLite\ConnectionsService\ISQLiteConnectionService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="MentoringApp.Data.Dao.UserRoleType">
+    <Position X="2.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAQAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dao\UserDao.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

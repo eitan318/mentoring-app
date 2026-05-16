@@ -3,6 +3,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MentoringApp.Model.User
 {
+    /// <summary>
+    /// Abstract base for all user types.
+    /// Concrete subtypes: <see cref="StudentModel"/>, <see cref="SupervisorModel"/>, <see cref="AdminModel"/>.
+    /// JSON polymorphism is handled via <see cref="JsonDerivedTypeAttribute"/>.
+    /// </summary>
     [JsonDerivedType(typeof(StudentModel), typeDiscriminator: "student")]
     [JsonDerivedType(typeof(SupervisorModel), typeDiscriminator: "supervisor")]
     [JsonDerivedType(typeof(AdminModel), typeDiscriminator: "admin")]

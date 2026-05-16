@@ -4,6 +4,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Service
 {
+    /// <summary>Maps <see cref="SubjectDao"/> DTOs to <see cref="SubjectModel"/> domain objects.</summary>
     public class SubjectService
     {
         private readonly ISubjectRepo _subjectRepo;

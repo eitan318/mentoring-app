@@ -12,6 +12,11 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Seeds the database with representative test data: 1 admin, 3 supervisors,
+    /// 6 class slots, ~24 students (mentors + mentees), 5 pairs, and associated reviews/issues.
+    /// Called on startup when <c>recreateInitialDb</c> is <c>true</c> in <c>App.xaml.cs</c>.
+    /// </summary>
     public class DummyDataSeeder
     {
         private readonly UserService _userService;

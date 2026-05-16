@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
+    /// <summary>A session review written by a mentor or mentee recording meeting content and hours.</summary>
     public class Review
     {
 
