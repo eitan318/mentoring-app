@@ -2,6 +2,7 @@ using System.Text;
 using MentoringApp.Api.Endpoints;
 using MentoringApp.Api.Helpers;
 using MentoringApp.Data.DI;
+using MentoringApp.Service;
 using MentoringApp.Service.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -81,10 +82,21 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Recreate and seed the DB on startup when configured (examiner / first-run setup).
+var appSettings = app.Services.GetRequiredService<AppSettings>();
+if (appSettings.RecreateDbOnStartup)
+{
+    using var scope = app.Services.CreateScope();
+    var adminService = scope.ServiceProvider.GetRequiredService<SystemAdminService>();
+    await adminService.RecreateDatabaseAsync();
+    await adminService.SeedDatabaseAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.MapDevEndpoints();
 }
 
 app.UseCors("WebClient");
@@ -102,6 +114,5 @@ app.MapReviewEndpoints();
 app.MapReferenceEndpoints();
 app.MapSettingsEndpoints();
 app.MapNotificationEndpoints();
-app.MapDevEndpoints();
 
 app.Run();

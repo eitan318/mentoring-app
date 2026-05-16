@@ -39,31 +39,6 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        bool recreateInitialDb = true;
-
-        if (recreateInitialDb)
-        {
-            // Wipe any persisted session so the fresh DB isn't bypassed on the next launch.
-            _serviceProvider.GetRequiredService<SessionService>().ClearSession();
-
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                string apiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001";
-                try
-                {
-                    using var client = new System.Net.Http.HttpClient();
-                    var response = client.PostAsync($"{apiBaseUrl}/api/dev/recreate-db", null).GetAwaiter().GetResult();
-                    if (!response.IsSuccessStatusCode)
-                        MessageBox.Show($"Failed to recreate DB via API. Status: {response.StatusCode}", "DB Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Could not reach the API to recreate the DB. Is it running? {ex.Message}", "DB Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-
-            }
-        }
-
 
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         var mainVM     = _serviceProvider.GetRequiredService<MainWindowViewModel>();

@@ -25,9 +25,6 @@ public partial class LoginViewModel : ObservableValidator, INavigatable
     private readonly SessionService _sessionService;
     private readonly AuthTokenStore _authTokenStore;
 
-    // In debug mode verification code step is skipped.
-    private static readonly bool _debugWithoutVerification = false;
-
     public LoginViewModel(
         AuthApiClient authClient,
         UserApiClient userClient,
@@ -83,7 +80,7 @@ public partial class LoginViewModel : ObservableValidator, INavigatable
         try
         {
             var response = await _authClient.SendCodeAsync(new SendCodeRequest(NationalId));
-            if (_debugWithoutVerification && response.DevCode is not null)
+            if (response.DevCode is not null)
             {
                 VerificationCode = response.DevCode;
                 await Login();
