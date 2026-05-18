@@ -345,6 +345,7 @@ namespace MentoringApp.Service
             // ── Step 7: Pairs ─────────────────────────────────────────────────
             Console.WriteLine("Generating Pairs...");
             List<int> pairIds = new();
+            var usedPairs = new HashSet<(int, int)>();
 
             for (int i = 0; i < 30; i++)
             {
@@ -353,8 +354,11 @@ namespace MentoringApp.Service
                 var mte = Pick(mentees);
 
                 if (men.Id == mte.Id) continue;
+                if (!usedPairs.Add((men.Id, mte.Id))) continue;
 
-                await _pairRepo.CreateAsync(sup.Id, men.Id, mte.Id);
+                bool created = await _pairRepo.CreateAsync(sup.Id, men.Id, mte.Id);
+                if (!created) continue;
+
                 int pid = GetId($"SELECT Id FROM Pairs WHERE MentorId = {men.Id} AND MenteeId = {mte.Id} ORDER BY Id DESC LIMIT 1");
                 pairIds.Add(pid);
             }
