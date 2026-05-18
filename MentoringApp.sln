@@ -5,6 +5,8 @@ VisualStudioVersion = 18.5.11709.299
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.Api", "src\MentoringApp.Api\MentoringApp.Api.csproj", "{237B53C7-80B1-4F4A-82C9-DEA5320D8258}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.Data", "src\MentoringApp.Data\MentoringApp.Data.csproj", "{63558A25-C351-425B-B2EE-05F6183E8D7C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.Model", "src\MentoringApp.Model\MentoringApp.Model.csproj", "{AAC759E5-8A98-404A-A39A-BC4568506AAD}"
@@ -14,8 +16,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.ViewModel", "src\MentoringApp.ViewModel\MentoringApp.ViewModel.csproj", "{75D0D459-E706-4F6F-9808-0DE7D0F77112}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.WPF", "src\MentoringApp.Desktop\MentoringApp.WPF.csproj", "{8CD4A9DB-E648-41B9-9091-D09BB40E46ED}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.Api", "src\MentoringApp.Api\MentoringApp.Api.csproj", "{237B53C7-80B1-4F4A-82C9-DEA5320D8258}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.ApiClient", "src\MentoringApp.ApiClient\MentoringApp.ApiClient.csproj", "{CEA6333B-B33D-4F7B-9DA1-98B0431C8EA1}"
 EndProject

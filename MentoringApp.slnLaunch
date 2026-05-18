@@ -1,6 +1,6 @@
 [
   {
-    "Name": "New Profile",
+    "Name": "AllProfile",
     "Projects": [
       {
         "Path": "src\\MentoringApp.Api\\MentoringApp.Api.csproj",
