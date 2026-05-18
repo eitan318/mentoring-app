@@ -49,7 +49,7 @@ public partial class AddIssueViewModel : ObservableValidator, INavigatable<IEnum
         ValidateAllProperties();
         if (HasErrors || SelectedIssueCategory == null || _userStore.User == null) return;
 
-        await _issueClient.CreateAsync(new CreateIssueRequest(IssueDescription, SelectedIssueCategory.Id, _userStore.User.Id));
+        await _issueClient.CreateAsync(new CreateIssueRequest(IssueDescription, SelectedIssueCategory.Id));
         RequestClose?.Invoke();
         _navigationService.GoBackAsync();
     }

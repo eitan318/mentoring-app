@@ -42,7 +42,7 @@ public record UpdateMentorProfileRequest(int SubjectId);
 public record UpdateMenteeProfileRequest(int SubjectId);
 public record UpdateSupervisorClassesRequest(IEnumerable<int> ClassIds);
 
-public record CreatePairRequest(int SupervisorId, int MentorId, int MenteeId);
+public record CreatePairRequest(int MentorId, int MenteeId);
 
 
 
@@ -64,7 +64,7 @@ public record PairRequestResponse(
     string MenteeSubjectName);
 
 /// <summary>Body sent when a supervisor accepts a pending pair request.</summary>
-public record AcceptRequestBody(int SupervisorId);
+public record AcceptRequestBody();
 
 public record MatchRecommendationResponse(
     int Id,
@@ -77,13 +77,13 @@ public record MatchRecommendationResponse(
     string MentorSubjectName,
     string MenteeSubjectName);
 
-public record GalleryPickRequest(int MenteeId, int MentorId, int SupervisorId);
+public record GalleryPickRequest(int MenteeId, int MentorId);
 /// <summary>Result of running the full matching pipeline (Tiers 1–5).</summary>
 public record PipelineMatchResponse(int PairsCreated);
 
 
 
-public record CreateIssueRequest(string Description, int CategoryId, int ReportedByUserId);
+public record CreateIssueRequest(string Description, int CategoryId);
 public record ForwardIssueRequest(int SupervisorId);
 
 // ── Reviews ───────────────────────────────────────────────────────────────────
@@ -99,7 +99,6 @@ public record CreateReviewRequest(
     string Content,
     DateTime Date,
     int PairId,
-    int AuthorUserId,
     double AmountOfHours);
 
 // ── Reference ─────────────────────────────────────────────────────────────────
@@ -112,6 +111,7 @@ public record SettingsResponse(
     bool IsPhase1Complete,
     bool IsProcessComplete,
     bool IsSchoolConfigured,
+    bool IsSupervisorsAssigned,
     bool IsUsersImported,
     double MeetingHoursBarrier);
 
@@ -120,7 +120,7 @@ public record BoolSettingRequest(bool Value);
 public record DeadlineBody(DateTime? Deadline);
 public record BoolBody(bool Value);
 public record SendRequestBody(int MenteeId, int MentorId);
-public record GalleryPickBody(int MenteeId, int MentorId, int SupervisorId);
+public record GalleryPickBody(int MenteeId, int MentorId);
 
 public record ErrorBody(string? Error);
 

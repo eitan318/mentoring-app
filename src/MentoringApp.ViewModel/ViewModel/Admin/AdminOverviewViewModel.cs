@@ -5,12 +5,13 @@ using MentoringApp.Model;
 using MentoringApp.Model.User;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
+using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModel.Supervisor;
 using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
-using System.Threading;
 using MentoringApp.ViewModel.Localization;
+using MentoringApp.ViewModel.Helpers;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
@@ -26,6 +27,8 @@ public class AdminSupervisorItem
 
     public int Id => Supervisor.Id;
     public string UserName => Supervisor.UserName;
+    public string ProfilePicturePath => Supervisor.ProfilePicturePath;
+    public Gender Gender => Supervisor.Gender;
 
     public List<SchoolClassModel> AssignedClasses { get; set; } = new();
 
@@ -49,29 +52,15 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     private readonly NotificationApiClient _notificationClient;
     private readonly IToastService _toastService;
     private readonly ILocalizationService _loc;
-    private CancellationTokenSource? _timerCts;
+    private readonly OneSecondTicker _ticker;
+    private bool _schoolConfigSubscribed;
+
+    public AdminProgressStore Progress { get; }
+    public SchoolConfigViewModel SchoolConfig { get; }
+    public SystemSettingsViewModel SupervisorAssignment { get; }
 
     [ObservableProperty] private string _operationResult = string.Empty;
     [ObservableProperty] private bool _hasOperationResult;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
-    [NotifyPropertyChangedFor(nameof(IsImportStepActive))]
-    private bool _isUsersImported;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
-    [NotifyPropertyChangedFor(nameof(IsPhase2Active))]
-    private bool _isSelectionPhaseActive;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsPhase1Active))]
-    [NotifyPropertyChangedFor(nameof(IsPhase2Active))]
-    private bool _isProcessComplete;
-
-    public bool IsImportStepActive => !IsUsersImported;
-    public bool IsPhase1Active => IsUsersImported && !IsSelectionPhaseActive && !IsProcessComplete;
-    public bool IsPhase2Active => IsSelectionPhaseActive && !IsProcessComplete;
 
     public string Phase1Summary => _loc.Get("Admin_Phase1_Summary");
     public string Phase2Summary => _loc.Get("Admin_Phase2_Summary");
@@ -87,6 +76,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
 
     public bool IsDeadlineScheduled => ActiveDeadline.HasValue;
     public bool IsDeadlineNotScheduled => !ActiveDeadline.HasValue;
+    public bool HasDeadlineOption => Progress.IsRegistrationStepActive || Progress.IsMentorSelectionStepActive;
 
     public ObservableCollection<AdminSupervisorItem> SupervisorsListPreview { get; } = new();
 
@@ -104,6 +94,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
 
     [ObservableProperty] private double _totalFillPercent;
     [ObservableProperty] private string _totalFillLabel = string.Empty;
+    [ObservableProperty] private bool _canCompleteSchoolConfig;
 
     public AdminOverviewViewModel(
         INavigationService navigationService,
@@ -114,7 +105,10 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         IssueApiClient issueClient,
         NotificationApiClient notificationClient,
         IToastService toastService,
-        ILocalizationService loc)
+        ILocalizationService loc,
+        AdminProgressStore progress,
+        SchoolConfigViewModel schoolConfig,
+        SystemSettingsViewModel supervisorAssignment)
     {
         _navigationService = navigationService;
         _windowService = windowService;
@@ -125,19 +119,16 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         _notificationClient = notificationClient;
         _toastService = toastService;
         _loc = loc;
-    }
+        Progress = progress;
+        SchoolConfig = schoolConfig;
+        SupervisorAssignment = supervisorAssignment;
+        _ticker = new OneSecondTicker(OnTimerTick);
 
-    private async Task RunTimerAsync(CancellationToken token)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-        try
+        Progress.PropertyChanged += (s, e) =>
         {
-            while (await timer.WaitForNextTickAsync(token))
-            {
-                OnTimerTick();
-            }
-        }
-        catch (OperationCanceledException) { }
+            if (e.PropertyName is nameof(AdminProgressStore.IsRegistrationStepActive) or nameof(AdminProgressStore.IsMentorSelectionStepActive))
+                OnPropertyChanged(nameof(HasDeadlineOption));
+        };
     }
 
     private void OnTimerTick()
@@ -160,6 +151,9 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             case "Import":
                 body = TranslationSource.Instance["Admin_PhaseGuide_Import"] ?? "Import Users";
                 break;
+            case "SchoolConfig":
+                body = TranslationSource.Instance["Admin_PhaseGuide_SchoolConfig"] ?? "Configure your school's grades and classes.";
+                break;
             case "Phase1":
                 body = TranslationSource.Instance["Admin_PhaseGuide_Phase1"] ?? "Phase 1: Registration";
                 break;
@@ -172,36 +166,37 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             default:
                 return;
         }
-                      
+
         _windowService.ShowMessage(body, title);
     }
 
     public async Task OnNavigatedToAsync()
     {
-        if (_timerCts == null || _timerCts.IsCancellationRequested)
-        {
-            _timerCts = new CancellationTokenSource();
-            _ = RunTimerAsync(_timerCts.Token);
-        }
+        _ticker.Start();
         await LoadDataAsync();
     }
-    
-    public Task OnNavigatedFromAsync() { _timerCts?.Cancel(); return Task.CompletedTask; }
+
+    public Task OnNavigatedFromAsync() { _ticker.Stop(); return Task.CompletedTask; }
 
     private async Task LoadDataAsync()
     {
-        var settings = await _settingsClient.GetAllAsync();
-        if (!settings.IsSchoolConfigured)
+        await Progress.RefreshAsync();
+        await SchoolConfig.LoadAsync();
+
+        UpdateSchoolConfigCompletion();
+        if (!_schoolConfigSubscribed)
         {
-            await _navigationService.NavigateToAsync<SystemSettingsViewModel>();
-            return;
+            SchoolConfig.AllClasses.CollectionChanged += (s, e) => UpdateSchoolConfigCompletion();
+            _schoolConfigSubscribed = true;
         }
 
-        IsUsersImported = settings.IsUsersImported;
-        IsSelectionPhaseActive = settings.IsPhase1Complete;
-        IsProcessComplete = settings.IsProcessComplete;
+        if (!Progress.IsSchoolConfigured) return;
 
-        ActiveDeadline = IsSelectionPhaseActive
+        await SupervisorAssignment.OnNavigatedToAsync();
+
+        var settings = await _settingsClient.GetAllAsync();
+
+        ActiveDeadline = Progress.IsSelectionPhaseActive
             ? (settings.Phase2Deadline != null ? DateTime.Parse(settings.Phase2Deadline) : null)
             : (settings.Phase1Deadline != null ? DateTime.Parse(settings.Phase1Deadline) : null);
 
@@ -221,8 +216,8 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         {
             statsMap.TryGetValue(supervisor.Id, out var stats);
 
-            var supervisorStudents = allStudents.Where(s => 
-                s.Grade != null && 
+            var supervisorStudents = allStudents.Where(s =>
+                s.Grade != null &&
                 supervisor.AssignedClasses.Any(ac => ac.Grade?.Id == s.Grade.Id && ac.ClassNum == s.ClassNum)
             ).ToList();
 
@@ -255,7 +250,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         if (!DeadlineInput.HasValue) return;
         ActiveDeadline = DeadlineInput.Value;
 
-        if (IsSelectionPhaseActive)
+        if (Progress.IsSelectionPhaseActive)
             await _settingsClient.SetPhase2DeadlineAsync(ActiveDeadline);
         else
             await _settingsClient.SetPhase1DeadlineAsync(ActiveDeadline);
@@ -267,17 +262,33 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     private async Task CancelDeadline()
     {
         ActiveDeadline = null;
-        if (IsSelectionPhaseActive)
+        if (Progress.IsSelectionPhaseActive)
             await _settingsClient.SetPhase2DeadlineAsync(null);
         else
             await _settingsClient.SetPhase1DeadlineAsync(null);
     }
 
     [RelayCommand]
-    private async Task MarkUsersImported()
+    private async Task CompleteSchoolConfig()
     {
-        IsUsersImported = true;
-        await _settingsClient.SetIsUsersImportedAsync(true);
+        if (SchoolConfig.AllClasses.Count == 0)
+        {
+            _toastService.Error(_loc.Get("Admin_SchoolConfig_NoClasses_Error"));
+            return;
+        }
+        await Progress.MarkSchoolConfiguredAsync();
+        await LoadDataAsync();
+    }
+
+    [RelayCommand]
+    private async Task CompleteSupervisorAssignment()
+    {
+        if (!SupervisorAssignment.AllClassesAssigned)
+        {
+            _toastService.Error(_loc.Get("Admin_SupervisorAssignment_Incomplete_Error"));
+            return;
+        }
+        await Progress.MarkSupervisorsAssignedAsync();
         try
         {
             await _notificationClient.SendPhase1StartedAsync();
@@ -288,6 +299,13 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
                 _loc.Get("Admin_EmailNotification_Failed_Title"),
                 _loc.Get("Admin_EmailNotification_Failed_Body"));
         }
+        await LoadDataAsync();
+    }
+
+    [RelayCommand]
+    private async Task MarkUsersImported()
+    {
+        await Progress.MarkUsersImportedAsync();
     }
 
     [RelayCommand]
@@ -302,8 +320,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
         try
         {
             await _matchingClient.GenerateScoresAsync();
-            IsSelectionPhaseActive = true;
-            await _settingsClient.SetIsPhase1CompleteAsync(true);
+            await Progress.MarkSelectionPhaseActiveAsync();
 
             var settings = await _settingsClient.GetAllAsync();
             ActiveDeadline = settings.Phase2Deadline != null ? DateTime.Parse(settings.Phase2Deadline) : null;
@@ -316,6 +333,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
                     _loc.Get("Admin_EmailNotification_Failed_Title"),
                     _loc.Get("Admin_EmailNotification_Failed_Body"));
             }
+            await LoadDataAsync();
             ShowResult(_loc.Get("Admin_ScoresGenerated_Message"));
         }
         catch (Exception ex)
@@ -339,8 +357,8 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             var fallback = await _matchingClient.RunFallbackMatchAsync();
             string fallbackText = _loc.Format("Admin_FallbackAssigned_Text", fallback.PairsCreated);
 
-            IsProcessComplete = true;
-            await _settingsClient.SetIsProcessCompleteAsync(true);
+            await Progress.MarkProcessCompleteAsync();
+            await LoadDataAsync();
 
             ShowResult(_loc.Format("Admin_ProcessComplete_Message", result.PairsCreated, fallbackText));
         }
@@ -382,6 +400,11 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     {
         OperationResult = message;
         HasOperationResult = true;
+    }
+
+    private void UpdateSchoolConfigCompletion()
+    {
+        CanCompleteSchoolConfig = SchoolConfig.AllClasses.Count > 0;
     }
 
     internal static bool IsStudentInfoFilled(StudentModel s)

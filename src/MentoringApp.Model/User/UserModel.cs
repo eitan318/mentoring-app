@@ -11,9 +11,8 @@ namespace MentoringApp.Model.User
     [JsonDerivedType(typeof(StudentModel), typeDiscriminator: "student")]
     [JsonDerivedType(typeof(SupervisorModel), typeDiscriminator: "supervisor")]
     [JsonDerivedType(typeof(AdminModel), typeDiscriminator: "admin")]
-    public abstract partial class UserModel : ObservableObject
+    public abstract partial class UserModel : BaseModel
     {
-        public int Id { get; set; }
         public string Email { get; set; } = string.Empty;
         public string NationalId { get; set; } = string.Empty;
 

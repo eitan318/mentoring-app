@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="700" d:DesignWidth="1100"
     mc:Ignorable="d"
+    SizeChanged="OnSizeChanged"
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
@@ -44,12 +45,13 @@
 
     <Grid Background="#F4F7FE">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition x:Name="SideNavColumn" Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- ── Left Sidebar ── -->
-        <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="0,20,20,0">
+        <Border x:Name="SideNavBorder" Grid.Column="0" Background="#FFFFFF" CornerRadius="0,20,20,0"
+                MouseEnter="OnSideNavMouseEnter" MouseLeave="OnSideNavMouseLeave">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="20" Color="#000000" Opacity="0.03"
                                   ShadowDepth="0" Direction="0"/>
@@ -58,7 +60,7 @@
             <DockPanel LastChildFill="False">
 
                 <!-- Navigation -->
-                <StackPanel DockPanel.Dock="Top" Margin="16,10,16,0">
+                <StackPanel DockPanel.Dock="Top" Margin="8,10,8,0">
 
                     <!-- Dashboard -->
                     <Button Command="{Binding GoToDashboardCommand}">
@@ -81,12 +83,14 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#x25A6;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding [Admin_Menu_Dashboard], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_Menu_Dashboard], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"
+                                       Visibility="{Binding IsRailMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseBoolToVis}}"/>
                         </StackPanel>
                     </Button>
 
-                    <!-- Manage Pairs -->
-                    <Button Command="{Binding ManagePairsCommand}">
+                    <!-- Manage Pairs (visible from mentor selection step onward) -->
+                    <Button Command="{Binding ManagePairsCommand}"
+                            Visibility="{Binding Progress.ShowManagePairs, Converter={StaticResource BoolToVis}}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
                                 <Style.Triggers>
@@ -106,12 +110,14 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#x1F4DA;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding [Admin_Menu_ManagePairs], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_Menu_ManagePairs], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"
+                                       Visibility="{Binding IsRailMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseBoolToVis}}"/>
                         </StackPanel>
                     </Button>
 
-                    <!-- Manage Users -->
-                    <Button Command="{Binding ManageUsersCommand}">
+                    <!-- Manage Users (visible once school is configured) -->
+                    <Button Command="{Binding ManageUsersCommand}"
+                            Visibility="{Binding Progress.ShowManageUsers, Converter={StaticResource BoolToVis}}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
                                 <Style.Triggers>
@@ -131,12 +137,14 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#x1F393;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding [Admin_Menu_ManageUsers], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_Menu_ManageUsers], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"
+                                       Visibility="{Binding IsRailMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseBoolToVis}}"/>
                         </StackPanel>
                     </Button>
 
-                    <!-- System Settings -->
-                    <Button Command="{Binding SystemSettingsCommand}">
+                    <!-- System Settings (visible once school is configured) -->
+                    <Button Command="{Binding SystemSettingsCommand}"
+                            Visibility="{Binding Progress.ShowSystemSettings, Converter={StaticResource BoolToVis}}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource SideNavStyle}">
                                 <Style.Triggers>
@@ -156,7 +164,8 @@
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#x2699;" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding [Admin_Menu_SystemSettings], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding [Admin_Menu_SystemSettings], Source={x:Static loc:TranslationSource.Instance}}" VerticalAlignment="Center"
+                                       Visibility="{Binding IsRailMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseBoolToVis}}"/>
                         </StackPanel>
                     </Button>
 

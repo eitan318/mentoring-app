@@ -215,6 +215,105 @@ The first two are run on every pull request. The E2E suite is run nightly and on
 
 ---
 
-## 5. Closing Notes
+## 5. Async Programming Tooling (Async Track — primary requirement)
+
+The Async-Programming track of the rubric demands more than `async`/`await` keywords sprinkled in handlers; it requires a **coherent async pipeline** end-to-end. This section catalogues the tools and rules that make the pipeline coherent.
+
+### 5.1 Async surface contracts
+
+Every method that crosses an I/O boundary returns `Task` or `Task<T>`. Synchronous wrappers exist only at the *outer-most* edge (DI bootstrap, `Main`).
+
+| Layer | Sync? | Why |
+|---|---|---|
+| `View` event handlers | Sync entry; awaits inside | XAML/Razor event signatures |
+| `ViewModel` `[RelayCommand]` | `async Task` | Source generator chooses async overload automatically |
+| `ApiClient` | `async Task<T>` | Wraps `HttpClient` async APIs |
+| `Service` | `async Task<Result<T>>` | Composes repositories + validators |
+| `Repository` | `async Task<T>` | Wraps `SqliteDataReader.ReadAsync` etc. |
+
+> **Rule** — never call `.Result` or `.Wait()`. The codebase compiles with `<TreatWarningsAsErrors>` enabled and the Roslyn analyser CA2007/CA1849/AsyncFixer rule set, so a sync-over-async violation fails the build.
+
+### 5.2 `Task.WhenAll` for fan-out
+
+Independent I/O is parallelised:
+
+```csharp
+var studentTasks    = students.Select(s => _emailService.SendEmailAsync(...));
+var supervisorTasks = supervisors.Select(sv => _emailService.SendEmailAsync(...));
+var results         = await Task.WhenAll(studentTasks.Concat(supervisorTasks));
+```
+
+> **Reviewer note** — `Task.WhenAll` rethrows the *first* exception it observes. If the caller needs to know about all failures, iterate the returned tasks afterwards and inspect `task.IsFaulted`.
+
+### 5.3 `IAsyncRelayCommand` and `[RelayCommand]`
+
+The toolkit's source generator produces an `IAsyncRelayCommand` whenever the annotated method is `async Task`:
+
+```csharp
+[RelayCommand]
+private async Task SendVerificationCode()
+{
+    ValidateAllProperties();
+    if (HasErrors) return;
+    var result = await _auth.SendCodeAsync(new SendCodeRequest(NationalId));
+    // ...
+}
+```
+
+The generated command exposes:
+
+- `IsRunning` — bound to a "Sending…" `Visibility`/`IsEnabled` state in XAML.
+- `CancelCommand` — automatically generated when the method accepts a `CancellationToken`.
+
+> **Reviewer note** — `IsRunning` is the canonical anti-double-click guard; never re-implement it manually.
+
+### 5.4 `CancellationToken` propagation
+
+Long-running flows accept a `CancellationToken` parameter and pass it down to every awaiter:
+
+```csharp
+public async Task<IEnumerable<MatchScore>> ScoreAllAsync(CancellationToken ct = default)
+{
+    var users = await _userService.GetAllUsersAsync(ct);
+    return await Task.WhenAll(users.Select(u => ScoreOneAsync(u, ct)));
+}
+```
+
+> **Where the tokens come from** — `IAsyncRelayCommand` injects a token tied to its `CancelCommand`; ASP.NET endpoints inject `HttpContext.RequestAborted`. Both are propagated end-to-end.
+
+### 5.5 Async + delegates — the prescribed combination
+
+The Async-Programming rubric line reads: *"server-side data handling based on an asynchronous mechanism that uses delegates, among other things"*. The codebase satisfies this on three different combinations:
+
+1. **`Func<Task>` as an async strategy** — `NavigationService.NavigateCoreAsync<T>(vm, onNavigatedTo: () => vm.OnNavigatedToAsync())`.
+2. **`Action<T>` as a sync continuation in an async pipeline** — `INavigationService.UseContext` callback.
+3. **`Func<HttpRequestMessage, HttpResponseMessage>` for test seams** — `FakeHttpMessageHandler`.
+
+See the dedicated chapter [`06-async-and-delegates.md`](06-async-and-delegates.md).
+
+### 5.6 Common pitfalls (and how the codebase avoids them)
+
+| Pitfall | Avoided by |
+|---|---|
+| Sync over async (`.Result`) | Analyser rule + reviewer policy |
+| Capturing `SynchronizationContext` in libraries | All library methods use `ConfigureAwait(false)` |
+| Async `void` event handlers | Only the outer-most XAML event handler is `async void`; everything inside awaits `Task` |
+| Forgetting to `await` `Task.WhenAll` | Build warning `CS4014` is treated as error |
+
+---
+
+## 6. Closing Notes
 
 The engineering choices reinforce one another. Strict project layering makes the DI bootstrap obvious; the DI bootstrap makes lifetime contracts explicit; explicit lifetimes make tests fast and deterministic; deterministic tests make refactors cheap. The codebase is structured so that the **next** architectural change — Postgres, MAUI, gRPC — can be implemented behind an existing seam rather than across the whole solution.
+
+---
+
+## 7. Curriculum Alignment
+
+| Rubric concept | Realisation | Section |
+|---|---|---|
+| Advanced OOP w/ inheritance (mandatory #7) | UserModel hierarchy, ValueConverters via `IValueConverter` | §3 |
+| Source generators / advanced C# | `[ObservableProperty]`, `[RelayCommand]`, pattern matching | §3 |
+| Async server programming (Async track) | `Task`-typed method surface, fan-out, cancellation | §5 |
+| Multi-platform clients (Async track) | WPF + Web share ViewModels via DI swap | §2 |
+| Testing (project quality) | Three-tier test pyramid: Service / ViewModel / E2E | §4 |

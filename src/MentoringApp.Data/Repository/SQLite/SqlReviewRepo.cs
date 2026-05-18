@@ -7,6 +7,7 @@ namespace MentoringApp.Data.Acess.SQLite
     internal class SqlReviewRepo : IReviewRepo
     {
         private readonly ISQLiteConnectionService _db;
+        private const string SelectCols = "Id, PairId, AuthorUserId, Content, Date, AmountOfHours";
 
         public SqlReviewRepo(ISQLiteConnectionService db)
         {
@@ -16,7 +17,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<ReviewDao>> GetByPairAsync(int pairId)
         {
             var rows = await _db.QueryAsync<ReviewRow>(
-                "SELECT Id, PairId, AuthorUserId, Content, Date, AmountOfHours FROM Reviews WHERE PairId = @PairId",
+                $"SELECT {SelectCols} FROM Reviews WHERE PairId = @PairId",
                 new { PairId = pairId });
             return rows.Select(MapToDto).ToList();
         }
@@ -24,7 +25,7 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<ReviewDao>> GetByAuthorAsync(int authorUserId)
         {
             var rows = await _db.QueryAsync<ReviewRow>(
-                "SELECT Id, PairId, AuthorUserId, Content, Date, AmountOfHours FROM Reviews WHERE AuthorUserId = @AuthorUserId",
+                $"SELECT {SelectCols} FROM Reviews WHERE AuthorUserId = @AuthorUserId",
                 new { AuthorUserId = authorUserId });
             return rows.Select(MapToDto).ToList();
         }

@@ -160,123 +160,141 @@
                     <StackPanel Visibility="{Binding IsSupervisor, Converter={StaticResource InverseBoolToVis}}">
 
                         <Rectangle Height="1" Fill="#F3F4F6" Margin="0,8,0,16"/>
-                        <TextBlock Style="{StaticResource SectionHeader}"
-                                   Text="{Binding [Profile_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}" />
 
-                        <TextBlock Style="{StaticResource FieldLabel}" Margin="0,12,0,4"
-                                   Text="{Binding [Profile_Grade_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                        <ComboBox
-                            TextSearch.TextPath="Name"
-                            IsEnabled="{Binding IsEditMode}"
-                            ItemsSource="{Binding Grades}"
-                            SelectedItem="{Binding SelectedGrade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                            Margin="0,0,0,16">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock>
-                                        <TextBlock.Text>
-                                            <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
-                                                <Binding Path="Name" />
-                                                <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-
-                        <TextBlock Style="{StaticResource FieldLabel}"
-                                   Text="{Binding [Profile_ClassNum_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                        <TextBox IsReadOnly="{Binding IsReadOnly}"
-                                 BorderBrush="#E5E7EB" BorderThickness="1" Padding="10,8" FontSize="14"
-                                 Margin="0,0,0,16"
-                                 Text="{Binding ClassNum, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
-
-                        <!-- Mentor section -->
-                        <StackPanel Visibility="{Binding HasMentorProfile, Converter={StaticResource BoolToVis}}">
-                            <Rectangle Height="1" Fill="#F3F4F6" Margin="0,4,0,12"/>
+                        <!-- Role selection (shown only when student has no role yet) -->
+                        <StackPanel Visibility="{Binding ShowRoleSelection, Converter={StaticResource BoolToVis}}">
                             <TextBlock Style="{StaticResource SectionHeader}"
-                                       Text="{Binding [Profile_SubjectToTeach_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-
-                            <TextBlock Style="{StaticResource FieldLabel}" Margin="0,12,0,4"
-                                       Text="{Binding [Profile_SubjectToTeach_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <ComboBox
-                                TextSearch.TextPath="Name"
-                                IsEnabled="{Binding IsEditMode}"
-                                ItemsSource="{Binding Subjects}"
-                                SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                SelectedValuePath="Id"
-                                Margin="0,0,0,16">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
-                                                    <Binding Path="Name" />
-                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-
-                            <TextBlock Style="{StaticResource FieldLabel}"
-                                       Text="{Binding [Profile_MaxMentees_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <TextBox IsReadOnly="{Binding IsReadOnly}"
-                                     BorderBrush="#E5E7EB" BorderThickness="1" Padding="10,8" FontSize="14"
-                                     Margin="0,0,0,16"
-                                     Text="{Binding MaxMentees, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
-
-                            <TextBlock Style="{StaticResource FieldLabel}"
-                                       Text="{Binding [Profile_PreferredMenteeGender_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <ComboBox
-                                IsEnabled="{Binding IsEditMode}"
-                                ItemsSource="{Binding GenderPreferenceOptions}"
-                                SelectedValue="{Binding SelectedPreferredMenteeGenderValue, UpdateSourceTrigger=PropertyChanged}"
-                                SelectedValuePath="Value"
-                                DisplayMemberPath="Display"
-                                Margin="0,0,0,16" />
+                                       Text="{Binding [Profile_ChooseRole_Title], Source={x:Static loc:TranslationSource.Instance}}" />
+                            <TextBlock FontSize="12" Foreground="#6B7280" Margin="0,4,0,16"
+                                       Text="{Binding [Profile_ChooseRole_Hint], Source={x:Static loc:TranslationSource.Instance}}" />
+                            <CheckBox IsChecked="{Binding IsMentorSelected}" Content="Mentor" Margin="0,0,0,8" FontSize="14"/>
+                            <CheckBox IsChecked="{Binding IsMenteeSelected}" Content="Mentee" Margin="0,0,0,16" FontSize="14"/>
+                            <Button Style="{StaticResource PrimaryBtn}"
+                                    Content="{Binding [Profile_ChooseRole_Confirm], Source={x:Static loc:TranslationSource.Instance}}"
+                                    Command="{Binding ConfirmRoleSelectionCommand}"
+                                    HorizontalAlignment="Left" />
                         </StackPanel>
 
-                        <!-- Mentee section -->
-                        <StackPanel Visibility="{Binding HasMenteeProfile, Converter={StaticResource BoolToVis}}">
-                            <Rectangle Height="1" Fill="#F3F4F6" Margin="0,4,0,12"/>
+                        <!-- Profile fields (hidden while role selection is pending) -->
+                        <StackPanel Visibility="{Binding ShowRoleSelection, Converter={StaticResource InverseBoolToVis}}">
+
                             <TextBlock Style="{StaticResource SectionHeader}"
-                                       Text="{Binding [Profile_SubjectToLearn_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                       Text="{Binding [Profile_GradeClass_Label], Source={x:Static loc:TranslationSource.Instance}}" />
 
                             <TextBlock Style="{StaticResource FieldLabel}" Margin="0,12,0,4"
-                                       Text="{Binding [Profile_SubjectToLearn_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                       Text="{Binding [Profile_GradeClass_Label], Source={x:Static loc:TranslationSource.Instance}}" />
                             <ComboBox
-                                TextSearch.TextPath="Name"
-                                IsEnabled="{Binding IsEditMode}"
-                                ItemsSource="{Binding Subjects}"
-                                SelectedValue="{Binding SubjectToLearn, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                SelectedValuePath="Id"
+                                IsEnabled="False"
+                                ItemsSource="{Binding SchoolClasses}"
+                                SelectedItem="{Binding SelectedSchoolClass, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                                 Margin="0,0,0,16">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
-                                                    <Binding Path="Name" />
-                                                    <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                        <Binding Path="Grade.Name" />
+                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                            <TextBlock Text=" – " />
+                                            <TextBlock Text="{Binding [Profile_ClassNum_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                            <TextBlock Text=" " />
+                                            <TextBlock Text="{Binding ClassNum}" />
+                                        </StackPanel>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
 
-                            <TextBlock Style="{StaticResource FieldLabel}"
-                                       Text="{Binding [Profile_PreferredMentorGender_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <ComboBox
-                                IsEnabled="{Binding IsEditMode}"
-                                ItemsSource="{Binding GenderPreferenceOptions}"
-                                SelectedValue="{Binding SelectedPreferredMentorGenderValue, UpdateSourceTrigger=PropertyChanged}"
-                                SelectedValuePath="Value"
-                                DisplayMemberPath="Display"
-                                Margin="0,0,0,16" />
+                            <!-- Mentor section -->
+                            <StackPanel Visibility="{Binding HasMentorProfile, Converter={StaticResource BoolToVis}}">
+                                <Rectangle Height="1" Fill="#F3F4F6" Margin="0,4,0,12"/>
+                                <TextBlock Style="{StaticResource SectionHeader}"
+                                           Text="{Binding [Profile_SubjectToTeach_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+
+                                <TextBlock Style="{StaticResource FieldLabel}" Margin="0,12,0,4"
+                                           Text="{Binding [Profile_SubjectToTeach_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                <ComboBox
+                                    TextSearch.TextPath="Name"
+                                    IsEnabled="{Binding IsEditMode}"
+                                    ItemsSource="{Binding Subjects}"
+                                    SelectedValue="{Binding SubjectToTeach, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                    SelectedValuePath="Id"
+                                    Margin="0,0,0,16">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                                        <Binding Path="Name" />
+                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <TextBlock Style="{StaticResource FieldLabel}"
+                                           Text="{Binding [Profile_MaxMentees_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                <TextBox IsReadOnly="{Binding IsReadOnly}"
+                                         BorderBrush="#E5E7EB" BorderThickness="1" Padding="10,8" FontSize="14"
+                                         Margin="0,0,0,16"
+                                         Text="{Binding MaxMentees, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+
+                                <TextBlock Style="{StaticResource FieldLabel}"
+                                           Text="{Binding [Profile_PreferredMenteeGender_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                <ComboBox
+                                    IsEnabled="{Binding IsEditMode}"
+                                    ItemsSource="{Binding GenderPreferenceOptions}"
+                                    SelectedValue="{Binding SelectedPreferredMenteeGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                                    SelectedValuePath="Value"
+                                    DisplayMemberPath="Display"
+                                    Margin="0,0,0,16" />
+                            </StackPanel>
+
+                            <!-- Mentee section -->
+                            <StackPanel Visibility="{Binding HasMenteeProfile, Converter={StaticResource BoolToVis}}">
+                                <Rectangle Height="1" Fill="#F3F4F6" Margin="0,4,0,12"/>
+                                <TextBlock Style="{StaticResource SectionHeader}"
+                                           Text="{Binding [Profile_SubjectToLearn_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+
+                                <TextBlock Style="{StaticResource FieldLabel}" Margin="0,12,0,4"
+                                           Text="{Binding [Profile_SubjectToLearn_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                <ComboBox
+                                    TextSearch.TextPath="Name"
+                                    IsEnabled="{Binding IsEditMode}"
+                                    ItemsSource="{Binding Subjects}"
+                                    SelectedValue="{Binding SubjectToLearn, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                    SelectedValuePath="Id"
+                                    Margin="0,0,0,16">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Subject_">
+                                                        <Binding Path="Name" />
+                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <TextBlock Style="{StaticResource FieldLabel}"
+                                           Text="{Binding [Profile_PreferredMentorGender_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                <ComboBox
+                                    IsEnabled="{Binding IsEditMode}"
+                                    ItemsSource="{Binding GenderPreferenceOptions}"
+                                    SelectedValue="{Binding SelectedPreferredMentorGenderValue, UpdateSourceTrigger=PropertyChanged}"
+                                    SelectedValuePath="Value"
+                                    DisplayMemberPath="Display"
+                                    Margin="0,0,0,16" />
+                            </StackPanel>
+
                         </StackPanel>
 
                     </StackPanel>
@@ -296,7 +314,7 @@
                             ToolTip="{Binding [Profile_SaveChanges_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
                             Command="{Binding SaveCommand}"
                             Content="{Binding [Profile_SaveChanges_Button], Source={x:Static loc:TranslationSource.Instance}}"
-                            Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVis}}" />
+                            Visibility="{Binding IsSaveButtonVisible, Converter={StaticResource BoolToVis}}" />
                     </StackPanel>
 
                     <TextBlock

@@ -1,0 +1,164 @@
+<UserControl
+    x:Class="MentoringApp.View.Supervisor.Dashboard.IssuesListView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
+    xmlns:b="clr-namespace:MentoringApp.Behaviors"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+
+    <UserControl.Resources>
+        <Style x:Key="IssueTabStyle" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Border" Padding="12,8" BorderThickness="0,0,0,2" BorderBrush="Transparent">
+                            <TextBlock x:Name="Label" Text="{TemplateBinding Content}" FontSize="14" Foreground="#6B7280" FontWeight="Medium"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#A855F7"/>
+                                <Setter TargetName="Label" Property="Foreground" Value="#A855F7"/>
+                                <Setter TargetName="Label" Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Label" Property="Foreground" Value="#A855F7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IssueListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="12,16" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="BorderBrush" Value="#F3F4F6" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="#F9FAFB"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="#F3F4F6"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="IssueItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="Desc" FontSize="14" FontWeight="Medium" Foreground="#111827" Text="{Binding Description}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#F3F4F6" CornerRadius="6" Padding="8,2" Margin="0,0,8,0">
+                            <TextBlock FontSize="11" Foreground="#4B5563" FontWeight="SemiBold">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Category_">
+                                        <Binding Path="Category.Name" />
+                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </Border>
+                        <TextBlock FontSize="11" Foreground="#9CA3AF" VerticalAlignment="Center">
+                            <Run Text="{Binding [IssueItem_Created_Label], Source={x:Static loc:TranslationSource.Instance}, Mode=OneWay}"/>
+                            <Run Text=" "/>
+                            <Run Text="{Binding CreationDate, StringFormat='{}{0:d}'}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                <Border x:Name="StatBadge" Grid.Column="1" Background="#FEE2E2" CornerRadius="12" Padding="12,6" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <TextBlock x:Name="Stat" Text="{Binding [Supervisor_IssuePending], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#DC2626" FontSize="12" FontWeight="Bold"/>
+                </Border>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsResolved}" Value="True">
+                    <Setter TargetName="Desc" Property="TextDecorations" Value="Strikethrough" />
+                    <Setter TargetName="Desc" Property="Foreground" Value="#9CA3AF" />
+                    <Setter TargetName="StatBadge" Property="Background" Value="#D1FAE5" />
+                    <Setter TargetName="Stat" Property="Foreground" Value="#059669" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Border Style="{StaticResource CardStyleLg}" Padding="20,16,20,0"
+            Visibility="{Binding ArePairsAndIssuesVisible, Converter={StaticResource BoolToVis}}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                    <RadioButton Content="{Binding [Supervisor_IssuePending], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource IssueTabStyle}" IsChecked="{Binding IsShowingPending, Mode=OneWay}" Command="{Binding ShowPendingCommand}"/>
+                    <RadioButton Content="{Binding [Supervisor_IssueResolved], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource IssueTabStyle}" IsChecked="{Binding IsShowingResolved, Mode=OneWay}" Command="{Binding ShowResolvedCommand}" Margin="16,0,0,0"/>
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding IssuesSectionContextTitle}" FontSize="13" FontStyle="Italic" Foreground="#9CA3AF" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </DockPanel>
+
+            <Rectangle Grid.Row="1" Height="1" Fill="#E5E7EB" VerticalAlignment="Top" Margin="-20,0,-20,0"/>
+
+            <Grid Grid.Row="2" Margin="0,12,0,0">
+                <TextBlock Text="{Binding [Supervisor_NoPendingIssues], Source={x:Static loc:TranslationSource.Instance}}" FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding FilteredPendingIssues.Count}" Value="0"/>
+                                        <Condition Binding="{Binding ShowResolvedIssues}" Value="False"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Text="{Binding [Supervisor_NoResolvedIssues], Source={x:Static loc:TranslationSource.Instance}}" FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding FilteredResolvedIssues.Count}" Value="0"/>
+                                        <Condition Binding="{Binding ShowResolvedIssues}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <ListView ItemsSource="{Binding FilteredPendingIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          b:ListItemSelector.Command="{Binding SelectIssueCommand}">
+                    <ListView.Style>
+                        <Style TargetType="ListView">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding ShowResolvedIssues}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
+                        </Style>
+                    </ListView.Style>
+                </ListView>
+                <ListView ItemsSource="{Binding FilteredResolvedIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          b:ListItemSelector.Command="{Binding SelectIssueCommand}"
+                          Visibility="{Binding ShowResolvedIssues, Converter={StaticResource BoolToVis}}"/>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

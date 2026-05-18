@@ -24,4 +24,14 @@ public class SettingsApiClient(HttpClient http) : ApiClientBase(http)
 
     public Task SetIsUsersImportedAsync(bool value) =>
         PutAsync("/api/settings/is-users-imported", new BoolSettingRequest(value));
+
+    public Task SetIsSupervisorsAssignedAsync(bool value) =>
+        PutAsync("/api/settings/is-supervisors-assigned", new BoolSettingRequest(value));
+
+    /// <summary>
+    /// Graduates the highest-grade students, promotes all others by one grade,
+    /// wipes all pairs/reviews/requests, and resets the admin wizard to step 1.
+    /// </summary>
+    public Task AdvanceYearAsync() =>
+        PostAsync("/api/settings/advance-year", new { });
 }

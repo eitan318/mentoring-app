@@ -114,10 +114,10 @@ namespace MentoringApp.Service
                 "(@g12,1),(@g12,2),(@g12,3),(@g12,4)",
                 new { g9, g10, g11, g12 });
 
-            int sc9_1 = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g9}  AND ClassNum=1");
-            int sc9_2 = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g9}  AND ClassNum=2");
-            int sc9_3 = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g9}  AND ClassNum=3");
-            int sc9_4 = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g9}  AND ClassNum=4");
+            int sc9_1  = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g9}  AND ClassNum=1");
+            int sc9_2  = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g9}  AND ClassNum=2");
+            int sc9_3  = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g9}  AND ClassNum=3");
+            int sc9_4  = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g9}  AND ClassNum=4");
             int sc10_1 = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g10} AND ClassNum=1");
             int sc10_2 = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g10} AND ClassNum=2");
             int sc10_3 = GetId($"SELECT Id FROM SchoolClasses WHERE GradeId={g10} AND ClassNum=3");

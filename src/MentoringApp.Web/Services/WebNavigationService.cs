@@ -48,6 +48,7 @@ public class WebNavigationService : INavigationService
     {
         if (_routes.TryGetValue(typeof(TViewModel), out var url))
         {
+            if (IsCurrentUrl(url)) return Task.CompletedTask;
             if (IsRootRoute(url)) _history.Clear();
             else _history.Push(_navManager.Uri);
 
@@ -63,6 +64,7 @@ public class WebNavigationService : INavigationService
         _paramStore.Set(typeof(TViewModel), parameter!);
         if (_routes.TryGetValue(typeof(TViewModel), out var url))
         {
+            if (IsCurrentUrl(url)) return Task.CompletedTask;
             if (IsRootRoute(url)) _history.Clear();
             else _history.Push(_navManager.Uri);
 
@@ -77,6 +79,7 @@ public class WebNavigationService : INavigationService
         if (_routes.TryGetValue(typeof(TViewModel), out var url))
         {
             _history.Clear();
+            if (IsCurrentUrl(url)) return Task.CompletedTask;
             _navManager.NavigateTo(url);
             CanGoBackChanged?.Invoke();
         }
@@ -90,10 +93,17 @@ public class WebNavigationService : INavigationService
         if (_routes.TryGetValue(typeof(TViewModel), out var url))
         {
             _history.Clear();
+            if (IsCurrentUrl(url)) return Task.CompletedTask;
             _navManager.NavigateTo(url);
             CanGoBackChanged?.Invoke();
         }
         return Task.CompletedTask;
+    }
+
+    private bool IsCurrentUrl(string url)
+    {
+        var relativePath = new Uri(_navManager.Uri).AbsolutePath;
+        return relativePath.Equals(url, StringComparison.OrdinalIgnoreCase);
     }
 
     private bool IsRootRoute(string url)

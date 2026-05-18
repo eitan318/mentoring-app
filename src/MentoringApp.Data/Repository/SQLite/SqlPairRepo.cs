@@ -81,6 +81,12 @@ namespace MentoringApp.Data.Acess.SQLite
             }
         }
 
+        public async Task DeleteAllAsync()
+        {
+            const string sql = "DELETE FROM Pairs;";
+            await _db.ExecuteAsync(sql);
+        }
+
         public async Task<bool> DeleteAsync(int pairId)
         {
             try

@@ -74,9 +74,9 @@ public static class MatchingEndpoints
         .WithOpenApi();
 
         // PUT /api/matching/requests/{requestId}/accept — Admin/Supervisor
-        group.MapPut("/requests/{requestId:int}/accept", async (int requestId, AcceptRequestBody req, MatchingFlowService matching) =>
+        group.MapPut("/requests/{requestId:int}/accept", async (int requestId, MatchingFlowService matching) =>
         {
-            var result = await matching.AcceptPairRequestAsync(requestId, req.SupervisorId);
+            var result = await matching.AcceptPairRequestAsync(requestId);
             return result.ToHttp();
         })
         .RequireAuthorization("AdminOrSupervisor")
@@ -110,7 +110,7 @@ public static class MatchingEndpoints
         // POST /api/matching/gallery-pick — Student
         group.MapPost("/gallery-pick", async (GalleryPickBody req, MatchingFlowService matching) =>
         {
-            var result = await matching.GalleryPickAsync(req.MenteeId, req.MentorId, req.SupervisorId);
+            var result = await matching.GalleryPickAsync(req.MenteeId, req.MentorId);
             return result.ToHttp();
         })
         .WithOpenApi();

@@ -1,7 +1,4 @@
 using System.Windows.Controls;
-using System.Windows.Input;
-using MentoringApp.Model;
-using MentoringApp.ViewModel.ViewModel.Admin;
 
 namespace MentoringApp.View.Admin
 {
@@ -15,14 +12,9 @@ namespace MentoringApp.View.Admin
             InitializeComponent();
         }
 
-        private void OnForwardedIssueClick(object sender, MouseButtonEventArgs e)
+        private void SupervisorsListView_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (sender is ListViewItem item &&
-                item.DataContext is IssueModel issue &&
-                DataContext is AdminOverviewViewModel vm)
-            {
-                vm.SelectForwardedIssueCommand.Execute(issue);
-            }
+
         }
     }
 }

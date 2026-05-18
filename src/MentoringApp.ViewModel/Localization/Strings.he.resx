@@ -189,6 +189,21 @@
   <data name="Profile_Grade_Label" xml:space="preserve">
     <value>כיתה</value>
   </data>
+  <data name="Profile_GradeClass_Label" xml:space="preserve">
+    <value>כיתה ומספר</value>
+  </data>
+  <data name="Profile_ChooseRole_Title" xml:space="preserve">
+    <value>בחר תפקיד</value>
+  </data>
+  <data name="Profile_ChooseRole_Hint" xml:space="preserve">
+    <value>בחר תפקיד אחד או שניים להמשך.</value>
+  </data>
+  <data name="Profile_ChooseRole_Confirm" xml:space="preserve">
+    <value>המשך</value>
+  </data>
+  <data name="Table_Registered" xml:space="preserve">
+    <value>נרשמו</value>
+  </data>
   <data name="Profile_SubjectToTeach_Label" xml:space="preserve">
     <value>מקצוע ללמד</value>
   </data>
@@ -1067,6 +1082,18 @@
   <data name="SysSettings_Continue_Tooltip" xml:space="preserve">
     <value>המשך ללוח הבקרה הראשי</value>
   </data>
+  <data name="SysSettings_ContinueToDashboard_Button" xml:space="preserve">
+    <value>המשך ללוח הבקרה ←</value>
+  </data>
+  <data name="SysSettings_ContinueToDashboard_Hint" xml:space="preserve">
+    <value>בית הספר הוגדר! כעת תוכל להמשיך ללוח הבקרה ולהוסיף תלמידים.</value>
+  </data>
+  <data name="Admin_Step_SchoolConfig" xml:space="preserve">
+    <value>הגדרת בית ספר</value>
+  </data>
+  <data name="Admin_Step_AssignSupervisors" xml:space="preserve">
+    <value>הקצאת מדריכים</value>
+  </data>
   <data name="Admin_Step_ImportUsers" xml:space="preserve">
     <value>ייבוא משתמשים</value>
   </data>
@@ -1160,6 +1187,9 @@
   <data name="Supervisor_NoPairs" xml:space="preserve">
     <value>לא הוקצו זוגות עדיין.</value>
   </data>
+  <data name="Supervisor_PairSearch_Placeholder" xml:space="preserve">
+    <value>חפש לפי שם…</value>
+  </data>
   <data name="Supervisor_NoPendingIssues" xml:space="preserve">
     <value>אין בעיות ממתינות.</value>
   </data>
@@ -1252,8 +1282,20 @@
   <data name="Admin_PhaseDeadlines_Label" xml:space="preserve"><value>תאריכי יעד</value></data>
   <data name="Admin_ProcessComplete_NoDeadlines_Label" xml:space="preserve"><value>התהליך הושלם. אין תאריכי יעד פעילים.</value></data>
   <data name="Admin_PhaseActions_Label" xml:space="preserve"><value>פעולות השלב</value></data>
+  <data name="Admin_GoToSystemSettings_Button" xml:space="preserve"><value>עבור להגדרות מערכת</value></data>
+  <data name="Admin_SchoolConfig_Required_Label" xml:space="preserve"><value>הגדר את בית הספר בהגדרות לפני הוספת תלמידים.</value></data>
+  <data name="Admin_SchoolConfig_InProgress_Hint" xml:space="preserve"><value>הוסף לפחות כיתה אחת כדי לעבור לשלב הבא.</value></data>
+  <data name="Admin_CompleteSchoolConfig_Button" xml:space="preserve"><value>✓ השלם הגדרת בית ספר</value></data>
+  <data name="Admin_CompleteSupervisorAssignment_Button" xml:space="preserve"><value>✓ השלם הקצאת מדריכים</value></data>
+  <data name="Admin_SchoolConfig_NoClasses_Error" xml:space="preserve"><value>אנא הוסף לפחות כיתה אחת לפני השלמת הגדרת בית הספר.</value></data>
+  <data name="Admin_SupervisorAssignment_Incomplete_Error" xml:space="preserve"><value>אנא הקצה את כל הכיתות למדריכים לפני המשך.</value></data>
+  <data name="Admin_NoDeadlinesYet_Label" xml:space="preserve"><value>תאריכי יעד יהיו זמינים לאחר תחילת ההרשמה.</value></data>
+  <data name="Admin_ImportUsers_Instruction_Title" xml:space="preserve"><value>ייבא משתמשים כדי להמשיך</value></data>
+  <data name="Admin_ImportUsers_Instruction_Body" xml:space="preserve"><value>פתח את הלשונית "ניהול משתמשים" בסרגל הצד כדי לייבא מדריכים ותלמידים. לאחר הייבוא, לחץ "התחל הרשמה" בצד.</value></data>
+  <data name="Admin_PhaseGuide_SchoolConfig" xml:space="preserve"><value>הגדרת בית ספר:\nהוסף את השכבות והכיתות המשתתפות בתוכנית. יש להשלים שלב זה לפני ייבוא המשתמשים.</value></data>
   <data name="Admin_GoToManageUsers_Button" xml:space="preserve"><value>עבור לניהול משתמשים</value></data>
   <data name="Admin_BeginRegistration_Button" xml:space="preserve"><value>✓ התחל הרשמה</value></data>
+  <data name="Admin_Continue_Button" xml:space="preserve"><value>המשך</value></data>
   <data name="Admin_ProcessComplete_Label" xml:space="preserve"><value>תהליך הושלם</value></data>
   <data name="Admin_NoticeBoard_Label" xml:space="preserve"><value>לוח מודעות</value></data>
   <data name="Admin_NewIssue_Label" xml:space="preserve"><value>פנייה חדשה</value></data>
@@ -1309,4 +1351,15 @@
   <data name="MatchTier_AdminManual" xml:space="preserve"><value>התאמה ידנית</value></data>
   <data name="Student_RequestedAt_Label" xml:space="preserve"><value>נשלח ב:</value></data>
   <data name="Student_ExpertIn_Label" xml:space="preserve"><value>מומחה ב</value></data>
+  <data name="SysSettings_AdvanceYear_Button" xml:space="preserve"><value>📅 שנת לימוד הבאה</value></data>
+  <data name="SysSettings_AdvanceYear_Tooltip" xml:space="preserve"><value>עבור לשנת הלימודים הבאה: מחזק את השכבה הגבוהה, מקדם את השאר ומאפס את אשף המנהל</value></data>
+  <data name="SysSettings_AdvanceYear_Confirm_Title" xml:space="preserve"><value>מעבר לשנת הלימודים הבאה?</value></data>
+  <data name="SysSettings_AdvanceYear_Confirm_Body" xml:space="preserve"><value>פעולה זו תבצע לצמיתת:
+• הסרת כל התלמידים בשכבה הגבוהה (בוגרים)
+• קידום כל תלמיד אחר לשכבה הבאה
+• מחיקת כל הזוגות, הבקרות ובקשות החניכה
+• איפוס כל הגדרות המנהל לשלב 1
+
+פעולה זו אינה ניתנת לביטול. להמשיך?</value></data>
+  <data name="SysSettings_AdvanceYear_Success" xml:space="preserve"><value>✓ המעבר לשנת הלימודים הבאה הצליח.</value></data>
 </root>

@@ -7,6 +7,7 @@ namespace MentoringApp.Data.Acess.SQLite
     internal class SqlMatchScoreRepo : IMatchScoreRepo
     {
         private readonly ISQLiteConnectionService _db;
+        private const string SelectCols = "Id, MenteeId, MentorId, ScorePercent";
 
         public SqlMatchScoreRepo(ISQLiteConnectionService db) => _db = db;
 
@@ -23,14 +24,14 @@ namespace MentoringApp.Data.Acess.SQLite
         public async Task<IEnumerable<MatchScoreDao>> GetTopForMenteeAsync(int menteeId, int limit = 3)
         {
             var rows = await _db.QueryAsync<ScoreRow>(
-                "SELECT Id, MenteeId, MentorId, ScorePercent FROM MatchScores WHERE MenteeId = @MenteeId ORDER BY ScorePercent DESC LIMIT @Limit",
+                $"SELECT {SelectCols} FROM MatchScores WHERE MenteeId = @MenteeId ORDER BY ScorePercent DESC LIMIT @Limit",
                 new { MenteeId = menteeId, Limit = limit });
             return rows.Select(MapToDto).ToList();
         }
 
         public async Task<IEnumerable<MatchScoreDao>> GetAllAsync()
         {
-            var rows = await _db.QueryAsync<ScoreRow>("SELECT Id, MenteeId, MentorId, ScorePercent FROM MatchScores ORDER BY ScorePercent DESC");
+            var rows = await _db.QueryAsync<ScoreRow>($"SELECT {SelectCols} FROM MatchScores ORDER BY ScorePercent DESC");
             return rows.Select(MapToDto).ToList();
         }
 
