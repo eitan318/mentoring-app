@@ -1,0 +1,19 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "src\\MentoringApp.Api\\MentoringApp.Api.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\MentoringApp.Desktop\\MentoringApp.WPF.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\MentoringApp.Web\\MentoringApp.Web.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
