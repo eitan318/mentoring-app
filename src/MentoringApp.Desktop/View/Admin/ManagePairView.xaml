@@ -270,6 +270,40 @@
                                 </StackPanel>
                             </Border>
 
+                            <!-- Supervisor Card -->
+                            <StackPanel Visibility="{Binding Supervisor, Converter={StaticResource NullToVis}}" Margin="0,0,0,24">
+                                <TextBlock Text="{Binding [Admin_ManagePair_Supervisor], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,8"/>
+                                <Border Background="#F5F0FF" BorderThickness="1" BorderBrush="#D8B4FE" CornerRadius="12" Padding="16">
+                                    <DockPanel>
+                                        <components:ProfilePictureControl DockPanel.Dock="Left" Width="44" Height="44" Margin="0,0,14,0" VerticalAlignment="Center"
+                                                                          ImagePath="{Binding Supervisor.ProfilePicturePath}"
+                                                                          Gender="{Binding Supervisor.Gender}"/>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Supervisor.UserName}" FontWeight="Bold" FontSize="15" Foreground="#111827"/>
+                                            <TextBlock Text="{Binding Supervisor.Email}" Foreground="#6B7280" FontSize="12" Margin="0,2"/>
+                                        </StackPanel>
+                                        <Button DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Content="{Binding [PairDetails_ViewSupervisorProfile], Source={x:Static loc:TranslationSource.Instance}}"
+                                                Command="{Binding DataContext.NavigateToSupervisorProfileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                Background="#A855F7" Foreground="White" BorderThickness="0"
+                                                Padding="10,5" Cursor="Hand">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#9333EA"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </DockPanel>
+                                </Border>
+                            </StackPanel>
+
                             <!-- Summary Section -->
                             <TextBlock Text="{Binding [Admin_ManagePair_RecentActivity], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"/>
                             <Border Background="#F3F4F6" CornerRadius="8" Padding="16" Margin="0,0,0,24">

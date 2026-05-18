@@ -357,6 +357,12 @@
   <data name="PairDetails_ActiveIssues_Label" xml:space="preserve">
     <value>בעיות פעילות ועבר</value>
   </data>
+  <data name="PairDetails_Supervisor_Label" xml:space="preserve">
+    <value>מפקח</value>
+  </data>
+  <data name="PairDetails_ViewSupervisorProfile" xml:space="preserve">
+    <value>צפה בפרופיל</value>
+  </data>
   <data name="Admin_CreatePair_SearchSupervisor" xml:space="preserve">
     <value>חיפוש מפקח:</value>
   </data>
@@ -407,6 +413,9 @@
   </data>
   <data name="Admin_ManagePair_DetailsHeader" xml:space="preserve">
     <value>פרטי הזוג הנבחר</value>
+  </data>
+  <data name="Admin_ManagePair_Supervisor" xml:space="preserve">
+    <value>מפקח</value>
   </data>
   <data name="Admin_ManageUsers_AddImportHeader" xml:space="preserve">
     <value>הוספה וייבוא משתמשים</value>
