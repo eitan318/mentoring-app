@@ -242,7 +242,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
         if (item != null)
         {
-            var vm = new PairDetailsViewModel(_pairClient, _issueClient, _reviewClient, _settingsClient)
+            var vm = new PairDetailsViewModel(_pairClient, _issueClient, _reviewClient, _settingsClient, _navigationService)
             {
                 ShowIssues = false
             };

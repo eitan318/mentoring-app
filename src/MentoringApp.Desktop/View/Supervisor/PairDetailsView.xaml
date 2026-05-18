@@ -81,6 +81,42 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+                <!-- Supervisor Row -->
+                <Border Margin="0,0,0,15" Padding="10,8" Background="#F5F0FF" BorderBrush="#D8B4FE" BorderThickness="1" CornerRadius="6"
+                        Visibility="{Binding CurrentPair.Supervisor, Converter={StaticResource NullToVis}}">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                            <components:ProfilePictureControl Width="36" Height="36" Margin="0,0,10,0"
+                                                              VerticalAlignment="Center"
+                                                              ImagePath="{Binding CurrentPair.Supervisor.ProfilePicturePath}"
+                                                              Gender="{Binding CurrentPair.Supervisor.Gender}"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [PairDetails_Supervisor_Label], Source={x:Static loc:TranslationSource.Instance}}" FontSize="11" Foreground="#7C3AED" FontWeight="SemiBold" Margin="0,0,0,1"/>
+                                <TextBlock Text="{Binding CurrentPair.Supervisor.UserName}" FontWeight="Bold" FontSize="14" Foreground="#111827"/>
+                                <TextBlock Text="{Binding CurrentPair.Supervisor.Email}" Foreground="#6B7280" FontSize="11" Margin="0,1,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <Button DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Content="{Binding [PairDetails_ViewSupervisorProfile], Source={x:Static loc:TranslationSource.Instance}}"
+                                Command="{Binding NavigateToSupervisorProfileCommand}"
+                                Background="#A855F7" Foreground="White" BorderThickness="0"
+                                Padding="12,6" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#9333EA"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </DockPanel>
+                </Border>
+
                 <!-- Meeting Hours Progress -->
                 <StackPanel>
                     <DockPanel Margin="0,0,0,4">

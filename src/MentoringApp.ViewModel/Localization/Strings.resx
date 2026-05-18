@@ -357,6 +357,12 @@
   <data name="PairDetails_ActiveIssues_Label" xml:space="preserve">
     <value>Active &amp; Past Issues</value>
   </data>
+  <data name="PairDetails_Supervisor_Label" xml:space="preserve">
+    <value>Supervisor</value>
+  </data>
+  <data name="PairDetails_ViewSupervisorProfile" xml:space="preserve">
+    <value>View Profile</value>
+  </data>
   <data name="Admin_CreatePair_SearchSupervisor" xml:space="preserve">
     <value>Search Supervisor:</value>
   </data>
@@ -407,6 +413,9 @@
   </data>
   <data name="Admin_ManagePair_DetailsHeader" xml:space="preserve">
     <value>Selected Pair Details</value>
+  </data>
+  <data name="Admin_ManagePair_Supervisor" xml:space="preserve">
+    <value>Supervisor</value>
   </data>
   <data name="Admin_ManageUsers_AddImportHeader" xml:space="preserve">
     <value>Add &amp; Import Users</value>
