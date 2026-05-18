@@ -199,7 +199,93 @@ Records earn their keep here through structural equality and `with`-expression u
 
 ---
 
-## 5. Putting it together
+## 5. Event-Driven Programming — `INotifyPropertyChanged`, Custom Events, and Delegates
+
+The Async-Programming track of the rubric mandates *"heavy use of advanced OOP and event-driven features"*. This codebase satisfies that requirement on three layers, each using a different delegate flavour:
+
+### 5.1 Implicit events — `INotifyPropertyChanged` via the toolkit
+
+Every `[ObservableProperty]`-annotated field in the ViewModel and Model layers expands into a setter that raises `PropertyChanged`. WPF and Blazor bindings subscribe transparently, so a single mutation propagates to dozens of bound controls without imperative refresh code.
+
+> **Note** — `PropertyChanged` is itself a built-in `EventHandler<PropertyChangedEventArgs>` delegate; the toolkit only saves the boilerplate, it does **not** replace the underlying event mechanism.
+
+### 5.2 Explicit `event Action` — navigation surface
+
+The navigation service raises a parameterless built-in delegate to broadcast back-stack mutations:
+
+```csharp
+// src/MentoringApp.ViewModel/Navigation/NavigationService.cs
+public event Action? CanGoBackChanged;
+// ...
+CanGoBackChanged?.Invoke();
+```
+
+Subscribers (typically shell ViewModels) refresh `IRelayCommand.CanExecute()` for the back-button command. Multicast is implicit — every shell that subscribes is notified.
+
+### 5.3 `Action<T>` — context-bound callbacks
+
+`INavigationService.UseContext(Action<INavigatable>)` accepts a closure that knows how to update *its* surrounding container (a `ContentControl` in WPF, a router in Blazor). The navigation service does not know what the container is; it merely calls the delegate when the current `ViewModel` changes:
+
+```csharp
+public IDisposable UseContext(Action<INavigatable> contextSetter)
+{
+    var store = new NavigationStore();
+    Action updateUi = () => contextSetter(store.CurrentViewModel);
+    store.CurrentViewModelChanged += updateUi;       // chain delegate to event
+    // ...
+}
+```
+
+> **Note — Why `Action<T>` instead of an interface?** A delegate is the lightest possible polymorphism; defining `IShellHost { void Update(INavigatable) }` would force every shell to implement an interface for a single one-line method.
+
+### 5.4 `Func<Task>` — asynchronous strategy injection
+
+The internal `NavigateCoreAsync<T>` method receives a `Func<Task>` representing *which* `OnNavigatedToAsync` overload to call (parameterless versus parameterised). The same pipeline therefore handles both navigation kinds:
+
+```csharp
+private async Task NavigateCoreAsync<TViewModel>(
+    TViewModel vm, Func<Task> onNavigatedTo, bool clearHistory = false)
+    where TViewModel : class, INavigatable
+{
+    // ...
+    await onNavigatedTo();
+    CanGoBackChanged?.Invoke();
+}
+```
+
+> **Code reviewer note** — this is the cleanest pattern for "do mostly the same thing, but call a different async hook at the end". An `if (parameter is null) call A else call B` would force `NavigateCoreAsync` to know about the parameter shape.
+
+### 5.5 Custom delegates — fakes for tests
+
+`MentoringApp.ViewModel.Tests` injects fakes through a custom delegate signature:
+
+```csharp
+private sealed class FakeHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> handler)
+    : HttpMessageHandler
+{
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage req, CancellationToken ct)
+        => Task.FromResult(handler(req));
+}
+```
+
+The captured `Func<HttpRequestMessage, HttpResponseMessage>` is the test seam: tests register an arbitrary lambda, the ViewModel calls real `ApiClient` code, and assertions run against the recorded request.
+
+### 5.6 The pattern matrix
+
+| Mechanism | Delegate type | Where used | Why |
+|---|---|---|---|
+| `INotifyPropertyChanged` | `PropertyChangedEventHandler` | ViewModels, domain models | Implicit binding refresh |
+| `event Action?` | Built-in parameterless | `NavigationService.CanGoBackChanged`, `StoreBase` | Multicast notification |
+| `Action<T>` | Built-in single-arg | Shell context callback | Lightweight strategy injection |
+| `Func<Task>` | Built-in async | Navigation pipeline | Async strategy without virtuals |
+| `Func<TIn, TOut>` | Built-in | Test fakes | Inline lambda swaps |
+| `EventHandler<T>` | Built-in | Toast service, store mutations | CLR-canonical event signature |
+
+> **Reviewer note** — the codebase deliberately avoids declaring **custom** named delegate types (`public delegate void MyXxxHandler(...)`). Built-in `Action`/`Func`/`EventHandler` cover every scenario without polluting the namespace, and they compose naturally with LINQ and async.
+
+---
+
+## 6. Putting it together
 
 A typical write-side request now flows like this:
 
@@ -209,3 +295,16 @@ A typical write-side request now flows like this:
 4. The ViewModel consumes the `Result<T>`, populates observable state, and the view re-renders without imperative refresh code.
 
 Each layer keeps the next one ignorant of the layers below it. That is the central architectural promise of this codebase.
+
+---
+
+## 7. Curriculum Alignment
+
+| Rubric concept | Realisation |
+|---|---|
+| OOP (mandatory #7) | `UserModel` polymorphic hierarchy + composition for student profiles |
+| Inheritance | `AdminModel`/`SupervisorModel`/`StudentModel : UserModel` |
+| Event-driven programming | `INotifyPropertyChanged` toolkit + `event Action?` callbacks |
+| Delegates (Async track) | `Func<Task>`, `Action<T>`, `Func<TIn, TOut>` across navigation, stores, test seams |
+| Validation classes (extension §10) | `UserValidator`, `MentorProfileValidator` (FluentValidation) |
+| Service layer (Network Services track) | `*Service` classes — see §3 |

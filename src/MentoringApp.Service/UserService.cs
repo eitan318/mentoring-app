@@ -1,5 +1,6 @@
 using System;
 using System.IO.IsolatedStorage;
+using System.Text.RegularExpressions;
 using MentoringApp.Data.Dao;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Model;
@@ -330,12 +331,11 @@ namespace MentoringApp.Service
 
         public async Task<Result> RegisterUserAsync(RegisterRequest req)
         {
+            if (req.Role.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
+                req.Role.Equals("supervisor", StringComparison.OrdinalIgnoreCase))
+                return Result.Failure("This role cannot be self-registered.");
+
             UserModel user;
-            if (req.Role.Equals("supervisor", StringComparison.OrdinalIgnoreCase))
-            {
-                user = new SupervisorModel { UserName = req.UserName, Email = req.Email, NationalId = req.NationalId };
-            }
-            else
             {
                 var student = new StudentModel
                 {
@@ -369,9 +369,29 @@ namespace MentoringApp.Service
             return dtos.Select(d => new SupervisorStatsResponse(d.Id, d.UserName, d.PendingIssuesCount, d.ResolvedIssuesCount, d.PairsCount));
         }
 
-        public async Task<bool> UpdateBaseInfoAsync(int id, string userName, string email, string nationalId, string? phoneNumber, int gender)
+        private static readonly Regex PhoneRegex = new(@"^[+]?[\d\s\-\(\)]{7,20}$", RegexOptions.Compiled);
+        private static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
+        private static readonly Regex NationalIdRegex = new(@"^\d{9}$", RegexOptions.Compiled);
+
+        public async Task<Result> UpdateBaseInfoAsync(int id, string userName, string email, string nationalId, string? phoneNumber, int gender)
         {
-            return await _userRepo.UpdateBaseInfoAsync(id, userName, email, nationalId, phoneNumber, gender);
+            if (string.IsNullOrWhiteSpace(userName) || userName.Length < 3 || userName.Length > 50)
+                return Result.Failure("Username must be between 3 and 50 characters.");
+            if (string.IsNullOrWhiteSpace(email) || !EmailRegex.IsMatch(email))
+                return Result.Failure("A valid email address is required.");
+            if (string.IsNullOrWhiteSpace(nationalId) || !NationalIdRegex.IsMatch(nationalId))
+                return Result.Failure("National ID must be exactly 9 digits.");
+            if (phoneNumber != null && !PhoneRegex.IsMatch(phoneNumber))
+                return Result.Failure("Phone number format is invalid.");
+            if (gender < 0 || gender > 3)
+                return Result.Failure("Invalid gender value.");
+
+            var existing = await _userRepo.GetUserDtoByNationalIdAsync(nationalId);
+            if (existing != null && existing.Id != id)
+                return Result.Failure("A user with this National ID already exists.");
+
+            bool ok = await _userRepo.UpdateBaseInfoAsync(id, userName, email, nationalId, phoneNumber, gender);
+            return ok ? Result.Ok() : Result.Failure("User not found.");
         }
 
         public async Task UpdateStudentGradeAndClassAsync(int id, int gradeId, int classNum)
@@ -379,19 +399,30 @@ namespace MentoringApp.Service
             await _userRepo.UpdateStudentGradeAndClassAsync(id, gradeId, classNum);
         }
 
-        public async Task UpdateStudentPreferredGendersAsync(int id, int preferredMentorGender, int preferredMenteeGender)
+        public async Task<Result> UpdateStudentPreferredGendersAsync(int id, int preferredMentorGender, int preferredMenteeGender)
         {
+            if (preferredMentorGender < 0 || preferredMentorGender > 2)
+                return Result.Failure("Invalid preferred mentor gender value.");
+            if (preferredMenteeGender < 0 || preferredMenteeGender > 2)
+                return Result.Failure("Invalid preferred mentee gender value.");
             await _userRepo.UpdateStudentPreferredGendersAsync(id, preferredMentorGender, preferredMenteeGender);
+            return Result.Ok();
         }
 
-        public async Task UpsertMentorProfileAsync(int id, int subjectId)
+        public async Task<Result> UpsertMentorProfileAsync(int id, int subjectId)
         {
+            if (subjectId <= 0)
+                return Result.Failure("Invalid subject ID.");
             await _userRepo.UpsertMentorProfileAsync(id, subjectId);
+            return Result.Ok();
         }
 
-        public async Task UpsertMenteeProfileAsync(int id, int subjectId)
+        public async Task<Result> UpsertMenteeProfileAsync(int id, int subjectId)
         {
+            if (subjectId <= 0)
+                return Result.Failure("Invalid subject ID.");
             await _userRepo.UpsertMenteeProfileAsync(id, subjectId);
+            return Result.Ok();
         }
 
         public async Task UpdateProfilePicturePathAsync(int id, string path)

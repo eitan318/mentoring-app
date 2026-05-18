@@ -3,14 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="root">
     <Grid>
+        <!-- Tinted background circle (always present as a safe backdrop) -->
         <Ellipse Fill="{Binding DefaultFill, ElementName=root}" />
-        <Viewbox Margin="5"
-                 Visibility="{Binding ShowDefaultAvatar, ElementName=root, Converter={StaticResource BoolToVis}}">
-            <TextBlock
-                Text="&#xE77B;"
-                FontFamily="Segoe MDL2 Assets"
-                Foreground="White" />
-        </Viewbox>
+
+        <!-- Gender default avatar (shown when no user photo) -->
+        <Ellipse Visibility="{Binding ShowDefaultAvatar, ElementName=root, Converter={StaticResource BoolToVis}}">
+            <Ellipse.Fill>
+                <ImageBrush ImageSource="{Binding DefaultImageSource, ElementName=root}"
+                            Stretch="UniformToFill" />
+            </Ellipse.Fill>
+        </Ellipse>
+
+        <!-- User's actual profile picture (overlaid when set) -->
         <Ellipse>
             <Ellipse.Fill>
                 <ImageBrush

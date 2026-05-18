@@ -9,7 +9,7 @@
              FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <ScrollViewer Background="#F4F7FE" VerticalScrollBarVisibility="Auto">
-        <Grid Margin="24,40,24,40">
+        <Grid Margin="{StaticResource PageMargin}">
             <Border
                 Background="White"
                 CornerRadius="16"

@@ -154,6 +154,7 @@
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding CanForward}" Value="True"/>
                                         <Condition Binding="{Binding CurrentIssue.IsForwardedToAdmin}" Value="False"/>
+                                        <Condition Binding="{Binding CurrentIssue.IsResolved}" Value="False"/>
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </MultiDataTrigger>
@@ -162,11 +163,23 @@
                     </Button.Style>
                 </Button>
                 <Button
-                    Style="{StaticResource PrimaryBtn}"
                     ToolTip="{Binding [Issue_Resolve_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
                     Command="{Binding ResolveIssueCommand}"
-                    Content="{Binding [Issue_Resolve_Button], Source={x:Static loc:TranslationSource.Instance}}"
-                    Visibility="{Binding CurrentIssue.IsResolved, Converter={StaticResource InverseBoolToVis}}" />
+                    Content="{Binding [Issue_Resolve_Button], Source={x:Static loc:TranslationSource.Instance}}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource PrimaryBtn}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentIssue.IsResolved}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding CurrentIssue.IsForwardedToAdmin}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </StackPanel>
 
         </StackPanel>

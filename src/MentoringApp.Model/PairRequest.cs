@@ -11,11 +11,8 @@ namespace MentoringApp.Model
         Accepted,
         Rejected
     }
-
-    /// <summary>
-    /// Represents a mentee's request to be paired with a specific mentor.
-    /// Used in Tier 1 (direct) and Tier 3 (gallery pick).
     /// </summary>
+    /// 
     public class PairRequest
     {
         public int Id { get; set; }

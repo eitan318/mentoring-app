@@ -1,0 +1,15 @@
+<UserControl
+    x:Class="MentoringApp.View.Supervisor.Dashboard.PhaseBannerView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+
+    <Border Visibility="{Binding IsPhaseBannerVisible, Converter={StaticResource BoolToVis}}" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="12" Padding="16,12" Margin="0,0,0,20">
+        <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="{Binding BannerTitle}" FontWeight="Bold" FontSize="14" Foreground="#1E3A8A" Margin="0,0,0,2"/>
+            <TextBlock Text="{Binding BannerSubtitle}" Foreground="#3B82F6" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,2"/>
+            <TextBlock Text="{Binding BannerTimer}" FontSize="11" FontWeight="SemiBold" Foreground="#2563EB"/>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -55,7 +55,6 @@ public partial class AddReviewViewModel : ObservableValidator, INavigatable<int>
             Content: ReviewContent,
             Date: DateTime.Now,
             PairId: _currentPairId,
-            AuthorUserId: _userStore.User.Id,
             AmountOfHours: AmountOfHours));
 
         RequestClose?.Invoke();

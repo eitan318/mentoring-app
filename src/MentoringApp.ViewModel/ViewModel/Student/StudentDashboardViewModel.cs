@@ -9,7 +9,6 @@ using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
 using MentoringApp.ViewModel.ViewModel.User;
 using System.Collections.ObjectModel;
-using System.Threading;
 
 namespace MentoringApp.ViewModel.ViewModel.Student;
 
@@ -32,7 +31,7 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
     [ObservableProperty] private bool _isPhase1Active;
     [ObservableProperty] private bool _isPhase2Active;
 
-    private CancellationTokenSource? _timerCts;
+    private readonly OneSecondTicker _ticker;
     private DateTime? _tier1Deadline;
     private DateTime? _tier3Deadline;
     private bool _isPhase1Complete;
@@ -85,9 +84,11 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
 
         _selectionGalleryVm.OnPairCreated = LoadDataAsync;
         _mentorRequestsVm.OnPairCreated = LoadDataAsync;
+        _ticker = new OneSecondTicker(UpdatePhaseTimer);
     }
 
     public async Task OnNavigatedToAsync() => await LoadDataAsync();
+    public Task OnNavigatedFromAsync() { _ticker.Stop(); return Task.CompletedTask; }
 
     private async Task LoadDataAsync()
     {
@@ -100,7 +101,8 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         _tier3Deadline = settings.Phase2Deadline != null ? DateTime.Parse(settings.Phase2Deadline) : null;
         _isPhase1Complete = settings.IsPhase1Complete;
 
-        SetupTimer();
+        UpdatePhaseTimer();
+        _ticker.Start();
 
         bool mentorIsMatched = false;
         bool menteeIsMatched = false;
@@ -177,27 +179,6 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
             await _toastService.ShowInfoAsync(_loc.Get("Student_Phase1Info_Title"), _loc.Get("Student_Phase1Info_Body"));
         else if (IsPhase2Active)
             await _toastService.ShowInfoAsync(_loc.Get("Student_Phase2Info_Title"), _loc.Get("Student_Phase2Info_Body"));
-    }
-
-    private void SetupTimer()
-    {
-        _timerCts?.Cancel();
-        _timerCts = new CancellationTokenSource();
-        _ = RunTimerAsync(_timerCts.Token);
-    }
-
-    private async Task RunTimerAsync(CancellationToken token)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-        UpdatePhaseTimer();
-        try
-        {
-            while (await timer.WaitForNextTickAsync(token))
-            {
-                UpdatePhaseTimer();
-            }
-        }
-        catch (OperationCanceledException) { }
     }
 
     private void UpdatePhaseTimer()
@@ -298,7 +279,7 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
 
         try
         {
-            await _matchingClient.GalleryPickAsync(new GalleryPickRequest(currentUser.Id, recommendation.MentorId, 1));
+            await _matchingClient.GalleryPickAsync(new GalleryPickRequest(currentUser.Id, recommendation.MentorId));
             AlreadyMatched = true;
             StatusMessage = _loc.Format("Student_MatchedWith_Message", recommendation.MentorName);
             if (OnPairCreated != null) await OnPairCreated();
@@ -374,7 +355,7 @@ public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.Vi
     {
         try
         {
-            await _matchingClient.AcceptRequestAsync(request.Id, new AcceptRequestBody(AssignedSupervisorId));
+            await _matchingClient.AcceptRequestAsync(request.Id, new AcceptRequestBody());
             StatusMessage = _loc.Format("Student_AcceptedPaired_Message", request.MenteeName);
             if (OnPairCreated != null) await OnPairCreated();
         }
@@ -478,14 +459,13 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
         try
         {
             await _matchingClient.SendPairRequestAsync(new SendPairRequestBody(currentUser.Id, card.MentorId));
-            StatusMessage = _loc.Format("Student_RequestSent_Message", card.MentorName);
             card.HasPendingRequest = true;
         }
         catch (Exception ex)
         {
             StatusMessage = $"✗ {ex.Message}";
+            HasStatusMessage = true;
         }
-        HasStatusMessage = true;
     }
 
     [RelayCommand]
@@ -498,14 +478,13 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
             var pending = await _matchingClient.GetRequestsForMenteeAsync(currentUser.Id);
             var req = pending.FirstOrDefault(r => r.MentorId == card.MentorId);
             if (req != null) await _matchingClient.CancelRequestAsync(req.Id);
-            StatusMessage = _loc.Format("Student_RequestCancelled_Message", card.MentorName);
             card.HasPendingRequest = false;
         }
         catch (Exception ex)
         {
             StatusMessage = $"✗ {ex.Message}";
+            HasStatusMessage = true;
         }
-        HasStatusMessage = true;
     }
 }
 

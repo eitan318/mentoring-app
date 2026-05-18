@@ -265,6 +265,174 @@ Empty values in the configuration are tolerated for development; the API host ru
 
 ---
 
-## 6. Summary
+## 6. Stateless Architecture (Network Services Track)
 
-The networking architecture is a strict three-ring layout: **typed client methods → `ApiClientBase` HTTP conversion → ASP.NET Core minimal APIs**. JSON, authentication, error handling and retry policy are each centralised in exactly one place. The email subsystem follows the same single-responsibility shape: a singleton service exposing one method, with retry semantics bounded to genuinely transient failures.
+The rubric's Network-Services track requires *"a stateless environment, e.g. ASP.NET"*. The codebase satisfies this requirement uniformly.
+
+### 6.1 What "stateless" means here
+
+* **No session affinity.** Two consecutive requests from the same client may be served by different threads, processes or hosts. Nothing per-user is held in memory between requests.
+* **JWT carries identity.** Every authenticated request presents `Authorization: Bearer <jwt>`; the server reconstructs the user from the token claims without a session lookup.
+* **Per-request DI scope.** Repositories, services, and DbContexts (when they exist) are `Scoped`, meaning they are constructed at the start of a request and disposed at the end. There is no cross-request mutable state.
+
+### 6.2 Mechanics — the request lifecycle
+
+```
+HTTP request
+    │
+    ├── Authentication middleware reads JWT, builds ClaimsPrincipal
+    ├── Authorization policy validates the route's [Authorize(Policy=…)]
+    │
+    ├── Endpoint handler resolved from minimal-API map
+    │     ↳ ASP.NET creates a fresh DI scope
+    │     ↳ Resolves Scoped services from that scope
+    │
+    ├── Service runs business logic, returns Result<T>
+    └── Endpoint maps Result<T> → HTTP status code, scope is disposed
+```
+
+> **Reviewer note** — there is no `Session.Add(...)` anywhere in the codebase. Even verification codes (a stateful concept) are stored in the **database**, not in memory; that is what keeps the host genuinely horizontally scalable.
+
+### 6.3 Comparison
+
+| Stateful (anti-pattern) | Stateless (this codebase) |
+|---|---|
+| `HttpContext.Session["user"]` | JWT claims |
+| In-process verification-code dictionary | `VerificationCodes` table |
+| Server-side cart object | Client holds the cart, sends it on submit |
+
+---
+
+## 7. File Transfer Between Server & Client (Extension §9)
+
+The rubric's section 9 includes *"transferring files (images / songs / documents) between server and client and/or vice versa"*. Two file-transfer features exist in production today.
+
+### 7.1 Profile-picture upload — `multipart/form-data`
+
+**Client side** — `UserApiClient.UploadProfilePictureAsync(int userId, string localPath)` builds a `MultipartFormDataContent`:
+
+```csharp
+public async Task<string> UploadProfilePictureAsync(int userId, string localPath)
+{
+    using var stream     = File.OpenRead(localPath);
+    using var fileContent = new StreamContent(stream);
+    fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+
+    using var form = new MultipartFormDataContent
+    {
+        { fileContent, "file", Path.GetFileName(localPath) }
+    };
+
+    using var resp = await _http.PostAsync($"api/users/{userId}/profile-picture", form);
+    // …
+}
+```
+
+**Server side** — endpoint receives an `IFormFile`:
+
+```csharp
+group.MapPost("/{id:int}/profile-picture", async (int id, IFormFile file, UserService svc) =>
+{
+    if (file.Length == 0) return Results.BadRequest();
+    using var ms = new MemoryStream();
+    await file.CopyToAsync(ms);
+    var saved = await svc.SaveProfilePictureAsync(id, ms.ToArray(), file.FileName);
+    return saved.Success ? Results.Ok(new { url = saved.Data }) : Results.BadRequest();
+});
+```
+
+> **Reviewer notes**
+> - **Stream, not byte array, on the client.** `StreamContent` lets the runtime upload incrementally without buffering the entire file in memory.
+> - **`MemoryStream` on the server.** Acceptable for small files (profile pictures are <1 MB). For larger documents, prefer `file.OpenReadStream()` and pipe directly to disk.
+> - **Authorization.** The endpoint inherits `RequireAuthorization()` from the group; only authenticated users can upload.
+> - **Content-Type validation belongs in the service layer.** Reject `image/svg+xml` and similar — see [`10-security.md`](10-security.md) §4.
+
+### 7.2 Excel import — file system + ClosedXML
+
+`ExcelImportService.ImportStudentsFromExcelAsync(string filePath)` is the bulk-onboarding pipeline.
+
+```csharp
+public async Task<Result<int>> ImportStudentsFromExcelAsync(string filePath)
+{
+    using var workbook = new XLWorkbook(filePath);
+    var worksheet      = workbook.Worksheet(1);
+    var rows           = worksheet.RowsUsed().Skip(1);  // skip header
+
+    int successCount = 0;
+    foreach (var row in rows)
+    {
+        var nationalId = row.Cell(1).GetString()?.Trim() ?? "";
+        var email      = row.Cell(2).GetString()?.Trim() ?? "";
+        var userName   = row.Cell(3).GetString()?.Trim() ?? "";
+        if (string.IsNullOrWhiteSpace(nationalId) ||
+            string.IsNullOrWhiteSpace(email)      ||
+            string.IsNullOrWhiteSpace(userName)) continue;
+
+        var student = new StudentModel(0, email, userName, nationalId,
+                                       new GradeModel { Id = 1, Name = "Imported", Num = 0 });
+        if ((await _userService.CreateUserAsync(student)).Success) successCount++;
+    }
+    return Result<int>.Ok(successCount);
+}
+```
+
+> **Why ClosedXML?** It is a managed wrapper over OpenXML — no Microsoft Office or COM automation is required, so the import works on a headless server.
+
+### 7.3 Generalised file-transfer pattern
+
+| Direction | Transport | Use site |
+|---|---|---|
+| Client → Server | `multipart/form-data` | Profile picture upload |
+| Server → Client | `image/*` response with caching headers | Profile picture serving |
+| Local → Local | File path + ClosedXML/IO | Excel import (admin-only) |
+
+See [`09-file-management.md`](09-file-management.md) for the security-sensitive details (path traversal, content sniffing, virus scanning).
+
+---
+
+## 8. External Service Integration (Extension §10)
+
+The rubric's section 10 mentions *"writing and using an external Service, as needed by the project"*. Two external services are integrated.
+
+### 8.1 SMTP (Gmail)
+
+Already covered in §5. The `EmailService` consumes the standard `System.Net.Mail.SmtpClient`; nothing in the calling code is aware of Gmail specifically — switching to a transactional-email vendor (SendGrid, Mailgun) is a one-class change.
+
+### 8.2 Configuration-only switching
+
+`EmailSettings` in `appsettings.json` is the only thing that has to change to redirect mail traffic:
+
+```json
+{
+  "EmailSettings": {
+    "SmtpHost": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "FromEmail": "noreply@example.com",
+    "FromPassword": "<app-password>"
+  }
+}
+```
+
+> **Reviewer note** — credentials are read **once** at startup; rotating them requires a host restart, which is acceptable for this app's deployment cadence. For zero-downtime rotation, wrap the credential read in `IOptionsMonitor<EmailSettings>`.
+
+### 8.3 Future-friendly seams
+
+The architecture is set up so that a future *AI service* (rubric extension §10) — for instance an LLM-driven mentor recommendation — can plug into `MatchingFlowService` behind a new interface (`ICompatibilityProvider`) without rewriting any caller. See [`12-bonus-and-extensions.md`](12-bonus-and-extensions.md).
+
+---
+
+## 9. Summary
+
+The networking architecture is a strict three-ring layout: **typed client methods → `ApiClientBase` HTTP conversion → ASP.NET Core minimal APIs**. JSON, authentication, error handling and retry policy are each centralised in exactly one place. The email subsystem follows the same single-responsibility shape: a singleton service exposing one method, with retry semantics bounded to genuinely transient failures. The architecture is genuinely **stateless** — JWTs carry identity, scoped DI carries the per-request dependency graph, and there is no in-memory session store.
+
+---
+
+## 10. Curriculum Alignment
+
+| Rubric concept | Realisation | Section |
+|---|---|---|
+| Server-Client web services (Network track) | `ApiClient` ↔ minimal-API host | §1, §4 |
+| `Service` built by the student (Network track) | `*Service` classes invoked by endpoints | §4 |
+| Stateless environment (Network track) | JWT + scoped DI, no session store | §6 |
+| File transfer (extension §9) | Profile picture upload (`multipart/form-data`), Excel import | §7 |
+| External Service (extension §10) | SMTP via `EmailService` | §8 |

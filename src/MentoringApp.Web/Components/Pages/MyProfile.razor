@@ -68,26 +68,42 @@
         @if (!Vm.IsSupervisor)
         {
             <hr class="divider" />
-            <div class="section-header">@Loc.Get("Profile_Grade_Label")</div>
 
-            <div class="field-label">@Loc.Get("Profile_Grade_Label")</div>
-            <select class="field-input"
-                    disabled="@(!Vm.IsEditMode)"
-                    value="@(Vm.SelectedGrade?.Id.ToString() ?? "")"
-                    @onchange="OnGradeChanged">
+            @* Role selection (only when no role chosen yet) *@
+            @if (Vm.ShowRoleSelection)
+            {
+                <div class="section-header">@Loc.Get("Profile_ChooseRole_Title")</div>
+                <div class="role-hint">@Loc.Get("Profile_ChooseRole_Hint")</div>
+                <label class="role-check">
+                    <input type="checkbox" checked="@Vm.IsMentorSelected"
+                           @onchange="e => Vm.IsMentorSelected = (bool)(e.Value ?? false)" />
+                    Mentor
+                </label>
+                <label class="role-check">
+                    <input type="checkbox" checked="@Vm.IsMenteeSelected"
+                           @onchange="e => Vm.IsMenteeSelected = (bool)(e.Value ?? false)" />
+                    Mentee
+                </label>
+                <button class="btn-confirm-role"
+                        @onclick="() => Vm.ConfirmRoleSelectionCommand.Execute(null)">
+                    @Loc.Get("Profile_ChooseRole_Confirm")
+                </button>
+            }
+            else
+            {
+            <div class="section-header">@Loc.Get("Profile_GradeClass_Label")</div>
+
+            <div class="field-label">@Loc.Get("Profile_GradeClass_Label")</div>
+            <select class="field-input field-readonly"
+                    disabled="true"
+                    value="@(Vm.SelectedSchoolClass?.Id.ToString() ?? "")"
+                    @onchange="OnSchoolClassChanged">
                 <option value=""></option>
-                @foreach (var g in Vm.Grades)
+                @foreach (var sc in Vm.SchoolClasses)
                 {
-                    <option value="@g.Id" selected="@(Vm.SelectedGrade?.Id == g.Id)">@g.Name</option>
+                    <option value="@sc.Id" selected="@(Vm.SelectedSchoolClass?.Id == sc.Id)">@sc.DisplayName</option>
                 }
             </select>
-
-            <div class="field-label">@Loc.Get("Profile_ClassNum_Label")</div>
-            <input class="field-input"
-                   type="number"
-                   readonly="@Vm.IsReadOnly"
-                   value="@Vm.ClassNum"
-                   @oninput="e => Vm.ClassNum = int.TryParse(e.Value?.ToString(), out var n) ? n : 0" />
 
             @* ── Mentor section ──────────────────────────────────────────── *@
             @if (Vm.HasMentorProfile)
@@ -155,6 +171,7 @@
                     }
                 </select>
             }
+            } @* end else (role selection done) *@
         }
 
         @* ── Action buttons ───────────────────────────────────────────────── *@
@@ -168,7 +185,7 @@
                     @Loc.Get("Profile_EditProfile_Button")
                 </button>
             }
-            @if (Vm.IsEditMode)
+            @if (Vm.IsSaveButtonVisible)
             {
                 <button class="btn-save"
                         title="@Loc.Get("Profile_SaveChanges_Tooltip")"
@@ -287,6 +304,23 @@
         margin-top: 10px;
         font-size: 13px;
     }
+
+    .role-hint {
+        font-size: 12px; color: #6B7280;
+        margin: 4px 0 16px;
+    }
+    .role-check {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 14px; cursor: pointer;
+        margin-bottom: 10px;
+    }
+    .role-check input { width: 16px; height: 16px; cursor: pointer; }
+    .btn-confirm-role {
+        background: #A855F7; color: white; font-weight: 600;
+        border: 0; padding: 10px 20px; border-radius: 8px;
+        cursor: pointer; font-size: 14px; margin-top: 6px;
+    }
+    .btn-confirm-role:hover { background: #9333EA; }
 </style>
 
 @code {
@@ -308,10 +342,10 @@
     private void OnLocChanged(object? sender, PropertyChangedEventArgs e) =>
         InvokeAsync(StateHasChanged);
 
-    private void OnGradeChanged(ChangeEventArgs e)
+    private void OnSchoolClassChanged(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString(), out var id))
-            Vm.SelectedGrade = Vm.Grades.FirstOrDefault(g => g.Id == id);
+            Vm.SelectedSchoolClass = Vm.SchoolClasses.FirstOrDefault(sc => sc.Id == id);
     }
 
     private void OnGenderChanged(ChangeEventArgs e)

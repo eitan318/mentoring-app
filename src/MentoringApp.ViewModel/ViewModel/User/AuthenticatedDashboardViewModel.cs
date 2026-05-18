@@ -49,11 +49,16 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
     private void OnCanGoBackChanged() => OnPropertyChanged(nameof(IsBackVisible));
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBackVisible))]
     [NotifyPropertyChangedFor(nameof(IsProfileButtonVisible))]
     private INavigatable? _activeSubPage;
 
     public bool IsProfileButtonVisible => ActiveSubPage is not MyProfileViewModel;
+
+    /// <summary>
+    /// The back button shows whenever the active navigation context has back-history.
+    /// Sidebar items use NavigateToRootAsync (which clears history), so they leave
+    /// CanGoBack false; subview navigations use NavigateToAsync, which pushes history.
+    /// </summary>
     public bool IsBackVisible => _navigationService.CanGoBack();
 
     [ObservableProperty] private UserModel? _currentUser;
@@ -113,6 +118,8 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
     {
         if (user is not StudentModel student)
             return false;
+        if (!student.IsMentor && !student.IsMentee)
+            return true;
         if (student.Grade == null || student.Grade.Id <= 0 || student.ClassNum <= 0)
             return true;
         if (student.IsMentor && (student.MentorProfile == null || student.MentorProfile.SubjectToTeach <= 0))

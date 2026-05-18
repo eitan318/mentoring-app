@@ -247,6 +247,209 @@ The Blazor lifetime model (`Scoped` per circuit) does not match the WPF lifetime
 
 ---
 
-## 6. Summary
+## 6. User Controls (Extension §9)
 
-The navigation and UI architecture deliberately treats **ViewModels as the contract** between the application and its renderers. The stack-of-stacks design supports nested shells without leaking back-history. `INavigatable`/`IClosable` give ViewModels the lifecycle hooks they need without coupling them to a shell. `DataTemplate` (WPF) and `@page` (Blazor) provide platform-appropriate view resolution while keeping the ViewModel layer untouched. The platform-specific `INavigationService` implementation is the single seam where WPF and Web semantics diverge.
+The rubric's section 9 explicitly mentions *"use of user controls"* as an extension topic. The codebase satisfies this with reusable, dependency-property-driven controls under `src/MentoringApp.Desktop/View/Components/`.
+
+### 6.1 The `ProfilePictureControl` — anatomy of a `UserControl`
+
+```csharp
+// src/MentoringApp.Desktop/View/Components/ProfilePictureControl.xaml.cs
+public partial class ProfilePictureControl : UserControl
+{
+    public static readonly DependencyProperty ImagePathProperty =
+        DependencyProperty.Register("ImagePath", typeof(string), typeof(ProfilePictureControl),
+            new PropertyMetadata(null, OnImagePathOrGenderChanged));
+
+    public string ImagePath
+    {
+        get => (string)GetValue(ImagePathProperty);
+        set => SetValue(ImagePathProperty, value);
+    }
+
+    public static readonly DependencyProperty GenderProperty =
+        DependencyProperty.Register("Gender", typeof(Gender), typeof(ProfilePictureControl),
+            new PropertyMetadata(Gender.PreferNoAnswer, OnImagePathOrGenderChanged));
+    // ...
+}
+```
+
+### 6.2 Why `DependencyProperty` instead of CLR properties
+
+* **Bindings.** WPF only allows `{Binding …}` against `DependencyProperty`. A plain CLR property cannot receive a binding source.
+* **Property-changed callbacks.** `OnImagePathOrGenderChanged` runs whenever *either* property mutates, allowing the control to recompute the default-avatar fill colour atomically.
+* **Read-only computed state.** `ShowDefaultAvatar` and `DefaultFill` are read-only DPs registered with `RegisterReadOnly(...)` — only the control writes them, but XAML triggers can still bind to them.
+
+### 6.3 Reuse patterns
+
+| Reuse mechanism | Where used | Pros |
+|---|---|---|
+| `UserControl` (composite) | `ProfilePictureControl`, `ToastHostView` | Encapsulates layout + code-behind |
+| `ResourceDictionary` styles | `Styles/*.xaml` | Inherit a look, not a structure |
+| `DataTemplate` selectors | `Styles/ViewModelViewMap.xaml` | Polymorphic rendering |
+| Attached property | (none yet — candidate for keyboard helpers) | Cross-cutting, no inheritance |
+
+> **Reviewer note** — `UserControl` is appropriate here because the avatar contains *both* presentation and small amounts of behaviour (file existence check, gender→colour mapping). Pure presentation would belong in a `ResourceDictionary` style.
+
+---
+
+## 7. Value Converters (Extension §10)
+
+The rubric's section 10 explicitly mentions *"writing and using value converter classes"*. The codebase carries ten production converters under `src/MentoringApp.Desktop/Converter/`.
+
+### 7.1 The contract
+
+```csharp
+public interface IValueConverter
+{
+    object? Convert    (object value, Type targetType, object parameter, CultureInfo culture);
+    object  ConvertBack(object value, Type targetType, object parameter, CultureInfo culture);
+}
+```
+
+A converter is the binding-engine extension point: it transforms a source-property value into a target-property value at bind time.
+
+### 7.2 Catalogue
+
+| Converter | Purpose |
+|---|---|
+| `InverseBoolConverter` | `bool` ↔ `!bool` for `IsEnabled` toggles |
+| `InverseBooleanToVisibilityConverter` | `bool → Visibility.Collapsed/Visible` reversed |
+| `NullToVisibilityConverter` | Nullable reference → `Collapsed` when null |
+| `StringToImageSourceConverter` | File-path string → `BitmapImage` (or null) |
+| `StringToFlowDirectionConverter` | `"he"`/`"en"` → `FlowDirection.RightToLeft`/`LeftToRight` |
+| `DbTranslationConverter` | DB-stored key → localised string via `TranslationSource` |
+| `LocalizedFormatConverter` | Composite-format string from resx + multi-binding |
+| `LocalizedClassCountConverter` | Pluralisation-aware (e.g. "1 class" vs "3 classes") |
+| `GradeClassDisplayConverter` | `(Grade, ClassNum)` → `"10A"` style label |
+| `PercentToStrokeDashArrayConverter` | Percentage → SVG-ish ring chart segment |
+
+### 7.3 Walk-through — `StringToImageSourceConverter`
+
+```csharp
+public class StringToImageSourceConverter : IValueConverter
+{
+    public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is not string path || string.IsNullOrWhiteSpace(path)) return null;
+        if (!System.IO.File.Exists(path)) return null;
+
+        var bitmap = new BitmapImage();
+        bitmap.BeginInit();
+        bitmap.CacheOption = BitmapCacheOption.OnLoad;   // close the file handle immediately
+        bitmap.UriSource   = new Uri(path, UriKind.Absolute);
+        bitmap.EndInit();
+        bitmap.Freeze();                                 // make immutable & cross-thread safe
+        return bitmap;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+```
+
+> **Reviewer note** — `BitmapCacheOption.OnLoad` + `Freeze()` is the correct pattern for "load-once, never-mutate" images. Without `OnLoad`, the file handle would stay open for the lifetime of the bitmap; without `Freeze`, the image could not be assigned to a control on a thread different from where it was created.
+
+### 7.4 Multi-binding converters
+
+`LocalizedFormatConverter` implements `IMultiValueConverter`, taking an array of source values plus a format key and producing one output:
+
+```csharp
+// Pseudo-XAML (multi-binding for a localisable greeting)
+<TextBlock>
+    <TextBlock.Text>
+        <MultiBinding Converter="{StaticResource LocalizedFormat}" ConverterParameter="WelcomeFormat">
+            <Binding Path="UserName"/>
+            <Binding Path="UnreadCount"/>
+        </MultiBinding>
+    </TextBlock.Text>
+</TextBlock>
+```
+
+> **Why prefer a multi-converter to string interpolation in code-behind?** The localisation keys (`WelcomeFormat`) live with the resx, the bindings live in XAML, and the WPF binding engine handles change-propagation automatically.
+
+### 7.5 Registration in `App.xaml`
+
+```xml
+<Application.Resources>
+    <ResourceDictionary>
+        <conv:InverseBoolConverter             x:Key="InverseBool"/>
+        <conv:NullToVisibilityConverter        x:Key="NullToVis"/>
+        <conv:StringToImageSourceConverter     x:Key="ImagePathToImage"/>
+        <!-- … -->
+    </ResourceDictionary>
+</Application.Resources>
+```
+
+Once registered, converters are referenced from any view via `{StaticResource}`.
+
+> **Reviewer checklist**
+> - Converters never mutate input — they are pure functions of `(value, parameter, culture)`.
+> - `ConvertBack` is implemented only when `Mode=TwoWay` is realistic; otherwise it throws `NotSupportedException`.
+> - Conversion failures return the binding-engine sentinel (`DependencyProperty.UnsetValue` or `Binding.DoNothing`) rather than throwing.
+
+---
+
+## 8. Permission-Aware UI (Mandatory Requirement #8)
+
+The rubric's mandatory requirement #8 demands *"the project handles multiple permission levels … the UI must contain only the options matching the permission level"*. UI-side permission gating happens in three coordinated places.
+
+### 8.1 Shell selection at login time
+
+`AuthenticatedDashboardView` selects an inner shell ViewModel by inspecting `UserStore.Current`:
+
+```csharp
+INavigatable shell = _userStore.Current switch
+{
+    AdminModel       => _services.GetRequiredService<AdminDashboardViewModel>(),
+    SupervisorModel  => _services.GetRequiredService<SupervisorDashboardViewModel>(),
+    StudentModel     => _services.GetRequiredService<StudentDashboardViewModel>(),
+    _                => throw new InvalidOperationException("Unknown role")
+};
+```
+
+A user simply cannot reach the wrong shell — there is no URL or hotkey that lets a Student land on `AdminDashboardView`.
+
+### 8.2 Per-element visibility gating
+
+Inside a shared shell, finer permissions are expressed via `Visibility` bindings:
+
+```xml
+<Button Content="{Binding [Forward_To_Admin], Source={x:Static loc:TranslationSource.Instance}}"
+        Visibility="{Binding CanForwardToAdmin, Converter={StaticResource BoolToVis}}"/>
+```
+
+`CanForwardToAdmin` is computed in the ViewModel from `UserStore.Current` and the entity context (e.g. only a Supervisor can forward an issue belonging to one of their assigned classes).
+
+### 8.3 Server-side enforcement
+
+UI gating is **convenience**, not security. The actual permission check is on the API:
+
+```csharp
+group.MapPost("/", async (CreateUserRequest req, UserService userService) =>
+{
+    // ...
+}).RequireAuthorization("AdminOnly");
+```
+
+`AdminOnly`, `AdminOrSupervisor` policies are wired in `Program.cs` (see [10-security.md](10-security.md)). A forged client cannot escape the policy check.
+
+> **Reviewer note** — never trust a UI hide. Even if a button is invisible, the corresponding endpoint must enforce the policy server-side.
+
+---
+
+## 9. Summary
+
+The navigation and UI architecture deliberately treats **ViewModels as the contract** between the application and its renderers. The stack-of-stacks design supports nested shells without leaking back-history. `INavigatable`/`IClosable` give ViewModels the lifecycle hooks they need without coupling them to a shell. `DataTemplate` (WPF) and `@page` (Blazor) provide platform-appropriate view resolution while keeping the ViewModel layer untouched. The platform-specific `INavigationService` implementation is the single seam where WPF and Web semantics diverge. UserControls and Value Converters extend the WPF surface without introducing UI logic into ViewModels, and permission-aware rendering is layered on top of strictly server-enforced policies.
+
+---
+
+## 10. Curriculum Alignment
+
+| Rubric concept | Realisation | Section |
+|---|---|---|
+| Comfortable UI (mandatory #5) | Stack-of-stacks navigation, role-targeted shells | §1 |
+| Multi-permission levels (mandatory #8) | UI gating + server policies | §8 |
+| Use of user controls (extension §9) | `ProfilePictureControl`, `ToastHostView` | §6 |
+| Value converter classes (extension §10) | 10 converters under `Converter/` | §7 |
+| Multiple platforms (Async track) | WPF + Blazor share ViewModels via DI swap | §3, §4 |

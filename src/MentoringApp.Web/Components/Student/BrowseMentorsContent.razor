@@ -28,11 +28,20 @@
                     @mentor.SubjectName · @mentor.GradeName · Class @mentor.ClassNum
                 </div>
             </div>
-            <button class="btn-primary"
-                    disabled="@mentor.HasPendingRequest"
-                    @onclick="async () => await Vm.SendRequestCommand.ExecuteAsync(mentor)">
-                @(mentor.HasPendingRequest ? "Request Sent" : "Send Request")
-            </button>
+            @if (mentor.HasPendingRequest)
+            {
+                <button class="btn-cancel"
+                        @onclick="async () => await Vm.CancelRequestCommand.ExecuteAsync(mentor)">
+                    Cancel Request
+                </button>
+            }
+            else
+            {
+                <button class="btn-primary"
+                        @onclick="async () => await Vm.SendRequestCommand.ExecuteAsync(mentor)">
+                    Send Request
+                </button>
+            }
         </div>
     }
 </div>
@@ -60,8 +69,13 @@
         padding: 8px 14px; border-radius: 8px; font-weight: 600;
         font-size: 13px; cursor: pointer;
     }
-    .btn-primary:hover:not(:disabled) { background: #9333EA; }
-    .btn-primary:disabled { opacity: .55; cursor: default; }
+    .btn-primary:hover { background: #9333EA; }
+    .btn-cancel {
+        background: #DC2626; color: white; border: 0;
+        padding: 8px 14px; border-radius: 8px; font-weight: 600;
+        font-size: 13px; cursor: pointer;
+    }
+    .btn-cancel:hover { background: #B91C1C; }
 </style>
 
 @code {

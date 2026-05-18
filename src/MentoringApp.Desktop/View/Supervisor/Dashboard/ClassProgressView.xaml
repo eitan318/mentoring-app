@@ -1,0 +1,244 @@
+<UserControl
+    x:Class="MentoringApp.View.Supervisor.Dashboard.ClassProgressView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:components="clr-namespace:MentoringApp.View.Components"
+    xmlns:loc="clr-namespace:MentoringApp.ViewModel.Localization;assembly=MentoringApp.ViewModel"
+    FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
+
+    <Border Style="{StaticResource CardStyleLg}" Visibility="{Binding IsPhase1Active, Converter={StaticResource BoolToVis}}" Margin="0,0,0,24">
+        <StackPanel>
+
+            <!-- Header: circular graph + summary text -->
+            <DockPanel Margin="0,0,0,20">
+                <Grid DockPanel.Dock="Left" Width="110" Height="110" Margin="0,0,20,0">
+                    <!-- Background ring -->
+                    <Ellipse Margin="5" Stroke="#E5E7EB" StrokeThickness="10" Fill="Transparent"/>
+                    <!-- Progress ring (starts from top via -90° rotation) -->
+                    <Ellipse Margin="5" Stroke="#10B981" StrokeThickness="10" Fill="Transparent"
+                             RenderTransformOrigin="0.5,0.5"
+                             StrokeDashArray="{Binding ClassProgressPercent, Converter={StaticResource PercentToStrokeDash}, ConverterParameter='100,10'}">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform Angle="-90"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <!-- Center labels -->
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ClassProgressPercent, StringFormat={}{0:F0}%}"
+                                   FontSize="22" FontWeight="Bold" Foreground="#111827"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding [Supervisor_Registered_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                                   FontSize="10" Foreground="#6B7280" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+                <StackPanel VerticalAlignment="Center">
+                    <DockPanel Margin="0,0,0,8">
+                        <TextBlock Text="{Binding [Supervisor_ClassRegistration_Title], Source={x:Static loc:TranslationSource.Instance}}"
+                                   FontSize="16" FontWeight="Bold" Foreground="#111827" VerticalAlignment="Center"/>
+                        <Button DockPanel.Dock="Right" Content="?" Width="20" Height="20" FontSize="11" FontWeight="Bold"
+                                Background="#E5E7EB" Foreground="#4B5563" BorderThickness="0" Cursor="Hand"
+                                Command="{Binding ShowPhaseInfoCommand}" VerticalAlignment="Center" Margin="6,0,0,0">
+                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
+                        </Button>
+                    </DockPanel>
+                    <TextBlock Text="{Binding ClassProgressInfo}" Foreground="#6B7280" FontSize="13" TextWrapping="Wrap"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Rectangle Height="1" Fill="#F3F4F6" Margin="-24,0,-24,16"/>
+
+            <!-- Not-yet-registered section -->
+            <TextBlock FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"
+                       Text="{Binding [Supervisor_InactiveStudents_Header], Source={x:Static loc:TranslationSource.Instance}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding InactiveStudents.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <!-- All-registered empty state -->
+            <TextBlock Text="{Binding [Supervisor_AllRegistered_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                       FontSize="14" Foreground="#6B7280" FontStyle="Italic"
+                       HorizontalAlignment="Center" Margin="0,8">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding InactiveStudents.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <!-- Table column headers -->
+            <Grid Margin="10,0,10,8">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding InactiveStudents.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="1" Text="{Binding [Admin_ManageUsers_Name_Column], Source={x:Static loc:TranslationSource.Instance}}"
+                           FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="44,0,0,0"/>
+                <TextBlock Grid.Column="2" Text="{Binding [Admin_ManageUsers_Email_Column], Source={x:Static loc:TranslationSource.Instance}}"
+                           FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
+                <TextBlock Grid.Column="3" Text="{Binding [Admin_ManageUsers_Class_Column], Source={x:Static loc:TranslationSource.Instance}}"
+                           FontWeight="SemiBold" FontSize="12" Foreground="#6B7280" Margin="0,0,8,0"/>
+                <TextBlock Grid.Column="4" Text="{Binding [Admin_ManageUsers_Status_Column], Source={x:Static loc:TranslationSource.Instance}}"
+                           FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
+            </Grid>
+            <Rectangle Height="1" Fill="#F3F4F6" Margin="-24,0,-24,0">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding InactiveStudents.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+
+            <!-- Student list -->
+            <ListView ItemsSource="{Binding InactiveStudents}" MaxHeight="260"
+                      BorderThickness="0" Background="Transparent"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="10,12"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                        <Setter Property="BorderBrush" Value="#F3F4F6"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListViewItem">
+                                    <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#F9FAFB"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#F3F4F6"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <components:ProfilePictureControl Grid.Column="0" Width="32" Height="32"
+                                Margin="0,0,12,0" VerticalAlignment="Center"
+                                ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}"/>
+
+                            <TextBlock Grid.Column="1" Text="{Binding UserName}" VerticalAlignment="Center"
+                                       FontWeight="Medium" Foreground="#111827"/>
+
+                            <TextBlock Grid.Column="2" Text="{Binding Email}" VerticalAlignment="Center"
+                                       Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+
+                            <!-- Grade · Class badge -->
+                            <Border Grid.Column="3" Background="#F3F4F6" CornerRadius="8" Padding="8,4"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#374151">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource GradeClassDisplay}">
+                                            <Binding Path="Grade.Name"/>
+                                            <Binding Path="ClassNum"/>
+                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Border>
+
+                            <!-- Role badges -->
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Background="#ECFDF5" CornerRadius="8" Padding="8,4" Margin="0,0,4,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsMentor}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding [Supervisor_Role_Mentor], Source={x:Static loc:TranslationSource.Instance}}"
+                                               Foreground="#059669" FontSize="11" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Background="#EFF6FF" CornerRadius="8" Padding="8,4" Margin="0,0,4,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsMentee}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding [Supervisor_Role_Mentee], Source={x:Static loc:TranslationSource.Instance}}"
+                                               Foreground="#2563EB" FontSize="11" FontWeight="SemiBold"/>
+                                </Border>
+                                <!-- No role warning: shown only when neither mentor nor mentee -->
+                                <Border Background="#FEF2F2" CornerRadius="8" Padding="8,4">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsMentor}" Value="False"/>
+                                                        <Condition Binding="{Binding IsMentee}" Value="False"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding [Supervisor_Role_NoRole], Source={x:Static loc:TranslationSource.Instance}}"
+                                               Foreground="#DC2626" FontSize="11" FontWeight="SemiBold"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+        </StackPanel>
+    </Border>
+</UserControl>

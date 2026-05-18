@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using MentoringApp.Api.Helpers;
 using MentoringApp.Service;
 using MentoringApp.Model;
@@ -45,9 +47,17 @@ public static class IssueEndpoints
             .WithOpenApi();
 
         // POST /api/issues
-        group.MapPost("/", async (CreateIssueRequest req, IssueService issueService) =>
-            (await issueService.CreateIssueAsync(req.Description, req.CategoryId, req.ReportedByUserId)).ToHttp())
-            .WithOpenApi();
+        group.MapPost("/", async (CreateIssueRequest req, ClaimsPrincipal user, IssueService issueService) =>
+        {
+            if (req.Description.Length < 5 || req.Description.Length > 1000)
+                return Results.BadRequest(new { error = "Description must be between 5 and 1000 characters." });
+
+            if (!int.TryParse(user.FindFirstValue(JwtRegisteredClaimNames.Sub), out int userId))
+                return Results.Unauthorized();
+
+            return (await issueService.CreateIssueAsync(req.Description, req.CategoryId, userId)).ToHttp();
+        })
+        .WithOpenApi();
 
         // PUT /api/issues/{id}/resolve — Admin/Supervisor
         group.MapPut("/{id:int}/resolve", async (int id, IssueService issueService) =>

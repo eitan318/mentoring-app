@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
-    /// <summary>Lookup record for an issue category (e.g. "Technical Issue", "Behavioral Issue").</summary>
-    public class IssueCategoryModel
+    public class IssueCategoryModel : BaseModel
     {
-        public required int Id { get; set; }
         public required string Name { get; set; }
 
         [SetsRequiredMembers]

@@ -69,7 +69,8 @@ namespace MentoringApp.Data.DI
                 new SqlMatchScoreRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
             services.AddSingleton<ISchoolClassRepo>(sp =>
                 new SqlSchoolClassRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
-
+            services.AddSingleton<IYearAdvanceRepo>(sp =>
+                new SqlYearAdvanceRepo(sp.GetRequiredService<ISQLiteConnectionService>()));
 
             return services;
         }

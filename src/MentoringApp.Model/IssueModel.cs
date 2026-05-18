@@ -7,13 +7,8 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
-    /// <summary>
-    /// A problem or concern reported by a user.
-    /// Can be escalated to an admin by a supervisor via <see cref="ForwardedBySupervisorId"/>.
-    /// </summary>
-    public class IssueModel
+    public class IssueModel : BaseModel
     {
-        public required int Id { get; set; }
         public required string Description { get; set; }
         public required IssueCategoryModel Category { get; set; }
         public int ReportedByUserId { get; set; }
