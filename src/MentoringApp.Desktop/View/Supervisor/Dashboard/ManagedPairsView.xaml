@@ -8,6 +8,31 @@
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
+        <Style x:Key="ModernInput" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <Grid>
+                                <TextBlock Text="{TemplateBinding Tag}" Foreground="#9CA3AF" Margin="14,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" x:Name="Placeholder"/>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="PairListViewItemStyle" TargetType="ListViewItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="Padding" Value="12,16" />
