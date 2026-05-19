@@ -87,7 +87,11 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         _ticker = new OneSecondTicker(UpdatePhaseTimer);
     }
 
-    public async Task OnNavigatedToAsync() => await LoadDataAsync();
+    public async Task OnNavigatedToAsync()
+    {
+        try { await LoadDataAsync(); }
+        catch { /* API unavailable on first load — dashboard renders with empty state */ }
+    }
     public Task OnNavigatedFromAsync() { _ticker.Stop(); return Task.CompletedTask; }
 
     private async Task LoadDataAsync()
@@ -143,13 +147,13 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         {
             if (currentUser.IsMentee && !menteeIsMatched)
             {
-                await _selectionGalleryVm.LoadAsync();
+                try { await _selectionGalleryVm.LoadAsync(); } catch { }
                 Pairs.Add(_selectionGalleryVm);
             }
             if (currentUser.IsMentor && !mentorIsMatched)
             {
                 _mentorRequestsVm.IsPhase2Active = true;
-                await _mentorRequestsVm.LoadAsync();
+                try { await _mentorRequestsVm.LoadAsync(); } catch { }
                 Pairs.Add(_mentorRequestsVm);
             }
         }
@@ -157,13 +161,13 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         {
             if (currentUser.IsMentee && !menteeIsMatched)
             {
-                await _browseMentorsVm.LoadAsync();
+                try { await _browseMentorsVm.LoadAsync(); } catch { }
                 Pairs.Add(_browseMentorsVm);
             }
             if (currentUser.IsMentor && !mentorIsMatched)
             {
                 _mentorRequestsVm.IsPhase2Active = false;
-                await _mentorRequestsVm.LoadAsync();
+                try { await _mentorRequestsVm.LoadAsync(); } catch { }
                 Pairs.Add(_mentorRequestsVm);
             }
         }
@@ -333,21 +337,26 @@ public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.Vi
         var currentUser = _userStore.User;
         if (currentUser == null || !currentUser.IsMentor) { IsLoading = false; return; }
 
-        var requests = await _matchingClient.GetRequestsForMentorAsync(currentUser.Id);
-        foreach (var req in requests)
-            PendingRequests.Add(req);
-
-        var settings = await _settingsClient.GetAllAsync();
-        if (settings.Phase1Deadline != null)
+        try
         {
-            var deadline = DateTime.Parse(settings.Phase1Deadline);
-            var diff = deadline - DateTime.Now;
-            RequestWindowTimerDisplay = diff.TotalSeconds > 0
-                ? _loc.Format("Student_RequestWindowClosesIn", $"{diff.Days:D2}d : {diff.Hours:D2}h : {diff.Minutes:D2}m")
-                : _loc.Get("Student_RequestWindowClosed");
-        }
+            var requests = await _matchingClient.GetRequestsForMentorAsync(currentUser.Id);
+            foreach (var req in requests)
+                PendingRequests.Add(req);
 
-        IsLoading = false;
+            var settings = await _settingsClient.GetAllAsync();
+            if (settings.Phase1Deadline != null)
+            {
+                var deadline = DateTime.Parse(settings.Phase1Deadline);
+                var diff = deadline - DateTime.Now;
+                RequestWindowTimerDisplay = diff.TotalSeconds > 0
+                    ? _loc.Format("Student_RequestWindowClosesIn", $"{diff.Days:D2}d : {diff.Hours:D2}h : {diff.Minutes:D2}m")
+                    : _loc.Get("Student_RequestWindowClosed");
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]

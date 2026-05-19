@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using MentoringApp.Api.Helpers;
 using MentoringApp.Data.Interfaces;
@@ -39,7 +38,7 @@ public static class ReviewEndpoints
             if (req.AmountOfHours < 0.1 || req.AmountOfHours > 24)
                 return Results.BadRequest(new { error = "Hours must be between 0.1 and 24." });
 
-            if (!int.TryParse(user.FindFirstValue(JwtRegisteredClaimNames.Sub), out int userId))
+            if (!int.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
                 return Results.Unauthorized();
 
             var result = await reviewService.CreateReviewAsync(req.Content, req.PairId, userId, req.AmountOfHours);

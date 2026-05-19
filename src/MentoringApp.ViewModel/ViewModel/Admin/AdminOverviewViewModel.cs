@@ -261,11 +261,18 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     [RelayCommand]
     private async Task CancelDeadline()
     {
-        ActiveDeadline = null;
-        if (Progress.IsSelectionPhaseActive)
-            await _settingsClient.SetPhase2DeadlineAsync(null);
-        else
-            await _settingsClient.SetPhase1DeadlineAsync(null);
+        try
+        {
+            ActiveDeadline = null;
+            if (Progress.IsSelectionPhaseActive)
+                await _settingsClient.SetPhase2DeadlineAsync(null);
+            else
+                await _settingsClient.SetPhase1DeadlineAsync(null);
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+        }
     }
 
     [RelayCommand]
@@ -276,8 +283,16 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             _toastService.Error(_loc.Get("Admin_SchoolConfig_NoClasses_Error"));
             return;
         }
-        await Progress.MarkSchoolConfiguredAsync();
-        await LoadDataAsync();
+        try
+        {
+            await Progress.MarkSchoolConfiguredAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+            return;
+        }
+        try { await LoadDataAsync(); } catch { }
     }
 
     [RelayCommand]
@@ -288,7 +303,15 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             _toastService.Error(_loc.Get("Admin_SupervisorAssignment_Incomplete_Error"));
             return;
         }
-        await Progress.MarkSupervisorsAssignedAsync();
+        try
+        {
+            await Progress.MarkSupervisorsAssignedAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+            return;
+        }
         try
         {
             await _notificationClient.SendPhase1StartedAsync();
@@ -299,13 +322,20 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
                 _loc.Get("Admin_EmailNotification_Failed_Title"),
                 _loc.Get("Admin_EmailNotification_Failed_Body"));
         }
-        await LoadDataAsync();
+        try { await LoadDataAsync(); } catch { }
     }
 
     [RelayCommand]
     private async Task MarkUsersImported()
     {
-        await Progress.MarkUsersImportedAsync();
+        try
+        {
+            await Progress.MarkUsersImportedAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+        }
     }
 
     [RelayCommand]

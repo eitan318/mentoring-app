@@ -117,10 +117,6 @@ public record SettingsResponse(
 
 public record DeadlineRequest(DateTime? Deadline);
 public record BoolSettingRequest(bool Value);
-public record DeadlineBody(DateTime? Deadline);
-public record BoolBody(bool Value);
-public record SendRequestBody(int MenteeId, int MentorId);
-public record GalleryPickBody(int MenteeId, int MentorId);
 
 public record ErrorBody(string? Error);
 
@@ -131,4 +127,3 @@ public record ImportResult(int Imported);
 public record SupervisorIdResponse(int SupervisorId);
 
 
-public record AddSchoolClassBody(int GradeId, int ClassNum);
