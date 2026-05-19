@@ -262,21 +262,6 @@ namespace MentoringApp.Service
             return Result.Ok();
         }
 
-        public async Task<Result> UploadProfilePictureAsync(int userId, string sourceFilePath)
-        {
-            Result<UserModel> result = await GetUserByIdAsync(userId);
-            if (!result.Success) return Result.Failure(result.ErrorMessage);
-            UserModel user = result.Data;
-
-            if (!user.IsValidProfilePicture(sourceFilePath))
-                return Result.Failure("Invalid format");
-
-            MoveFileToLocalStorage(user.Id, sourceFilePath);
-            string destPath = MoveFileToLocalStorage(userId, sourceFilePath);
-
-            await _userRepo.UpdateProfilePictureAsync(userId, destPath);
-            return Result.Ok();
-        }
 
         public async Task<Result> UpdateLanguageAsync(int userId, string language)
         {
@@ -287,28 +272,7 @@ namespace MentoringApp.Service
             return updated ? Result.Ok() : Result.Failure("Failed to update language.");
         }
 
-        /// <summary>
-        /// Copies the source file into the app's LocalApplicationData folder,
-        /// naming it "{userId}{ext}" (overwriting any previous picture for that user).
-        /// Returns the absolute destination path that should be persisted to the DB.
-        /// </summary>
-        private string MoveFileToLocalStorage(int userId, string sourceFilePath)
-        {
-            string ext = Path.GetExtension(sourceFilePath).ToLowerInvariant();
 
-            string folder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "MentoringApp", "ProfilePictures");
-
-            Directory.CreateDirectory(folder);
-
-            string destFileName = $"{userId}{ext}";
-            string destPath = Path.Combine(folder, destFileName);
-
-            File.Copy(sourceFilePath, destPath, overwrite: true);
-
-            return destPath;
-        }
         public async Task<Result> CreateUserAsync(CreateUserRequest req)
         {
             UserModel user = req.Role.ToLowerInvariant() switch

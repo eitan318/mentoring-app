@@ -67,6 +67,12 @@ public partial class RegistrationViewModel : ObservableValidator, INavigatable<b
         ValidateAllProperties();
         if (HasErrors) return;
 
+        if (!SupervisorOrStudentIsSupervisor && SelectedGrade == null)
+        {
+            ErrorMessage = "Grade is required.";
+            return;
+        }
+
         ErrorMessage = "";
 
         var request = new RegisterRequest(

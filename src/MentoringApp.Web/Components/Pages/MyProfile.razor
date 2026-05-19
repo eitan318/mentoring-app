@@ -91,19 +91,8 @@
             }
             else
             {
-            <div class="section-header">@Loc.Get("Profile_GradeClass_Label")</div>
-
             <div class="field-label">@Loc.Get("Profile_GradeClass_Label")</div>
-            <select class="field-input field-readonly"
-                    disabled="true"
-                    value="@(Vm.SelectedSchoolClass?.Id.ToString() ?? "")"
-                    @onchange="OnSchoolClassChanged">
-                <option value=""></option>
-                @foreach (var sc in Vm.SchoolClasses)
-                {
-                    <option value="@sc.Id" selected="@(Vm.SelectedSchoolClass?.Id == sc.Id)">@sc.DisplayName</option>
-                }
-            </select>
+            <div class="field-value field-readonly">@Vm.GradeClassDisplay</div>
 
             @* ── Mentor section ──────────────────────────────────────────── *@
             @if (Vm.HasMentorProfile)
@@ -273,6 +262,7 @@
     }
     .field-input:focus { border-color: #4E6EF2; }
     .field-readonly { background: #F9FAFB; color: #6B7280; }
+    .field-value { font-size: 15px; color: #374151; font-weight: 500; margin-bottom: 16px; }
 
     .section-header {
         font-size: 14px; font-weight: 600;
@@ -341,12 +331,6 @@
 
     private void OnLocChanged(object? sender, PropertyChangedEventArgs e) =>
         InvokeAsync(StateHasChanged);
-
-    private void OnSchoolClassChanged(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var id))
-            Vm.SelectedSchoolClass = Vm.SchoolClasses.FirstOrDefault(sc => sc.Id == id);
-    }
 
     private void OnGenderChanged(ChangeEventArgs e)
     {

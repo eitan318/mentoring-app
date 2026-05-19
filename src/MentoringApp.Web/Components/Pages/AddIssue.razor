@@ -92,14 +92,19 @@
 @code {
     private string Dir => TranslationSource.Instance.IsRtl ? "rtl" : "ltr";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         Vm.PropertyChanged += OnVmChanged;
         TranslationSource.Instance.PropertyChanged += OnLocChanged;
+    }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
         var categories = ParamStore.Take<IEnumerable<IssueCategoryModel>>(typeof(AddIssueViewModel))
                          ?? Enumerable.Empty<IssueCategoryModel>();
         await Vm.OnNavigatedToAsync(categories);
+        StateHasChanged();
     }
 
     private void OnVmChanged(object? sender, PropertyChangedEventArgs e) =>

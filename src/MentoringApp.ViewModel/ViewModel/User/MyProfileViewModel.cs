@@ -51,6 +51,7 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     [NotifyPropertyChangedFor(nameof(SelectedPreferredMentorGenderValue))]
     [NotifyPropertyChangedFor(nameof(SelectedPreferredMenteeGenderValue))]
     [NotifyPropertyChangedFor(nameof(ShowRoleSelection))]
+    [NotifyPropertyChangedFor(nameof(GradeClassDisplay))]
     private UserModel? _currentUser;
 
     [ObservableProperty]
@@ -107,6 +108,10 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
             }
         }
     }
+
+    public string GradeClassDisplay =>
+        SelectedSchoolClass?.DisplayName
+        ?? (AsStudent?.Grade != null ? $"{AsStudent.Grade.Name} – Class {AsStudent.ClassNum}" : "");
 
     public int SubjectToTeach
     {

@@ -26,12 +26,20 @@
                   rows="5"
                   value="@Vm.ReviewContent"
                   @oninput="e => Vm.ReviewContent = e.Value?.ToString() ?? string.Empty"></textarea>
+        @foreach (var msg in FieldErrors("ReviewContent"))
+        {
+            <div class="error-msg">@msg</div>
+        }
 
         <div class="field-label">@Loc.Get("Review_Hours_Label")</div>
         <input class="field-input field-hours"
                type="number" step="0.1" min="0.1" max="24"
                value="@Vm.AmountOfHours.ToString(CultureInfo.InvariantCulture)"
                @oninput="OnHoursChanged" />
+        @foreach (var msg in FieldErrors("AmountOfHours"))
+        {
+            <div class="error-msg">@msg</div>
+        }
 
         <div class="actions">
             <button class="btn-primary"
@@ -86,18 +94,30 @@
     }
     .btn-primary:hover { background: #059669; }
     .btn-primary:disabled { opacity: .5; cursor: default; }
+    .error-msg { color: #DC2626; font-size: 12px; margin: -10px 0 10px; }
 </style>
 
 @code {
     private string Dir => TranslationSource.Instance.IsRtl ? "rtl" : "ltr";
 
-    protected override async Task OnInitializedAsync()
+    private IEnumerable<string> FieldErrors(string prop) =>
+        ((System.ComponentModel.INotifyDataErrorInfo)Vm)
+            .GetErrors(prop)
+            .Cast<System.ComponentModel.DataAnnotations.ValidationResult>()
+            .Select(r => r.ErrorMessage ?? "");
+
+    protected override void OnInitialized()
     {
         Vm.PropertyChanged += OnVmChanged;
         TranslationSource.Instance.PropertyChanged += OnLocChanged;
+    }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
         var pairId = ParamStore.Take<int>(typeof(AddReviewViewModel));
         await Vm.OnNavigatedToAsync(pairId);
+        StateHasChanged();
     }
 
     private void OnVmChanged(object? sender, PropertyChangedEventArgs e) =>
