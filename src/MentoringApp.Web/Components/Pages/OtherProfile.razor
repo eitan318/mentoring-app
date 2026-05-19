@@ -133,15 +133,19 @@
     private static string PicBg(MentoringApp.Model.User.Gender g) =>
         g == MentoringApp.Model.User.Gender.Female ? "#FBCFE8" : "#BFDBFE";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         Vm.PropertyChanged += OnVmChanged;
         TranslationSource.Instance.PropertyChanged += OnLocChanged;
+    }
 
-        // Take the userId set by WebNavigationService.NavigateToAsync<OtherProfileViewModel, int>(id)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
         var userId = ParamStore.Take<int>(typeof(OtherProfileViewModel));
         if (userId > 0)
             await Vm.OnNavigatedToAsync(userId);
+        StateHasChanged();
     }
 
     private void OnVmChanged(object? sender, PropertyChangedEventArgs e) =>
