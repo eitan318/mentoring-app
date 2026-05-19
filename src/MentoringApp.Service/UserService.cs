@@ -57,8 +57,8 @@ namespace MentoringApp.Service
                 return Result.Failure("Username must be at least 3 characters.");
             if (string.IsNullOrWhiteSpace(user.Email) || !user.Email.Contains('@'))
                 return Result.Failure("A valid email address is required.");
-            if (string.IsNullOrWhiteSpace(user.NationalId) || user.NationalId.Length > 9 || !user.NationalId.All(char.IsDigit))
-                return Result.Failure("National ID must be valid and up to 9 digits.");
+            if (string.IsNullOrWhiteSpace(user.NationalId) || user.NationalId.Length != 9 || !user.NationalId.All(char.IsDigit))
+                return Result.Failure("National ID must be exactly 9 digits.");
 
             // Prevent duplicate national ID
             var existing = await _userRepo.GetUserDtoByNationalIdAsync(user.NationalId);
@@ -229,8 +229,8 @@ namespace MentoringApp.Service
                 return Result.Failure("Username must be at least 3 characters.");
             if (string.IsNullOrWhiteSpace(user.Email) || !user.Email.Contains('@'))
                 return Result.Failure("A valid email address is required.");
-            if (string.IsNullOrWhiteSpace(user.NationalId) || user.NationalId.Length > 9 || !user.NationalId.All(char.IsDigit))
-                return Result.Failure("National ID must be valid and up to 9 digits.");
+            if (string.IsNullOrWhiteSpace(user.NationalId) || user.NationalId.Length != 9 || !user.NationalId.All(char.IsDigit))
+                return Result.Failure("National ID must be exactly 9 digits.");
 
             var existing = await _userRepo.GetUserDtoByNationalIdAsync(user.NationalId);
             if (existing != null && existing.Id != user.Id)
@@ -379,18 +379,16 @@ namespace MentoringApp.Service
                 return Result.Failure("Username must be between 3 and 50 characters.");
             if (string.IsNullOrWhiteSpace(email) || !EmailRegex.IsMatch(email))
                 return Result.Failure("A valid email address is required.");
-            if (string.IsNullOrWhiteSpace(nationalId) || !NationalIdRegex.IsMatch(nationalId))
-                return Result.Failure("National ID must be exactly 9 digits.");
             if (phoneNumber != null && !PhoneRegex.IsMatch(phoneNumber))
                 return Result.Failure("Phone number format is invalid.");
             if (gender < 0 || gender > 3)
                 return Result.Failure("Invalid gender value.");
 
-            var existing = await _userRepo.GetUserDtoByNationalIdAsync(nationalId);
-            if (existing != null && existing.Id != id)
-                return Result.Failure("A user with this National ID already exists.");
+            // NationalId cannot be changed after creation — always keep the stored value
+            var existingUser = await _userRepo.GetUserDtoByIdAsync(id);
+            if (existingUser == null) return Result.Failure("User not found.");
 
-            bool ok = await _userRepo.UpdateBaseInfoAsync(id, userName, email, nationalId, phoneNumber, gender);
+            bool ok = await _userRepo.UpdateBaseInfoAsync(id, userName, email, existingUser.NationalId, phoneNumber, gender);
             return ok ? Result.Ok() : Result.Failure("User not found.");
         }
 

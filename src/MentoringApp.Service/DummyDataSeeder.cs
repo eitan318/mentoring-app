@@ -137,7 +137,7 @@ namespace MentoringApp.Service
             // ── Step 4: Users — Admin ─────────────────────────────────────────
             Console.WriteLine("Generating Users...");
 
-            var admin = new AdminModel { Email = "eitanamir09@gmail.com", NationalId = "100", UserName = "Admin User" };
+            var admin = new AdminModel { Email = "eitanamir09@gmail.com", NationalId = "100000000", UserName = "Admin User" };
             await _userService.CreateUserAsync(admin);
 
             // ── Step 5: Users — Supervisors ───────────────────────────────────
@@ -154,7 +154,7 @@ namespace MentoringApp.Service
             var supervisors = new List<SupervisorModel>();
             for (int s = 0; s < numSupervisors; s++)
             {
-                var sup = MakeSupervisor($"supervisor{s + 1}@mentoringapp.com", $"200{s + 1}");
+                var sup = MakeSupervisor($"supervisor{s + 1}@mentoringapp.com", $"2{s + 1:D8}");
                 await _userService.CreateUserAsync(sup);
                 AssignSupervisorClasses(sup.Id, slotIds[s * 2], slotIds[s * 2 + 1]);
                 supervisors.Add(sup);
@@ -172,7 +172,7 @@ namespace MentoringApp.Service
                     var mentor = new StudentModel
                     {
                         Email = $"mentor{studentIndex}@mentoringapp.com",
-                        NationalId = $"3{studentIndex:D4}",
+                        NationalId = $"3{studentIndex:D8}",
                         UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
                         Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
                         ClassNum = slot.classNum,
@@ -191,7 +191,7 @@ namespace MentoringApp.Service
                     var mentee = new StudentModel
                     {
                         Email = $"mentee{studentIndex}@mentoringapp.com",
-                        NationalId = $"4{studentIndex:D4}",
+                        NationalId = $"4{studentIndex:D8}",
                         UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
                         Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
                         ClassNum = slot.classNum,
@@ -216,7 +216,7 @@ namespace MentoringApp.Service
                     var noRole = new StudentModel
                     {
                         Email = $"unfilled.norole{unfilledIndex}@mentoringapp.com",
-                        NationalId = $"9{unfilledIndex:D4}",
+                        NationalId = $"9{unfilledIndex:D8}",
                         UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
                         Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
                         ClassNum = slot.classNum,
@@ -232,7 +232,7 @@ namespace MentoringApp.Service
                         var noSubject = new StudentModel
                         {
                             Email = $"unfilled.nosubject{unfilledIndex}@mentoringapp.com",
-                            NationalId = $"9{unfilledIndex:D4}",
+                            NationalId = $"9{unfilledIndex:D8}",
                             UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
                             Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
                             ClassNum = slot.classNum,
@@ -250,7 +250,7 @@ namespace MentoringApp.Service
                         var noSubjectMentee = new StudentModel
                         {
                             Email = $"unfilled.mentee{unfilledIndex}@mentoringapp.com",
-                            NationalId = $"9{unfilledIndex:D4}",
+                            NationalId = $"9{unfilledIndex:D8}",
                             UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
                             Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
                             ClassNum = slot.classNum,

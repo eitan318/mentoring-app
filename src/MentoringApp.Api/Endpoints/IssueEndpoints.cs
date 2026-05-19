@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using MentoringApp.Api.Helpers;
 using MentoringApp.Service;
@@ -52,7 +51,7 @@ public static class IssueEndpoints
             if (req.Description.Length < 5 || req.Description.Length > 1000)
                 return Results.BadRequest(new { error = "Description must be between 5 and 1000 characters." });
 
-            if (!int.TryParse(user.FindFirstValue(JwtRegisteredClaimNames.Sub), out int userId))
+            if (!int.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
                 return Results.Unauthorized();
 
             return (await issueService.CreateIssueAsync(req.Description, req.CategoryId, userId)).ToHttp();

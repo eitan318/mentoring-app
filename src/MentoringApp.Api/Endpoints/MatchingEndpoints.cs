@@ -50,7 +50,7 @@ public static class MatchingEndpoints
         .WithOpenApi();
 
         // POST /api/matching/requests — Student
-        group.MapPost("/requests", async (SendRequestBody req, MatchingFlowService matching) =>
+        group.MapPost("/requests", async (SendPairRequestBody req, MatchingFlowService matching) =>
         {
             var result = await matching.SendPairRequestAsync(req.MenteeId, req.MentorId);
             return result.ToHttp();
@@ -69,26 +69,35 @@ public static class MatchingEndpoints
         group.MapGet("/requests/for-mentor/{mentorId:int}", async (int mentorId, MatchingFlowService matching) =>
         {
             var requests = await matching.GetPendingRequestsForMentorAsync(mentorId);
-            return Results.Ok(requests);
+            return Results.Ok(requests.Select(r => new PairRequestResponse(
+                r.Id,
+                r.MenteeId,
+                r.MentorId,
+                r.Status.ToString(),
+                (int)r.Tier,
+                r.CreatedAt.ToString("O"),
+                r.MenteeName,
+                r.MentorName,
+                r.MenteeProfilePicturePath,
+                (int)r.MenteeGender,
+                r.MenteeSubjectName)));
         })
         .WithOpenApi();
 
-        // PUT /api/matching/requests/{requestId}/accept — Admin/Supervisor
+        // PUT /api/matching/requests/{requestId}/accept — Mentor
         group.MapPut("/requests/{requestId:int}/accept", async (int requestId, MatchingFlowService matching) =>
         {
             var result = await matching.AcceptPairRequestAsync(requestId);
             return result.ToHttp();
         })
-        .RequireAuthorization("AdminOrSupervisor")
         .WithOpenApi();
 
-        // PUT /api/matching/requests/{requestId}/reject — Admin/Supervisor
+        // PUT /api/matching/requests/{requestId}/reject — Mentor
         group.MapPut("/requests/{requestId:int}/reject", async (int requestId, MatchingFlowService matching) =>
         {
             var result = await matching.RejectPairRequestAsync(requestId);
             return result.ToHttp();
         })
-        .RequireAuthorization("AdminOrSupervisor")
         .WithOpenApi();
 
         // DELETE /api/matching/requests/{requestId} — Student (cancel)
@@ -108,7 +117,7 @@ public static class MatchingEndpoints
         .WithOpenApi();
 
         // POST /api/matching/gallery-pick — Student
-        group.MapPost("/gallery-pick", async (GalleryPickBody req, MatchingFlowService matching) =>
+        group.MapPost("/gallery-pick", async (GalleryPickRequest req, MatchingFlowService matching) =>
         {
             var result = await matching.GalleryPickAsync(req.MenteeId, req.MentorId);
             return result.ToHttp();

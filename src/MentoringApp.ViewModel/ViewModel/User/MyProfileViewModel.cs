@@ -294,14 +294,12 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
 
     private async Task NavigateBackToDashboard()
     {
-        if (_navigationService.CanGoBack()) return;
-
         if (CurrentUser is AdminModel)
-            await _navigationService.NavigateToAsync<AdminDashboardViewModel>();
+            await _navigationService.NavigateToRootAsync<AdminDashboardViewModel>();
         else if (CurrentUser is SupervisorModel)
-            await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id);
+            await _navigationService.NavigateToRootAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id);
         else
-            await _navigationService.NavigateToAsync<StudentDashboardViewModel>();
+            await _navigationService.NavigateToRootAsync<StudentDashboardViewModel>();
     }
 
     [RelayCommand]
