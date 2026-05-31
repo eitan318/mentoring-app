@@ -1,0 +1,11 @@
+**/bin
+**/obj
+**/.vs
+**/.vscode
+**/.claude
+.git
+.gitignore
+*.md
+docker-compose*.yml
+infra/
+Tests/

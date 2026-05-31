@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "5035:8080"
+    environment:
+      DOTNET_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Data Source=/app/data/mentoring.db"
+      JwtSettings__Secret: "local-dev-secret-min-32-characters-xx"
+      AllowedOrigins: "http://localhost:5194"
+      AppSettings__RecreateDbOnStartup: "false"
+      AppSettings__SkipVerificationCode: "true"
+    volumes:
+      - mentoring-data:/app/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "5194:8080"
+    environment:
+      DOTNET_ENVIRONMENT: Production
+      ApiSettings__BaseUrl: "http://api:8080"
+    depends_on:
+      - api
+
+volumes:
+  mentoring-data:

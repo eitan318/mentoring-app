@@ -1,0 +1,26 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+COPY ["src/MentoringApp.Web/MentoringApp.Web.csproj", "src/MentoringApp.Web/"]
+COPY ["src/MentoringApp.ViewModel/MentoringApp.ViewModel.csproj", "src/MentoringApp.ViewModel/"]
+COPY ["src/MentoringApp.ApiClient/MentoringApp.ApiClient.csproj", "src/MentoringApp.ApiClient/"]
+COPY ["src/MentoringApp.Model/MentoringApp.Model.csproj", "src/MentoringApp.Model/"]
+
+RUN dotnet restore "src/MentoringApp.Web/MentoringApp.Web.csproj"
+
+COPY src/ src/
+
+RUN dotnet publish "src/MentoringApp.Web/MentoringApp.Web.csproj" \
+    -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_HTTP_PORTS=8080
+ENV ApiSettings__BaseUrl="http://mentoring-api:8080"
+
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "MentoringApp.Web.dll"]

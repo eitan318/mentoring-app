@@ -1,0 +1,27 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+COPY ["src/MentoringApp.Api/MentoringApp.Api.csproj", "src/MentoringApp.Api/"]
+COPY ["src/MentoringApp.Service/MentoringApp.Service.csproj", "src/MentoringApp.Service/"]
+COPY ["src/MentoringApp.Data/MentoringApp.Data.csproj", "src/MentoringApp.Data/"]
+COPY ["src/MentoringApp.Model/MentoringApp.Model.csproj", "src/MentoringApp.Model/"]
+
+RUN dotnet restore "src/MentoringApp.Api/MentoringApp.Api.csproj"
+
+COPY src/ src/
+
+RUN dotnet publish "src/MentoringApp.Api/MentoringApp.Api.csproj" \
+    -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+COPY --from=build /app/publish .
+COPY src/MentoringApp.Data/Resources/Database/mentoring.db /app/data/mentoring.db
+
+ENV ASPNETCORE_HTTP_PORTS=8080
+ENV ConnectionStrings__DefaultConnection="Data Source=/app/data/mentoring.db"
+
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "MentoringApp.Api.dll"]
