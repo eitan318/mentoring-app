@@ -115,8 +115,7 @@
                     <RadioButton Content="{Binding [Supervisor_IssueResolved], Source={x:Static loc:TranslationSource.Instance}}"
                                  Style="{StaticResource IssueTabStyle}"
                                  IsChecked="{Binding IsShowingResolved, Mode=OneWay}"
-                                 Command="{Binding ShowResolvedCommand}"
-                                 Margin="16,0,0,0"/>
+                                 Command="{Binding ShowResolvedCommand}"/>
                 </StackPanel>
                 <TextBlock DockPanel.Dock="Right" Text="{Binding IssuesSectionContextTitle}" FontSize="13" FontStyle="Italic" Foreground="#9CA3AF" HorizontalAlignment="Right" VerticalAlignment="Center"/>
             </DockPanel>
@@ -124,17 +123,18 @@
             <Rectangle Grid.Row="1" Height="1" Fill="#E5E7EB" VerticalAlignment="Top" Margin="-20,0,-20,0"/>
 
             <Grid Grid.Row="2" Margin="0,12,0,0">
-                <!-- Empty-state labels -->
+                <!-- Empty-state labels — Visibility is controlled ONLY by the Style's MultiDataTrigger.
+                     A local Visibility binding would beat the trigger (local value > style trigger in WPF)
+                     and show the empty-state text even when items exist. -->
                 <TextBlock Text="{Binding [Supervisor_NoPendingIssues], Source={x:Static loc:TranslationSource.Instance}}"
-                           FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0"
-                           Visibility="{Binding IsShowingPending, Converter={StaticResource BoolToVis}}">
+                           FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding FilteredPendingIssues.Count}" Value="0"/>
+                                        <Condition Binding="{Binding PendingIssuesCount}" Value="0"/>
                                         <Condition Binding="{Binding IsShowingPending}" Value="True"/>
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Visible"/>
@@ -151,7 +151,7 @@
                             <Style.Triggers>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding FilteredForwardedIssues.Count}" Value="0"/>
+                                        <Condition Binding="{Binding ForwardedIssuesCount}" Value="0"/>
                                         <Condition Binding="{Binding IsShowingForwarded}" Value="True"/>
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Visible"/>
@@ -168,7 +168,7 @@
                             <Style.Triggers>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding FilteredResolvedIssues.Count}" Value="0"/>
+                                        <Condition Binding="{Binding ResolvedIssuesCount}" Value="0"/>
                                         <Condition Binding="{Binding IsShowingResolved}" Value="True"/>
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Visible"/>

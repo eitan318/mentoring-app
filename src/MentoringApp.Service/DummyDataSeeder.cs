@@ -19,7 +19,7 @@ namespace MentoringApp.Service
     public class DummyDataSeeder
     {
         // Controls dataset size. 0.1 → ~1 supervisor, ~6 users.  1.0 → ~8 supervisors, ~300 users.
-        private const float Scale = 0.4f;
+        private const float Scale = 0.3f;
 
         private readonly UserService _userService;
         private readonly IPairRepo _pairRepo;
