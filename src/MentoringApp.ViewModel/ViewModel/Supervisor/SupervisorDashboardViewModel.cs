@@ -77,6 +77,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
     [NotifyPropertyChangedFor(nameof(FilteredResolvedIssues))]
     [NotifyPropertyChangedFor(nameof(FilteredForwardedIssues))]
+    [NotifyPropertyChangedFor(nameof(PendingIssuesCount))]
     [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
     [NotifyPropertyChangedFor(nameof(ForwardedIssuesCount))]
     [NotifyPropertyChangedFor(nameof(HasForwardedIssues))]
@@ -89,6 +90,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
     [NotifyPropertyChangedFor(nameof(FilteredResolvedIssues))]
     [NotifyPropertyChangedFor(nameof(FilteredForwardedIssues))]
+    [NotifyPropertyChangedFor(nameof(PendingIssuesCount))]
     [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
     [NotifyPropertyChangedFor(nameof(ForwardedIssuesCount))]
     [NotifyPropertyChangedFor(nameof(HasForwardedIssues))]
@@ -122,6 +124,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     public IEnumerable<IssueModel> FilteredForwardedIssues =>
         PairFilter(AllIssues.Where(i => i.IsForwardedToAdmin && !i.IsResolved));
 
+    public int PendingIssuesCount   => FilteredPendingIssues.Count();
     public int ResolvedIssuesCount  => FilteredResolvedIssues.Count();
     public int ForwardedIssuesCount => FilteredForwardedIssues.Count();
     public bool HasForwardedIssues  => ForwardedIssuesCount > 0;
