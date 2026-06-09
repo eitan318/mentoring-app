@@ -109,27 +109,6 @@
                     </Style>
                 </StackPanel.Style>
 
-                <!-- School config: hint while user is adding classes -->
-                <TextBlock Text="{Binding [Admin_SchoolConfig_InProgress_Hint], Source={x:Static loc:TranslationSource.Instance}}"
-                           Foreground="#6B7280" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"
-                           Visibility="{Binding Progress.IsSchoolConfigStepActive, Converter={StaticResource BoolToVis}}"/>
-
-                <Button Content="{Binding [Admin_CompleteSchoolConfig_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10"
-                        Background="#A855F7" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                        Visibility="{Binding Progress.IsSchoolConfigStepActive, Converter={StaticResource BoolToVis}}"
-                        IsEnabled="{Binding CanCompleteSchoolConfig}"
-                        Command="{Binding CompleteSchoolConfigCommand}">
-                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                </Button>
-
-                <Button Content="{Binding [Admin_CompleteSupervisorAssignment_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10"
-                        Background="#A855F7" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                        Visibility="{Binding Progress.IsSupervisorAssignmentStepActive, Converter={StaticResource BoolToVis}}"
-                        IsEnabled="{Binding SupervisorAssignment.AllClassesAssigned}"
-                        Command="{Binding CompleteSupervisorAssignmentCommand}">
-                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                </Button>
-
                 <Button Content="{Binding [Admin_BeginRegistration_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10"
                         Background="#10B981" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
                         Visibility="{Binding Progress.IsImportStepActive, Converter={StaticResource BoolToVis}}"

@@ -27,6 +27,7 @@ public partial class SystemSettingsViewModel : ObservableObject, INavigatable
     private readonly SettingsApiClient _settingsClient;
     private readonly UserApiClient _userClient;
     private readonly AdminProgressStore _progress;
+    private readonly INavigationService _navigationService;
     private readonly IToastService _toastService;
     private readonly ILocalizationService _loc;
 
@@ -55,6 +56,7 @@ public partial class SystemSettingsViewModel : ObservableObject, INavigatable
         _userClient = userClient;
         _progress = progress;
         SchoolConfig = schoolConfig;
+        _navigationService = navigationService;
         _toastService = toastService;
         _loc = loc;
     }
@@ -162,7 +164,7 @@ public partial class SystemSettingsViewModel : ObservableObject, INavigatable
             await _settingsClient.AdvanceYearAsync();
             await _progress.RefreshAsync();
             _toastService.Success(_loc.Get("SysSettings_AdvanceYear_Success"));
-            await OnNavigatedToAsync();
+            await _navigationService.NavigateToRootAsync<AdminOverviewViewModel>();
         }
         catch (Exception ex)
         {

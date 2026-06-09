@@ -1336,6 +1336,7 @@
   <data name="Admin_Menu_SystemSettings" xml:space="preserve"><value>הגדרות מערכת</value></data>
   <data name="Admin_PhaseGuide_Title" xml:space="preserve"><value>מדריך שלבים</value></data>
   <data name="Admin_PhaseGuide_Import" xml:space="preserve"><value>ייבוא משתמשים:\nהעלה קבצי אקסל לייבוא מדריכים וחניכים למערכת. חובה להשלים שלב זה לפני תחילת ההתאמה.</value></data>
+  <data name="Admin_PhaseGuide_SupervisorAssignment" xml:space="preserve"><value>שיוך מפקחים:\nגרור ושחרר כיתות לכל מפקח כדי שכל מפקח יהיה אחראי על קבוצת תלמידים. יש לשייך את כל הכיתות לפני המשך.</value></data>
   <data name="Admin_PhaseGuide_Phase1" xml:space="preserve"><value>שלב 1: הרשמה והתאמה ידנית\nחניכים מתחברים וממלאים את פרטיהם. חניכים יכולים לדפדף במנטורים ולשלוח בקשות. קבע תאריך יעד לשלב זה.</value></data>
   <data name="Admin_PhaseGuide_Phase2" xml:space="preserve"><value>שלב 2: גלריית בחירה והתאמה אוטומטית\nחניכים ללא זוג רואים את המנטורים המתאימים להם ביותר ויכולים לבחור. כשהיעד חולף, מי שלא בחר מותאם אוטומטית.</value></data>
   <data name="Admin_PhaseGuide_Phase3" xml:space="preserve"><value>שלב 3: חניכה פעילה (הושלם)\nתהליך ההתאמה הסתיים. הזוגות מתחילים פגישות ומדווחים על שעות. מדריכים עוקבים אחר התקדמות.</value></data>

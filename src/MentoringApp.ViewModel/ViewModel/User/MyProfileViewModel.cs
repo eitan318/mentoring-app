@@ -6,9 +6,6 @@ using MentoringApp.Model.User;
 using MentoringApp.ViewModel.Helpers;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
-using MentoringApp.ViewModel.ViewModel.Admin;
-using MentoringApp.ViewModel.ViewModel.Student;
-using MentoringApp.ViewModel.ViewModel.Supervisor;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.IService;
 using System.Collections.ObjectModel;
@@ -43,6 +40,7 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     [NotifyPropertyChangedFor(nameof(Gender))]
     [NotifyPropertyChangedFor(nameof(SelectedGenderValue))]
     [NotifyPropertyChangedFor(nameof(IsSupervisor))]
+    [NotifyPropertyChangedFor(nameof(IsStudent))]
     [NotifyPropertyChangedFor(nameof(SelectedSchoolClass))]
     [NotifyPropertyChangedFor(nameof(HasMentorProfile))]
     [NotifyPropertyChangedFor(nameof(HasMenteeProfile))]
@@ -90,6 +88,7 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     }
 
     public bool IsSupervisor => CurrentUser is SupervisorModel;
+    public bool IsStudent    => CurrentUser is StudentModel;
     public bool IsSaveButtonVisible => IsEditMode && !ShowRoleSelection;
 
     private StudentModel? AsStudent => CurrentUser as StudentModel;
@@ -300,12 +299,9 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
 
     private async Task NavigateBackToDashboard()
     {
-        if (CurrentUser is AdminModel)
-            await _navigationService.NavigateToRootAsync<AdminDashboardViewModel>();
-        else if (CurrentUser is SupervisorModel)
-            await _navigationService.NavigateToRootAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id);
-        else
-            await _navigationService.NavigateToRootAsync<StudentDashboardViewModel>();
+        // GoBack stays inside the existing shell context (sidebar, etc.) rather than
+        // navigating to a shell VM which would call UseContext() and stack a new sidebar.
+        await _navigationService.GoBackAsync();
     }
 
     [RelayCommand]
