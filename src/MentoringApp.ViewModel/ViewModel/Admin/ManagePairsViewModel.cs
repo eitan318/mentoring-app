@@ -5,11 +5,13 @@ using MentoringApp.Model;
 using MentoringApp.ViewModel.IService;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModel.Supervisor;
+using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
+/// <summary>Backs the admin "Manage Pairs" screen: lists existing mentor–mentee pairs and supports creating/removing them.</summary>
 public partial class ManagePairsViewModel : ObservableObject, INavigatable
 {
     private readonly IWindowService _windowService;
@@ -95,6 +97,13 @@ public partial class ManagePairsViewModel : ObservableObject, INavigatable
     }
 
     [RelayCommand] private void CreatePair() => _navigationService.NavigateToAsync<CreatePairViewModel>();
+
+    [RelayCommand]
+    private async Task NavigateToSupervisorProfile()
+    {
+        if (SelectedPair?.Supervisor != null)
+            await _navigationService.NavigateToAsync<OtherProfileViewModel, int>(SelectedPair.Supervisor.Id);
+    }
 
     [RelayCommand(CanExecute = nameof(HasSelectedPair))]
     private async Task SelectPair()

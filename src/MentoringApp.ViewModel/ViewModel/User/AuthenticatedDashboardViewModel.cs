@@ -118,7 +118,7 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
     {
         if (user is not StudentModel student)
             return false;
-        if (student.Grade == null || student.Grade.Id <= 0 || student.ClassNum <= 0)
+        if (!student.IsMentor && !student.IsMentee)
             return true;
         if (student.IsMentor && (student.MentorProfile == null || student.MentorProfile.SubjectToTeach <= 0))
             return true;

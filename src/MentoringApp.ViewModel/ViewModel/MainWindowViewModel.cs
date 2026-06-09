@@ -3,6 +3,7 @@ using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.ViewModel.User;
 
+/// <summary>Root shell view model bound to the main window: hosts the currently displayed view model and owns the top-level navigation context.</summary>
 public partial class MainWindowViewModel : ObservableObject, INavigatable
 {
     private readonly INavigationService _navigationService;

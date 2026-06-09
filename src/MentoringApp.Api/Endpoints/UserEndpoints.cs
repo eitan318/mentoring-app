@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/users minimal-API endpoints: user CRUD, profile updates, and supervisor stats (auth required).</summary>
 public static class UserEndpoints
 {
     public static void MapUserEndpoints(this WebApplication app)
@@ -84,8 +85,8 @@ public static class UserEndpoints
         // PUT /api/users/{id}/base-info
         group.MapPut("/{id:int}/base-info", async (int id, UpdateBaseInfoRequest req, UserService userService) =>
         {
-            bool ok = await userService.UpdateBaseInfoAsync(id, req.UserName, req.Email, req.NationalId, req.PhoneNumber, req.Gender);
-            return ok ? Results.Ok() : Results.NotFound();
+            var result = await userService.UpdateBaseInfoAsync(id, req.UserName, req.Email, req.NationalId, req.PhoneNumber, req.Gender);
+            return result.ToHttp();
         })
         .WithOpenApi();
 
@@ -97,35 +98,36 @@ public static class UserEndpoints
         })
         .WithOpenApi();
 
-        // PUT /api/users/{id}/grade-class
+        // PUT /api/users/{id}/grade-class — Admin only (grade/class set via import, not self-service)
         group.MapPut("/{id:int}/grade-class", async (int id, UpdateGradeClassRequest req, UserService userService) =>
         {
             await userService.UpdateStudentGradeAndClassAsync(id, req.GradeId, req.ClassNum);
             return Results.Ok();
         })
+        .RequireAuthorization("AdminOnly")
         .WithOpenApi();
 
         // PUT /api/users/{id}/gender-preferences
         group.MapPut("/{id:int}/gender-preferences", async (int id, UpdateGenderPreferencesRequest req, UserService userService) =>
         {
-            await userService.UpdateStudentPreferredGendersAsync(id, req.PreferredMentorGender, req.PreferredMenteeGender);
-            return Results.Ok();
+            var result = await userService.UpdateStudentPreferredGendersAsync(id, req.PreferredMentorGender, req.PreferredMenteeGender);
+            return result.ToHttp();
         })
         .WithOpenApi();
 
         // PUT /api/users/{id}/mentor-profile
         group.MapPut("/{id:int}/mentor-profile", async (int id, UpdateMentorProfileRequest req, UserService userService) =>
         {
-            await userService.UpsertMentorProfileAsync(id, req.SubjectId);
-            return Results.Ok();
+            var result = await userService.UpsertMentorProfileAsync(id, req.SubjectId);
+            return result.ToHttp();
         })
         .WithOpenApi();
 
         // PUT /api/users/{id}/mentee-profile
         group.MapPut("/{id:int}/mentee-profile", async (int id, UpdateMenteeProfileRequest req, UserService userService) =>
         {
-            await userService.UpsertMenteeProfileAsync(id, req.SubjectId);
-            return Results.Ok();
+            var result = await userService.UpsertMenteeProfileAsync(id, req.SubjectId);
+            return result.ToHttp();
         })
         .WithOpenApi();
 

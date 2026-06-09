@@ -4,6 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.Service.DI
 {
+    /// <summary>
+    /// Registers all business-logic services in the DI container and binds the "AppSettings"
+    /// and "EmailSettings" configuration sections. Called once at startup from the API's Program.cs.
+    /// </summary>
     public static class ServiceDependencyInjection
     {
         public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
@@ -31,6 +35,15 @@ namespace MentoringApp.Service.DI
 
             // Validator
             services.AddSingleton<UserValidator>();
+
+            // Pull settings from the "AppSettings" section of appsettings.json
+            var appSection = configuration.GetSection("AppSettings");
+            services.AddSingleton(new AppSettings
+            {
+                RecreateDbOnStartup  = bool.TryParse(appSection["RecreateDbOnStartup"],  out var rec)  && rec,
+                SkipVerificationCode = bool.TryParse(appSection["SkipVerificationCode"], out var skip) && skip,
+                AdminEmail           = appSection["AdminEmail"] ?? "admin@school.edu"
+            });
 
             // Pull settings from the "EmailSettings" section of appsettings.json
             var emailSection = configuration.GetSection("EmailSettings");

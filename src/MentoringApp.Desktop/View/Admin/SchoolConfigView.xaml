@@ -122,7 +122,8 @@
 
                 <DockPanel Grid.Row="0" Margin="0,0,0,20">
                     <TextBlock Text="{Binding [SysSettings_ParticipatingClasses_Header], Source={x:Static loc:TranslationSource.Instance}}" FontSize="18" FontWeight="Bold" Foreground="#111827" VerticalAlignment="Center"/>
-                    <Button DockPanel.Dock="Right" Content="{Binding [SysSettings_RemoveSelected_Button], Source={x:Static loc:TranslationSource.Instance}}" Command="{Binding DeleteClassCommand}" Style="{StaticResource DangerBtn}" HorizontalAlignment="Right" Padding="12,6"/>
+                    <Button DockPanel.Dock="Right" Content="{Binding [SysSettings_RemoveSelected_Button], Source={x:Static loc:TranslationSource.Instance}}" Command="{Binding DeleteClassCommand}" Style="{StaticResource DangerBtn}" HorizontalAlignment="Right" Padding="12,6"
+                            Visibility="{Binding CanDeleteClass, Converter={StaticResource BoolToVis}}"/>
                 </DockPanel>
 
                 <Border Grid.Row="1" Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="12" Padding="8">

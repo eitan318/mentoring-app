@@ -6,6 +6,7 @@ using MentoringApp.ViewModel.ViewModelHelper;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
 
+/// <summary>Backs the read-only view of another user's profile, loaded by user id.</summary>
 public partial class OtherProfileViewModel : ObservableObject, INavigatable<int>
 {
     [ObservableProperty]

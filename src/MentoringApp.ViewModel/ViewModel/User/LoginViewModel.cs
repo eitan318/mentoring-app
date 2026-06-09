@@ -15,6 +15,7 @@ using System.Text.Json;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
 
+/// <summary>Backs the login screen: drives the two-step (national-id → emailed code) login flow and stores the resulting session/JWT.</summary>
 public partial class LoginViewModel : ObservableValidator, INavigatable
 {
     private readonly AuthApiClient _authClient;
@@ -24,9 +25,6 @@ public partial class LoginViewModel : ObservableValidator, INavigatable
     private readonly ILanguageService _languageService;
     private readonly SessionService _sessionService;
     private readonly AuthTokenStore _authTokenStore;
-
-    // In debug mode verification code step is skipped.
-    private static readonly bool _debugWithoutVerification = true;
 
     public LoginViewModel(
         AuthApiClient authClient,
@@ -83,7 +81,7 @@ public partial class LoginViewModel : ObservableValidator, INavigatable
         try
         {
             var response = await _authClient.SendCodeAsync(new SendCodeRequest(NationalId));
-            if (_debugWithoutVerification && response.DevCode is not null)
+            if (response.DevCode is not null)
             {
                 VerificationCode = response.DevCode;
                 await Login();

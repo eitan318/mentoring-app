@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Bulk-imports users from an admin-supplied Excel spreadsheet (via ClosedXML) and creates
+    /// them through <see cref="UserService"/>. Used during the "Import Users" setup phase.
+    /// </summary>
     public class ExcelImportService
     {
         private readonly UserService _userService;

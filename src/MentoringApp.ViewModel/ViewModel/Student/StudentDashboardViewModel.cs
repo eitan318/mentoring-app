@@ -83,11 +83,16 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         _mentorRequestsVm = mentorRequestsVm;
 
         _selectionGalleryVm.OnPairCreated = LoadDataAsync;
-        _mentorRequestsVm.OnPairCreated = LoadDataAsync;
+        _browseMentorsVm.OnPairCreated   = LoadDataAsync;
+        _mentorRequestsVm.OnPairCreated  = LoadDataAsync;
         _ticker = new OneSecondTicker(UpdatePhaseTimer);
     }
 
-    public async Task OnNavigatedToAsync() => await LoadDataAsync();
+    public async Task OnNavigatedToAsync()
+    {
+        try { await LoadDataAsync(); }
+        catch { /* API unavailable on first load — dashboard renders with empty state */ }
+    }
     public Task OnNavigatedFromAsync() { _ticker.Stop(); return Task.CompletedTask; }
 
     private async Task LoadDataAsync()
@@ -143,13 +148,18 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         {
             if (currentUser.IsMentee && !menteeIsMatched)
             {
-                await _selectionGalleryVm.LoadAsync();
+                // Top-3 algorithmic recommendations
+                try { await _selectionGalleryVm.LoadAsync(); } catch { }
                 Pairs.Add(_selectionGalleryVm);
+
+                // Full browse — still available in Phase 2 so mentees can pick anyone
+                try { await _browseMentorsVm.LoadAsync(); } catch { }
+                Pairs.Add(_browseMentorsVm);
             }
             if (currentUser.IsMentor && !mentorIsMatched)
             {
                 _mentorRequestsVm.IsPhase2Active = true;
-                await _mentorRequestsVm.LoadAsync();
+                try { await _mentorRequestsVm.LoadAsync(); } catch { }
                 Pairs.Add(_mentorRequestsVm);
             }
         }
@@ -157,13 +167,13 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         {
             if (currentUser.IsMentee && !menteeIsMatched)
             {
-                await _browseMentorsVm.LoadAsync();
+                try { await _browseMentorsVm.LoadAsync(); } catch { }
                 Pairs.Add(_browseMentorsVm);
             }
             if (currentUser.IsMentor && !mentorIsMatched)
             {
                 _mentorRequestsVm.IsPhase2Active = false;
-                await _mentorRequestsVm.LoadAsync();
+                try { await _mentorRequestsVm.LoadAsync(); } catch { }
                 Pairs.Add(_mentorRequestsVm);
             }
         }
@@ -231,6 +241,7 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
 
 // ─── SelectionGalleryViewModel (Phase 2 mentee tab) ───────────────────────
 
+/// <summary>Mentee Phase-2 tab: shows the top recommended mentors (the gallery) and lets the mentee pick one (Tier 3).</summary>
 public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.ViewModel.ViewModelHelper.INavigatable
 {
     private readonly ILocalizationService _loc;
@@ -279,7 +290,7 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
 
         try
         {
-            await _matchingClient.GalleryPickAsync(new GalleryPickRequest(currentUser.Id, recommendation.MentorId, 1));
+            await _matchingClient.GalleryPickAsync(new GalleryPickRequest(currentUser.Id, recommendation.MentorId));
             AlreadyMatched = true;
             StatusMessage = _loc.Format("Student_MatchedWith_Message", recommendation.MentorName);
             if (OnPairCreated != null) await OnPairCreated();
@@ -295,6 +306,7 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
 
 // ─── MentorRequestsViewModel (Phase 2 mentor tab) ─────────────────────────
 
+/// <summary>Mentor tab: shows pending pair requests sent to this mentor and lets them accept/reject each.</summary>
 public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.ViewModel.ViewModelHelper.INavigatable
 {
     private readonly ILocalizationService _loc;
@@ -333,21 +345,26 @@ public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.Vi
         var currentUser = _userStore.User;
         if (currentUser == null || !currentUser.IsMentor) { IsLoading = false; return; }
 
-        var requests = await _matchingClient.GetRequestsForMentorAsync(currentUser.Id);
-        foreach (var req in requests)
-            PendingRequests.Add(req);
-
-        var settings = await _settingsClient.GetAllAsync();
-        if (settings.Phase1Deadline != null)
+        try
         {
-            var deadline = DateTime.Parse(settings.Phase1Deadline);
-            var diff = deadline - DateTime.Now;
-            RequestWindowTimerDisplay = diff.TotalSeconds > 0
-                ? _loc.Format("Student_RequestWindowClosesIn", $"{diff.Days:D2}d : {diff.Hours:D2}h : {diff.Minutes:D2}m")
-                : _loc.Get("Student_RequestWindowClosed");
-        }
+            var requests = await _matchingClient.GetRequestsForMentorAsync(currentUser.Id);
+            foreach (var req in requests)
+                PendingRequests.Add(req);
 
-        IsLoading = false;
+            var settings = await _settingsClient.GetAllAsync();
+            if (settings.Phase1Deadline != null)
+            {
+                var deadline = DateTime.Parse(settings.Phase1Deadline);
+                var diff = deadline - DateTime.Now;
+                RequestWindowTimerDisplay = diff.TotalSeconds > 0
+                    ? _loc.Format("Student_RequestWindowClosesIn", $"{diff.Days:D2}d : {diff.Hours:D2}h : {diff.Minutes:D2}m")
+                    : _loc.Get("Student_RequestWindowClosed");
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]
@@ -355,7 +372,7 @@ public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.Vi
     {
         try
         {
-            await _matchingClient.AcceptRequestAsync(request.Id, new AcceptRequestBody(AssignedSupervisorId));
+            await _matchingClient.AcceptRequestAsync(request.Id, new AcceptRequestBody());
             StatusMessage = _loc.Format("Student_AcceptedPaired_Message", request.MenteeName);
             if (OnPairCreated != null) await OnPairCreated();
         }
@@ -387,6 +404,7 @@ public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.Vi
 
 // ─── BrowseMentorsViewModel (Phase 1 mentee tab) ──────────────────────────
 
+/// <summary>Mentee Phase-1 tab: browse available mentors and send a direct pair request (Tier 1).</summary>
 public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.ViewModel.ViewModelHelper.INavigatable
 {
     private readonly ILocalizationService _loc;
@@ -400,6 +418,9 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _statusMessage;
     [ObservableProperty] private bool _hasStatusMessage;
+
+    /// <summary>Called when a pair is successfully created (e.g. request accepted). Used by the Phase-2 path to refresh the dashboard.</summary>
+    public Func<Task>? OnPairCreated { get; set; }
 
     public BrowseMentorsViewModel(MatchingApiClient matchingClient, UserStore userStore, ReferenceApiClient referenceClient, ILocalizationService loc)
     {
@@ -443,6 +464,7 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
                 Gender = mentor.Gender,
                 SubjectName = subjectName,
                 GradeName = mentor.Grade?.Name ?? "",
+                GradeNum = mentor.Grade?.Num ?? 0,
                 ClassNum = mentor.ClassNum,
                 HasPendingRequest = pendingMentorIds.Contains(mentor.Id)
             });
@@ -459,14 +481,13 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
         try
         {
             await _matchingClient.SendPairRequestAsync(new SendPairRequestBody(currentUser.Id, card.MentorId));
-            StatusMessage = _loc.Format("Student_RequestSent_Message", card.MentorName);
             card.HasPendingRequest = true;
         }
         catch (Exception ex)
         {
             StatusMessage = $"✗ {ex.Message}";
+            HasStatusMessage = true;
         }
-        HasStatusMessage = true;
     }
 
     [RelayCommand]
@@ -479,14 +500,13 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
             var pending = await _matchingClient.GetRequestsForMenteeAsync(currentUser.Id);
             var req = pending.FirstOrDefault(r => r.MentorId == card.MentorId);
             if (req != null) await _matchingClient.CancelRequestAsync(req.Id);
-            StatusMessage = _loc.Format("Student_RequestCancelled_Message", card.MentorName);
             card.HasPendingRequest = false;
         }
         catch (Exception ex)
         {
             StatusMessage = $"✗ {ex.Message}";
+            HasStatusMessage = true;
         }
-        HasStatusMessage = true;
     }
 }
 
@@ -496,8 +516,21 @@ public partial class MentorCard : ObservableObject
     public string MentorName { get; set; } = string.Empty;
     public string SubjectName { get; set; } = string.Empty;
     public string GradeName { get; set; } = string.Empty;
+    public int GradeNum { get; set; }
     public int ClassNum { get; set; }
     public string ProfilePicturePath { get; set; } = string.Empty;
     public Gender Gender { get; set; }
     [ObservableProperty] private bool _hasPendingRequest;
+
+    /// <summary>Human-readable grade+class label, e.g. "10th grade class 3".</summary>
+    public string GradeClassDisplay =>
+        GradeNum > 0
+            ? $"{GradeNum}{OrdinalSuffix(GradeNum)} grade class {ClassNum}"
+            : ClassNum > 0 ? $"Class {ClassNum}" : "";
+
+    private static string OrdinalSuffix(int n) => (n % 100) switch
+    {
+        11 or 12 or 13 => "th",
+        _ => (n % 10) switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" }
+    };
 }

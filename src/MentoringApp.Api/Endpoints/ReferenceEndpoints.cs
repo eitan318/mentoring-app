@@ -5,6 +5,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/reference minimal-API endpoints: lookup data (subjects, grades, classes, issue categories).</summary>
 public static class ReferenceEndpoints
 {
     public static void MapReferenceEndpoints(this WebApplication app)
@@ -56,7 +57,7 @@ public static class ReferenceEndpoints
         .WithOpenApi();
 
         // POST /api/reference/school-classes
-        group.MapPost("/school-classes", async (AddSchoolClassBody req, SchoolClassService schoolClassService) =>
+        group.MapPost("/school-classes", async (AddSchoolClassRequest req, SchoolClassService schoolClassService) =>
         {
             var result = await schoolClassService.AddClassAsync(req.GradeId, req.ClassNum);
             return result.Success ? Results.StatusCode(201) : Results.BadRequest(new { error = result.ErrorMessage });

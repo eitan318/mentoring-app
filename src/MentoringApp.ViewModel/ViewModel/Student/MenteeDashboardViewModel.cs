@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.ViewModel.ViewModel.Student
 {
+    /// <summary>Mentee-side pair dashboard (counterpart = mentor); specializes <see cref="PairMemberDashboardViewModel"/>.</summary>
     public partial class MenteeDashboardViewModel : PairMemberDashboardViewModel
     {
         public override string CounterpartRole => "MENTOR";

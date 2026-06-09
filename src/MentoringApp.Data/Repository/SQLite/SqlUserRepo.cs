@@ -311,6 +311,12 @@ namespace MentoringApp.Data.Acess.SQLite
             return rows > 0;
         }
 
+        public async Task ClearAllStudentProfilesAsync()
+        {
+            await _db.ExecuteAsync("DELETE FROM UserMentors;");
+            await _db.ExecuteAsync("DELETE FROM UserMentees;");
+        }
+
         public async Task<bool> UpdateBaseInfoAsync(int id, string name, string email, string nationalId, string? phoneNumber, int gender)
         {
             const string sql = "UPDATE Users SET UserName = @name, Email = @email, NationalId = @nationalId, PhoneNumber = @phoneNumber, Gender = @gender WHERE Id = @id";

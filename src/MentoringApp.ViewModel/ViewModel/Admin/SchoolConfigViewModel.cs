@@ -26,6 +26,8 @@ public partial class SchoolConfigViewModel : ObservableObject
     [ObservableProperty] private string _classNumInput = "";
     [ObservableProperty] private SchoolClassModel? _selectedClass;
 
+    public bool CanDeleteClass => !_progress.IsSchoolConfigured;
+
     public SchoolConfigViewModel(
         ReferenceApiClient referenceClient,
         AdminProgressStore progress,
@@ -36,6 +38,15 @@ public partial class SchoolConfigViewModel : ObservableObject
         _progress = progress;
         _toastService = toastService;
         _loc = loc;
+
+        _progress.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(AdminProgressStore.IsSchoolConfigured))
+            {
+                OnPropertyChanged(nameof(CanDeleteClass));
+                DeleteClassCommand.NotifyCanExecuteChanged();
+            }
+        };
     }
 
     public async Task LoadAsync()
@@ -79,7 +90,7 @@ public partial class SchoolConfigViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanDeleteClass))]
     private async Task DeleteClass()
     {
         if (SelectedClass == null)

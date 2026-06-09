@@ -11,5 +11,10 @@ namespace MentoringApp.View.Admin
         {
             InitializeComponent();
         }
+
+        private void SupervisorsListView_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }

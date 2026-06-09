@@ -1,10 +1,12 @@
+using System.Security.Claims;
 using MentoringApp.Api.Helpers;
 using MentoringApp.Data.Interfaces;
 using MentoringApp.Service;
-using MentoringApp.Model;  
+using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/reviews minimal-API endpoints: create and query pair session reviews.</summary>
 public static class ReviewEndpoints
 {
     public static void MapReviewEndpoints(this WebApplication app)
@@ -30,10 +32,17 @@ public static class ReviewEndpoints
         .WithOpenApi();
 
         // POST /api/reviews — Student
-        group.MapPost("/", async (CreateReviewRequest req, ReviewService reviewService) =>
+        group.MapPost("/", async (CreateReviewRequest req, ClaimsPrincipal user, ReviewService reviewService) =>
         {
-            var result = await reviewService.CreateReviewAsync(
-                req.Content, req.PairId, req.AuthorUserId, req.AmountOfHours);
+            if (req.Content.Length < 10 || req.Content.Length > 2000)
+                return Results.BadRequest(new { error = "Review content must be between 10 and 2000 characters." });
+            if (req.AmountOfHours < 0.1 || req.AmountOfHours > 24)
+                return Results.BadRequest(new { error = "Hours must be between 0.1 and 24." });
+
+            if (!int.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+                return Results.Unauthorized();
+
+            var result = await reviewService.CreateReviewAsync(req.Content, req.PairId, userId, req.AmountOfHours);
             return result.ToHttp();
         })
         .WithOpenApi();

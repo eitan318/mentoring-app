@@ -5,6 +5,7 @@ using MentoringApp.Model;
 namespace MentoringApp.Service.Mapping
 {
 
+    /// <summary>Static mapper converting <see cref="IssueCategoryDao"/> rows into <see cref="IssueCategoryModel"/> objects.</summary>
     public static class IssueCategoryMapper
     {
         public static IssueCategoryModel ToModel(IssueCategoryDao dto)

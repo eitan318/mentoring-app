@@ -50,16 +50,11 @@ namespace MentoringApp.Service
         public async Task<IEnumerable<StudentModel>> GetAvailableMentorsAsync()
         {
             var allUsers = await _userService.GetAllUsersAsync();
-            var allPairs = await _pairRepo.GetAllAsync();
-
-            var mentorPairCounts = allPairs
-                .GroupBy(p => p.MentorId)
-                .ToDictionary(g => g.Key, g => g.Count());
+            var matchedMentorIds = (await _pairRepo.GetMatchedMentorIdsAsync()).ToHashSet();
 
             return allUsers
                 .OfType<StudentModel>()
-                .Where(s => s.IsMentor &&
-                       mentorPairCounts.GetValueOrDefault(s.Id, 0) < (s.MentorProfile?.MaxMentees ?? 1));
+                .Where(s => s.IsMentor && !matchedMentorIds.Contains(s.Id));
         }
 
         public async Task<IEnumerable<StudentModel>> GetAvailableMenteesAsync()
@@ -81,12 +76,8 @@ namespace MentoringApp.Service
             if (matchedMentees.Contains(menteeId))
                 return Result.Failure("You are already matched with a mentor.");
 
-            var allPairs = await _pairRepo.GetAllAsync();
-            var currentMentees = allPairs.Count(p => p.MentorId == mentorId);
-            var mentorUser = await _userService.GetUserByIdAsync(mentorId);
-            var maxMentees = (mentorUser.Data as StudentModel)?.MentorProfile?.MaxMentees ?? 1;
-
-            if (currentMentees >= maxMentees)
+            var matchedMentors = await _pairRepo.GetMatchedMentorIdsAsync();
+            if (matchedMentors.Contains(mentorId))
                 return Result.Failure("That mentor is no longer available.");
 
             bool exists = await _pairRequestRepo.ExistsAsync(menteeId, mentorId);
@@ -105,7 +96,7 @@ namespace MentoringApp.Service
         /// The request lookup iterates all mentors because <see cref="IPairRequestRepo"/>
         /// does not yet expose a GetByIdAsync method. Replace with that once available.
         /// </remarks>
-        public async Task<Result> AcceptPairRequestAsync(int requestId, int supervisorId)
+        public async Task<Result> AcceptPairRequestAsync(int requestId)
         {
             // TODO: replace loop with _pairRequestRepo.GetByIdAsync(requestId)
             //       once that method is added to IPairRequestRepo.
@@ -123,12 +114,8 @@ namespace MentoringApp.Service
             if (req == null) return Result.Failure("Request not found.");
             if (req.Status != "Pending") return Result.Failure("Request is no longer pending.");
 
-            var allPairs = await _pairRepo.GetAllAsync();
-            var currentMentees = allPairs.Count(p => p.MentorId == req.MentorId);
-            var mentorUser = await _userService.GetUserByIdAsync(req.MentorId);
-            var maxMentees = (mentorUser.Data as StudentModel)?.MentorProfile?.MaxMentees ?? 1;
-
-            if (currentMentees >= maxMentees)
+            var matchedMentors = await _pairRepo.GetMatchedMentorIdsAsync();
+            if (matchedMentors.Contains(req.MentorId))
             {
                 await RejectPairRequestAsync(requestId);
                 return Result.Failure("You have reached your maximum number of mentees.");
@@ -220,6 +207,8 @@ namespace MentoringApp.Service
             {
                 foreach (var mentor in mentors)
                 {
+                    if (mentor.Id == mentee.Id) continue;
+
                     scores.Add(new MatchScoreDao
                     {
                         MenteeId = mentee.Id,
@@ -246,22 +235,20 @@ namespace MentoringApp.Service
         public async Task<IEnumerable<MatchScore>> GetTopRecommendationsAsync(int menteeId, int topN = 3)
         {
             var dtos = await _matchScoreRepo.GetTopForMenteeAsync(menteeId, topN);
+            var matchedMentorIds = (await _pairRepo.GetMatchedMentorIdsAsync()).ToHashSet();
 
-            var allPairs = await _pairRepo.GetAllAsync();
-            var mentorPairCounts = allPairs
-                .GroupBy(p => p.MentorId)
-                .ToDictionary(g => g.Key, g => g.Count());
+            // Filter stale entries (mentor was paired since the matrix was built) and self-matches
+            var validDtos = dtos.Where(d => !matchedMentorIds.Contains(d.MentorId) && d.MentorId != menteeId).ToList();
+
+            // Mentee was added after the score matrix was generated — backfill their rows
+            if (!validDtos.Any())
+                return await BackfillAndReturnRecommendationsAsync(menteeId, matchedMentorIds, topN);
 
             var result = new List<MatchScore>();
-
-            foreach (var dto in dtos)
+            foreach (var dto in validDtos)
             {
                 var mentorResult = await _userService.GetUserByIdAsync(dto.MentorId);
                 var mentorModel = mentorResult.Data as StudentModel;
-
-                int currentMentees = mentorPairCounts.GetValueOrDefault(dto.MentorId, 0);
-                int maxMentees = mentorModel?.MentorProfile?.MaxMentees ?? 1;
-                if (currentMentees >= maxMentees) continue;
 
                 var menteeResult = await _userService.GetUserByIdAsync(dto.MenteeId);
                 var menteeModel = menteeResult.Data as StudentModel;
@@ -283,18 +270,78 @@ namespace MentoringApp.Service
             return result;
         }
 
-        public async Task<Result> GalleryPickAsync(int menteeId, int mentorId, int supervisorId)
+        /// <summary>
+        /// Called when a mentee has no pre-computed scores (added after the score matrix was
+        /// generated). Scores every available unmatched mentor, persists all rows to the
+        /// MatchScores table so subsequent requests hit the DB like normal users, then returns
+        /// the top <paramref name="topN"/>.
+        /// </summary>
+        private async Task<IEnumerable<MatchScore>> BackfillAndReturnRecommendationsAsync(
+            int menteeId, HashSet<int> matchedMentorIds, int topN)
         {
+            var menteeResult = await _userService.GetUserByIdAsync(menteeId);
+            if (menteeResult.Data is not StudentModel menteeModel)
+                return Enumerable.Empty<MatchScore>();
+
+            var availableMentors = (await GetAvailableMentorsAsync())
+                .Where(m => !matchedMentorIds.Contains(m.Id) && m.Id != menteeId)
+                .ToList();
+
+            if (!availableMentors.Any())
+                return Enumerable.Empty<MatchScore>();
+
+            // Compute scores for every available mentor and persist them so the matrix
+            // stays complete for future requests and for auto/fallback match.
+            var newRows = availableMentors.Select(mentor => new MatchScoreDao
+            {
+                MenteeId = menteeId,
+                MentorId = mentor.Id,
+                ScorePercent = _scorer.Calculate(
+                    menteeModel.MenteeProfile?.SubjectToLearn,
+                    mentor.MentorProfile?.SubjectToTeach,
+                    menteeModel.PreferredMentorGender,
+                    mentor.Gender,
+                    mentor.PreferredMenteeGender,
+                    menteeModel.Gender)
+            }).ToList();
+
+            await _matchScoreRepo.BulkInsertAsync(newRows);
+
+            // Build the rich MatchScore display objects for the top N
+            var topRows = newRows.OrderByDescending(r => r.ScorePercent).Take(topN);
+            var menteeSubjectName = await GetSubjectNameAsync(menteeModel.MenteeProfile?.SubjectToLearn);
+            var result = new List<MatchScore>();
+
+            foreach (var row in topRows)
+            {
+                var mentor = availableMentors.First(m => m.Id == row.MentorId);
+                result.Add(new MatchScore
+                {
+                    MenteeId = menteeId,
+                    MentorId = mentor.Id,
+                    ScorePercent = row.ScorePercent,
+                    MentorName = mentor.UserName,
+                    MentorProfilePicturePath = mentor.ProfilePicturePath ?? string.Empty,
+                    MentorGender = mentor.Gender,
+                    MentorSubjectName = await GetSubjectNameAsync(mentor.MentorProfile?.SubjectToTeach),
+                    MenteeSubjectName = menteeSubjectName
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<Result> GalleryPickAsync(int menteeId, int mentorId)
+        {
+            if (menteeId == mentorId)
+                return Result.Failure("You cannot be paired with yourself.");
+
             var matchedMentees = await _pairRepo.GetMatchedMenteeIdsAsync();
             if (matchedMentees.Contains(menteeId))
                 return Result.Failure("You are already matched.");
 
-            var allPairs = await _pairRepo.GetAllAsync();
-            var currentMentees = allPairs.Count(p => p.MentorId == mentorId);
-            var mentorUser = await _userService.GetUserByIdAsync(mentorId);
-            var maxMentees = (mentorUser.Data as StudentModel)?.MentorProfile?.MaxMentees ?? 1;
-
-            if (currentMentees >= maxMentees)
+            var matchedMentors = await _pairRepo.GetMatchedMentorIdsAsync();
+            if (matchedMentors.Contains(mentorId))
                 return Result.Failure("That mentor is no longer available.");
 
             int assignedSupervisorId = await _supervisorAssignment.GetForMenteeAsync(menteeId);
@@ -339,6 +386,7 @@ namespace MentoringApp.Service
 
             foreach (var score in allScores)
             {
+                if (score.MenteeId == score.MentorId) continue;
                 if (matchedMentees.Contains(score.MenteeId)) continue;
                 if (matchedMentors.Contains(score.MentorId)) continue;
 
@@ -401,6 +449,13 @@ namespace MentoringApp.Service
             foreach (var mentee in incompleteMentees)
             {
                 if (!remainingMentors.TryDequeue(out var mentor)) break;
+
+                if (mentor.Id == mentee.Id)
+                {
+                    remainingMentors.Enqueue(mentor);
+                    if (!remainingMentors.TryDequeue(out mentor)) break;
+                    if (mentor.Id == mentee.Id) continue;
+                }
 
                 // Flag for supervisor review if either profile is incomplete
                 bool isIncomplete = mentee.MenteeProfile == null || mentor.MentorProfile == null;

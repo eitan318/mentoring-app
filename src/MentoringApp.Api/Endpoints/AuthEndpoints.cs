@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/auth minimal-API endpoints: send login code, login (issues a JWT), and register.</summary>
 public static class AuthEndpoints
 {
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
@@ -14,20 +15,19 @@ public static class AuthEndpoints
         app.MapPost("/api/auth/send-code", async (
             SendCodeRequest request,
             AuthService authService,
-            IWebHostEnvironment env) =>
+            AppSettings appSettings) =>
         {
             if (string.IsNullOrWhiteSpace(request.NationalId))
                 return Results.BadRequest(new { error = "NationalId is required." });
 
-            var result = await authService.SendVerificationCodeAsync(request.NationalId, env.IsDevelopment());
+            var result = await authService.SendVerificationCodeAsync(request.NationalId, appSettings.SkipVerificationCode);
 
             if (result.Success)
             {
-                if (env.IsDevelopment() && !string.IsNullOrEmpty(result.Data))
-                {
-                    return Results.Ok(new { devCode = result.Data });
-                }
-                return Results.Ok();
+                string? devCode = appSettings.SkipVerificationCode && !string.IsNullOrEmpty(result.Data)
+                    ? result.Data
+                    : null;
+                return Results.Ok(new { devCode });
             }
 
             return Results.BadRequest(new { error = result.ErrorMessage });

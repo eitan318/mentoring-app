@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 
 namespace MentoringApp.Behaviors
 {
@@ -44,7 +45,12 @@ namespace MentoringApp.Behaviors
                         cmd.Execute(item.Content);
                     return;
                 }
-                node = VisualTreeHelper.GetParent(node);
+                // VisualTreeHelper.GetParent throws InvalidOperationException for
+                // FrameworkContentElement nodes (e.g. Run, Paragraph) because they
+                // are DependencyObjects but not Visuals. Use the logical tree for those.
+                node = (node is Visual || node is Visual3D)
+                    ? VisualTreeHelper.GetParent(node)
+                    : LogicalTreeHelper.GetParent(node) as DependencyObject;
             }
         }
     }

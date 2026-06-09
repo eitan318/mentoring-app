@@ -2,6 +2,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 
+/// <summary>Typed client for the /api/auth endpoints (send login code, login, register).</summary>
 public class AuthApiClient(HttpClient http) : ApiClientBase(http)
 {
     public Task<SendCodeResponse> SendCodeAsync(SendCodeRequest request) =>

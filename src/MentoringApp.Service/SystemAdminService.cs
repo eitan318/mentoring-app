@@ -2,6 +2,10 @@ using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Service;
 
+/// <summary>
+/// Developer/admin operations: drops and recreates the SQLite database and triggers the dummy-data seed.
+/// Not intended for use in production workflows.
+/// </summary>
 public class SystemAdminService
 {
     private readonly IDbRepo _dbRepo;
@@ -47,6 +51,8 @@ public class SystemAdminService
     ///         <see cref="IUserRepo.DeleteUserAsync"/>.</item>
     ///   <item>Moves every remaining student up one grade.</item>
     ///   <item>Deletes all pairs, reviews, and pair requests.</item>
+    ///   <item>Clears all student mentor/mentee profiles so returning students
+    ///         can re-register their role in the new year's registration phase.</item>
     ///   <item>Resets all admin settings flags to their initial values so the
     ///         admin wizard starts from step 1 again.</item>
     /// </list>
@@ -66,7 +72,12 @@ public class SystemAdminService
         // 3. Wipe all pairs, reviews, and pair requests
         await _pairRepo.DeleteAllAsync();
 
-        // 4. Reset settings – admin returns to step 1 of the wizard
+        // 4. Clear mentor/mentee roles so returning students re-register their
+        //    role during the new year's registration phase (they may want to switch
+        //    from mentor to mentee or vice versa).
+        await _userRepo.ClearAllStudentProfilesAsync();
+
+        // 5. Reset settings – admin returns to step 1 of the wizard
         await _settingsService.SetIsSchoolConfiguredAsync(false);
         await _settingsService.SetIsSupervisorsAssignedAsync(false);
         await _settingsService.SetIsUsersImportedAsync(false);

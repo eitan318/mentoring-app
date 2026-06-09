@@ -11,6 +11,10 @@ namespace MentoringApp.Data.Dao
 {
 
 
+    /// <summary>
+    /// Flat row mirror of the Users table (with the role-specific columns flattened in).
+    /// Returned by the SQL repos and mapped to/from the rich <c>UserModel</c> hierarchy in the service layer.
+    /// </summary>
     public class UserDao
     {
         // Core Identity
@@ -43,6 +47,7 @@ namespace MentoringApp.Data.Dao
         public DateTime? VerificationCodeCreated { get; set; }
     }
 
+    /// <summary>Role discriminator column stored in the Users table.</summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum UserRoleType { Student, Admin, Supervisor }
 

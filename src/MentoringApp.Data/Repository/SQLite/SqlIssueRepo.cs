@@ -4,6 +4,7 @@ using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IIssueRepo"/> (student-reported issues).</summary>
     internal class SqlIssueRepo : IIssueRepo
     {
         private readonly ISQLiteConnectionService _db;

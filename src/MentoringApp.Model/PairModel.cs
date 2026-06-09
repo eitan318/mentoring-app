@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
+    /// <summary>
+    /// A confirmed mentoring relationship between a mentor and a mentee, overseen by a supervisor.
+    /// This is the central entity the whole matching process produces.
+    /// </summary>
     public class PairModel : BaseModel
     {
         public required StudentModel Mentee { get; set; }

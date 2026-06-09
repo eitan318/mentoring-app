@@ -6,15 +6,13 @@ using MentoringApp.Model.User;
 using MentoringApp.ViewModel.Helpers;
 using MentoringApp.ViewModel.Navigation;
 using MentoringApp.ViewModel.Store;
-using MentoringApp.ViewModel.ViewModel.Admin;
-using MentoringApp.ViewModel.ViewModel.Student;
-using MentoringApp.ViewModel.ViewModel.Supervisor;
 using MentoringApp.ViewModel.ViewModelHelper;
 using MentoringApp.ViewModel.IService;
 using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
 
+/// <summary>Backs the current user's own profile screen: view/edit personal details, preferences and profile picture, validated before save.</summary>
 public partial class MyProfileViewModel : ObservableValidator, INavigatable
 {
     private readonly UserStore _userStore;
@@ -24,11 +22,13 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     private readonly IFileService _fileService;
 
     [ObservableProperty] private bool _isReadOnly = true;
-    [ObservableProperty] private bool _isEditMode = false;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSaveButtonVisible))]
+    private bool _isEditMode = false;
     [ObservableProperty] private string _errorMessage = "";
 
     [ObservableProperty] private ObservableCollection<SubjectModel> _subjects = [];
-    [ObservableProperty] private ObservableCollection<GradeModel> _grades = [];
+    [ObservableProperty] private ObservableCollection<SchoolClassModel> _schoolClasses = [];
 
     // האובייקט המרכזי - ה-Data Binding ב-XAML יתבצע ישירות מולו
     [ObservableProperty]
@@ -40,8 +40,8 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     [NotifyPropertyChangedFor(nameof(Gender))]
     [NotifyPropertyChangedFor(nameof(SelectedGenderValue))]
     [NotifyPropertyChangedFor(nameof(IsSupervisor))]
-    [NotifyPropertyChangedFor(nameof(SelectedGrade))]
-    [NotifyPropertyChangedFor(nameof(ClassNum))]
+    [NotifyPropertyChangedFor(nameof(IsStudent))]
+    [NotifyPropertyChangedFor(nameof(SelectedSchoolClass))]
     [NotifyPropertyChangedFor(nameof(HasMentorProfile))]
     [NotifyPropertyChangedFor(nameof(HasMenteeProfile))]
     [NotifyPropertyChangedFor(nameof(SubjectToTeach))]
@@ -49,7 +49,15 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     [NotifyPropertyChangedFor(nameof(SubjectToLearn))]
     [NotifyPropertyChangedFor(nameof(SelectedPreferredMentorGenderValue))]
     [NotifyPropertyChangedFor(nameof(SelectedPreferredMenteeGenderValue))]
+    [NotifyPropertyChangedFor(nameof(ShowRoleSelection))]
+    [NotifyPropertyChangedFor(nameof(GradeClassDisplay))]
     private UserModel? _currentUser;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSaveButtonVisible))]
+    private bool _showRoleSelection;
+    [ObservableProperty] private bool _isMentorSelected;
+    [ObservableProperty] private bool _isMenteeSelected;
 
     [ObservableProperty] private string _roleBadge = string.Empty;
 
@@ -80,22 +88,30 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
     }
 
     public bool IsSupervisor => CurrentUser is SupervisorModel;
+    public bool IsStudent    => CurrentUser is StudentModel;
+    public bool IsSaveButtonVisible => IsEditMode && !ShowRoleSelection;
 
     private StudentModel? AsStudent => CurrentUser as StudentModel;
     public bool HasMentorProfile => AsStudent?.IsMentor == true;
     public bool HasMenteeProfile => AsStudent?.IsMentee == true;
 
-    public GradeModel? SelectedGrade
+    public SchoolClassModel? SelectedSchoolClass
     {
-        get => AsStudent?.Grade;
-        set { if (AsStudent != null && value != null) AsStudent.Grade = value; }
+        get => AsStudent == null ? null
+            : SchoolClasses.FirstOrDefault(sc => sc.Grade?.Id == AsStudent.Grade?.Id && sc.ClassNum == AsStudent.ClassNum);
+        set
+        {
+            if (AsStudent != null && value != null)
+            {
+                AsStudent.Grade = value.Grade;
+                AsStudent.ClassNum = value.ClassNum;
+            }
+        }
     }
 
-    public int ClassNum
-    {
-        get => AsStudent?.ClassNum ?? 0;
-        set { if (AsStudent != null) AsStudent.ClassNum = value; }
-    }
+    public string GradeClassDisplay =>
+        SelectedSchoolClass?.DisplayName
+        ?? (AsStudent?.Grade != null ? $"{AsStudent.Grade.Name} – Class {AsStudent.ClassNum}" : "");
 
     public int SubjectToTeach
     {
@@ -151,10 +167,10 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
 
     private async Task InitializeAsync()
     {
-        var grades = await _referenceClient.GetGradesAsync();
+        var schoolClasses = await _referenceClient.GetSchoolClassesAsync();
         var subjects = await _referenceClient.GetSubjectsAsync();
 
-        Grades = new ObservableCollection<GradeModel>(grades);
+        SchoolClasses = new ObservableCollection<SchoolClassModel>(schoolClasses);
         Subjects = new ObservableCollection<SubjectModel>(subjects);
 
         LoadUserData();
@@ -180,6 +196,33 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
                 _ => "Student"
             },
             _ => "User"
+        };
+
+        if (AsStudent != null && !AsStudent.IsMentor && !AsStudent.IsMentee)
+            ShowRoleSelection = true;
+    }
+
+    [RelayCommand]
+    private void ConfirmRoleSelection()
+    {
+        if (!IsMentorSelected && !IsMenteeSelected) return;
+        if (AsStudent == null) return;
+
+        if (IsMentorSelected)
+            AsStudent.MentorProfile ??= new MentoringApp.Model.User.StudentProfiles.MentorProfile();
+        if (IsMenteeSelected)
+            AsStudent.MenteeProfile ??= new MentoringApp.Model.User.StudentProfiles.MenteeProfile();
+
+        ShowRoleSelection = false;
+        OnPropertyChanged(nameof(HasMentorProfile));
+        OnPropertyChanged(nameof(HasMenteeProfile));
+
+        RoleBadge = (AsStudent.IsMentor, AsStudent.IsMentee) switch
+        {
+            (true, true) => "Student · Mentor & Mentee",
+            (true, false) => "Student · Mentor",
+            (false, true) => "Student · Mentee",
+            _ => "Student"
         };
     }
 
@@ -213,13 +256,6 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
             // 2. לוגיקה ספציפית לסטודנט
             if (CurrentUser is StudentModel student)
             {
-                // עדכון כיתה
-                if (student.Grade != null)
-                {
-                    await _userClient.UpdateGradeClassAsync(student.Id,
-                        new UpdateGradeClassRequest(student.Grade.Id, student.ClassNum));
-                }
-
                 // עדכון העדפות מגדר
                 await _userClient.UpdateGenderPreferencesAsync(student.Id,
                     new UpdateGenderPreferencesRequest(
@@ -251,26 +287,21 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
             ErrorMessage = string.Empty;
             IsReadOnly = true;
             IsEditMode = false;
-
-            // ניווט חזרה לדשבורד המתאים במידה וצריך
-            await NavigateBackToDashboard();
         }
         catch (Exception ex)
         {
             ErrorMessage = "Save failed: " + ex.Message;
+            return;
         }
+
+        await NavigateBackToDashboard();
     }
 
     private async Task NavigateBackToDashboard()
     {
-        if (_navigationService.CanGoBack()) return;
-
-        if (CurrentUser is AdminModel)
-            await _navigationService.NavigateToAsync<AdminDashboardViewModel>();
-        else if (CurrentUser is SupervisorModel)
-            await _navigationService.NavigateToAsync<SupervisorDashboardViewModel, int>(CurrentUser.Id);
-        else
-            await _navigationService.NavigateToAsync<StudentDashboardViewModel>();
+        // GoBack stays inside the existing shell context (sidebar, etc.) rather than
+        // navigating to a shell VM which would call UseContext() and stack a new sidebar.
+        await _navigationService.GoBackAsync();
     }
 
     [RelayCommand]

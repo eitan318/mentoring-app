@@ -4,6 +4,7 @@ using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="ISchoolClassRepo"/> (class slots and supervisor ownership).</summary>
     internal class SqlSchoolClassRepo : ISchoolClassRepo
     {
         private readonly ISQLiteConnectionService _db;

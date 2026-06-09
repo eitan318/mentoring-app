@@ -10,20 +10,62 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <DockPanel Grid.Row="0" Margin="0,0,0,20">
+            <!-- Title + Count Badge -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
                 <TextBlock Text="{Binding [Admin_NoticeBoard_Label], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="Bold" FontSize="18" Foreground="#111827" VerticalAlignment="Center"/>
                 <Border Background="#EF4444" CornerRadius="10" Padding="6,2" HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Visibility="{Binding HasForwardedIssues, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="{Binding ForwardedIssues.Count}" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                        Visibility="{Binding HasPendingForwardedIssues, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{Binding PendingForwardedIssuesCount}" Foreground="White" FontSize="11" FontWeight="Bold"/>
                 </Border>
             </DockPanel>
 
-            <ListView Grid.Row="1" ItemsSource="{Binding ForwardedIssues}" BorderThickness="0" Background="Transparent"
+            <!-- Tabs: Pending & Resolved -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                <RadioButton Content="{Binding [Admin_NoticeBoard_Pending], Source={x:Static loc:TranslationSource.Instance}}"
+                             IsChecked="{Binding IsShowingPendingNotices, Mode=OneWay}"
+                             Command="{Binding ShowPendingNoticesCommand}"
+                             Cursor="Hand" Focusable="False" Margin="0,0,16,0">
+                    <RadioButton.Template>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="Border" Padding="12,8" BorderThickness="0,0,0,2" BorderBrush="Transparent">
+                                <TextBlock Text="{TemplateBinding Content}" FontSize="14" Foreground="#6B7280" FontWeight="Medium"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Border" Property="Border.BorderBrush" Value="#A855F7"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </RadioButton.Template>
+                </RadioButton>
+                <RadioButton Content="{Binding [Admin_NoticeBoard_Resolved], Source={x:Static loc:TranslationSource.Instance}}"
+                             IsChecked="{Binding IsShowingResolvedNotices, Mode=OneWay}"
+                             Command="{Binding ShowResolvedNoticesCommand}"
+                             Cursor="Hand" Focusable="False">
+                    <RadioButton.Template>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="Border" Padding="12,8" BorderThickness="0,0,0,2" BorderBrush="Transparent">
+                                <TextBlock Text="{TemplateBinding Content}" FontSize="14" Foreground="#6B7280" FontWeight="Medium"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Border" Property="Border.BorderBrush" Value="#A855F7"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </RadioButton.Template>
+                </RadioButton>
+            </StackPanel>
+
+            <!-- Pending List -->
+            <ListView Grid.Row="2" ItemsSource="{Binding FilteredPendingForwardedIssues}" BorderThickness="0" Background="Transparent"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                      b:ListItemSelector.Command="{Binding SelectForwardedIssueCommand}">
+                      b:ListItemSelector.Command="{Binding SelectForwardedIssueCommand}"
+                      Visibility="{Binding IsShowingPendingNotices, Converter={StaticResource BoolToVis}}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -44,15 +86,110 @@
                                     <TextBlock Text="{Binding [Admin_NewIssue_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#9CA3AF" FontSize="11" HorizontalAlignment="Right"/>
                                 </DockPanel>
                                 <TextBlock Text="{Binding Description}" FontSize="13" Foreground="#374151" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Margin="0,0,0,8"/>
-                                <TextBlock Text="{Binding AuthorName, StringFormat='By - {0}'}" FontSize="12" Foreground="#6B7280"/>
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding AuthorName, StringFormat='By - {0}'}" FontSize="12" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <Button DockPanel.Dock="Right"
+                                            Content="{Binding [Issue_ViewDetails_Button], Source={x:Static loc:TranslationSource.Instance}}"
+                                            Command="{Binding DataContext.SelectForwardedIssueCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            HorizontalAlignment="Right"
+                                            Padding="10,4" BorderThickness="0"
+                                            Background="#A855F7" Foreground="White"
+                                            FontSize="11" FontWeight="SemiBold" Cursor="Hand">
+                                        <Button.Resources>
+                                            <Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style>
+                                        </Button.Resources>
+                                    </Button>
+                                </DockPanel>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
 
-            <TextBlock Grid.Row="1" Text="{Binding [Admin_NoNotices_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Visibility="{Binding HasForwardedIssues, Converter={StaticResource InverseBoolToVis}}"/>
+            <!-- Resolved List -->
+            <ListView Grid.Row="2" ItemsSource="{Binding FilteredResolvedForwardedIssues}" BorderThickness="0" Background="Transparent"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      b:ListItemSelector.Command="{Binding SelectForwardedIssueCommand}"
+                      Visibility="{Binding IsShowingResolvedNotices, Converter={StaticResource BoolToVis}}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0,0,0,16"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#F9FAFB" CornerRadius="12" Padding="16">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,8">
+                                    <Border Background="#FEF3C7" CornerRadius="4" Padding="6,2" DockPanel.Dock="Left">
+                                        <TextBlock Text="{Binding Category.Name}" Foreground="#D97706" FontSize="11" FontWeight="SemiBold"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding [Admin_ResolvedIssue_Label], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#9CA3AF" FontSize="11" HorizontalAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding Description}" FontSize="13" Foreground="#374151" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Margin="0,0,0,8"/>
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding AuthorName, StringFormat='By - {0}'}" FontSize="12" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <Button DockPanel.Dock="Right"
+                                            Content="{Binding [Issue_ViewDetails_Button], Source={x:Static loc:TranslationSource.Instance}}"
+                                            Command="{Binding DataContext.SelectForwardedIssueCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            HorizontalAlignment="Right"
+                                            Padding="10,4" BorderThickness="0"
+                                            Background="#A855F7" Foreground="White"
+                                            FontSize="11" FontWeight="SemiBold" Cursor="Hand">
+                                        <Button.Resources>
+                                            <Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style>
+                                        </Button.Resources>
+                                    </Button>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <!-- Empty-state messages -->
+            <TextBlock Grid.Row="2" Text="{Binding [Admin_NoPendingNotices_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                       Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Visibility="{Binding IsShowingPendingNotices, Converter={StaticResource BoolToVis}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasPendingForwardedIssues}" Value="False"/>
+                                    <Condition Binding="{Binding IsShowingPendingNotices}" Value="True"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Grid.Row="2" Text="{Binding [Admin_NoResolvedNotices_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                       Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Visibility="{Binding IsShowingResolvedNotices, Converter={StaticResource BoolToVis}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasResolvedForwardedIssues}" Value="False"/>
+                                    <Condition Binding="{Binding IsShowingResolvedNotices}" Value="True"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </Grid>
     </Border>
 </UserControl>

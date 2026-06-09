@@ -194,3 +194,7 @@ obj
 **/wwwroot/lib
 .env
 *_wpftmp.csproj
+.claudignore
+CLAUDE.md
+Tests
+.claude

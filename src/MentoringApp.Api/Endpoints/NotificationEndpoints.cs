@@ -2,6 +2,7 @@ using MentoringApp.Service;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/notifications minimal-API endpoints: trigger phase-transition emails to users.</summary>
 public static class NotificationEndpoints
 {
     public static void MapNotificationEndpoints(this WebApplication app)

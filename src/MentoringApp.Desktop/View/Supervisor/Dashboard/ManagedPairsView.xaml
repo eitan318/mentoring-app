@@ -8,6 +8,31 @@
     FlowDirection="{Binding Source={x:Static loc:TranslationSource.Instance}, Path=FlowDirection}">
 
     <UserControl.Resources>
+        <Style x:Key="ModernInput" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <Grid>
+                                <TextBlock Text="{TemplateBinding Tag}" Foreground="#9CA3AF" Margin="14,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" x:Name="Placeholder"/>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="PairListViewItemStyle" TargetType="ListViewItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="Padding" Value="12,16" />
@@ -36,10 +61,13 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <DockPanel Grid.Row="0" Margin="0,0,0,20">
+            <!-- Title + clear-selection button -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
                 <TextBlock Text="{Binding [Supervisor_ManagedPairs_Label], Source={x:Static loc:TranslationSource.Instance}}" FontSize="18" FontWeight="Bold" Foreground="#111827" VerticalAlignment="Center"/>
                 <Button DockPanel.Dock="Right" Content="{Binding [Supervisor_ClearSelection_Button], Source={x:Static loc:TranslationSource.Instance}}" HorizontalAlignment="Right" Background="Transparent" Foreground="#A855F7" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" Command="{Binding SelectPairCommand}" CommandParameter="{x:Null}">
                     <Button.Style>
@@ -51,16 +79,19 @@
                 </Button>
             </DockPanel>
 
-            <TextBlock Grid.Row="1" Text="{Binding [Supervisor_NoPairs], Source={x:Static loc:TranslationSource.Instance}}" FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" Margin="0,0,0,16" HorizontalAlignment="Center">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers><DataTrigger Binding="{Binding PairsSupervised.Count}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+            <!-- Search box -->
+            <TextBox Grid.Row="1"
+                     Text="{Binding PairSearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource ModernInput}"
+                     Tag="{Binding [Supervisor_PairSearch_Placeholder], Source={x:Static loc:TranslationSource.Instance}}"
+                     Margin="0,0,0,12"/>
 
-            <Grid Grid.Row="1" Margin="10,0,10,12">
+            <!-- Empty-state label -->
+            <TextBlock Grid.Row="2" Text="{Binding [Supervisor_NoPairs], Source={x:Static loc:TranslationSource.Instance}}" FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" Margin="0,0,0,16" HorizontalAlignment="Center"
+                       Visibility="{Binding FilteredPairsIsEmpty, Converter={StaticResource BoolToVis}}"/>
+
+            <!-- Column headers -->
+            <Grid Grid.Row="3" Margin="10,0,10,12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="1.5*"/>
@@ -68,9 +99,9 @@
                 <TextBlock Grid.Column="0" Text="{Binding [Common_Pair], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
                 <TextBlock Grid.Column="1" Text="{Binding [Common_Progress], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" FontSize="12" Foreground="#6B7280"/>
             </Grid>
-            <Rectangle Grid.Row="1" Height="1" Fill="#F3F4F6" VerticalAlignment="Bottom" Margin="-20,0,-20,0"/>
+            <Rectangle Grid.Row="3" Height="1" Fill="#F3F4F6" VerticalAlignment="Bottom" Margin="-20,0,-20,0"/>
 
-            <ListView Grid.Row="2" ItemsSource="{Binding PairsSupervised}" ItemContainerStyle="{StaticResource PairListViewItemStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            <ListView Grid.Row="4" ItemsSource="{Binding FilteredPairsSupervised}" ItemContainerStyle="{StaticResource PairListViewItemStyle}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       b:ListItemSelector.Command="{Binding SelectPairCommand}">
                 <ListView.ItemTemplate>
                     <DataTemplate>

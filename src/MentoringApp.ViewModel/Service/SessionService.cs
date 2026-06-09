@@ -3,6 +3,10 @@ using System.Text.Json;
 
 namespace MentoringApp.ViewModel.Service;
 
+/// <summary>
+/// Persists the logged-in user's id + JWT to a local session.json (under LocalApplicationData) so the
+/// desktop app can auto-login on next launch. Cleared on logout.
+/// </summary>
 public class SessionService
 {
     private static readonly string SessionFilePath = Path.Combine(

@@ -1,5 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
+    /// <summary>Flat row mirror of the Reviews table; mapped to/from <c>Review</c>.</summary>
     public class ReviewDao
     {
         public int Id { get; set; }

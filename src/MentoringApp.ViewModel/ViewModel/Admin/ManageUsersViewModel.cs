@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
+/// <summary>Backs the admin "Manage Users" screen: list/filter users, import from Excel, and create/edit/delete users.</summary>
 public partial class ManageUsersViewModel : ObservableObject, INavigatable
 {
     private readonly IFileService _fileService;

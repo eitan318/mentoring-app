@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IDbRepo"/>: drops and recreates the whole schema (used when RecreateDbOnStartup is set).</summary>
     internal class SqlDbRepo : IDbRepo
     {
         private readonly string _connectionString;
@@ -118,8 +119,8 @@ namespace MentoringApp.Data.Acess.SQLite
 
                 CREATE TABLE Pairs (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    MentorId INTEGER NOT NULL,
-                    MenteeId INTEGER NOT NULL,
+                    MentorId INTEGER NOT NULL UNIQUE,
+                    MenteeId INTEGER NOT NULL UNIQUE,
                     SupervisorId INTEGER NOT NULL,
                     CreatedAt TEXT NOT NULL,
                     MatchTier INTEGER NOT NULL DEFAULT 0,

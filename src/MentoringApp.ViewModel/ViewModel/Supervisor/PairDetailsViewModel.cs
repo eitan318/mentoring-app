@@ -1,17 +1,22 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MentoringApp.ApiClient.Clients;
 using MentoringApp.Model;
+using MentoringApp.ViewModel.Navigation;
+using MentoringApp.ViewModel.ViewModel.User;
 using MentoringApp.ViewModel.ViewModelHelper;
 using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Supervisor;
 
+/// <summary>Backs the supervisor's pair-details view: loads one pair by id with its members, reviews and progress.</summary>
 public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
 {
     private readonly PairApiClient _pairClient;
     private readonly IssueApiClient _issueClient;
     private readonly ReviewApiClient _reviewClient;
     private readonly SettingsApiClient _settingsClient;
+    private readonly INavigationService _navigationService;
 
     [ObservableProperty] private PairModel? _currentPair;
     [ObservableProperty] private string _mentorName = "";
@@ -27,12 +32,14 @@ public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
         PairApiClient pairClient,
         IssueApiClient issueClient,
         ReviewApiClient reviewClient,
-        SettingsApiClient settingsClient)
+        SettingsApiClient settingsClient,
+        INavigationService navigationService)
     {
         _pairClient = pairClient;
         _issueClient = issueClient;
         _reviewClient = reviewClient;
         _settingsClient = settingsClient;
+        _navigationService = navigationService;
     }
 
     public async Task OnNavigatedToAsync(int pairId)
@@ -57,5 +64,12 @@ public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
                 .OrderByDescending(i => i.CreationDate);
             PairIssues = new ObservableCollection<IssueModel>(allIssues);
         }
+    }
+
+    [RelayCommand]
+    private async Task NavigateToSupervisorProfile()
+    {
+        if (CurrentPair?.Supervisor != null)
+            await _navigationService.NavigateToAsync<OtherProfileViewModel, int>(CurrentPair.Supervisor.Id);
     }
 }

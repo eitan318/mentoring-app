@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MentoringApp.ViewModel.ViewModel.Student;
 
+/// <summary>Backs the "Add Review" dialog: a pair member logs a session (content + hours) against a pair id, validated before submit.</summary>
 public partial class AddReviewViewModel : ObservableValidator, INavigatable<int>, ICloseable
 {
     [ObservableProperty]
@@ -55,7 +56,6 @@ public partial class AddReviewViewModel : ObservableValidator, INavigatable<int>
             Content: ReviewContent,
             Date: DateTime.Now,
             PairId: _currentPairId,
-            AuthorUserId: _userStore.User.Id,
             AmountOfHours: AmountOfHours));
 
         RequestClose?.Invoke();

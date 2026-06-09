@@ -41,6 +41,7 @@ public class AdminSupervisorItem
     public AdminSupervisorItem(SupervisorModel supervisor) => Supervisor = supervisor;
 }
 
+/// <summary>Backs the admin overview screen: the setup stepper, phase actions, and the per-supervisor progress list.</summary>
 public partial class AdminOverviewViewModel : ObservableObject, INavigatable
 {
     private readonly INavigationService _navigationService;
@@ -81,16 +82,43 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     public ObservableCollection<AdminSupervisorItem> SupervisorsListPreview { get; } = new();
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasForwardedIssues))]
+    [NotifyPropertyChangedFor(nameof(FilteredPendingForwardedIssues))]
+    [NotifyPropertyChangedFor(nameof(FilteredResolvedForwardedIssues))]
+    [NotifyPropertyChangedFor(nameof(HasPendingForwardedIssues))]
+    [NotifyPropertyChangedFor(nameof(HasResolvedForwardedIssues))]
     private ObservableCollection<IssueModel> _forwardedIssues = [];
 
-    public bool HasForwardedIssues => ForwardedIssues.Count > 0;
+    /// <summary>Forwarded but not yet resolved.</summary>
+    public IEnumerable<IssueModel> FilteredPendingForwardedIssues =>
+        ForwardedIssues.Where(i => i.IsForwardedToAdmin && !i.IsResolved);
+
+    /// <summary>Forwarded and resolved.</summary>
+    public IEnumerable<IssueModel> FilteredResolvedForwardedIssues =>
+        ForwardedIssues.Where(i => i.IsForwardedToAdmin && i.IsResolved);
+
+    public bool HasPendingForwardedIssues  => FilteredPendingForwardedIssues.Any();
+    public bool HasResolvedForwardedIssues => FilteredResolvedForwardedIssues.Any();
+    public bool HasForwardedIssues => HasPendingForwardedIssues || HasResolvedForwardedIssues;
+
+    public int PendingForwardedIssuesCount => FilteredPendingForwardedIssues.Count();
+
+    // ── Notice Board Tab State ─────────────────────────────────────────────────
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasSelectedForwardedIssuePane))]
-    private object? _selectedForwardedIssuePane;
+    [NotifyPropertyChangedFor(nameof(IsShowingPendingNotices))]
+    [NotifyPropertyChangedFor(nameof(IsShowingResolvedNotices))]
+    private int _activeNoticeTab; // 0 = Pending, 1 = Resolved
 
-    public bool HasSelectedForwardedIssuePane => SelectedForwardedIssuePane != null;
+    public bool IsShowingPendingNotices  => ActiveNoticeTab == 0;
+    public bool IsShowingResolvedNotices => ActiveNoticeTab == 1;
+
+    [RelayCommand] private void ShowPendingNotices()  => ActiveNoticeTab = 0;
+    [RelayCommand] private void ShowResolvedNotices() => ActiveNoticeTab = 1;
+
+    // SelectedForwardedIssuePane kept for backwards-compat but no longer driven
+    // by SelectForwardedIssue — navigation is used instead.
+    private object? _selectedForwardedIssuePane;
+    public bool HasSelectedForwardedIssuePane => _selectedForwardedIssuePane != null;
 
     [ObservableProperty] private double _totalFillPercent;
     [ObservableProperty] private string _totalFillLabel = string.Empty;
@@ -154,6 +182,9 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             case "SchoolConfig":
                 body = TranslationSource.Instance["Admin_PhaseGuide_SchoolConfig"] ?? "Configure your school's grades and classes.";
                 break;
+            case "SupervisorAssignment":
+                body = TranslationSource.Instance["Admin_PhaseGuide_SupervisorAssignment"] ?? "Assign classes to supervisors so each supervisor is responsible for a group of students.";
+                break;
             case "Phase1":
                 body = TranslationSource.Instance["Admin_PhaseGuide_Phase1"] ?? "Phase 1: Registration";
                 break;
@@ -192,7 +223,7 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
 
         if (!Progress.IsSchoolConfigured) return;
 
-        await SupervisorAssignment.RefreshSupervisorAssignmentsAsync();
+        await SupervisorAssignment.OnNavigatedToAsync();
 
         var settings = await _settingsClient.GetAllAsync();
 
@@ -261,11 +292,18 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     [RelayCommand]
     private async Task CancelDeadline()
     {
-        ActiveDeadline = null;
-        if (Progress.IsSelectionPhaseActive)
-            await _settingsClient.SetPhase2DeadlineAsync(null);
-        else
-            await _settingsClient.SetPhase1DeadlineAsync(null);
+        try
+        {
+            ActiveDeadline = null;
+            if (Progress.IsSelectionPhaseActive)
+                await _settingsClient.SetPhase2DeadlineAsync(null);
+            else
+                await _settingsClient.SetPhase1DeadlineAsync(null);
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+        }
     }
 
     [RelayCommand]
@@ -276,8 +314,16 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             _toastService.Error(_loc.Get("Admin_SchoolConfig_NoClasses_Error"));
             return;
         }
-        await Progress.MarkSchoolConfiguredAsync();
-        await LoadDataAsync();
+        try
+        {
+            await Progress.MarkSchoolConfiguredAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+            return;
+        }
+        try { await LoadDataAsync(); } catch { }
     }
 
     [RelayCommand]
@@ -288,7 +334,15 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             _toastService.Error(_loc.Get("Admin_SupervisorAssignment_Incomplete_Error"));
             return;
         }
-        await Progress.MarkSupervisorsAssignedAsync();
+        try
+        {
+            await Progress.MarkSupervisorsAssignedAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+            return;
+        }
         try
         {
             await _notificationClient.SendPhase1StartedAsync();
@@ -299,13 +353,20 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
                 _loc.Get("Admin_EmailNotification_Failed_Title"),
                 _loc.Get("Admin_EmailNotification_Failed_Body"));
         }
-        await LoadDataAsync();
+        try { await LoadDataAsync(); } catch { }
     }
 
     [RelayCommand]
     private async Task MarkUsersImported()
     {
-        await Progress.MarkUsersImportedAsync();
+        try
+        {
+            await Progress.MarkUsersImportedAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.Error(ex.Message);
+        }
     }
 
     [RelayCommand]
@@ -315,31 +376,36 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             _loc.Get("Admin_ConfirmStartPhase2_Body"),
             _loc.Get("Admin_ConfirmAction_Title"))) return;
 
+        // Advance the phase unconditionally — this is the admin's explicit decision.
+        // Score generation is a best-effort preparation step that must not block the transition.
+        await Progress.MarkSelectionPhaseActiveAsync();
+
         ShowResult(_loc.Get("Admin_GeneratingScores_Message"));
 
         try
         {
             await _matchingClient.GenerateScoresAsync();
-            await Progress.MarkSelectionPhaseActiveAsync();
-
-            var settings = await _settingsClient.GetAllAsync();
-            ActiveDeadline = settings.Phase2Deadline != null ? DateTime.Parse(settings.Phase2Deadline) : null;
-            DeadlineInput = DateTime.Now.AddDays(1);
-
-            try { await _notificationClient.SendPhase2StartedAsync(); }
-            catch
-            {
-                await _toastService.ShowInfoAsync(
-                    _loc.Get("Admin_EmailNotification_Failed_Title"),
-                    _loc.Get("Admin_EmailNotification_Failed_Body"));
-            }
-            await LoadDataAsync();
             ShowResult(_loc.Get("Admin_ScoresGenerated_Message"));
         }
         catch (Exception ex)
         {
+            // Phase is already advanced; warn but don't revert.
             ShowResult(_loc.Format("Admin_Phase2Failed_Message", ex.Message));
         }
+
+        var settings = await _settingsClient.GetAllAsync();
+        ActiveDeadline = settings.Phase2Deadline != null ? DateTime.Parse(settings.Phase2Deadline) : null;
+        DeadlineInput = DateTime.Now.AddDays(1);
+
+        try { await _notificationClient.SendPhase2StartedAsync(); }
+        catch
+        {
+            await _toastService.ShowInfoAsync(
+                _loc.Get("Admin_EmailNotification_Failed_Title"),
+                _loc.Get("Admin_EmailNotification_Failed_Body"));
+        }
+
+        await LoadDataAsync();
     }
 
     [RelayCommand]
@@ -379,12 +445,10 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
     [RelayCommand]
     private async Task SelectForwardedIssue(IssueModel? issue)
     {
-        if (issue == null) { SelectedForwardedIssuePane = null; return; }
-        var vm = new IssueViewModel(_navigationService, _issueClient);
-        vm.OnCloseRequested = () => SelectedForwardedIssuePane = null;
-        vm.OnIssueResolved = () => { SelectedForwardedIssuePane = null; _ = LoadDataAsync(); };
-        await vm.OnNavigatedToAsync(issue.Id);
-        SelectedForwardedIssuePane = vm;
+        if (issue == null) return;
+        // Navigate to the issue details view.
+        // When returning via Back, OnNavigatedToAsync is called and LoadDataAsync() refreshes the board.
+        await _navigationService.NavigateToAsync<IssueViewModel, int>(issue.Id);
     }
 
     [RelayCommand] private async Task ManageUsers() => await _navigationService.NavigateToAsync<ManageUsersViewModel>();

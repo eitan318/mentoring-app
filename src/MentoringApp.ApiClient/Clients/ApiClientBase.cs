@@ -6,6 +6,11 @@ using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 
+/// <summary>
+/// Base class for all typed API clients. Wraps an <see cref="HttpClient"/> and provides generic
+/// GET/POST/PUT/DELETE helpers that serialize/deserialize JSON and turn non-success responses
+/// into <see cref="Exceptions.ApiException"/>. Concrete clients (one per endpoint group) inherit this.
+/// </summary>
 public abstract class ApiClientBase(HttpClient http)
 {
     protected readonly HttpClient Http = http;

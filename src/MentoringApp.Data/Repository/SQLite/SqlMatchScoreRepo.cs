@@ -4,6 +4,7 @@ using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IMatchScoreRepo"/> (precomputed compatibility scores).</summary>
     internal class SqlMatchScoreRepo : IMatchScoreRepo
     {
         private readonly ISQLiteConnectionService _db;

@@ -2,6 +2,12 @@ using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Typed wrapper over the generic <see cref="ISettingsRepo"/> key/value store.
+    /// Exposes the global process state — phase deadlines, completion flags, and the meeting-hours
+    /// barrier — that drive the admin overview stepper and phase gating. The <c>*Key</c> constants
+    /// are the string keys used in the underlying Settings table.
+    /// </summary>
     public class SettingsService
     {
         private readonly ISettingsRepo _settingsRepo;

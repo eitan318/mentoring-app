@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MentoringApp.ViewModel.ViewModel.Student;
 
+/// <summary>Backs the "Report an Issue" dialog: a student picks a category and describes a problem, validated before submit.</summary>
 public partial class AddIssueViewModel : ObservableValidator, INavigatable<IEnumerable<IssueCategoryModel>>, ICloseable
 {
     [ObservableProperty] private ObservableCollection<IssueCategoryModel> _issueCategoryList = [];
@@ -49,7 +50,7 @@ public partial class AddIssueViewModel : ObservableValidator, INavigatable<IEnum
         ValidateAllProperties();
         if (HasErrors || SelectedIssueCategory == null || _userStore.User == null) return;
 
-        await _issueClient.CreateAsync(new CreateIssueRequest(IssueDescription, SelectedIssueCategory.Id, _userStore.User.Id));
+        await _issueClient.CreateAsync(new CreateIssueRequest(IssueDescription, SelectedIssueCategory.Id));
         RequestClose?.Invoke();
         _navigationService.GoBackAsync();
     }

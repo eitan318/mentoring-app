@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Supervisor;
 
+/// <summary>Backs the supervisor dashboard: the supervisor's managed pairs, their progress, and the issues they need to handle.</summary>
 public partial class SupervisorDashboardViewModel : ObservableObject, INavigatable<int>
 {
     protected readonly INavigationService _navigationService;
@@ -30,7 +31,24 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     private int _currentSupervisorId;
 
     [ObservableProperty] private UserModel? _selectedSupervisor;
-    [ObservableProperty] private ObservableCollection<PairProgressItem> _pairsSupervised = [];
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FilteredPairsSupervised))]
+    [NotifyPropertyChangedFor(nameof(FilteredPairsIsEmpty))]
+    private ObservableCollection<PairProgressItem> _pairsSupervised = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FilteredPairsSupervised))]
+    [NotifyPropertyChangedFor(nameof(FilteredPairsIsEmpty))]
+    private string _pairSearchText = "";
+
+    public IEnumerable<PairProgressItem> FilteredPairsSupervised =>
+        string.IsNullOrWhiteSpace(PairSearchText)
+            ? PairsSupervised
+            : PairsSupervised.Where(p =>
+                p.Pair.Mentor.UserName.Contains(PairSearchText, StringComparison.OrdinalIgnoreCase) ||
+                p.Pair.Mentee.UserName.Contains(PairSearchText, StringComparison.OrdinalIgnoreCase));
+
+    public bool FilteredPairsIsEmpty => !FilteredPairsSupervised.Any();
     [ObservableProperty] private ObservableCollection<UserModel> _inactiveStudents = [];
     [ObservableProperty] private string _classProgressInfo = string.Empty;
     [ObservableProperty] private double _classProgressPercent = 0.0;
@@ -58,7 +76,11 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
     [NotifyPropertyChangedFor(nameof(FilteredResolvedIssues))]
+    [NotifyPropertyChangedFor(nameof(FilteredForwardedIssues))]
+    [NotifyPropertyChangedFor(nameof(PendingIssuesCount))]
     [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
+    [NotifyPropertyChangedFor(nameof(ForwardedIssuesCount))]
+    [NotifyPropertyChangedFor(nameof(HasForwardedIssues))]
     private ObservableCollection<IssueModel> _allIssues = [];
 
     private int? _issueFilterMentorId;
@@ -67,7 +89,11 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredPendingIssues))]
     [NotifyPropertyChangedFor(nameof(FilteredResolvedIssues))]
+    [NotifyPropertyChangedFor(nameof(FilteredForwardedIssues))]
+    [NotifyPropertyChangedFor(nameof(PendingIssuesCount))]
     [NotifyPropertyChangedFor(nameof(ResolvedIssuesCount))]
+    [NotifyPropertyChangedFor(nameof(ForwardedIssuesCount))]
+    [NotifyPropertyChangedFor(nameof(HasForwardedIssues))]
     [NotifyPropertyChangedFor(nameof(IssuesSectionContextTitle))]
     private PairProgressItem? _issueFilterPair;
 
@@ -81,32 +107,48 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
         _issueFilterMenteeId = value?.Pair.Mentee.Id;
     }
 
-    public IEnumerable<IssueModel> FilteredPendingIssues => AllIssues
-        .Where(i => !i.IsResolved)
-        .Where(i => IssueFilterPair == null ||
+    private IEnumerable<IssueModel> PairFilter(IEnumerable<IssueModel> src) =>
+        src.Where(i => IssueFilterPair == null ||
             i.ReportedByUserId == _issueFilterMentorId ||
             i.ReportedByUserId == _issueFilterMenteeId);
 
-    public IEnumerable<IssueModel> FilteredResolvedIssues => AllIssues
-        .Where(i => i.IsResolved)
-        .Where(i => IssueFilterPair == null ||
-            i.ReportedByUserId == _issueFilterMentorId ||
-            i.ReportedByUserId == _issueFilterMenteeId);
+    /// <summary>Not resolved and not yet forwarded to admin.</summary>
+    public IEnumerable<IssueModel> FilteredPendingIssues =>
+        PairFilter(AllIssues.Where(i => !i.IsResolved && !i.IsForwardedToAdmin));
 
-    public int ResolvedIssuesCount => FilteredResolvedIssues.Count();
+    /// <summary>Resolved (regardless of whether they were forwarded first).</summary>
+    public IEnumerable<IssueModel> FilteredResolvedIssues =>
+        PairFilter(AllIssues.Where(i => i.IsResolved));
+
+    /// <summary>Forwarded to admin but not yet resolved.</summary>
+    public IEnumerable<IssueModel> FilteredForwardedIssues =>
+        PairFilter(AllIssues.Where(i => i.IsForwardedToAdmin && !i.IsResolved));
+
+    public int PendingIssuesCount   => FilteredPendingIssues.Count();
+    public int ResolvedIssuesCount  => FilteredResolvedIssues.Count();
+    public int ForwardedIssuesCount => FilteredForwardedIssues.Count();
+    public bool HasForwardedIssues  => ForwardedIssuesCount > 0;
 
     [ObservableProperty] private object? _selectedPaneContent;
+
+    // ── Tab state ─────────────────────────────────────────────────────────────
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsShowingPending))]
     [NotifyPropertyChangedFor(nameof(IsShowingResolved))]
-    private bool _showResolvedIssues;
+    [NotifyPropertyChangedFor(nameof(IsShowingForwarded))]
+    private int _activeIssueTab; // 0 = Pending, 1 = Resolved, 2 = Forwarded
 
-    public bool IsShowingPending  => !ShowResolvedIssues;
-    public bool IsShowingResolved =>  ShowResolvedIssues;
+    public bool IsShowingPending   => ActiveIssueTab == 0;
+    public bool IsShowingResolved  => ActiveIssueTab == 1;
+    public bool IsShowingForwarded => ActiveIssueTab == 2;
 
-    [RelayCommand] private void ShowPending()  => ShowResolvedIssues = false;
-    [RelayCommand] private void ShowResolved() => ShowResolvedIssues = true;
+    // Keep for backward-compat with any existing bindings
+    public bool ShowResolvedIssues => ActiveIssueTab == 1;
+
+    [RelayCommand] private void ShowPending()   => ActiveIssueTab = 0;
+    [RelayCommand] private void ShowResolved()  => ActiveIssueTab = 1;
+    [RelayCommand] private void ShowForwarded() => ActiveIssueTab = 2;
 
     [ObservableProperty] private ObservableCollection<PairProgressItem> _incompleteProfilePairs = [];
 
@@ -221,20 +263,15 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     [RelayCommand]
     private async Task SelectIssue(IssueModel? issue)
     {
-        if (issue != null)
-        {
-            var vm = new IssueViewModel(_navigationService, _issueClient);
-            var item = PairsSupervised.FirstOrDefault(p =>
-                p.Pair.Mentor.Id == issue.ReportedByUserId || p.Pair.Mentee.Id == issue.ReportedByUserId);
-            if (item != null)
-                vm.RelatedPairName = _loc.Format("Supervisor_RelatedPairName_Format", item.Pair.Mentor.UserName, item.Pair.Mentee.UserName);
-            vm.ForwardingsupervisorId = _currentSupervisorId;
-            vm.OnCloseRequested = () => SelectedPaneContent = null;
-            vm.OnIssueResolved = () => { SelectedPaneContent = null; _ = LoadSupervisorDataAsync(_currentSupervisorId); };
-            vm.OnIssueForwarded = () => { _ = LoadSupervisorDataAsync(_currentSupervisorId); };
-            await vm.OnNavigatedToAsync(issue.Id);
-            SelectedPaneContent = vm;
-        }
+        if (issue == null) return;
+
+        var vm = new IssueViewModel(_navigationService, _issueClient, _userClient, _pairClient);
+        vm.ForwardingsupervisorId = _currentSupervisorId;
+        vm.OnCloseRequested  = () => SelectedPaneContent = null;
+        vm.OnIssueResolved   = () => { SelectedPaneContent = null; _ = LoadSupervisorDataAsync(_currentSupervisorId); };
+        vm.OnIssueForwarded  = () => { _ = LoadSupervisorDataAsync(_currentSupervisorId); };
+        await vm.OnNavigatedToAsync(issue.Id);
+        SelectedPaneContent = vm;
     }
 
     [RelayCommand]
@@ -244,7 +281,7 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
 
         if (item != null)
         {
-            var vm = new PairDetailsViewModel(_pairClient, _issueClient, _reviewClient, _settingsClient)
+            var vm = new PairDetailsViewModel(_pairClient, _issueClient, _reviewClient, _settingsClient, _navigationService)
             {
                 ShowIssues = false
             };
@@ -274,8 +311,11 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     {
         _currentSupervisorId = supervisorId;
         SelectedSupervisor = await _userClient.GetByIdAsync(supervisorId);
-        await LoadSupervisorDataAsync(supervisorId);
+        // Load phase/settings FIRST so IsPhase1Active is set before data renders,
+        // preventing a flicker where the pairs dashboard briefly appears before
+        // switching to the registration dashboard.
         await LoadMatchingSettingsAsync();
+        await LoadSupervisorDataAsync(supervisorId);
     }
 
     [RelayCommand]

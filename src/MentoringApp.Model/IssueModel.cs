@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
+    /// <summary>
+    /// A problem reported by a student to their supervisor. A supervisor can resolve it,
+    /// or forward it up to the admin (then <see cref="IsForwardedToAdmin"/> is true).
+    /// </summary>
     public class IssueModel : BaseModel
     {
         public required string Description { get; set; }
@@ -14,6 +18,7 @@ namespace MentoringApp.Model
         public int ReportedByUserId { get; set; }
         public DateTime CreationDate { get; set; }
         public bool IsResolved { get; set; }
+        /// <summary>Id of the supervisor who escalated this issue to the admin; null if not forwarded.</summary>
         public int? ForwardedBySupervisorId { get; set; }
         public bool IsForwardedToAdmin => ForwardedBySupervisorId.HasValue;
 

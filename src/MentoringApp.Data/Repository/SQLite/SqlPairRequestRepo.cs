@@ -4,6 +4,7 @@ using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IPairRequestRepo"/> (pending pairing requests).</summary>
     internal class SqlPairRequestRepo : IPairRequestRepo
     {
         private readonly ISQLiteConnectionService _db;

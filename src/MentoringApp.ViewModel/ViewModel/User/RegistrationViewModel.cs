@@ -11,6 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
 
+/// <summary>Backs the registration dialog: collects and validates new-user details (role, grade/class, preferences) and submits them.</summary>
 public partial class RegistrationViewModel : ObservableValidator, INavigatable<bool>, ICloseable
 {
     private readonly AuthApiClient _authClient;
@@ -66,6 +67,12 @@ public partial class RegistrationViewModel : ObservableValidator, INavigatable<b
     {
         ValidateAllProperties();
         if (HasErrors) return;
+
+        if (!SupervisorOrStudentIsSupervisor && SelectedGrade == null)
+        {
+            ErrorMessage = "Grade is required.";
+            return;
+        }
 
         ErrorMessage = "";
 

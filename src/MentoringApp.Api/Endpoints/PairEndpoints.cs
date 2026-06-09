@@ -6,6 +6,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/pairs minimal-API endpoints: query and manage confirmed mentor–mentee pairs.</summary>
 public static class PairEndpoints
 {
     public static void MapPairEndpoints(this WebApplication app)

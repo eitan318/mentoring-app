@@ -15,7 +15,7 @@ namespace MentoringApp.View.Admin
     {
         // Window width below which the side-nav switches to rail mode.
         private const double CompactBreakpoint = 1000;
-        private const double RailWidth = 56;
+        private const double RailWidth = 70;
         private const double FullWidth = 200;
 
         // True iff the side-nav is currently collapsed to icon-only mode.
