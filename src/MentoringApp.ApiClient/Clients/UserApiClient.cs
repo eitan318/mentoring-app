@@ -48,13 +48,39 @@ public class UserApiClient(HttpClient http) : ApiClientBase(http)
 
     public async Task<string?> UploadProfilePictureAsync(int id, string filePath)
     {
-        using var form = new MultipartFormDataContent();
         using var fileStream = File.OpenRead(filePath);
-        form.Add(new StreamContent(fileStream), "file", Path.GetFileName(filePath));
+        return await UploadProfilePictureAsync(id, fileStream, Path.GetFileName(filePath));
+    }
+
+    /// <summary>
+    /// Uploads a profile picture from an arbitrary stream (used by the Web client,
+    /// where the file comes from a browser upload and has no local path).
+    /// Returns the stored relative path, or null on failure.
+    /// </summary>
+    public async Task<string?> UploadProfilePictureAsync(int id, Stream stream, string fileName)
+    {
+        using var form = new MultipartFormDataContent();
+        var fileContent = new StreamContent(stream);
+        // Give the part a content-type so the server's IFormFile binds reliably.
+        fileContent.Headers.ContentType =
+            new System.Net.Http.Headers.MediaTypeHeaderValue(GuessContentType(fileName));
+        form.Add(fileContent, "file", fileName);
+
         var response = await Http.PostAsync($"/api/users/{id}/profile-picture", form);
         if (!response.IsSuccessStatusCode) return null;
         var result = await response.Content.ReadFromJsonAsync<UploadResult>();
         return result?.Path;
+    }
+
+    private static string GuessContentType(string fileName)
+    {
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        return ext switch
+        {
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            _      => "image/jpeg",
+        };
     }
 
     public async Task<int> ImportStudentsAsync(string filePath)

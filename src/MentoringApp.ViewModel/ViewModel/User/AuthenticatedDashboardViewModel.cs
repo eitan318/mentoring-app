@@ -44,9 +44,14 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         _authTokenStore = authTokenStore;
 
         _navigationService.CanGoBackChanged += OnCanGoBackChanged;
+        _userStore.UserChanged += OnUserStoreChanged;
     }
 
     private void OnCanGoBackChanged() => OnPropertyChanged(nameof(IsBackVisible));
+
+    // Keep the top-bar avatar/name in sync when the store's user is replaced
+    // (e.g. after a profile-picture upload re-fetches the user).
+    private void OnUserStoreChanged() => CurrentUser = _userStore.User;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsProfileButtonVisible))]
@@ -136,6 +141,7 @@ public partial class AuthenticatedDashboardViewModel : ObservableObject, INaviga
         if (_navContext == null) return;
 
         _navigationService.CanGoBackChanged -= OnCanGoBackChanged;
+        _userStore.UserChanged -= OnUserStoreChanged;
         _sessionService.ClearSession();
         _authTokenStore.Clear();
         _userStore.User = null;

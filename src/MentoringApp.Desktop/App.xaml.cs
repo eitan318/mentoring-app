@@ -28,6 +28,10 @@ public partial class App : Application
 
         string apiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001";
 
+        // Make the base URL available to the profile-picture converter so it can
+        // build full URLs from the relative paths stored in the database.
+        MentoringApp.Converter.StringToImageSourceConverter.ApiBaseUrl = apiBaseUrl;
+
         var services = new ServiceCollection();
         services.AddViewModels(apiBaseUrl);
         services.AddView();
