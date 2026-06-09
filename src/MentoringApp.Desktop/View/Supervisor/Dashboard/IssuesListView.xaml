@@ -104,8 +104,19 @@
 
             <DockPanel Grid.Row="0" Margin="0,0,0,12">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                    <RadioButton Content="{Binding [Supervisor_IssuePending], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource IssueTabStyle}" IsChecked="{Binding IsShowingPending, Mode=OneWay}" Command="{Binding ShowPendingCommand}"/>
-                    <RadioButton Content="{Binding [Supervisor_IssueResolved], Source={x:Static loc:TranslationSource.Instance}}" Style="{StaticResource IssueTabStyle}" IsChecked="{Binding IsShowingResolved, Mode=OneWay}" Command="{Binding ShowResolvedCommand}" Margin="16,0,0,0"/>
+                    <RadioButton Content="{Binding [Supervisor_IssuePending], Source={x:Static loc:TranslationSource.Instance}}"
+                                 Style="{StaticResource IssueTabStyle}"
+                                 IsChecked="{Binding IsShowingPending, Mode=OneWay}"
+                                 Command="{Binding ShowPendingCommand}"/>
+                    <RadioButton Content="{Binding [Supervisor_IssueForwarded], Source={x:Static loc:TranslationSource.Instance}}"
+                                 Style="{StaticResource IssueTabStyle}"
+                                 IsChecked="{Binding IsShowingForwarded, Mode=OneWay}"
+                                 Command="{Binding ShowForwardedCommand}"/>       
+                    <RadioButton Content="{Binding [Supervisor_IssueResolved], Source={x:Static loc:TranslationSource.Instance}}"
+                                 Style="{StaticResource IssueTabStyle}"
+                                 IsChecked="{Binding IsShowingResolved, Mode=OneWay}"
+                                 Command="{Binding ShowResolvedCommand}"
+                                 Margin="16,0,0,0"/>
                 </StackPanel>
                 <TextBlock DockPanel.Dock="Right" Text="{Binding IssuesSectionContextTitle}" FontSize="13" FontStyle="Italic" Foreground="#9CA3AF" HorizontalAlignment="Right" VerticalAlignment="Center"/>
             </DockPanel>
@@ -113,7 +124,10 @@
             <Rectangle Grid.Row="1" Height="1" Fill="#E5E7EB" VerticalAlignment="Top" Margin="-20,0,-20,0"/>
 
             <Grid Grid.Row="2" Margin="0,12,0,0">
-                <TextBlock Text="{Binding [Supervisor_NoPendingIssues], Source={x:Static loc:TranslationSource.Instance}}" FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0">
+                <!-- Empty-state labels -->
+                <TextBlock Text="{Binding [Supervisor_NoPendingIssues], Source={x:Static loc:TranslationSource.Instance}}"
+                           FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0"
+                           Visibility="{Binding IsShowingPending, Converter={StaticResource BoolToVis}}">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -121,7 +135,7 @@
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding FilteredPendingIssues.Count}" Value="0"/>
-                                        <Condition Binding="{Binding ShowResolvedIssues}" Value="False"/>
+                                        <Condition Binding="{Binding IsShowingPending}" Value="True"/>
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </MultiDataTrigger>
@@ -129,7 +143,25 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <TextBlock Text="{Binding [Supervisor_NoResolvedIssues], Source={x:Static loc:TranslationSource.Instance}}" FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0">
+                <TextBlock Text="{Binding [Supervisor_NoForwardedIssues], Source={x:Static loc:TranslationSource.Instance}}"
+                           FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding FilteredForwardedIssues.Count}" Value="0"/>
+                                        <Condition Binding="{Binding IsShowingForwarded}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Text="{Binding [Supervisor_NoResolvedIssues], Source={x:Static loc:TranslationSource.Instance}}"
+                           FontSize="14" Foreground="#9CA3AF" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,24,0,0">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -137,7 +169,7 @@
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding FilteredResolvedIssues.Count}" Value="0"/>
-                                        <Condition Binding="{Binding ShowResolvedIssues}" Value="True"/>
+                                        <Condition Binding="{Binding IsShowingResolved}" Value="True"/>
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </MultiDataTrigger>
@@ -146,18 +178,32 @@
                     </TextBlock.Style>
                 </TextBlock>
 
-                <ListView ItemsSource="{Binding FilteredPendingIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                          b:ListItemSelector.Command="{Binding SelectIssueCommand}">
-                    <ListView.Style>
-                        <Style TargetType="ListView">
-                            <Setter Property="Visibility" Value="Visible"/>
-                            <Style.Triggers><DataTrigger Binding="{Binding ShowResolvedIssues}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
-                        </Style>
-                    </ListView.Style>
-                </ListView>
-                <ListView ItemsSource="{Binding FilteredResolvedIssues}" ItemContainerStyle="{StaticResource IssueListViewItemStyle}" ItemTemplate="{StaticResource IssueItemTemplate}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                <!-- Pending list -->
+                <ListView ItemsSource="{Binding FilteredPendingIssues}"
+                          ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
+                          ItemTemplate="{StaticResource IssueItemTemplate}"
+                          BorderThickness="0" Background="Transparent"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           b:ListItemSelector.Command="{Binding SelectIssueCommand}"
-                          Visibility="{Binding ShowResolvedIssues, Converter={StaticResource BoolToVis}}"/>
+                          Visibility="{Binding IsShowingPending, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Forwarded list (forwarded to admin, not yet resolved) -->
+                <ListView ItemsSource="{Binding FilteredForwardedIssues}"
+                          ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
+                          ItemTemplate="{StaticResource IssueItemTemplate}"
+                          BorderThickness="0" Background="Transparent"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          b:ListItemSelector.Command="{Binding SelectIssueCommand}"
+                          Visibility="{Binding IsShowingForwarded, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Resolved list -->
+                <ListView ItemsSource="{Binding FilteredResolvedIssues}"
+                          ItemContainerStyle="{StaticResource IssueListViewItemStyle}"
+                          ItemTemplate="{StaticResource IssueItemTemplate}"
+                          BorderThickness="0" Background="Transparent"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          b:ListItemSelector.Command="{Binding SelectIssueCommand}"
+                          Visibility="{Binding IsShowingResolved, Converter={StaticResource BoolToVis}}"/>
             </Grid>
         </Grid>
     </Border>
