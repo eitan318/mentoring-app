@@ -342,6 +342,9 @@
   <data name="Supervisor_IssueResolved" xml:space="preserve">
     <value>Resolved</value>
   </data>
+  <data name="Supervisor_IssueForwarded" xml:space="preserve">
+    <value>Forwarded</value>
+  </data>
   <data name="Supervisor_TotalResolved_Label" xml:space="preserve">
     <value>Total Resolved: </value>
   </data>
@@ -470,6 +473,9 @@
   </data>
   <data name="Admin_ManageUsers_Mentee" xml:space="preserve">
     <value>Mentee</value>
+  </data>
+  <data name="Admin_ManageUsers_NoRole" xml:space="preserve">
+    <value>No role</value>
   </data>
   <data name="Admin_ManageUsers_UnpairedOnly" xml:space="preserve">
     <value>Unpaired Only</value>
@@ -1158,11 +1164,20 @@ You can still manage issues and review pair activity from this dashboard.</value
   <data name="Issue_Resolve_Tooltip" xml:space="preserve">
     <value>Mark this issue as resolved</value>
   </data>
+  <data name="Issue_OriginPair_Label" xml:space="preserve">
+    <value>Originated from pair</value>
+  </data>
+  <data name="Issue_ReportedBy_Label" xml:space="preserve">
+    <value>Reported by</value>
+  </data>
   <data name="Issue_ForwardedBadge" xml:space="preserve">
     <value>⚠ Forwarded to Admin</value>
   </data>
   <data name="Issue_Forward_Button" xml:space="preserve">
     <value>Forward to Admin</value>
+  </data>
+  <data name="Issue_ViewDetails_Button" xml:space="preserve">
+    <value>View Details</value>
   </data>
   <data name="Issue_Forward_Tooltip" xml:space="preserve">
     <value>Escalate this issue to the admin</value>
@@ -1196,6 +1211,9 @@ You can still manage issues and review pair activity from this dashboard.</value
   </data>
   <data name="Supervisor_NoResolvedIssues" xml:space="preserve">
     <value>No resolved issues.</value>
+  </data>
+  <data name="Supervisor_NoForwardedIssues" xml:space="preserve">
+    <value>No issues have been forwarded to admin.</value>
   </data>
   <data name="Supervisor_SelectHint" xml:space="preserve">
     <value>Select a pair or an issue from the lists to view its details.</value>
@@ -1295,6 +1313,11 @@ You can still manage issues and review pair activity from this dashboard.</value
   <data name="Admin_NoticeBoard_Label" xml:space="preserve"><value>Notice Board</value></data>
   <data name="Admin_NewIssue_Label" xml:space="preserve"><value>New Issue</value></data>
   <data name="Admin_NoNotices_Label" xml:space="preserve"><value>No notices to display.</value></data>
+  <data name="Admin_NoticeBoard_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="Admin_NoticeBoard_Resolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="Admin_NoPendingNotices_Label" xml:space="preserve"><value>No pending notices.</value></data>
+  <data name="Admin_NoResolvedNotices_Label" xml:space="preserve"><value>No resolved notices.</value></data>
+  <data name="Admin_ResolvedIssue_Label" xml:space="preserve"><value>Resolved</value></data>
   <data name="Admin_ByAuthor_Format" xml:space="preserve"><value>By - {0}</value></data>
   <data name="Admin_Menu_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
   <data name="Admin_Menu_ManagePairs" xml:space="preserve"><value>Manage Pairs</value></data>

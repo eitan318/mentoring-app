@@ -342,6 +342,9 @@
   <data name="Supervisor_IssueResolved" xml:space="preserve">
     <value>טופל</value>
   </data>
+  <data name="Supervisor_IssueForwarded" xml:space="preserve">
+    <value>הועבר לאדמין</value>
+  </data>
   <data name="Supervisor_TotalResolved_Label" xml:space="preserve">
     <value>סה"כ טופלו: </value>
   </data>
@@ -470,6 +473,9 @@
   </data>
   <data name="Admin_ManageUsers_Mentee" xml:space="preserve">
     <value>חניך</value>
+  </data>
+  <data name="Admin_ManageUsers_NoRole" xml:space="preserve">
+    <value>ללא תפקיד</value>
   </data>
   <data name="Admin_ManageUsers_UnpairedOnly" xml:space="preserve">
     <value>ללא זוג בלבד</value>
@@ -1196,6 +1202,9 @@
   <data name="Supervisor_NoResolvedIssues" xml:space="preserve">
     <value>אין בעיות שנפתרו.</value>
   </data>
+  <data name="Supervisor_NoForwardedIssues" xml:space="preserve">
+    <value>לא הועברו בעיות לאדמין.</value>
+  </data>
   <data name="Supervisor_SelectHint" xml:space="preserve">
     <value>בחר זוג או בעיה מהרשימות כדי לראות את הפרטים.</value>
   </data>
@@ -1265,6 +1274,15 @@
   <data name="Issue_Forward_Button" xml:space="preserve">
     <value>קדם בעיה לאדמין</value>
   </data>
+  <data name="Issue_ViewDetails_Button" xml:space="preserve">
+    <value>הצג פרטים</value>
+  </data>
+  <data name="Issue_OriginPair_Label" xml:space="preserve">
+    <value>מקור - צמד</value>
+  </data>
+  <data name="Issue_ReportedBy_Label" xml:space="preserve">
+    <value>דווח על ידי</value>
+  </data>
   <data name="Issue_ForwardedBadge" xml:space="preserve">
     <value>⚠ הועברה לאדמין</value>
   </data>
@@ -1306,6 +1324,11 @@
   <data name="Admin_NoticeBoard_Label" xml:space="preserve"><value>לוח מודעות</value></data>
   <data name="Admin_NewIssue_Label" xml:space="preserve"><value>פנייה חדשה</value></data>
   <data name="Admin_NoNotices_Label" xml:space="preserve"><value>אין הודעות להצגה.</value></data>
+  <data name="Admin_NoticeBoard_Pending" xml:space="preserve"><value>ממתין</value></data>
+  <data name="Admin_NoticeBoard_Resolved" xml:space="preserve"><value>פתור</value></data>
+  <data name="Admin_NoPendingNotices_Label" xml:space="preserve"><value>אין הודעות ממתינות.</value></data>
+  <data name="Admin_NoResolvedNotices_Label" xml:space="preserve"><value>אין הודעות שפתורות.</value></data>
+  <data name="Admin_ResolvedIssue_Label" xml:space="preserve"><value>פתור</value></data>
   <data name="Admin_ByAuthor_Format" xml:space="preserve"><value>מאת - {0}</value></data>
   <data name="Admin_Menu_Dashboard" xml:space="preserve"><value>לוח בקרה</value></data>
   <data name="Admin_Menu_ManagePairs" xml:space="preserve"><value>ניהול זוגות</value></data>

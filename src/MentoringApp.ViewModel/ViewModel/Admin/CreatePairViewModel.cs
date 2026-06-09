@@ -24,6 +24,7 @@ public partial class CreatePairViewModel : ObservableObject, INavigatable
 
     [ObservableProperty] private string _mentorSearchText = string.Empty;
     [ObservableProperty] private string _menteeSearchText = string.Empty;
+    [ObservableProperty] private string _errorMessage = string.Empty;
 
     private readonly UserApiClient _userClient;
     private readonly PairApiClient _pairClient;
@@ -73,8 +74,16 @@ public partial class CreatePairViewModel : ObservableObject, INavigatable
     private async Task CreatePair()
     {
         if (SelectedMentee is null || SelectedMentor is null) return;
-        await _pairClient.CreateAsync(new CreatePairRequest(SelectedMentor.Id, SelectedMentee.Id));
-        await LoadAvailableUsersAsync();
+        ErrorMessage = string.Empty;
+        try
+        {
+            await _pairClient.CreateAsync(new CreatePairRequest(SelectedMentor.Id, SelectedMentee.Id));
+            await LoadAvailableUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
     public Task OnNavigatedToAsync() => LoadAvailableUsersAsync();

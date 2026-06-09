@@ -151,11 +151,21 @@
         Vm.PropertyChanged += OnVmChanged;
         TranslationSource.Instance.PropertyChanged += OnLocChanged;
 
-        // Populate CurrentUser / SelectedLanguage from the store. Calling the VM's
-        // OnNavigatedToAsync ALSO triggers role-based routing — fine on /authenticated,
-        // but on a direct URL like /student we are already there, so the redundant
-        // NavigateToAsync<StudentDashboardViewModel> is a harmless no-op (same URL).
-        await Vm.OnNavigatedToAsync();
+        try
+        {
+            // Populate CurrentUser / SelectedLanguage from the store. Calling the VM's
+            // OnNavigatedToAsync ALSO triggers role-based routing — fine on /authenticated,
+            // but on a direct URL like /student we are already there, so the redundant
+            // NavigateToAsync<StudentDashboardViewModel> is a harmless no-op (same URL).
+            await Vm.OnNavigatedToAsync();
+        }
+        catch (Microsoft.AspNetCore.Components.NavigationException)
+        {
+            // In Blazor Server, NavigateTo() signals the browser via SignalR and THEN throws
+            // NavigationException to abort the now-obsolete server-side render. The navigation
+            // has already been registered, so we swallow the exception here. Re-throwing would
+            // trigger Blazor's circuit error UI even though the navigation succeeded.
+        }
     }
 
     private void OnVmChanged(object? sender, PropertyChangedEventArgs e) =>

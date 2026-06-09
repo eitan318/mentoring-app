@@ -248,16 +248,50 @@
                                         <components:ProfilePictureControl Grid.Column="0" Width="32" Height="32" Margin="0,0,12,0" VerticalAlignment="Center" ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}"/>
                                         <TextBlock Grid.Column="1" Text="{Binding UserName}" VerticalAlignment="Center" FontWeight="Medium" Foreground="#111827"/>
                                         <TextBlock Grid.Column="2" Text="{Binding Email}" VerticalAlignment="Center" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
-                                        <Border Grid.Column="3" Background="#F3F4F6" CornerRadius="10" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                            <TextBlock Foreground="#374151" FontSize="11" FontWeight="SemiBold">
-                                                <TextBlock.Text>
-                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Role_">
-                                                        <Binding Path="Role"/>
-                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
-                                                    </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
-                                        </Border>
+                                        <!-- Role column: mentor/mentee badges for students, role badge for others -->
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <!-- Non-student role (Admin / Supervisor) -->
+                                            <Border Background="#F3F4F6" CornerRadius="10" Padding="8,4"
+                                                    Visibility="{Binding IsStudent, Converter={StaticResource InverseBoolToVis}}">
+                                                <TextBlock Foreground="#374151" FontSize="11" FontWeight="SemiBold">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Role_">
+                                                            <Binding Path="Role"/>
+                                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </Border>
+                                            <!-- Mentor badge -->
+                                            <Border Background="#DCFCE7" CornerRadius="10" Padding="8,4" Margin="0,0,4,0"
+                                                    Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
+                                                <TextBlock Text="{Binding [Admin_ManageUsers_Mentor], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#16A34A" FontSize="11" FontWeight="SemiBold"/>
+                                            </Border>
+                                            <!-- Mentee badge -->
+                                            <Border Background="#DBEAFE" CornerRadius="10" Padding="8,4"
+                                                    Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
+                                                <TextBlock Text="{Binding [Admin_ManageUsers_Mentee], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#2563EB" FontSize="11" FontWeight="SemiBold"/>
+                                            </Border>
+                                            <!-- Student with no role yet -->
+                                            <Border Background="#FEF3C7" CornerRadius="10" Padding="8,4">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding IsStudent}" Value="True"/>
+                                                                    <Condition Binding="{Binding IsMentor}" Value="False"/>
+                                                                    <Condition Binding="{Binding IsMentee}" Value="False"/>
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding [Admin_ManageUsers_NoRole], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#D97706" FontSize="11" FontWeight="SemiBold"/>
+                                            </Border>
+                                        </StackPanel>
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
@@ -293,8 +327,38 @@
                             <components:ProfilePictureControl Width="96" Height="96" Margin="0,0,0,16" ImagePath="{Binding ProfilePicturePath}" Gender="{Binding Gender}" HorizontalAlignment="Center"/>
                             
                             <TextBlock Text="{Binding UserName}" FontWeight="Bold" FontSize="20" Foreground="#111827" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                            <TextBlock Text="{Binding Email}" FontSize="14" Foreground="#6B7280" HorizontalAlignment="Center" Margin="0,0,0,30"/>
-                            
+                            <TextBlock Text="{Binding Email}" FontSize="14" Foreground="#6B7280" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+
+                            <!-- Student mentor/mentee role badges in detail pane -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20"
+                                        Visibility="{Binding IsStudent, Converter={StaticResource BoolToVis}}">
+                                <Border Background="#DCFCE7" CornerRadius="10" Padding="10,4" Margin="4,0"
+                                        Visibility="{Binding IsMentor, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="{Binding [Admin_ManageUsers_Mentor], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#16A34A" FontSize="12" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Background="#DBEAFE" CornerRadius="10" Padding="10,4" Margin="4,0"
+                                        Visibility="{Binding IsMentee, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="{Binding [Admin_ManageUsers_Mentee], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#2563EB" FontSize="12" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Background="#FEF3C7" CornerRadius="10" Padding="10,4" Margin="4,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsMentor}" Value="False"/>
+                                                        <Condition Binding="{Binding IsMentee}" Value="False"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding [Admin_ManageUsers_NoRole], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#D97706" FontSize="12" FontWeight="SemiBold"/>
+                                </Border>
+                            </StackPanel>
+
                             <TextBlock Text="{Binding [Admin_ManageUsers_AccountInfo], Source={x:Static loc:TranslationSource.Instance}}" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"/>
                             <Border Background="#F9FAFB" BorderThickness="1" BorderBrush="#F3F4F6" CornerRadius="8" Padding="16" Margin="0,0,0,24">
                                 <Grid>

@@ -19,7 +19,7 @@ namespace MentoringApp.Service
     public class DummyDataSeeder
     {
         // Controls dataset size. 0.1 → ~1 supervisor, ~6 users.  1.0 → ~8 supervisors, ~300 users.
-        private const float Scale = 0.3f;
+        private const float Scale = 0.4f;
 
         private readonly UserService _userService;
         private readonly IPairRepo _pairRepo;
@@ -84,13 +84,14 @@ namespace MentoringApp.Service
 
         public async Task SeedAsync()
         {
-            // Counts derived from Scale
+            // Counts derived from Scale.
+            // Target: each supervisor oversees 2 slots of ~10 profiled students = ~20 total.
             int numSupervisors  = Math.Max(1, (int)Math.Round(Scale * 8));
             int numSlots        = numSupervisors * 2; // 2 class slots per supervisor
-            int mentorsPerSlot  = Math.Max(1, (int)Math.Round(Scale * 6));
-            int menteesPerSlot  = Math.Max(1, (int)Math.Round(Scale * 8));
-            int unfilledPerSlot = (int)Math.Round(Scale * 3); // 0–3
-            int numPairs        = Math.Max(1, (int)Math.Round(Scale * 30));
+            int mentorsPerSlot  = Math.Max(2, (int)Math.Round(Scale * 12)); // was 6 → ~5 at 0.4
+            int menteesPerSlot  = Math.Max(2, (int)Math.Round(Scale * 16)); // was 8 → ~6 at 0.4
+            int unfilledPerSlot = (int)Math.Round(Scale * 5);               // was 3 → ~2 at 0.4
+            int numPairs        = Math.Max(1, (int)Math.Round(Scale * 50)); // was 30 → ~20 at 0.4
 
             // ── Step 1: Lookup tables ─────────────────────────────────────────
             _db.Execute("INSERT INTO Subjects (Name) VALUES ('Math'), ('Physics'), ('Computer Science'), ('English'), ('Chemistry'), ('Biology')");
@@ -104,14 +105,13 @@ namespace MentoringApp.Service
             // ── Step 2: School configuration ─────────────────────────────────
             Console.WriteLine("Seeding School Configuration...");
 
-            int g9  = GetId("SELECT Id FROM Grades WHERE Num = 9");
             int g10 = GetId("SELECT Id FROM Grades WHERE Num = 10");
             int g11 = GetId("SELECT Id FROM Grades WHERE Num = 11");
             int g12 = GetId("SELECT Id FROM Grades WHERE Num = 12");
 
-            // 16 possible slots ordered grade-first; take only what Scale needs
+            // 12 possible slots (grades 10–12, 4 classes each); take only what Scale needs
             var allSlotDefs = new List<(int gradeId, int classNum)>();
-            foreach (var gid in new[] { g9, g10, g11, g12 })
+            foreach (var gid in new[] { g10, g11, g12 })
                 for (int cn = 1; cn <= 4; cn++)
                     allSlotDefs.Add((gid, cn));
 
@@ -165,116 +165,73 @@ namespace MentoringApp.Service
             }
 
             // ── Step 6: Users — Students ──────────────────────────────────────
+            // Role assignment is grade-driven:
+            //   Grade 10 → mostly mentees  (75% mentee, 15% dual, 10% no role)
+            //   Grade 11 → mostly dual     (70% dual, 15% mentor, 15% mentee)
+            //   Grade 12 → mostly mentors  (75% mentor, 15% dual, 10% no role)
             List<StudentModel> mentors = new();
             List<StudentModel> mentees = new();
             int studentIndex = 1;
+            int unfilledIndex = 1;
+
+            var gradeNumById = new Dictionary<int, int> { { g10, 10 }, { g11, 11 }, { g12, 12 } };
+            int studentsPerSlot = mentorsPerSlot + menteesPerSlot;
 
             foreach (var slot in activeSlotDefs)
             {
-                for (int i = 0; i < mentorsPerSlot; i++, studentIndex++)
+                int gradeNum = gradeNumById.GetValueOrDefault(slot.gradeId, 11);
+
+                for (int i = 0; i < studentsPerSlot; i++, studentIndex++)
                 {
-                    var mentor = new StudentModel
+                    string role = DetermineStudentRole(gradeNum);
+                    bool isMentor = role is "mentor" or "dual";
+                    bool isMentee = role is "mentee" or "dual";
+
+                    var student = new StudentModel
                     {
-                        Email = $"mentor{studentIndex}@mentoringapp.com",
+                        Email = $"student{studentIndex}@mentoringapp.com",
                         NationalId = $"3{studentIndex:D8}",
                         UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
-                        Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
+                        Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = gradeNum },
                         ClassNum = slot.classNum,
                         Gender = Pick(_genders),
                         PhoneNumber = $"05{_rand.Next(10000000, 99999999)}",
-                        PreferredMenteeGender = Pick(_genderPrefs),
-                        MentorProfile = new MentorProfile { SubjectToTeach = Pick(subjectIds), MaxMentees = _rand.Next(1, 4) },
+                        PreferredMentorGender = isMentee ? Pick(_genderPrefs) : GenderPreference.NoPreference,
+                        PreferredMenteeGender = isMentor ? Pick(_genderPrefs) : GenderPreference.NoPreference,
+                        MentorProfile = isMentor ? new MentorProfile { SubjectToTeach = Pick(subjectIds), MaxMentees = _rand.Next(1, 4) } : null,
+                        MenteeProfile = isMentee ? new MenteeProfile { SubjectToLearn = Pick(subjectIds) } : null,
                         ProfilePicturePath = PickProfilePic(profilePics)
                     };
-                    await _userService.CreateUserAsync(mentor);
-                    mentors.Add(mentor);
+
+                    await _userService.CreateUserAsync(student);
+                    if (isMentor) mentors.Add(student);
+                    if (isMentee) mentees.Add(student);
                 }
 
-                for (int i = 0; i < menteesPerSlot; i++, studentIndex++)
+                // Unfilled students per slot (no role or incomplete profile)
+                for (int u = 0; u < unfilledPerSlot; u++, unfilledIndex++)
                 {
-                    var mentee = new StudentModel
-                    {
-                        Email = $"mentee{studentIndex}@mentoringapp.com",
-                        NationalId = $"4{studentIndex:D8}",
-                        UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
-                        Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
-                        ClassNum = slot.classNum,
-                        Gender = Pick(_genders),
-                        PhoneNumber = $"05{_rand.Next(10000000, 99999999)}",
-                        PreferredMentorGender = Pick(_genderPrefs),
-                        MenteeProfile = new MenteeProfile { SubjectToLearn = Pick(subjectIds) },
-                        ProfilePicturePath = PickProfilePic(profilePics)
-                    };
-                    await _userService.CreateUserAsync(mentee);
-                    mentees.Add(mentee);
-                }
-            }
-
-            // ── Step 6b: Unfilled students ────────────────────────────────────
-            if (unfilledPerSlot > 0)
-            {
-                int unfilledIndex = 1;
-                foreach (var slot in activeSlotDefs)
-                {
-                    // No role chosen yet
                     var noRole = new StudentModel
                     {
-                        Email = $"unfilled.norole{unfilledIndex}@mentoringapp.com",
+                        Email = $"unfilled{unfilledIndex}@mentoringapp.com",
                         NationalId = $"9{unfilledIndex:D8}",
                         UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
-                        Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
+                        Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = gradeNum },
                         ClassNum = slot.classNum,
                         Gender = Pick(_genders),
                         PhoneNumber = $"05{_rand.Next(10000000, 99999999)}"
                     };
                     await _userService.CreateUserAsync(noRole);
-                    unfilledIndex++;
-
-                    if (unfilledPerSlot >= 2)
-                    {
-                        // Role chosen but no subject
-                        var noSubject = new StudentModel
-                        {
-                            Email = $"unfilled.nosubject{unfilledIndex}@mentoringapp.com",
-                            NationalId = $"9{unfilledIndex:D8}",
-                            UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
-                            Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
-                            ClassNum = slot.classNum,
-                            Gender = Pick(_genders),
-                            PhoneNumber = $"05{_rand.Next(10000000, 99999999)}",
-                            MentorProfile = new MentorProfile { SubjectToTeach = 0, MaxMentees = 1 }
-                        };
-                        await _userService.CreateUserAsync(noSubject);
-                        unfilledIndex++;
-                    }
-
-                    if (unfilledPerSlot >= 3)
-                    {
-                        // Mentee role but no subject
-                        var noSubjectMentee = new StudentModel
-                        {
-                            Email = $"unfilled.mentee{unfilledIndex}@mentoringapp.com",
-                            NationalId = $"9{unfilledIndex:D8}",
-                            UserName = $"{Pick(_firstNames)} {Pick(_lastNames)}",
-                            Grade = new GradeModel { Id = slot.gradeId, Name = "", Num = 0 },
-                            ClassNum = slot.classNum,
-                            Gender = Pick(_genders),
-                            PhoneNumber = $"05{_rand.Next(10000000, 99999999)}",
-                            MenteeProfile = new MenteeProfile { SubjectToLearn = 0 }
-                        };
-                        await _userService.CreateUserAsync(noSubjectMentee);
-                        unfilledIndex++;
-                    }
                 }
             }
 
-            // Dual-role student always in Grade 9, Class 1
+            // Known dual-role test account always in Grade 11, Class 1
             var dualStudent = new StudentModel
             {
                 Email = "dual.test@mentoringapp.com",
                 NationalId = "50001",
                 UserName = "Dual Role Test",
-                Grade = new GradeModel { Id = g9, Name = "", Num = 0 },
+                Grade = new GradeModel { Id = g11, Name = "", Num = 11 },
                 ClassNum = 1,
                 Gender = Pick(_genders),
                 PhoneNumber = $"05{_rand.Next(10000000, 99999999)}",
@@ -384,6 +341,22 @@ namespace MentoringApp.Service
                 dir = dir.Parent;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Returns "mentor", "mentee", "dual", or "none" based on grade-level role distribution.
+        /// Grade 10 → mostly mentees; Grade 11 → mostly dual; Grade 12 → mostly mentors.
+        /// </summary>
+        private string DetermineStudentRole(int gradeNum)
+        {
+            double roll = _rand.NextDouble();
+            return gradeNum switch
+            {
+                10 => roll < 0.75 ? "mentee" : roll < 0.90 ? "dual" : "none",
+                11 => roll < 0.70 ? "dual"   : roll < 0.85 ? "mentor" : "mentee",
+                12 => roll < 0.75 ? "mentor" : roll < 0.90 ? "dual" : "none",
+                _  => roll < 0.50 ? "mentor" : "mentee"
+            };
         }
 
         private int GetId(string sql)

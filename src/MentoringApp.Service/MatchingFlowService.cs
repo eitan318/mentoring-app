@@ -235,15 +235,18 @@ namespace MentoringApp.Service
         public async Task<IEnumerable<MatchScore>> GetTopRecommendationsAsync(int menteeId, int topN = 3)
         {
             var dtos = await _matchScoreRepo.GetTopForMenteeAsync(menteeId, topN);
-
             var matchedMentorIds = (await _pairRepo.GetMatchedMentorIdsAsync()).ToHashSet();
 
+            // Filter stale entries (mentor was paired since the matrix was built) and self-matches
+            var validDtos = dtos.Where(d => !matchedMentorIds.Contains(d.MentorId) && d.MentorId != menteeId).ToList();
+
+            // Mentee was added after the score matrix was generated — backfill their rows
+            if (!validDtos.Any())
+                return await BackfillAndReturnRecommendationsAsync(menteeId, matchedMentorIds, topN);
+
             var result = new List<MatchScore>();
-
-            foreach (var dto in dtos)
+            foreach (var dto in validDtos)
             {
-                if (matchedMentorIds.Contains(dto.MentorId)) continue;
-
                 var mentorResult = await _userService.GetUserByIdAsync(dto.MentorId);
                 var mentorModel = mentorResult.Data as StudentModel;
 
@@ -261,6 +264,67 @@ namespace MentoringApp.Service
                     MentorGender = mentorModel?.Gender ?? Gender.PreferNoAnswer,
                     MentorSubjectName = await GetSubjectNameAsync(mentorModel?.MentorProfile?.SubjectToTeach),
                     MenteeSubjectName = await GetSubjectNameAsync(menteeModel?.MenteeProfile?.SubjectToLearn)
+                });
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Called when a mentee has no pre-computed scores (added after the score matrix was
+        /// generated). Scores every available unmatched mentor, persists all rows to the
+        /// MatchScores table so subsequent requests hit the DB like normal users, then returns
+        /// the top <paramref name="topN"/>.
+        /// </summary>
+        private async Task<IEnumerable<MatchScore>> BackfillAndReturnRecommendationsAsync(
+            int menteeId, HashSet<int> matchedMentorIds, int topN)
+        {
+            var menteeResult = await _userService.GetUserByIdAsync(menteeId);
+            if (menteeResult.Data is not StudentModel menteeModel)
+                return Enumerable.Empty<MatchScore>();
+
+            var availableMentors = (await GetAvailableMentorsAsync())
+                .Where(m => !matchedMentorIds.Contains(m.Id) && m.Id != menteeId)
+                .ToList();
+
+            if (!availableMentors.Any())
+                return Enumerable.Empty<MatchScore>();
+
+            // Compute scores for every available mentor and persist them so the matrix
+            // stays complete for future requests and for auto/fallback match.
+            var newRows = availableMentors.Select(mentor => new MatchScoreDao
+            {
+                MenteeId = menteeId,
+                MentorId = mentor.Id,
+                ScorePercent = _scorer.Calculate(
+                    menteeModel.MenteeProfile?.SubjectToLearn,
+                    mentor.MentorProfile?.SubjectToTeach,
+                    menteeModel.PreferredMentorGender,
+                    mentor.Gender,
+                    mentor.PreferredMenteeGender,
+                    menteeModel.Gender)
+            }).ToList();
+
+            await _matchScoreRepo.BulkInsertAsync(newRows);
+
+            // Build the rich MatchScore display objects for the top N
+            var topRows = newRows.OrderByDescending(r => r.ScorePercent).Take(topN);
+            var menteeSubjectName = await GetSubjectNameAsync(menteeModel.MenteeProfile?.SubjectToLearn);
+            var result = new List<MatchScore>();
+
+            foreach (var row in topRows)
+            {
+                var mentor = availableMentors.First(m => m.Id == row.MentorId);
+                result.Add(new MatchScore
+                {
+                    MenteeId = menteeId,
+                    MentorId = mentor.Id,
+                    ScorePercent = row.ScorePercent,
+                    MentorName = mentor.UserName,
+                    MentorProfilePicturePath = mentor.ProfilePicturePath ?? string.Empty,
+                    MentorGender = mentor.Gender,
+                    MentorSubjectName = await GetSubjectNameAsync(mentor.MentorProfile?.SubjectToTeach),
+                    MenteeSubjectName = menteeSubjectName
                 });
             }
 

@@ -69,15 +69,30 @@
                 FontSize="20"
                 FontWeight="Bold"
                 Foreground="#111827"
-                Margin="0,0,0,4"
+                Margin="0,0,0,16"
                 Text="{Binding [Issue_Title], Source={x:Static loc:TranslationSource.Instance}}" />
 
-            <TextBlock
-                FontSize="13"
-                Foreground="#A855F7"
-                FontStyle="Italic"
-                Margin="0,0,0,20"
-                Text="{Binding RelatedPairName}" />
+            <!-- Originated from pair -->
+            <Border Background="#F5F3FF" CornerRadius="10" Padding="12,10" Margin="0,0,0,8"
+                    Visibility="{Binding RelatedPairName, Converter={StaticResource NullToVis}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding [Issue_OriginPair_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                               FontSize="11" FontWeight="SemiBold" Foreground="#7C3AED" Margin="0,0,0,2"/>
+                    <TextBlock Text="{Binding RelatedPairName}"
+                               FontSize="13" FontWeight="Medium" Foreground="#111827"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Reported by -->
+            <Border Background="#F9FAFB" CornerRadius="10" Padding="12,10" Margin="0,0,0,20"
+                    Visibility="{Binding ReporterName, Converter={StaticResource NullToVis}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding [Issue_ReportedBy_Label], Source={x:Static loc:TranslationSource.Instance}}"
+                               FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,2"/>
+                    <TextBlock Text="{Binding ReporterName}"
+                               FontSize="13" FontWeight="Medium" Foreground="#111827"/>
+                </StackPanel>
+            </Border>
 
             <!-- Category -->
             <TextBlock
@@ -165,21 +180,9 @@
                 <Button
                     ToolTip="{Binding [Issue_Resolve_Tooltip], Source={x:Static loc:TranslationSource.Instance}}"
                     Command="{Binding ResolveIssueCommand}"
-                    Content="{Binding [Issue_Resolve_Button], Source={x:Static loc:TranslationSource.Instance}}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource PrimaryBtn}">
-                            <Setter Property="Visibility" Value="Visible"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentIssue.IsResolved}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding CurrentIssue.IsForwardedToAdmin}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                    Content="{Binding [Issue_Resolve_Button], Source={x:Static loc:TranslationSource.Instance}}"
+                    Visibility="{Binding CanResolve, Converter={StaticResource BoolToVis}}"
+                    Style="{StaticResource PrimaryBtn}"/>
             </StackPanel>
 
         </StackPanel>

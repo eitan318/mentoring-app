@@ -48,6 +48,7 @@ public static class ViewModelDependencyInjection
         services.AddTransient<CreatePairViewModel>();
         services.AddTransient<SupervisorDashboardViewModel>();
         services.AddTransient<PairDetailsViewModel>();
+        services.AddTransient<IssueViewModel>();
         services.AddTransient<AddIssueViewModel>();
         services.AddTransient<AddReviewViewModel>();
         services.AddTransient<MyProfileViewModel>();
