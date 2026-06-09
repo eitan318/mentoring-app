@@ -182,6 +182,9 @@ public partial class AdminOverviewViewModel : ObservableObject, INavigatable
             case "SchoolConfig":
                 body = TranslationSource.Instance["Admin_PhaseGuide_SchoolConfig"] ?? "Configure your school's grades and classes.";
                 break;
+            case "SupervisorAssignment":
+                body = TranslationSource.Instance["Admin_PhaseGuide_SupervisorAssignment"] ?? "Assign classes to supervisors so each supervisor is responsible for a group of students.";
+                break;
             case "Phase1":
                 body = TranslationSource.Instance["Admin_PhaseGuide_Phase1"] ?? "Phase 1: Registration";
                 break;

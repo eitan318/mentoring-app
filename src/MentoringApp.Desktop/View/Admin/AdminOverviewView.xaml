@@ -25,76 +25,85 @@
     </UserControl.Resources>
 
     <Grid Margin="30,24,30,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Phase Stepper -->
+            <RowDefinition Height="*"/>    <!-- Main content area (fills all remaining space) -->
+            <RowDefinition Height="Auto"/> <!-- Action button (initial steps only) -->
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="270"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ── Left Column (Main Content) ── -->
-        <Grid Grid.Column="0" Margin="0,0,30,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/> <!-- Header -->
-                <RowDefinition Height="Auto"/> <!-- Stat Cards -->
-                <RowDefinition Height="Auto"/> <!-- Phase Stepper -->
-                <RowDefinition Height="*"/>    <!-- Step content -->
-            </Grid.RowDefinitions>
+        <!-- Phase Stepper (spans both columns) -->
+        <overview:PhaseStepperView Grid.Row="0" Grid.ColumnSpan="2"/>
 
-            <!-- Phase Stepper -->
-            <overview:PhaseStepperView Grid.Row="2"/>
+        <!-- ── Content Area (Row 1, fills all remaining vertical space) ── -->
 
-            <!-- Bottom Row: Step-specific content -->
-            <Grid Grid.Row="3">
-                <!-- Step 1: School configuration (inline) -->
-                <local:SchoolConfigView DataContext="{Binding SchoolConfig}"
-                                        Visibility="{Binding DataContext.Progress.IsSchoolConfigStepActive, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
+        <!-- Initial steps: full-width content (School Config / Import / Supervisor Assignment) -->
+        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,12,0,0"
+              Visibility="{Binding Progress.IsSupervisorsAssigned, Converter={StaticResource InverseBoolToVis}}">
+            <!-- Step 1: School configuration -->
+            <local:SchoolConfigView DataContext="{Binding SchoolConfig}"
+                                    Visibility="{Binding DataContext.Progress.IsSchoolConfigStepActive, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
-                <!-- Step 2: Import users instruction -->
-                <Border Style="{StaticResource CardStyle}"
-                        Visibility="{Binding Progress.IsImportStepActive, Converter={StaticResource BoolToVis}}">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40">
-                        <TextBlock Text="&#x1F393;" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
-                        <TextBlock Text="{Binding [Admin_ImportUsers_Instruction_Title], Source={x:Static loc:TranslationSource.Instance}}"
-                                   FontSize="20" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center" Margin="0,0,0,12"/>
-                        <TextBlock Text="{Binding [Admin_ImportUsers_Instruction_Body], Source={x:Static loc:TranslationSource.Instance}}"
-                                   FontSize="14" Foreground="#6B7280" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="500"/>
-                    </StackPanel>
-                </Border>
+            <!-- Step 2: Import users instruction -->
+            <Border Style="{StaticResource CardStyle}"
+                    Visibility="{Binding Progress.IsImportStepActive, Converter={StaticResource BoolToVis}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40">
+                    <TextBlock Text="&#x1F393;" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                    <TextBlock Text="{Binding [Admin_ImportUsers_Instruction_Title], Source={x:Static loc:TranslationSource.Instance}}"
+                               FontSize="20" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                    <TextBlock Text="{Binding [Admin_ImportUsers_Instruction_Body], Source={x:Static loc:TranslationSource.Instance}}"
+                               FontSize="14" Foreground="#6B7280" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="500"/>
+                </StackPanel>
+            </Border>
 
-                <!-- Step 3: Assign Supervisors -->
-                <Border Style="{StaticResource CardStyle}"
-                        Visibility="{Binding Progress.IsSupervisorAssignmentStepActive, Converter={StaticResource BoolToVis}}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <local:SupervisorAssignmentView Grid.Row="0" DataContext="{Binding SupervisorAssignment}"/>
-                        <Button Grid.Row="1" Content="{Binding [Admin_Continue_Button], Source={x:Static loc:TranslationSource.Instance}}" Padding="0,10" Margin="0,20,0,0"
-                                Background="#A855F7" Foreground="White" FontWeight="SemiBold" BorderThickness="0"
-                                IsEnabled="{Binding SupervisorAssignment.AllClassesAssigned}"
-                                Command="{Binding CompleteSupervisorAssignmentCommand}">
-                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
-                        </Button>
-                    </Grid>
-                </Border>
-
-                <!-- Step 4: Supervisors list (Registration, Mentor Selection, and Completed phases) -->
-                <overview:SupervisorsListView Loaded="SupervisorsListView_Loaded"/>
-            </Grid>
+            <!-- Step 3: Supervisor Assignment (no extra card wrapper — view has its own CardStyleLg) -->
+            <local:SupervisorAssignmentView DataContext="{Binding SupervisorAssignment}"
+                                            Visibility="{Binding DataContext.Progress.IsSupervisorAssignmentStepActive, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
         </Grid>
 
-        <!-- ── Right Column (Sidebar) ── -->
-        <Grid Grid.Column="1">
+        <!-- Registration phase+: two-column layout -->
+        <overview:SupervisorsListView Grid.Row="1" Grid.Column="0" Margin="0,12,30,0"
+                                      Visibility="{Binding Progress.IsSupervisorsAssigned, Converter={StaticResource BoolToVis}}"
+                                      Loaded="SupervisorsListView_Loaded"/>
+
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0,12,0,0"
+              Visibility="{Binding Progress.IsSupervisorsAssigned, Converter={StaticResource BoolToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
-            <!-- Calendar / Deadlines / Phase Actions -->
             <overview:PhaseActionsView Grid.Row="0"/>
-
-            <!-- Notice Board (Forwarded Issues) -->
             <overview:NoticeBoardView Grid.Row="1" Visibility="{Binding Progress.IsSupervisorsAssigned, Converter={StaticResource BoolToVis}}"/>
         </Grid>
+
+        <!-- Action buttons at bottom (initial steps only, full width, plain text) -->
+        <Button Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0" Padding="0,14"
+                FontSize="15" FontWeight="SemiBold" Foreground="White" BorderThickness="0" Background="#A855F7"
+                Visibility="{Binding Progress.IsSchoolConfigStepActive, Converter={StaticResource BoolToVis}}"
+                IsEnabled="{Binding CanCompleteSchoolConfig}"
+                Command="{Binding CompleteSchoolConfigCommand}"
+                Content="{Binding [Admin_CompleteSchoolConfig_Button], Source={x:Static loc:TranslationSource.Instance}}">
+            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
+        </Button>
+
+        <Button Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0" Padding="0,14"
+                FontSize="15" FontWeight="SemiBold" Foreground="White" BorderThickness="0" Background="#10B981"
+                Visibility="{Binding Progress.IsImportStepActive, Converter={StaticResource BoolToVis}}"
+                Command="{Binding MarkUsersImportedCommand}"
+                Content="{Binding [Admin_BeginRegistration_Button], Source={x:Static loc:TranslationSource.Instance}}">
+            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
+        </Button>
+
+        <Button Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0" Padding="0,14"
+                FontSize="15" FontWeight="SemiBold" Foreground="White" BorderThickness="0" Background="#A855F7"
+                Visibility="{Binding Progress.IsSupervisorAssignmentStepActive, Converter={StaticResource BoolToVis}}"
+                IsEnabled="{Binding SupervisorAssignment.AllClassesAssigned}"
+                Command="{Binding CompleteSupervisorAssignmentCommand}"
+                Content="{Binding [Admin_CompleteSupervisorAssignment_Button], Source={x:Static loc:TranslationSource.Instance}}">
+            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
+        </Button>
     </Grid>
 </UserControl>

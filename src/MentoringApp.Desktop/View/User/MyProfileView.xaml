@@ -178,35 +178,38 @@
                         <!-- Profile fields (hidden while role selection is pending) -->
                         <StackPanel Visibility="{Binding ShowRoleSelection, Converter={StaticResource InverseBoolToVis}}">
 
-                            <TextBlock Style="{StaticResource SectionHeader}"
-                                       Text="{Binding [Profile_GradeClass_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                            <!-- Grade/class — students only -->
+                            <StackPanel Visibility="{Binding IsStudent, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Style="{StaticResource SectionHeader}"
+                                           Text="{Binding [Profile_GradeClass_Label], Source={x:Static loc:TranslationSource.Instance}}" />
 
-                            <TextBlock Style="{StaticResource FieldLabel}" Margin="0,12,0,4"
-                                       Text="{Binding [Profile_GradeClass_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                            <ComboBox
-                                IsEnabled="False"
-                                ItemsSource="{Binding SchoolClasses}"
-                                SelectedItem="{Binding SelectedSchoolClass, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                Margin="0,0,0,16">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock>
-                                                <TextBlock.Text>
-                                                    <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
-                                                        <Binding Path="Grade.Name" />
-                                                        <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
-                                                    </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
-                                            <TextBlock Text=" – " />
-                                            <TextBlock Text="{Binding [Profile_ClassNum_Label], Source={x:Static loc:TranslationSource.Instance}}" />
-                                            <TextBlock Text=" " />
-                                            <TextBlock Text="{Binding ClassNum}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
+                                <TextBlock Style="{StaticResource FieldLabel}" Margin="0,12,0,4"
+                                           Text="{Binding [Profile_GradeClass_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                <ComboBox
+                                    IsEnabled="False"
+                                    ItemsSource="{Binding SchoolClasses}"
+                                    SelectedItem="{Binding SelectedSchoolClass, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                    Margin="0,0,0,16">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock>
+                                                    <TextBlock.Text>
+                                                        <MultiBinding Converter="{StaticResource DbTranslation}" ConverterParameter="DB_Grade_">
+                                                            <Binding Path="Grade.Name" />
+                                                            <Binding Source="{x:Static loc:TranslationSource.Instance}" Path="CurrentCulture" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <TextBlock Text=" – " />
+                                                <TextBlock Text="{Binding [Profile_ClassNum_Label], Source={x:Static loc:TranslationSource.Instance}}" />
+                                                <TextBlock Text=" " />
+                                                <TextBlock Text="{Binding ClassNum}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
 
                             <!-- Mentor section -->
                             <StackPanel Visibility="{Binding HasMentorProfile, Converter={StaticResource BoolToVis}}">
