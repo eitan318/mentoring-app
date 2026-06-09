@@ -304,29 +304,47 @@ public partial class MyProfileViewModel : ObservableValidator, INavigatable
         await _navigationService.GoBackAsync();
     }
 
+    /// <summary>WPF entry point: opens a file dialog, then uploads the chosen image.</summary>
     [RelayCommand]
     private async Task UploadProfilePictureAsync()
     {
         var filePath = _fileService.OpenFile("Image Files|*.jpg;*.jpeg;*.png");
+        if (string.IsNullOrEmpty(filePath)) return;
 
-        if (string.IsNullOrEmpty(filePath) || CurrentUser == null) return;
+        using var fs = System.IO.File.OpenRead(filePath);
+        await UploadProfilePictureFromStreamAsync(fs, System.IO.Path.GetFileName(filePath));
+    }
 
+    /// <summary>
+    /// Shared upload logic used by both clients. The Web client calls this directly
+    /// with the browser file stream (it has no local path to open).
+    /// </summary>
+    public async Task<bool> UploadProfilePictureFromStreamAsync(System.IO.Stream stream, string fileName)
+    {
+        if (CurrentUser == null) return false;
         try
         {
-            var newPath = await _userClient.UploadProfilePictureAsync(CurrentUser.Id, filePath);
-            if (newPath != null)
+            var newPath = await _userClient.UploadProfilePictureAsync(CurrentUser.Id, stream, fileName);
+            if (newPath == null)
             {
-                var updated = await _userClient.GetByIdAsync(CurrentUser.Id);
-                if (updated != null)
-                {
-                    _userStore.User = updated;
-                    CurrentUser = updated;
-                }
+                ErrorMessage = "Upload failed: the server rejected the image.";
+                return false;
             }
+
+            // Re-fetch the user so ProfilePicturePath (and the bound image) refresh.
+            var updated = await _userClient.GetByIdAsync(CurrentUser.Id);
+            if (updated != null)
+            {
+                _userStore.User = updated;
+                CurrentUser = updated;
+            }
+            ErrorMessage = string.Empty;
+            return true;
         }
         catch (Exception ex)
         {
             ErrorMessage = "Upload failed: " + ex.Message;
+            return false;
         }
     }
 }

@@ -143,14 +143,27 @@ public static class UserEndpoints
         // POST /api/users/{id}/profile-picture (multipart)
         group.MapPost("/{id:int}/profile-picture", async (int id, IFormFile file, UserService userService, IWebHostEnvironment env) =>
         {
-            var uploadsDir = Path.Combine(env.WebRootPath ?? env.ContentRootPath, "uploads", "profile-pictures");
+            // Write to {ContentRoot}/uploads — the exact folder served by UseStaticFiles
+            // at the "/uploads" URL in Program.cs (deterministic, no dependency on wwwroot).
+            var uploadsDir = Path.Combine(env.ContentRootPath, "uploads", "profile-pictures");
             Directory.CreateDirectory(uploadsDir);
             var ext = Path.GetExtension(file.FileName);
-            var fileName = $"{id}{ext}";
+            // Append a timestamp so the URL changes on each upload and bypasses image caching.
+            var fileName = $"{id}_{DateTime.UtcNow:yyyyMMddHHmmss}{ext}";
+
+            // Remove any previous picture(s) for this user so stale files don't pile up.
+            foreach (var old in Directory.EnumerateFiles(uploadsDir, $"{id}.*").Concat(
+                                Directory.EnumerateFiles(uploadsDir, $"{id}_*")))
+            {
+                try { File.Delete(old); } catch { /* ignore */ }
+            }
+
             var filePath = Path.Combine(uploadsDir, fileName);
-            using var stream = File.Create(filePath);
-            await file.CopyToAsync(stream);
-            var relativePath = Path.Combine("uploads", "profile-pictures", fileName);
+            using (var stream = File.Create(filePath))
+                await file.CopyToAsync(stream);
+
+            // Always use forward slashes so the path is valid as a URL segment
+            var relativePath = $"uploads/profile-pictures/{fileName}";
             await userService.UpdateProfilePicturePathAsync(id, relativePath);
             return Results.Ok(new { path = relativePath });
         })

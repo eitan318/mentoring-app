@@ -3,12 +3,16 @@
 @layout MentoringApp.Web.Components.Layout.AuthenticatedLayout
 @implements IDisposable
 @using System.ComponentModel
+@using System.IO
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.Configuration
 @using MentoringApp.Model.User
 @using MentoringApp.ViewModel.ViewModel.User
 @using MentoringApp.ViewModel.IService
 @using MentoringApp.ViewModel.Localization
 @inject MyProfileViewModel Vm
 @inject ILocalizationService Loc
+@inject IConfiguration Config
 
 @*
     Mirrors MyProfileView.xaml — bound 1:1 to MyProfileViewModel.
@@ -18,13 +22,22 @@
 <div class="profile-root" dir="@Dir">
     <div class="profile-card">
 
-        @* ── Profile picture + change photo (camera button is no-op on web for now) ── *@
+        @* ── Profile picture + change photo (label wraps a hidden InputFile) ── *@
         <div class="pic-wrap">
-            <div class="pic" style="background:@PicBg(Vm.Gender)">
-                @(string.IsNullOrEmpty(Vm.UserName) ? "?" : Vm.UserName[0].ToString().ToUpper())
-            </div>
-            <button class="pic-camera" disabled
-                    title="@Loc.Get("Profile_ChangePhoto_Tooltip")">📷</button>
+            @if (!string.IsNullOrEmpty(PictureUrl))
+            {
+                <img class="pic pic-img" src="@PictureUrl" alt="profile picture" />
+            }
+            else
+            {
+                <div class="pic" style="background:@PicBg(Vm.Gender)">
+                    @(string.IsNullOrEmpty(Vm.UserName) ? "?" : Vm.UserName[0].ToString().ToUpper())
+                </div>
+            }
+            <label class="pic-camera" title="@Loc.Get("Profile_ChangePhoto_Tooltip")">
+                📷
+                <InputFile OnChange="OnPictureSelected" accept="image/*" style="display:none" />
+            </label>
         </div>
         <div class="pic-hint">@Loc.Get("Profile_ChangePhoto_Hint")</div>
 
@@ -218,6 +231,7 @@
         display: flex; align-items: center; justify-content: center;
         font-weight: 700; font-size: 32px; color: #1F2937;
     }
+    .pic-img { object-fit: cover; display: block; }
     .pic-camera {
         position: absolute;
         bottom: 0; right: 0;
@@ -225,7 +239,9 @@
         background: #111827; color: white;
         border: 0; border-radius: 50%;
         cursor: pointer; font-size: 14px;
+        display: flex; align-items: center; justify-content: center;
     }
+    .pic-camera:hover { background: #374151; }
     .pic-hint {
         text-align: center;
         font-size: 12px; color: #6B7280;
@@ -318,6 +334,41 @@
 
     private static string PicBg(MentoringApp.Model.User.Gender g) =>
         g == MentoringApp.Model.User.Gender.Female ? "#FBCFE8" : "#BFDBFE";
+
+    // Builds the absolute image URL from the relative path stored in the DB
+    // (e.g. "uploads/profile-pictures/42_....jpg") + the API base address.
+    private string? PictureUrl
+    {
+        get
+        {
+            var p = Vm.ProfilePicturePath;
+            if (string.IsNullOrWhiteSpace(p)) return null;
+            if (p.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return p;
+            var baseUrl = (Config["ApiSettings:BaseUrl"] ?? string.Empty).TrimEnd('/');
+            return $"{baseUrl}/{p.TrimStart('/')}";
+        }
+    }
+
+    private async Task OnPictureSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+        try
+        {
+            // OpenReadStream is forward-only; copy to a seekable MemoryStream so the
+            // multipart upload can read its length.
+            using var src = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // 5 MB
+            using var ms = new MemoryStream();
+            await src.CopyToAsync(ms);
+            ms.Position = 0;
+            await Vm.UploadProfilePictureFromStreamAsync(ms, file.Name);
+        }
+        catch (Exception ex)
+        {
+            Vm.ErrorMessage = "Upload failed: " + ex.Message;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
 
     protected override async Task OnInitializedAsync()
     {

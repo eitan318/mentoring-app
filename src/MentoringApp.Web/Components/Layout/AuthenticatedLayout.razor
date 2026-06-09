@@ -1,11 +1,13 @@
 @inherits LayoutComponentBase
 @implements IDisposable
 @using System.ComponentModel
+@using Microsoft.Extensions.Configuration
 @using MentoringApp.ViewModel.ViewModel.User
 @using MentoringApp.ViewModel.IService
 @using MentoringApp.ViewModel.Localization
 @inject AuthenticatedDashboardViewModel Vm
 @inject ILocalizationService Loc
+@inject IConfiguration Config
 
 @*
     Mirrors AuthenticatedDashboardView.xaml shell:
@@ -46,10 +48,17 @@
             {
                 <button class="btn-profile"
                         @onclick="() => Vm.NavigateProfileCommand.Execute(null)">
-                    <span class="profile-pic"
-                          style="background:@(Vm.CurrentUser.Gender.ToString() == "Female" ? "#FBCFE8" : "#BFDBFE")">
-                        @(string.IsNullOrEmpty(Vm.CurrentUser.UserName) ? "?" : Vm.CurrentUser.UserName![0].ToString().ToUpper())
-                    </span>
+                    @if (!string.IsNullOrEmpty(TopBarPictureUrl))
+                    {
+                        <img class="profile-pic profile-pic-img" src="@TopBarPictureUrl" alt="profile" />
+                    }
+                    else
+                    {
+                        <span class="profile-pic"
+                              style="background:@(Vm.CurrentUser.Gender.ToString() == "Female" ? "#FBCFE8" : "#BFDBFE")">
+                            @(string.IsNullOrEmpty(Vm.CurrentUser.UserName) ? "?" : Vm.CurrentUser.UserName![0].ToString().ToUpper())
+                        </span>
+                    }
                     <span class="profile-name">@Vm.CurrentUser.UserName</span>
                 </button>
             }
@@ -129,6 +138,7 @@
         display: inline-flex; align-items: center; justify-content: center;
         font-weight: 700; font-size: 12px; color: #1F2937;
     }
+    .profile-pic-img { object-fit: cover; }
     .profile-name { font-weight: 500; }
 
     .btn-logout {
@@ -145,6 +155,19 @@
 
 @code {
     private string Dir => TranslationSource.Instance.IsRtl ? "rtl" : "ltr";
+
+    // Absolute URL for the top-bar avatar, built from the relative DB path + API base.
+    private string? TopBarPictureUrl
+    {
+        get
+        {
+            var p = Vm.CurrentUser?.ProfilePicturePath;
+            if (string.IsNullOrWhiteSpace(p)) return null;
+            if (p.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return p;
+            var baseUrl = (Config["ApiSettings:BaseUrl"] ?? string.Empty).TrimEnd('/');
+            return $"{baseUrl}/{p.TrimStart('/')}";
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
