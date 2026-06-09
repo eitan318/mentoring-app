@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
+/// <summary>Backs the admin "Manage Pairs" screen: lists existing mentor–mentee pairs and supports creating/removing them.</summary>
 public partial class ManagePairsViewModel : ObservableObject, INavigatable
 {
     private readonly IWindowService _windowService;

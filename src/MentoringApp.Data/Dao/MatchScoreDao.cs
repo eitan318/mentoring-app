@@ -1,5 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
+    /// <summary>Flat row mirror of the MatchScores table (precomputed mentee↔mentor compatibility %).</summary>
     public class MatchScoreDao
     {
         public int Id { get; set; }

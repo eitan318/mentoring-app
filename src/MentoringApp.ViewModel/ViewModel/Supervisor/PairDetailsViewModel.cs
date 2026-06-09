@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Supervisor;
 
+/// <summary>Backs the supervisor's pair-details view: loads one pair by id with its members, reviews and progress.</summary>
 public partial class PairDetailsViewModel : ObservableObject, INavigatable<int>
 {
     private readonly PairApiClient _pairClient;

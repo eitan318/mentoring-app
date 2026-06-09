@@ -5,11 +5,17 @@ using MentoringApp.Model.User;
 
 namespace MentoringApp.Data.Interfaces
 {
+    // Repository contracts. Each interface abstracts persistence for one aggregate so the
+    // service layer never touches SQL directly; the concrete implementations live in
+    // Repository/SQLite. They are registered in DataDependencyInjection.
+
+    /// <summary>Database-level operations (schema creation/reset).</summary>
     public interface IDbRepo
     {
         void Recreate();
     }
 
+    /// <summary>Persistence for users (all roles) and their role-specific profile data.</summary>
     public interface IUserRepo
     {
         Task<bool> CreateUserAsync(UserModel user);
@@ -20,6 +26,13 @@ namespace MentoringApp.Data.Interfaces
         
 
         Task<bool> DeleteUserAsync(int userId);
+
+        /// <summary>
+        /// Removes every row from UserMentors and UserMentees so that all students
+        /// start the new academic year without a role and must re-register as
+        /// mentor/mentee during the registration phase.
+        /// </summary>
+        Task ClearAllStudentProfilesAsync();
 
         Task<bool> UpdateBaseInfoAsync(int id, string name, string email, string nationalId, string? phoneNumber, int gender);
 
@@ -34,6 +47,7 @@ namespace MentoringApp.Data.Interfaces
         Task<bool> UpdateLanguageAsync(int userId, string language);
     }
 
+    /// <summary>Persistence for one-time email login codes.</summary>
     public interface IVerificationCodeRepo
     {
         Task<bool> SaveAsync(int userId, string code, DateTime creationDate);
@@ -42,6 +56,7 @@ namespace MentoringApp.Data.Interfaces
         Task<bool> DeleteAsync(int userId);
     }
 
+    /// <summary>Persistence for confirmed mentor–mentee pairs.</summary>
     public interface IPairRepo
     {
         Task<IEnumerable<PairDao>> GetAllAsync();
@@ -71,6 +86,7 @@ namespace MentoringApp.Data.Interfaces
         Task DeleteAllAsync();
     }
 
+    /// <summary>Persistence for student-reported issues (resolve / forward).</summary>
     public interface IIssueRepo
     {
         Task<IEnumerable<IssueDao>> GetAllAsync();
@@ -83,12 +99,14 @@ namespace MentoringApp.Data.Interfaces
         Task<IEnumerable<IssueDao>> GetForwardedAsync();
     }
 
+    /// <summary>Read access to the issue-category lookup table.</summary>
     public interface IIssueCategoryRepo
     {
         Task<IEnumerable<IssueCategoryDao>> GetAllAsync();
         Task<IssueCategoryDao?> GetByIdAsync(int categoryId);
     }
 
+    /// <summary>Persistence for session reviews/logs written by pair members.</summary>
     public interface IReviewRepo
     {
         Task<IEnumerable<ReviewDao>> GetByPairAsync(int pairId);
@@ -96,6 +114,7 @@ namespace MentoringApp.Data.Interfaces
         Task<bool> CreateAsync(string content, DateTime date, int pairId, int authorUserId, double amountOfHours);
     }
 
+    /// <summary>Generic key/value store for global app settings (deadlines, process flags, barriers).</summary>
     public interface ISettingsRepo
     {
         Task<double> GetDoubleAsync(string key, double defaultValue = 0);
@@ -104,11 +123,13 @@ namespace MentoringApp.Data.Interfaces
         Task SetStringAsync(string key, string value);
     }
 
+    /// <summary>Read access to the subjects lookup table.</summary>
     public interface ISubjectRepo
     {
         Task<IEnumerable<SubjectDao>> GetAllSubjectsAsync();
     }
 
+    /// <summary>Read access to the grades lookup table.</summary>
     public interface IGradeRepo
     {
         Task<GradeDao?> GetByIdAsync(int id);
@@ -117,6 +138,7 @@ namespace MentoringApp.Data.Interfaces
 
     }
 
+    /// <summary>End-of-year rollover: identifying graduating students and bumping everyone else up a grade.</summary>
     public interface IYearAdvanceRepo
     {
         /// <summary>
@@ -132,7 +154,7 @@ namespace MentoringApp.Data.Interfaces
         Task AdvanceStudentGradesAsync();
     }
 
-    // ── NEW: pair request repo ────────────────────────────────────────────────
+    /// <summary>Persistence for mentee→mentor pairing requests awaiting supervisor approval.</summary>
     public interface IPairRequestRepo
     {
         Task<bool> CreateAsync(int menteeId, int mentorId, int tier);
@@ -144,7 +166,7 @@ namespace MentoringApp.Data.Interfaces
         Task<bool> ExistsAsync(int menteeId, int mentorId);
     }
 
-    // ── NEW: match score repo ─────────────────────────────────────────────────
+    /// <summary>Persistence for the precomputed mentee↔mentor compatibility score matrix (Tier 2).</summary>
     public interface IMatchScoreRepo
     {
         Task BulkInsertAsync(IEnumerable<MatchScoreDao> scores);
@@ -152,7 +174,7 @@ namespace MentoringApp.Data.Interfaces
         Task<IEnumerable<MatchScoreDao>> GetAllAsync();
         Task ClearAllAsync();
     }
-    // ── School Class repo ─────────────────────────────────────────────────
+    /// <summary>Persistence for school-class slots and which supervisor owns each.</summary>
     public interface ISchoolClassRepo
     {
         Task<IEnumerable<SchoolClassDao>> GetAllAsync();

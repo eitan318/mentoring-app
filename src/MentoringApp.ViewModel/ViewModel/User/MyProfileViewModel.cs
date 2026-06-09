@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
 
+/// <summary>Backs the current user's own profile screen: view/edit personal details, preferences and profile picture, validated before save.</summary>
 public partial class MyProfileViewModel : ObservableValidator, INavigatable
 {
     private readonly UserStore _userStore;

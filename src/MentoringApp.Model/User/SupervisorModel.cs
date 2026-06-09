@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 namespace MentoringApp.Model.User
 {
 
+    /// <summary>
+    /// A supervisor (teacher) user. Oversees the students in their <see cref="AssignedClasses"/>,
+    /// handles their issues, and approves pair requests. Issue counts are computed live from
+    /// <see cref="Issues"/> when loaded, or fall back to manually-set values (used by the admin
+    /// dashboard, which loads counts without the full issue list).
+    /// </summary>
     public class SupervisorModel : UserModel
     {
         /// <summary>All school class slots assigned to this supervisor.</summary>
@@ -50,6 +56,7 @@ namespace MentoringApp.Model.User
         public IEnumerable<IssueModel> ResolvedIssues =>
             Issues?.Where(i => i.IsResolved) ?? Enumerable.Empty<IssueModel>();
 
+        /// <summary>Workload heuristic (= number of pending issues) used to pick the least-busy supervisor when auto-forwarding issues.</summary>
         public int Problematicness() => PendingCount;
     }
 }

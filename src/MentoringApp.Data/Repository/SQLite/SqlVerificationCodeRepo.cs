@@ -4,6 +4,7 @@ using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IVerificationCodeRepo"/> (one-time login codes).</summary>
     internal class SqlVerificationCodeRepo : IVerificationCodeRepo
     {
         private readonly ISQLiteConnectionService _db;

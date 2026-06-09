@@ -7,11 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.Data.DI
 {
+    /// <summary>
+    /// Registers the data-access layer (repositories + the SQLite connection service) in the DI container.
+    /// Called once at startup from the API's Program.cs.
+    /// </summary>
     public static class DataDependencyInjection
     {
         /// <summary>
-        /// Entry point for the API host. Dispatches to the appropriate data backend
-        /// based on the "DataProvider" config key. Task 3 will add Postgres support here.
+        /// Entry point for the API host. Reads the "DefaultConnection" connection string
+        /// (falling back to the bundled SQLite file) and registers the SQLite repositories.
         /// </summary>
         public static IServiceCollection AddDataLayer(this IServiceCollection services, IConfiguration configuration)
         {

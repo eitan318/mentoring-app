@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
+/// <summary>Backs the admin "Create Pair" dialog: pick an available mentor and mentee and manually form a pair.</summary>
 public partial class CreatePairViewModel : ObservableObject, INavigatable
 {
     [ObservableProperty]

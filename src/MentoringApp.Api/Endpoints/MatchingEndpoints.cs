@@ -5,6 +5,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/matching minimal-API endpoints driving the 5-tier pairing pipeline (requests, score matrix, gallery, auto/fallback match).</summary>
 public static class MatchingEndpoints
 {
     public static void MapMatchingEndpoints(this WebApplication app)

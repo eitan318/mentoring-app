@@ -12,6 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.ViewModel.DI;
 
+/// <summary>
+/// Registers all view models, shared stores, navigation/localization services and the authenticated
+/// API clients in the DI container. Called once at startup from the desktop app's composition root.
+/// </summary>
 public static class ViewModelDependencyInjection
 {
     public static IServiceCollection AddViewModels(this IServiceCollection services, string apiBaseUrl)

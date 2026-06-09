@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.ViewModel.IService
 {
+    /// <summary>Abstraction for opening modal dialog windows (by view model) and message/confirm boxes, implemented in the view layer.</summary>
     public interface IWindowService
     {
         Task ShowDialogAsync<TViewModel>()

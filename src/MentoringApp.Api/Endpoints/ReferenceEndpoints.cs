@@ -5,6 +5,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/reference minimal-API endpoints: lookup data (subjects, grades, classes, issue categories).</summary>
 public static class ReferenceEndpoints
 {
     public static void MapReferenceEndpoints(this WebApplication app)

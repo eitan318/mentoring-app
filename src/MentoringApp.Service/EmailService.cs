@@ -3,6 +3,10 @@ using System.Net.Mail;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Low-level SMTP email sender. Retries up to <see cref="MaxAttempts"/> times on failure.
+    /// SMTP credentials are injected from configuration; higher-level NotificationService composes the messages.
+    /// </summary>
     public class EmailService
     {
         private readonly string _smtpHost;

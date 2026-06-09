@@ -4,6 +4,7 @@ using MentoringApp.Model.User;
 
 namespace MentoringApp.ApiClient.Clients;
 
+/// <summary>Typed client for the /api/users endpoints (user CRUD, profiles, supervisor stats).</summary>
 public class UserApiClient(HttpClient http) : ApiClientBase(http)
 {
     public Task<IEnumerable<UserModel>> GetAllAsync() =>

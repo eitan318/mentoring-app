@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
+    /// <summary>Lookup entity for an issue category (e.g. "Behaviour", "Attendance") that a reported issue is classified under.</summary>
     public class IssueCategoryModel : BaseModel
     {
         public required string Name { get; set; }

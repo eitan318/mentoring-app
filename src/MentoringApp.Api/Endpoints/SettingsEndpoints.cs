@@ -3,6 +3,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/settings minimal-API endpoints: read/update phase deadlines, process flags, and the meeting-hours barrier.</summary>
 public static class SettingsEndpoints
 {
     public static void MapSettingsEndpoints(this WebApplication app)

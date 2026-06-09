@@ -4,6 +4,10 @@ using MentoringApp.Model.User;
 
 namespace MentoringApp.Service.Validation
 {
+    /// <summary>
+    /// FluentValidation rules for <see cref="UserModel"/> (and role-specific rules for students).
+    /// Run by <see cref="AuthService"/> during registration; failures become a Result.ValidationFailure.
+    /// </summary>
     public class UserValidator : AbstractValidator<UserModel>
     {
         public UserValidator()

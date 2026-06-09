@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.ViewModel.Store
 {
+    /// <summary>Base class for shared app-state "stores", providing the INotifyPropertyChanged plumbing for data binding.</summary>
     public class StoreBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -4,6 +4,7 @@ using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IPairRepo"/> (confirmed mentor–mentee pairs).</summary>
     internal class SqlPairRepo : IPairRepo
     {
         private readonly ISQLiteConnectionService _db;

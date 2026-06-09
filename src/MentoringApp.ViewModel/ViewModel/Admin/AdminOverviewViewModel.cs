@@ -41,6 +41,7 @@ public class AdminSupervisorItem
     public AdminSupervisorItem(SupervisorModel supervisor) => Supervisor = supervisor;
 }
 
+/// <summary>Backs the admin overview screen: the setup stepper, phase actions, and the per-supervisor progress list.</summary>
 public partial class AdminOverviewViewModel : ObservableObject, INavigatable
 {
     private readonly INavigationService _navigationService;

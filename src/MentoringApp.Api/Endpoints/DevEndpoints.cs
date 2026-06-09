@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/dev minimal-API endpoints used only in development (e.g. recreate &amp; reseed the database). Unauthenticated for convenience.</summary>
 public static class DevEndpoints
 {
     public static IEndpointRouteBuilder MapDevEndpoints(this IEndpointRouteBuilder routes)

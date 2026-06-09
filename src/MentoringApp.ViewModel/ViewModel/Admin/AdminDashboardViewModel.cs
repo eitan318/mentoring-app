@@ -6,6 +6,7 @@ using MentoringApp.ViewModel.ViewModelHelper;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
+/// <summary>Backs the admin dashboard shell: sidebar navigation between the admin sub-pages, gated by setup progress.</summary>
 public partial class AdminDashboardViewModel : ObservableObject, INavigatable
 {
     private readonly INavigationService _navigationService;

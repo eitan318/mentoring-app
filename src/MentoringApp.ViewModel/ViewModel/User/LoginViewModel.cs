@@ -15,6 +15,7 @@ using System.Text.Json;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
 
+/// <summary>Backs the login screen: drives the two-step (national-id → emailed code) login flow and stores the resulting session/JWT.</summary>
 public partial class LoginViewModel : ObservableValidator, INavigatable
 {
     private readonly AuthApiClient _authClient;

@@ -3,6 +3,7 @@ using MentoringApp.Data.Acess.SQLite.ConnectionsService;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="ISettingsRepo"/> backed by a simple Key/Value Settings table.</summary>
     internal class SqlSettingsRepo : ISettingsRepo
     {
         private readonly ISQLiteConnectionService _db;

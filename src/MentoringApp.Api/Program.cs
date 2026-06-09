@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
+// Entry point / composition root for the backend Web API.
+// Wires up the data + service layers (DI), JWT authentication, CORS and Swagger,
+// then maps every endpoint group (MapAuthEndpoints, MapUserEndpoints, ...) and runs the host.
 var builder = WebApplication.CreateBuilder(args);
 
 // Data + service layers

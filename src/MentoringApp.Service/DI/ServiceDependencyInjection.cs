@@ -4,6 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.Service.DI
 {
+    /// <summary>
+    /// Registers all business-logic services in the DI container and binds the "AppSettings"
+    /// and "EmailSettings" configuration sections. Called once at startup from the API's Program.cs.
+    /// </summary>
     public static class ServiceDependencyInjection
     {
         public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)

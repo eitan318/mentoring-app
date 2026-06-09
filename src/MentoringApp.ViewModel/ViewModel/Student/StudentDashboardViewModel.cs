@@ -235,6 +235,7 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
 
 // ─── SelectionGalleryViewModel (Phase 2 mentee tab) ───────────────────────
 
+/// <summary>Mentee Phase-2 tab: shows the top recommended mentors (the gallery) and lets the mentee pick one (Tier 3).</summary>
 public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.ViewModel.ViewModelHelper.INavigatable
 {
     private readonly ILocalizationService _loc;
@@ -299,6 +300,7 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
 
 // ─── MentorRequestsViewModel (Phase 2 mentor tab) ─────────────────────────
 
+/// <summary>Mentor tab: shows pending pair requests sent to this mentor and lets them accept/reject each.</summary>
 public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.ViewModel.ViewModelHelper.INavigatable
 {
     private readonly ILocalizationService _loc;
@@ -396,6 +398,7 @@ public partial class MentorRequestsViewModel : ObservableObject, MentoringApp.Vi
 
 // ─── BrowseMentorsViewModel (Phase 1 mentee tab) ──────────────────────────
 
+/// <summary>Mentee Phase-1 tab: browse available mentors and send a direct pair request (Tier 1).</summary>
 public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.ViewModel.ViewModelHelper.INavigatable
 {
     private readonly ILocalizationService _loc;

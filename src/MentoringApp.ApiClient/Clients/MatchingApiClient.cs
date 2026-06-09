@@ -3,6 +3,7 @@ using MentoringApp.Model.User;
 
 namespace MentoringApp.ApiClient.Clients;
 
+/// <summary>Typed client for the /api/matching endpoints (pair requests, score matrix, gallery, auto/fallback match).</summary>
 public class MatchingApiClient(HttpClient http) : ApiClientBase(http)
 {
     public Task<IEnumerable<StudentModel>> GetAvailableMentorsAsync() =>

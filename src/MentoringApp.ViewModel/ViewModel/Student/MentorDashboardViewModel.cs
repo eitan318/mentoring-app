@@ -10,6 +10,7 @@ using MentoringApp.ViewModel.Store;
 namespace MentoringApp.ViewModel.ViewModel.Student
 {
 
+    /// <summary>Mentor-side pair dashboard (counterpart = mentee); specializes <see cref="PairMemberDashboardViewModel"/>.</summary>
     public partial class MentorDashboardViewModel : PairMemberDashboardViewModel
     {
         public override string CounterpartRole => "MENTEE";

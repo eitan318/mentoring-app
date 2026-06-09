@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/auth minimal-API endpoints: send login code, login (issues a JWT), and register.</summary>
 public static class AuthEndpoints
 {
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)

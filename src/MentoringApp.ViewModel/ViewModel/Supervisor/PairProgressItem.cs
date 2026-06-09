@@ -3,6 +3,7 @@ using MentoringApp.ViewModel.IService;
 
 namespace MentoringApp.ViewModel.ViewModel.Supervisor;
 
+/// <summary>View-friendly wrapper around a <see cref="PairModel"/> showing meeting-hours progress toward the required barrier, for the supervisor dashboard.</summary>
 public class PairProgressItem
 {
     private readonly ILocalizationService _loc;

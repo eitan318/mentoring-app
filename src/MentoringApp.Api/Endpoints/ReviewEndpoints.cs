@@ -6,6 +6,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/reviews minimal-API endpoints: create and query pair session reviews.</summary>
 public static class ReviewEndpoints
 {
     public static void MapReviewEndpoints(this WebApplication app)
