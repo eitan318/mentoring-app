@@ -58,8 +58,15 @@ namespace MentoringApp.Service
             // Send Email
             string body = $"<h1>Your code is {code}</h1>";
             bool sent = await _emailService.SendEmailAsync(user.Email, "Verification code", body);
-        
-            return sent ? Result<string>.Ok(string.Empty) : Result<string>.Failure("Failed to send email. Please check your connection.");
+
+            if (sent)
+                return Result<string>.Ok(string.Empty);
+
+            // Include the real SMTP reason (auth failure, blocked port, etc.) so it's diagnosable.
+            var reason = string.IsNullOrWhiteSpace(_emailService.LastError)
+                ? "please check your connection."
+                : _emailService.LastError;
+            return Result<string>.Failure($"Failed to send email: {reason}");
         }
 
         public async Task<Result<UserModel>> LoginAsync(string nationalId)

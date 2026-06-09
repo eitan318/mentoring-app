@@ -25,48 +25,27 @@ namespace MentoringApp.Service
         // ── Phase notifications ───────────────────────────────────────────────
 
         /// <summary>
-        /// Sent to every registered user when the admin opens the info-filing phase.
-        /// Returns false if any email could not be sent.
+        /// Phase-start announcement to every registered user.
+        /// <para>
+        /// DISABLED: mass-emailing all users (especially with seeded data) quickly exhausts the
+        /// email provider's daily sending quota ("daily user sending limit exceeded"). Only
+        /// authentication (login verification-code) emails are sent. Returns true (no-op success)
+        /// so callers that check the result don't surface a false warning.
+        /// </para>
+        /// To re-enable, restore the GetAllUsersAsync + Task.WhenAll loop (kept in BuildPhase1Body).
         /// </summary>
-        public async Task<bool> SendPhase1StartedAsync()
+        public Task<bool> SendPhase1StartedAsync()
         {
-            try
-            {
-                var all = await _userService.GetAllUsersAsync();
-                var results = await Task.WhenAll(all.Select(u => _emailService.SendEmailAsync(
-                    u.Email,
-                    "Mentoring App — Please Fill Your Profile",
-                    BuildPhase1Body(u.UserName))));
-                return results.All(r => r);
-            }
-            catch { return false; }
+            return Task.FromResult(true);
         }
 
         /// <summary>
-        /// Sent when the admin starts the matching/selection phase.
-        /// Students are asked to log in for pairing; supervisors are asked to monitor.
-        /// Returns false if any email could not be sent.
+        /// Phase-start announcement to all students and supervisors.
+        /// DISABLED for the same reason as <see cref="SendPhase1StartedAsync"/> — only auth emails are sent.
         /// </summary>
-        public async Task<bool> SendPhase2StartedAsync()
+        public Task<bool> SendPhase2StartedAsync()
         {
-            try
-            {
-                var all = (await _userService.GetAllUsersAsync()).ToList();
-
-                var studentTasks = all.OfType<StudentModel>().Select(s => _emailService.SendEmailAsync(
-                    s.Email,
-                    "Mentoring App — Matching Phase Has Begun",
-                    BuildPhase2StudentBody(s.UserName)));
-
-                var supervisorTasks = all.OfType<SupervisorModel>().Select(sv => _emailService.SendEmailAsync(
-                    sv.Email,
-                    "Mentoring App — Please Supervise Student Matching",
-                    BuildPhase2SupervisorBody(sv.UserName)));
-
-                var results = await Task.WhenAll(studentTasks.Concat(supervisorTasks));
-                return results.All(r => r);
-            }
-            catch { return false; }
+            return Task.FromResult(true);
         }
 
         // ── Issue notifications ───────────────────────────────────────────────

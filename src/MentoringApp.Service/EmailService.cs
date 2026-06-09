@@ -16,16 +16,33 @@ namespace MentoringApp.Service
 
         private const int MaxAttempts = 3;
 
+        /// <summary>The reason the last send failed (null on success). Surfaced so callers can show a useful message.</summary>
+        public string? LastError { get; private set; }
+
         public EmailService(string smtpHost, int smtpPort, string fromEmail, string fromPassword)
         {
             _smtpHost = smtpHost;
             _smtpPort = smtpPort;
             _fromEmail = fromEmail;
-            _fromPassword = fromPassword;
+            // Gmail (and most providers) display app passwords with spaces for readability,
+            // but the actual credential has none — strip whitespace or SMTP auth fails with 535.
+            _fromPassword = (fromPassword ?? string.Empty).Replace(" ", string.Empty);
         }
 
         public async Task<bool> SendEmailAsync(string to, string subject, string htmlBody)
         {
+            LastError = null;
+
+            // Fail fast with a clear message if the sender isn't configured.
+            if (string.IsNullOrWhiteSpace(_smtpHost) ||
+                string.IsNullOrWhiteSpace(_fromEmail) ||
+                string.IsNullOrWhiteSpace(_fromPassword))
+            {
+                LastError = "Email sender is not configured (SmtpHost / FromEmail / FromPassword missing).";
+                Console.Error.WriteLine($"[EmailService] {LastError}");
+                return false;
+            }
+
             for (int attempt = 1; attempt <= MaxAttempts; attempt++)
             {
                 try
@@ -42,13 +59,20 @@ namespace MentoringApp.Service
                 }
                 catch (SmtpException ex) when (IsTransient(ex) && attempt < MaxAttempts)
                 {
+                    LastError = ex.Message;
                     await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt))); // 2s, 4s
                 }
-                catch
+                catch (Exception ex)
                 {
+                    // Surface the real cause (auth failure, blocked port, etc.) instead of swallowing it.
+                    LastError = ex.Message;
+                    Console.Error.WriteLine($"[EmailService] Send to '{to}' failed: {ex}");
                     return false;
                 }
             }
+
+            LastError ??= "Email sending failed after multiple attempts.";
+            Console.Error.WriteLine($"[EmailService] {LastError}");
             return false;
         }
 
