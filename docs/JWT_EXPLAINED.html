@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>How JWT Works — MentoringApp</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f7; color: #1e1e2e; }
+
+  header {
+    background: linear-gradient(135deg, #1a237e, #3949ab);
+    color: white; padding: 36px 48px;
+  }
+  header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; }
+  header p  { font-size: 1rem; opacity: .8; }
+
+  main { max-width: 980px; margin: 0 auto; padding: 36px 24px 60px; }
+
+  /* ── section card ── */
+  .card {
+    background: white; border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    margin-bottom: 28px; overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 24px;
+    font-weight: 700; font-size: 1rem; letter-spacing: .3px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-body { padding: 20px 24px; }
+  .card-body p, .card-body li { line-height: 1.75; font-size: .95rem; }
+  .card-body ul, .card-body ol { padding-left: 22px; margin-top: 8px; }
+  .card-body li { margin-bottom: 4px; }
+  .card-body p + p { margin-top: 10px; }
+
+  /* colour themes per step */
+  .c-purple  { background:#5e35b1; color:white; }
+  .c-blue    { background:#1565c0; color:white; }
+  .c-teal    { background:#00695c; color:white; }
+  .c-orange  { background:#e65100; color:white; }
+  .c-green   { background:#2e7d32; color:white; }
+  .c-red     { background:#b71c1c; color:white; }
+  .c-indigo  { background:#283593; color:white; }
+  .c-slate   { background:#37474f; color:white; }
+
+  /* ── flow diagram ── */
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 0; margin: 18px 0;
+  }
+  .flow-box {
+    background: #e8eaf6; border: 2px solid #9fa8da;
+    border-radius: 10px; padding: 10px 16px;
+    font-size: .85rem; font-weight: 600; text-align: center;
+    min-width: 120px;
+  }
+  .flow-arrow {
+    font-size: 1.4rem; color: #5c6bc0; padding: 0 6px; line-height:1;
+  }
+  .flow-label {
+    font-size: .72rem; color: #555; text-align: center;
+    display: block; margin-top: 3px; font-weight: normal;
+  }
+  .flow-col { display: flex; flex-direction: column; align-items: center; }
+
+  /* ── code block ── */
+  pre {
+    background: #1e1e2e; color: #cdd6f4;
+    border-radius: 8px; padding: 16px 18px;
+    font-size: .82rem; line-height: 1.6;
+    overflow-x: auto; margin: 12px 0;
+    tab-size: 4;
+  }
+  .kw  { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .cm  { color: #6c7086; font-style: italic; }
+  .cls { color: #89b4fa; }
+  .num { color: #fab387; }
+  .prop{ color: #89dceb; }
+
+  /* ── token anatomy ── */
+  .token-parts {
+    display: flex; flex-wrap: wrap; gap: 0;
+    font-family: 'Consolas','Courier New', monospace;
+    font-size: .82rem; border-radius: 8px; overflow: hidden;
+    margin: 12px 0; border: 1px solid #ddd;
+  }
+  .tok-h  { background:#1565c0; color:white; padding: 10px 14px; flex: 1; }
+  .tok-p  { background:#2e7d32; color:white; padding: 10px 14px; flex: 1.6; }
+  .tok-s  { background:#b71c1c; color:white; padding: 10px 14px; flex: 1.2; }
+  .tok-dot{ background:#263238; color:#90a4ae; padding: 10px 2px; font-weight:700; }
+  .tok-label { font-size:.7rem; font-weight:700; letter-spacing:.5px; opacity:.8; }
+  .tok-val   { word-break: break-all; font-size:.75rem; margin-top:3px; }
+
+  /* ── claim table ── */
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size:.88rem; }
+  th { background: #e8eaf6; padding: 8px 12px; text-align:left; font-weight:700; }
+  td { padding: 7px 12px; border-top: 1px solid #e0e0e0; }
+  tr:hover td { background:#fafafa; }
+  code { background:#eef0f9; border-radius:4px; padding: 1px 5px; font-size:.85em; }
+
+  /* ── highlight box ── */
+  .note {
+    border-left: 4px solid #5e35b1; background: #ede7f6;
+    padding: 12px 16px; border-radius: 0 8px 8px 0;
+    font-size: .88rem; margin: 14px 0;
+  }
+  .warn {
+    border-left: 4px solid #e65100; background: #fbe9e7;
+    padding: 12px 16px; border-radius: 0 8px 8px 0;
+    font-size: .88rem; margin: 14px 0;
+  }
+  .success {
+    border-left: 4px solid #2e7d32; background: #e8f5e9;
+    padding: 12px 16px; border-radius: 0 8px 8px 0;
+    font-size: .88rem; margin: 14px 0;
+  }
+
+  /* ── step badge ── */
+  .step-badge {
+    display: inline-flex; align-items:center; justify-content:center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,.25); font-weight: 800;
+    font-size: .85rem; flex-shrink:0;
+  }
+
+  h3 { font-size: 1rem; margin: 16px 0 6px; color: #283593; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔐 How JWT Authentication Works</h1>
+  <p>MentoringApp — full walkthrough from login to every API request</p>
+</header>
+
+<main>
+
+<!-- ── OVERVIEW ── -->
+<div class="card">
+  <div class="card-header c-indigo">
+    <span class="step-badge">💡</span>
+    What is JWT and why do we use it?
+  </div>
+  <div class="card-body">
+    <p><strong>JWT (JSON Web Token)</strong> is a compact, self-contained token that proves who you are on every API call. Instead of the server keeping a "session table" of logged-in users, it hands you a signed token at login — and you present that token on every subsequent request.</p>
+    <p>The server can verify it <em>without any database lookup</em>, because the token carries the identity inside it, signed with a secret key.</p>
+    <div class="note">
+      <strong>Why JWT in this project?</strong><br>
+      Our API is <strong>stateless</strong> — it does not remember you between requests. Any request that arrives with a valid JWT is trusted, regardless of which server instance handles it. This makes the system easy to scale.
+    </div>
+    <div class="flow">
+      <div class="flow-col">
+        <div class="flow-box">Client<br><span class="flow-label">WPF / Blazor</span></div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-col">
+        <div class="flow-box">POST /api/auth/login<br><span class="flow-label">sends NationalId + code</span></div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-col">
+        <div class="flow-box">API Server<br><span class="flow-label">validates, creates token</span></div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-col">
+        <div class="flow-box">JWT Token<br><span class="flow-label">returned to client</span></div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-col">
+        <div class="flow-box">Every request<br><span class="flow-label">Authorization: Bearer &lt;token&gt;</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOKEN ANATOMY ── -->
+<div class="card">
+  <div class="card-header c-blue">
+    <span class="step-badge">🧩</span>
+    Anatomy of a JWT Token
+  </div>
+  <div class="card-body">
+    <p>A JWT is three Base64Url-encoded JSON objects joined by dots:</p>
+    <div class="token-parts">
+      <div class="tok-h">
+        <div class="tok-label">HEADER</div>
+        <div class="tok-val">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</div>
+      </div>
+      <div class="tok-dot">.</div>
+      <div class="tok-p">
+        <div class="tok-label">PAYLOAD (claims)</div>
+        <div class="tok-val">eyJzdWIiOiI0MiIsIm5hbWUiOiJBbGljZSIsInJvbGUiOiJTdHVkZW50IiwibGFuZ3VhZ2UiOiJlbiIsImp0aSI6ImFiY2QiLCJleHAiOjE3MDAwMDAwMDB9</div>
+      </div>
+      <div class="tok-dot">.</div>
+      <div class="tok-s">
+        <div class="tok-label">SIGNATURE (HMAC-SHA256)</div>
+        <div class="tok-val">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</div>
+      </div>
+    </div>
+
+    <h3>Header</h3>
+    <p>Declares the algorithm used to sign the token:</p>
+    <pre>{ "alg": "HS256", "typ": "JWT" }</pre>
+
+    <h3>Payload — the Claims</h3>
+    <p>The payload carries <em>claims</em> — facts about the user. These are the exact claims our <code>JwtHelper.cs</code> puts in every token:</p>
+    <table>
+      <tr><th>Claim key</th><th>Value example</th><th>What it means</th></tr>
+      <tr><td><code>sub</code></td><td><code>42</code></td><td>User's database ID (Subject)</td></tr>
+      <tr><td><code>name</code></td><td><code>"Alice Cohen"</code></td><td>Display name</td></tr>
+      <tr><td><code>role</code></td><td><code>"Student"</code></td><td>Admin / Supervisor / Student — drives authorization policies</td></tr>
+      <tr><td><code>language</code></td><td><code>"he"</code></td><td>UI language preference, read on the client side</td></tr>
+      <tr><td><code>jti</code></td><td><code>"a4b2c..."</code></td><td>Unique token ID (prevents replay if you later build a blacklist)</td></tr>
+      <tr><td><code>exp</code></td><td><code>1700000000</code></td><td>Expiry timestamp (UTC Unix time)</td></tr>
+    </table>
+
+    <h3>Signature</h3>
+    <p>
+      <code>HMAC_SHA256( base64(header) + "." + base64(payload),  secretKey )</code>
+    </p>
+    <p>If <em>anyone</em> tampers with the header or payload — even one character — the signature no longer matches and the server rejects the token.</p>
+
+    <div class="warn">
+      <strong>Important:</strong> The payload is Base64-encoded, <em>not encrypted</em>. Anyone can decode and read it. Never put passwords or sensitive data in a JWT payload.
+    </div>
+  </div>
+</div>
+
+<!-- ── STEP 1: LOGIN ── -->
+<div class="card">
+  <div class="card-header c-purple">
+    <span class="step-badge">1</span>
+    Step 1 — Login: the two-step verification flow
+  </div>
+  <div class="card-body">
+    <p>Our login is a two-step email-verification flow. The client never sends a password — only a 6-digit code sent by email.</p>
+
+    <h3>1a — Send verification code</h3>
+    <pre><span class="cm">// AuthEndpoints.cs</span>
+app.MapPost(<span class="str">"/api/auth/send-code"</span>, async (SendCodeRequest request, AuthService authService, ...) =>
+{
+    <span class="cm">// AuthService generates a 6-digit code, saves it to DB, emails it to the user</span>
+    var result = await authService.SendVerificationCodeAsync(request.NationalId, ...);
+    return Results.Ok(...);
+})
+.AllowAnonymous();   <span class="cm">// ← no JWT needed yet, anyone can call this</span></pre>
+
+    <h3>1b — Submit the code → receive JWT</h3>
+    <pre><span class="cm">// AuthEndpoints.cs</span>
+app.MapPost(<span class="str">"/api/auth/login"</span>, async (LoginRequest request, AuthService authService,
+                                          IOptions&lt;<span class="cls">JwtSettings</span>&gt; jwtOptions) =>
+{
+    <span class="cm">// Verify the 6-digit code (expires after 10 minutes)</span>
+    var codeResult = await authService.VerificationCodeValid(request.Password);
+    if (!codeResult.Success) return Results.Unauthorized();
+
+    <span class="cm">// Load the full user from DB</span>
+    var loginResult = await authService.LoginAsync(request.NationalId);
+    if (!loginResult.Success) return Results.Unauthorized();
+
+    <span class="cm">// Build and sign the JWT</span>
+    var (token, expiresAt) = JwtHelper.GenerateToken(loginResult.Data!, jwtOptions.Value);
+
+    return Results.Ok(new { token, expiresAt });   <span class="cm">// ← sent back to client</span>
+})
+.AllowAnonymous();</pre>
+
+    <h3>JwtHelper — building the token</h3>
+    <pre><span class="cm">// JwtHelper.cs</span>
+<span class="kw">var</span> claims = <span class="kw">new</span>[]
+{
+    <span class="kw">new</span> <span class="cls">Claim</span>(<span class="cls">JwtRegisteredClaimNames</span>.Sub,  user.Id.ToString()),
+    <span class="kw">new</span> <span class="cls">Claim</span>(<span class="cls">JwtRegisteredClaimNames</span>.Name, user.UserName),
+    <span class="kw">new</span> <span class="cls">Claim</span>(<span class="str">"role"</span>,     role),          <span class="cm">// "Admin" | "Supervisor" | "Student"</span>
+    <span class="kw">new</span> <span class="cls">Claim</span>(<span class="str">"language"</span>, user.Language),
+    <span class="kw">new</span> <span class="cls">Claim</span>(<span class="cls">JwtRegisteredClaimNames</span>.Jti, <span class="cls">Guid</span>.NewGuid().ToString())
+};
+
+<span class="kw">var</span> key   = <span class="kw">new</span> <span class="cls">SymmetricSecurityKey</span>(<span class="cls">Encoding</span>.UTF8.GetBytes(settings.Secret));
+<span class="kw">var</span> creds = <span class="kw">new</span> <span class="cls">SigningCredentials</span>(key, <span class="cls">SecurityAlgorithms</span>.HmacSha256);
+
+<span class="kw">var</span> token = <span class="kw">new</span> <span class="cls">JwtSecurityToken</span>(
+    issuer:            settings.Issuer,
+    audience:          settings.Audience,
+    claims:            claims,
+    expires:           DateTime.UtcNow.AddHours(settings.ExpiryHours),
+    signingCredentials: creds
+);
+
+<span class="kw">return</span> (<span class="kw">new</span> <span class="cls">JwtSecurityTokenHandler</span>().WriteToken(token), expiresAt);</pre>
+
+    <div class="success">
+      After this call the client holds a token string like:<br>
+      <code style="word-break:break-all; font-size:.78rem;">eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MiIsInJvbGUiOiJTdHVkZW50IiwiZXhwIjoxNzAwMDAwfQ.abc123...</code>
+    </div>
+  </div>
+</div>
+
+<!-- ── STEP 2: CLIENT STORES TOKEN ── -->
+<div class="card">
+  <div class="card-header c-teal">
+    <span class="step-badge">2</span>
+    Step 2 — Client stores the token in AuthTokenStore
+  </div>
+  <div class="card-body">
+    <p>The client (WPF / Blazor) receives the token and stores it in a singleton <code>AuthTokenStore</code>. This is an in-memory object — the token is never written to disk.</p>
+    <pre><span class="cm">// AuthTokenStore.cs — singleton, lives for the entire app lifetime</span>
+<span class="kw">public class</span> <span class="cls">AuthTokenStore</span>
+{
+    <span class="kw">public string?</span>  Token    { <span class="kw">get</span>; <span class="kw">set</span>; }   <span class="cm">// the JWT string</span>
+    <span class="kw">public int?</span>     UserId   { <span class="kw">get</span>; <span class="kw">set</span>; }   <span class="cm">// parsed from the sub claim</span>
+    <span class="kw">public string?</span>  Role     { <span class="kw">get</span>; <span class="kw">set</span>; }   <span class="cm">// "Admin" | "Supervisor" | "Student"</span>
+    <span class="kw">public string?</span>  Language { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public bool</span> IsAuthenticated => Token != <span class="kw">null</span>;
+
+    <span class="kw">public event</span> Action? SessionExpired;   <span class="cm">// fires when API returns 401</span>
+}</pre>
+    <div class="note">
+      The <code>Role</code> and <code>UserId</code> stored here are used directly by the client to decide which dashboard to show — without an extra API call.
+    </div>
+  </div>
+</div>
+
+<!-- ── STEP 3: BEARER HEADER ── -->
+<div class="card">
+  <div class="card-header c-orange">
+    <span class="step-badge">3</span>
+    Step 3 — Every API request carries the token (BearerTokenHandler)
+  </div>
+  <div class="card-body">
+    <p>A <strong>DelegatingHandler</strong> is a middleware in the <code>HttpClient</code> pipeline. It runs automatically before every outgoing HTTP request. Ours injects the <code>Authorization: Bearer &lt;token&gt;</code> header:</p>
+    <pre><span class="cm">// BearerTokenHandler.cs</span>
+<span class="kw">public class</span> <span class="cls">BearerTokenHandler</span>(<span class="cls">AuthTokenStore</span> authTokenStore) : <span class="cls">DelegatingHandler</span>
+{
+    <span class="kw">protected override async</span> Task&lt;<span class="cls">HttpResponseMessage</span>&gt; SendAsync(
+        <span class="cls">HttpRequestMessage</span> request, <span class="cls">CancellationToken</span> ct)
+    {
+        <span class="cm">// Attach token to EVERY outgoing request automatically</span>
+        <span class="kw">if</span> (authTokenStore.Token != <span class="kw">null</span>)
+            request.Headers.Authorization =
+                <span class="kw">new</span> <span class="cls">AuthenticationHeaderValue</span>(<span class="str">"Bearer"</span>, authTokenStore.Token);
+
+        var response = await <span class="kw">base</span>.SendAsync(request, ct);
+
+        <span class="cm">// If the server says 401 (token expired / revoked) → notify the app</span>
+        <span class="kw">if</span> (response.StatusCode == <span class="cls">HttpStatusCode</span>.Unauthorized && wasAuthenticated)
+            authTokenStore.NotifySessionExpired();   <span class="cm">// ← navigates back to login</span>
+
+        <span class="kw">return</span> response;
+    }
+}</pre>
+    <div class="note">
+      The developer does <em>not</em> manually add the header in each API call — the handler does it for every single request in the background.
+    </div>
+    <p>The resulting HTTP request looks like:</p>
+    <pre>GET /api/users/42 HTTP/1.1
+Host: localhost:5000
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MiIs...</pre>
+  </div>
+</div>
+
+<!-- ── STEP 4: SERVER VALIDATES ── -->
+<div class="card">
+  <div class="card-header c-blue">
+    <span class="step-badge">4</span>
+    Step 4 — Server validates the token on every request
+  </div>
+  <div class="card-body">
+    <p>The API is configured with <code>AddJwtBearer</code> in <code>Program.cs</code>. It automatically intercepts every incoming request, reads the <code>Authorization</code> header, and validates the token before the endpoint code ever runs:</p>
+    <pre><span class="cm">// Program.cs</span>
+builder.Services.AddAuthentication(<span class="cls">JwtBearerDefaults</span>.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = <span class="kw">new</span> <span class="cls">TokenValidationParameters</span>
+        {
+            ValidateIssuer           = <span class="kw">true</span>,   <span class="cm">// must match settings.Issuer</span>
+            ValidateAudience         = <span class="kw">true</span>,   <span class="cm">// must match settings.Audience</span>
+            ValidateLifetime         = <span class="kw">true</span>,   <span class="cm">// rejects expired tokens</span>
+            ValidateIssuerSigningKey = <span class="kw">true</span>,   <span class="cm">// signature must match the secret</span>
+            ValidIssuer    = jwtSettings.Issuer,
+            ValidAudience  = jwtSettings.Audience,
+            IssuerSigningKey = <span class="kw">new</span> <span class="cls">SymmetricSecurityKey</span>(
+                                <span class="cls">Encoding</span>.UTF8.GetBytes(jwtSettings.Secret))
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(<span class="str">"AdminOnly"</span>,         policy => policy.RequireRole(<span class="str">"Admin"</span>));
+    options.AddPolicy(<span class="str">"AdminOrSupervisor"</span>, policy => policy.RequireRole(<span class="str">"Admin"</span>, <span class="str">"Supervisor"</span>));
+});</pre>
+
+    <h3>What is validated?</h3>
+    <table>
+      <tr><th>Check</th><th>What happens if it fails</th></tr>
+      <tr><td>Signature</td><td><strong>401 Unauthorized</strong> — token was tampered with</td></tr>
+      <tr><td>Expiry (<code>exp</code>)</td><td><strong>401 Unauthorized</strong> — token has expired</td></tr>
+      <tr><td>Issuer / Audience</td><td><strong>401 Unauthorized</strong> — token from wrong source</td></tr>
+      <tr><td>Role policy (AdminOnly)</td><td><strong>403 Forbidden</strong> — authenticated but not authorized</td></tr>
+    </table>
+
+    <h3>How endpoints use it</h3>
+    <pre><span class="cm">// UserEndpoints.cs — only Admins can call this endpoint</span>
+group.MapGet(<span class="str">"/"</span>, async (<span class="cls">UserService</span> userService) => { ... })
+     .RequireAuthorization(<span class="str">"AdminOnly"</span>);
+
+<span class="cm">// RequireAuthorization() with no argument = any valid JWT (any role)</span>
+group.MapGet(<span class="str">"/{id:int}"</span>, async (<span class="kw">int</span> id, <span class="cls">UserService</span> userService) => { ... })
+     .RequireAuthorization();</pre>
+  </div>
+</div>
+
+<!-- ── STEP 5: SESSION EXPIRY ── -->
+<div class="card">
+  <div class="card-header c-red">
+    <span class="step-badge">5</span>
+    Step 5 — Handling token expiry (session expired)
+  </div>
+  <div class="card-body">
+    <p>When a token expires, the server returns <code>401 Unauthorized</code>. The <code>BearerTokenHandler</code> detects this and fires the <code>SessionExpired</code> event on <code>AuthTokenStore</code>:</p>
+    <pre><span class="cm">// BearerTokenHandler.cs — triggered on 401</span>
+<span class="kw">if</span> (response.StatusCode == <span class="cls">HttpStatusCode</span>.Unauthorized && wasAuthenticated)
+    authTokenStore.NotifySessionExpired();
+
+<span class="cm">// AuthTokenStore.cs — clears everything and raises the event</span>
+<span class="kw">internal void</span> NotifySessionExpired()
+{
+    <span class="kw">if</span> (_sessionExpiredNotified) <span class="kw">return</span>;  <span class="cm">// fire only once even with concurrent requests</span>
+    _sessionExpiredNotified = <span class="kw">true</span>;
+    Clear();                             <span class="cm">// wipe Token, UserId, Role, Language</span>
+    SessionExpired?.Invoke();            <span class="cm">// ← app navigates back to login screen</span>
+}</pre>
+    <div class="warn">
+      The <code>_sessionExpiredNotified</code> flag prevents multiple simultaneous API requests (all returning 401) from each triggering a separate navigation event.
+    </div>
+  </div>
+</div>
+
+<!-- ── FULL FLOW SUMMARY ── -->
+<div class="card">
+  <div class="card-header c-slate">
+    <span class="step-badge">📋</span>
+    Complete Flow — Summary
+  </div>
+  <div class="card-body">
+    <ol style="line-height:2; font-size:.93rem;">
+      <li>User enters their <strong>National ID</strong> → client calls <code>POST /api/auth/send-code</code></li>
+      <li>Server generates a 6-digit code, saves it to DB, emails it to the user</li>
+      <li>User enters the code → client calls <code>POST /api/auth/login</code> with NationalId + code</li>
+      <li>Server validates the code (10-minute expiry), then calls <code>JwtHelper.GenerateToken</code></li>
+      <li>Token (with <code>sub, name, role, language, jti, exp</code>) is signed with <strong>HMAC-SHA256</strong> using the server's secret key</li>
+      <li>Token string is returned to the client → stored in <code>AuthTokenStore</code> (in memory only)</li>
+      <li><code>BearerTokenHandler</code> automatically adds <code>Authorization: Bearer &lt;token&gt;</code> to every outgoing HTTP request</li>
+      <li>Server receives request → <code>AddJwtBearer</code> middleware validates signature, expiry, issuer, audience → populates <code>HttpContext.User</code> with the claims</li>
+      <li>Endpoint checks <code>.RequireAuthorization("AdminOnly")</code> etc. → <strong>403</strong> if role doesn't match, or proceeds</li>
+      <li>If token has expired → server returns <strong>401</strong> → <code>BearerTokenHandler</code> fires <code>SessionExpired</code> → app returns to login screen</li>
+    </ol>
+
+    <div class="success" style="margin-top:16px;">
+      <strong>Key design benefit:</strong> The server is completely <strong>stateless</strong> — it stores no session data. Every piece of identity information (who you are, your role, your language) travels inside the token itself. Any server instance can validate any request without shared state.
+    </div>
+  </div>
+</div>
+
+<!-- ── SETTINGS ── -->
+<div class="card">
+  <div class="card-header c-green">
+    <span class="step-badge">⚙</span>
+    Configuration — JwtSettings (appsettings.json)
+  </div>
+  <div class="card-body">
+    <p>All JWT parameters come from <code>appsettings.json</code> (base values) overridden by <code>appsettings.Development.json</code>:</p>
+    <pre><span class="cm">// appsettings.json</span>
+{
+  <span class="str">"JwtSettings"</span>: {
+    <span class="str">"Issuer"</span>:     <span class="str">"MentoringApp.Api"</span>,
+    <span class="str">"Audience"</span>:   <span class="str">"MentoringApp.Client"</span>,
+    <span class="str">"ExpiryHours"</span>: <span class="num">72</span>
+  }
+}
+
+<span class="cm">// appsettings.Development.json (secret only here, never in production)</span>
+{
+  <span class="str">"JwtSettings"</span>: {
+    <span class="str">"Secret"</span>: <span class="str">"dev-secret-key-at-least-32-characters-long"</span>
+  }
+}</pre>
+    <table>
+      <tr><th>Setting</th><th>Purpose</th></tr>
+      <tr><td><code>Issuer</code></td><td>Who created the token — validated on every request</td></tr>
+      <tr><td><code>Audience</code></td><td>Who the token is for — validated on every request</td></tr>
+      <tr><td><code>ExpiryHours</code></td><td>How long the token is valid (72 h = 3 days)</td></tr>
+      <tr><td><code>Secret</code></td><td>The HMAC signing key — must be ≥ 32 characters; <strong>never commit to public repos</strong></td></tr>
+    </table>
+  </div>
+</div>
+
+</main>
+</body>
+</html>

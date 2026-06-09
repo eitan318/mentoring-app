@@ -853,6 +853,12 @@
   <data name="Selection_Choose_Button" xml:space="preserve">
     <value>✓ בחר חונך זה</value>
   </data>
+  <data name="Selection_ChooseKnown_Header" xml:space="preserve">
+    <value>או בחר מישהו שאתה מכיר</value>
+  </data>
+  <data name="Selection_ChooseKnown_Description" xml:space="preserve">
+    <value>חפש כל חונך זמין לפי שם ובחר בו ישירות.</value>
+  </data>
   <data name="Supervisor_InactiveStudents_Header" xml:space="preserve">
     <value>תלמידים עם פרופילים לא שלמים:</value>
   </data>
