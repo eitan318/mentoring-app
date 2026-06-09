@@ -91,7 +91,7 @@ namespace MentoringApp.Service
             int mentorsPerSlot  = Math.Max(2, (int)Math.Round(Scale * 12)); // was 6 → ~5 at 0.4
             int menteesPerSlot  = Math.Max(2, (int)Math.Round(Scale * 16)); // was 8 → ~6 at 0.4
             int unfilledPerSlot = (int)Math.Round(Scale * 5);               // was 3 → ~2 at 0.4
-            int numPairs        = Math.Max(1, (int)Math.Round(Scale * 50)); // was 30 → ~20 at 0.4
+            int numPairs        = Math.Max(1, (int)Math.Round(Scale * 18)); // ~7 at 0.4 — leaves majority of mentors unpaired
 
             // ── Step 1: Lookup tables ─────────────────────────────────────────
             _db.Execute("INSERT INTO Subjects (Name) VALUES ('Math'), ('Physics'), ('Computer Science'), ('English'), ('Chemistry'), ('Biology')");
@@ -109,10 +109,13 @@ namespace MentoringApp.Service
             int g11 = GetId("SELECT Id FROM Grades WHERE Num = 11");
             int g12 = GetId("SELECT Id FROM Grades WHERE Num = 12");
 
-            // 12 possible slots (grades 10–12, 4 classes each); take only what Scale needs
+            // 12 possible slots interleaved by class number so every grade is represented
+            // even at small Scale values (e.g. numSlots=6 → 2×g10, 2×g11, 2×g12).
+            // Old ordering was grade-grouped, which put all grade-10 slots first and left
+            // grade-12 (mostly mentors) completely absent at low Scale.
             var allSlotDefs = new List<(int gradeId, int classNum)>();
-            foreach (var gid in new[] { g10, g11, g12 })
-                for (int cn = 1; cn <= 4; cn++)
+            for (int cn = 1; cn <= 4; cn++)
+                foreach (var gid in new[] { g10, g11, g12 })
                     allSlotDefs.Add((gid, cn));
 
             var activeSlotDefs = allSlotDefs.Take(numSlots).ToList();

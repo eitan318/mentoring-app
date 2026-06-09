@@ -311,8 +311,11 @@ public partial class SupervisorDashboardViewModel : ObservableObject, INavigatab
     {
         _currentSupervisorId = supervisorId;
         SelectedSupervisor = await _userClient.GetByIdAsync(supervisorId);
-        await LoadSupervisorDataAsync(supervisorId);
+        // Load phase/settings FIRST so IsPhase1Active is set before data renders,
+        // preventing a flicker where the pairs dashboard briefly appears before
+        // switching to the registration dashboard.
         await LoadMatchingSettingsAsync();
+        await LoadSupervisorDataAsync(supervisorId);
     }
 
     [RelayCommand]

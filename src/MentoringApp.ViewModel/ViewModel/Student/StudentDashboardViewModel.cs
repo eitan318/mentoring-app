@@ -83,7 +83,8 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         _mentorRequestsVm = mentorRequestsVm;
 
         _selectionGalleryVm.OnPairCreated = LoadDataAsync;
-        _mentorRequestsVm.OnPairCreated = LoadDataAsync;
+        _browseMentorsVm.OnPairCreated   = LoadDataAsync;
+        _mentorRequestsVm.OnPairCreated  = LoadDataAsync;
         _ticker = new OneSecondTicker(UpdatePhaseTimer);
     }
 
@@ -147,8 +148,13 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         {
             if (currentUser.IsMentee && !menteeIsMatched)
             {
+                // Top-3 algorithmic recommendations
                 try { await _selectionGalleryVm.LoadAsync(); } catch { }
                 Pairs.Add(_selectionGalleryVm);
+
+                // Full browse — still available in Phase 2 so mentees can pick anyone
+                try { await _browseMentorsVm.LoadAsync(); } catch { }
+                Pairs.Add(_browseMentorsVm);
             }
             if (currentUser.IsMentor && !mentorIsMatched)
             {
@@ -413,6 +419,9 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
     [ObservableProperty] private string? _statusMessage;
     [ObservableProperty] private bool _hasStatusMessage;
 
+    /// <summary>Called when a pair is successfully created (e.g. request accepted). Used by the Phase-2 path to refresh the dashboard.</summary>
+    public Func<Task>? OnPairCreated { get; set; }
+
     public BrowseMentorsViewModel(MatchingApiClient matchingClient, UserStore userStore, ReferenceApiClient referenceClient, ILocalizationService loc)
     {
         _matchingClient = matchingClient;
@@ -455,6 +464,7 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
                 Gender = mentor.Gender,
                 SubjectName = subjectName,
                 GradeName = mentor.Grade?.Name ?? "",
+                GradeNum = mentor.Grade?.Num ?? 0,
                 ClassNum = mentor.ClassNum,
                 HasPendingRequest = pendingMentorIds.Contains(mentor.Id)
             });
@@ -506,8 +516,21 @@ public partial class MentorCard : ObservableObject
     public string MentorName { get; set; } = string.Empty;
     public string SubjectName { get; set; } = string.Empty;
     public string GradeName { get; set; } = string.Empty;
+    public int GradeNum { get; set; }
     public int ClassNum { get; set; }
     public string ProfilePicturePath { get; set; } = string.Empty;
     public Gender Gender { get; set; }
     [ObservableProperty] private bool _hasPendingRequest;
+
+    /// <summary>Human-readable grade+class label, e.g. "10th grade class 3".</summary>
+    public string GradeClassDisplay =>
+        GradeNum > 0
+            ? $"{GradeNum}{OrdinalSuffix(GradeNum)} grade class {ClassNum}"
+            : ClassNum > 0 ? $"Class {ClassNum}" : "";
+
+    private static string OrdinalSuffix(int n) => (n % 100) switch
+    {
+        11 or 12 or 13 => "th",
+        _ => (n % 10) switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" }
+    };
 }
