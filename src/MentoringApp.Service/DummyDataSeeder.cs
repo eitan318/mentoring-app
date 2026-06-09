@@ -40,12 +40,12 @@ namespace MentoringApp.Service
             "Maya", "Tali", "Galit", "Shira", "Orly", "Gali", "Ayelet", "Ronit", "Liron", "Hila",
             "Dana", "Naomi", "Sigal", "Yael", "Avital", "Meital", "Inbar", "Ela", "Nili", "Reut",
             "Sapir", "Tamar", "Adi", "Orna", "Limor", "Sivan", "Chen", "Mor", "Raz", "Shani",
-            "Anat", "Bat-El", "Dafna", "Efrat", "Fanny", "Gefen", "Hadas", "Iris", "Jenny", "Keren"
+            "Anat", "Bat-El", "Dafna", "Efrat", "Fanny", "Gefen", "Hadas", "Iris", "Jenny", "Keren", "Liraz"
         };
         private readonly string[] _lastNames =
         {
             "Baruch", "Shukrun", "Speicer", "Syuniakov", "Leybovits", "Harel-Zeleznik", "Ben-Amram", "Mordechai",
-            "Hahmon", "Elkalay", "Kurtz", "Macluf", "Keinan", "Vahaba", "Taylor", "Lachmish",
+            "Hahmon", "Elkalay", "Kurtz", "Macluf", "Keinan", "Vahaba", "Taylor", "Lachmish", "Bracha",
             "Elazar", "Adaniahu", "Lavi", "Vana", "Cohen", "Levi", "Mizrahi", "Peretz",
             "Shapiro", "Goldberg", "Ben-David", "Haim", "Amar", "Azulay",
             "Biton", "Dahan", "Edri", "Fadida", "Gavriel", "Hadad", "Israeli", "Katz",
