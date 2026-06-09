@@ -20,7 +20,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
@@ -44,82 +43,149 @@
             <TextBlock Text="{Binding StatusMessage}" Foreground="#1B5E20" FontWeight="SemiBold" TextWrapping="Wrap"/>
         </Border>
 
-        <!-- Recommendation cards -->
-        <ItemsControl Grid.Row="3" ItemsSource="{Binding Recommendations}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Margin="0,0,0,14" Padding="20" CornerRadius="10"
-                            BorderThickness="2" BorderBrush="#E3F2FD" Background="White">
-                        <Border.Effect>
-                            <DropShadowEffect ShadowDepth="3" BlurRadius="10" Opacity="0.1"/>
-                        </Border.Effect>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+        <!-- Scrollable content: top-3 recommendations + "choose someone you know" list -->
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
 
-                            <!-- Avatar -->
-                            <components:ProfilePictureControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
-                                Width="64" Height="64" Margin="0,0,16,0" VerticalAlignment="Center"
-                                ImagePath="{Binding MentorProfilePicturePath}"
-                                Gender="{Binding MentorGender}"/>
+                <!-- Recommendation cards -->
+                <ItemsControl ItemsSource="{Binding Recommendations}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,14" Padding="20" CornerRadius="10"
+                                    BorderThickness="2" BorderBrush="#E3F2FD" Background="White">
+                                <Border.Effect>
+                                    <DropShadowEffect ShadowDepth="3" BlurRadius="10" Opacity="0.1"/>
+                                </Border.Effect>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                            <!-- Info -->
-                            <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="{Binding MentorName}"/>
-                                <TextBlock Foreground="#2E7D32" FontSize="12" Margin="0,4,0,0">
-                                    <Run Text="📘 "/>
-                                    <Run Text="{Binding MentorSubjectName}" FontWeight="Medium"/>
-                                </TextBlock>
-                            </StackPanel>
+                                    <!-- Avatar -->
+                                    <components:ProfilePictureControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                                        Width="64" Height="64" Margin="0,0,16,0" VerticalAlignment="Center"
+                                        ImagePath="{Binding MentorProfilePicturePath}"
+                                        Gender="{Binding MentorGender}"/>
 
-                            <!-- Score bar -->
-                            <Grid Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <ProgressBar Height="8" Minimum="0" Maximum="100"
-                                             Value="{Binding ScorePercent}"
-                                             Background="#E0E0E0" Foreground="#1976D2" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1" Margin="8,0,0,0" FontWeight="Bold" Foreground="#1976D2"
-                                           Text="{Binding ScorePercent, StringFormat='{}{0:0}% match'}"/>
-                            </Grid>
+                                    <!-- Info -->
+                                    <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="{Binding MentorName}"/>
+                                        <TextBlock Foreground="#2E7D32" FontSize="12" Margin="0,4,0,0">
+                                            <Run Text="📘 "/>
+                                            <Run Text="{Binding MentorSubjectName}" FontWeight="Medium"/>
+                                        </TextBlock>
+                                    </StackPanel>
 
-                            <!-- Choose button -->
-                            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                                    Margin="0,12,0,0" Padding="0,10"
-                                    FontSize="14" FontWeight="SemiBold"
-                                    Background="#1976D2" Foreground="White" BorderThickness="0"
-                                    Command="{Binding DataContext.ChooseMentorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}"
-                                    Cursor="Hand"
-                                    ToolTip="{Binding [Selection_Choose_Tooltip], Source={x:Static loc:TranslationSource.Instance}}">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                                <TextBlock Text="{Binding [Selection_Choose_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
-                            </Button>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                                    <!-- Score bar -->
+                                    <Grid Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ProgressBar Height="8" Minimum="0" Maximum="100"
+                                                     Value="{Binding ScorePercent}"
+                                                     Background="#E0E0E0" Foreground="#1976D2" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Margin="8,0,0,0" FontWeight="Bold" Foreground="#1976D2"
+                                                   Text="{Binding ScorePercent, StringFormat='{}{0:0}% match'}"/>
+                                    </Grid>
 
-        <!-- Empty state -->
-        <StackPanel Grid.Row="4" HorizontalAlignment="Center" Margin="0,20,0,0"
-                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
-            <TextBlock Text="{Binding [Selection_Loading], Source={x:Static loc:TranslationSource.Instance}}" Foreground="#999" FontSize="14"/>
-        </StackPanel>
+                                    <!-- Choose button -->
+                                    <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                            Margin="0,12,0,0" Padding="0,10"
+                                            FontSize="14" FontWeight="SemiBold"
+                                            Background="#1976D2" Foreground="White" BorderThickness="0"
+                                            Command="{Binding DataContext.ChooseMentorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Cursor="Hand"
+                                            ToolTip="{Binding [Selection_Choose_Tooltip], Source={x:Static loc:TranslationSource.Instance}}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <TextBlock Text="{Binding [Selection_Choose_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Loading hint -->
+                <TextBlock HorizontalAlignment="Center" Margin="0,8,0,0" Foreground="#999" FontSize="14"
+                           Text="{Binding [Selection_Loading], Source={x:Static loc:TranslationSource.Instance}}"
+                           Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- ── Choose someone you know ───────────────────────────────────── -->
+                <Rectangle Height="1" Fill="#E5E7EB" Margin="0,16,0,16"/>
+
+                <TextBlock FontSize="16" FontWeight="Bold" Foreground="#111827"
+                           Text="{Binding [Selection_ChooseKnown_Header], Source={x:Static loc:TranslationSource.Instance}}"/>
+                <TextBlock Foreground="#666" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,10"
+                           Text="{Binding [Selection_ChooseKnown_Description], Source={x:Static loc:TranslationSource.Instance}}"/>
+
+                <!-- Search box -->
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Padding="10,8" FontSize="13" Margin="0,0,0,12"
+                         BorderBrush="#D1D5DB" BorderThickness="1"
+                         VerticalContentAlignment="Center"/>
+
+                <!-- Known mentors list -->
+                <ItemsControl ItemsSource="{Binding KnownMentors}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,8" Padding="14,10" CornerRadius="8"
+                                    BorderThickness="1" BorderBrush="#E5E7EB" Background="White">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <components:ProfilePictureControl Grid.Column="0"
+                                        Width="44" Height="44" Margin="0,0,12,0" VerticalAlignment="Center"
+                                        ImagePath="{Binding ProfilePicturePath}"
+                                        Gender="{Binding Gender}"/>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#111827" Text="{Binding MentorName}"/>
+                                        <TextBlock FontSize="11" Foreground="#6B7280" Margin="0,2,0,0">
+                                            <Run Text="{Binding SubjectName, Mode=OneWay}"/>
+                                            <Run Text=" · "/>
+                                            <Run Text="{Binding GradeClassDisplay, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="2" VerticalAlignment="Center"
+                                            Padding="14,8" FontSize="13" FontWeight="SemiBold"
+                                            Background="#1976D2" Foreground="White" BorderThickness="0" Cursor="Hand"
+                                            Command="{Binding DataContext.ChooseKnownMentorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <TextBlock Text="{Binding [Selection_Choose_Button], Source={x:Static loc:TranslationSource.Instance}}"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

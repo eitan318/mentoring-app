@@ -853,6 +853,12 @@ The system is currently processing matches based on compatibility. Please wait u
   <data name="Selection_Choose_Button" xml:space="preserve">
     <value>✓ Choose This Mentor</value>
   </data>
+  <data name="Selection_ChooseKnown_Header" xml:space="preserve">
+    <value>Or choose someone you know</value>
+  </data>
+  <data name="Selection_ChooseKnown_Description" xml:space="preserve">
+    <value>Search any available mentor by name and pick them directly.</value>
+  </data>
   <data name="Supervisor_InactiveStudents_Header" xml:space="preserve">
     <value>Students with incomplete profiles:</value>
   </data>
