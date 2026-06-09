@@ -83,7 +83,6 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
         _mentorRequestsVm = mentorRequestsVm;
 
         _selectionGalleryVm.OnPairCreated = LoadDataAsync;
-        _browseMentorsVm.OnPairCreated   = LoadDataAsync;
         _mentorRequestsVm.OnPairCreated  = LoadDataAsync;
         _ticker = new OneSecondTicker(UpdatePhaseTimer);
     }
@@ -146,22 +145,16 @@ public partial class StudentDashboardViewModel : ObservableObject, ViewModelHelp
 
         if (_isPhase1Complete)
         {
+            // Phase 2 (mentor selection): the mentee picks a mentor directly via the
+            // gallery — top-3 recommendations PLUS an integrated "choose someone you know"
+            // search list (see SelectionGalleryViewModel). No separate browse tab.
             if (currentUser.IsMentee && !menteeIsMatched)
             {
-                // Top-3 algorithmic recommendations
                 try { await _selectionGalleryVm.LoadAsync(); } catch { }
                 Pairs.Add(_selectionGalleryVm);
-
-                // Full browse — still available in Phase 2 so mentees can pick anyone
-                try { await _browseMentorsVm.LoadAsync(); } catch { }
-                Pairs.Add(_browseMentorsVm);
             }
-            if (currentUser.IsMentor && !mentorIsMatched)
-            {
-                _mentorRequestsVm.IsPhase2Active = true;
-                try { await _mentorRequestsVm.LoadAsync(); } catch { }
-                Pairs.Add(_mentorRequestsVm);
-            }
+            // In Phase 2 mentees CHOOSE directly (no requests are sent), so an unmatched
+            // mentor has no "mentoring requests" tab to act on — they simply wait to be picked.
         }
         else
         {
@@ -249,6 +242,7 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
 
     private readonly MatchingApiClient _matchingClient;
     private readonly UserStore _userStore;
+    private readonly ReferenceApiClient _referenceClient;
 
     [ObservableProperty] private ObservableCollection<MatchRecommendationResponse> _recommendations = [];
     [ObservableProperty] private bool _isLoading;
@@ -256,12 +250,34 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
     [ObservableProperty] private bool _hasStatusMessage;
     [ObservableProperty] private bool _alreadyMatched;
 
+    // ── "Choose someone you know" — integrated browse/search list below the top 3 ──
+    /// <summary>Full list of available mentors (unfiltered backing store).</summary>
+    private readonly List<MentorCard> _allMentors = [];
+
+    [ObservableProperty] private ObservableCollection<MentorCard> _knownMentors = [];
+
+    [ObservableProperty]
+    private string _searchText = string.Empty;
+
+    partial void OnSearchTextChanged(string value) => ApplySearchFilter();
+
+    private void ApplySearchFilter()
+    {
+        var query = (SearchText ?? string.Empty).Trim();
+        var matches = string.IsNullOrEmpty(query)
+            ? _allMentors
+            : _allMentors.Where(m => m.MentorName.Contains(query, StringComparison.OrdinalIgnoreCase));
+
+        KnownMentors = new ObservableCollection<MentorCard>(matches);
+    }
+
     public Func<Task>? OnPairCreated { get; set; }
 
-    public SelectionGalleryViewModel(MatchingApiClient matchingClient, UserStore userStore, ILocalizationService loc)
+    public SelectionGalleryViewModel(MatchingApiClient matchingClient, UserStore userStore, ReferenceApiClient referenceClient, ILocalizationService loc)
     {
         _matchingClient = matchingClient;
         _userStore = userStore;
+        _referenceClient = referenceClient;
         _loc = loc;
     }
 
@@ -279,7 +295,64 @@ public partial class SelectionGalleryViewModel : ObservableObject, MentoringApp.
         foreach (var rec in recs.Take(3))
             Recommendations.Add(rec);
 
+        // Load the full available-mentor list so the mentee can also pick someone they know.
+        await LoadKnownMentorsAsync(currentUser.Id);
+
         IsLoading = false;
+    }
+
+    private async Task LoadKnownMentorsAsync(int currentUserId)
+    {
+        _allMentors.Clear();
+
+        try
+        {
+            var availableMentors = await _matchingClient.GetAvailableMentorsAsync();
+            var subjectMap = (await _referenceClient.GetSubjectsAsync()).ToDictionary(s => s.Id, s => s.Name);
+
+            foreach (var mentor in availableMentors.Where(m => m.Id != currentUserId))
+            {
+                string subjectName = "";
+                if (mentor.MentorProfile != null && subjectMap.TryGetValue(mentor.MentorProfile.SubjectToTeach, out string? sn))
+                    subjectName = sn;
+
+                _allMentors.Add(new MentorCard
+                {
+                    MentorId = mentor.Id,
+                    MentorName = mentor.UserName,
+                    ProfilePicturePath = mentor.ProfilePicturePath ?? "",
+                    Gender = mentor.Gender,
+                    SubjectName = subjectName,
+                    GradeName = mentor.Grade?.Name ?? "",
+                    GradeNum = mentor.Grade?.Num ?? 0,
+                    ClassNum = mentor.ClassNum
+                });
+            }
+        }
+        catch { /* leave list empty if unavailable */ }
+
+        ApplySearchFilter();
+    }
+
+    /// <summary>Pick a mentor chosen from the search list (same Tier-3 gallery pick as the top-3 cards).</summary>
+    [RelayCommand]
+    private async Task ChooseKnownMentor(MentorCard card)
+    {
+        var currentUser = _userStore.User;
+        if (currentUser == null || card == null) return;
+
+        try
+        {
+            await _matchingClient.GalleryPickAsync(new GalleryPickRequest(currentUser.Id, card.MentorId));
+            AlreadyMatched = true;
+            StatusMessage = _loc.Format("Student_MatchedWith_Message", card.MentorName);
+            if (OnPairCreated != null) await OnPairCreated();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"✗ {ex.Message}";
+        }
+        HasStatusMessage = true;
     }
 
     [RelayCommand]
@@ -418,9 +491,6 @@ public partial class BrowseMentorsViewModel : ObservableObject, MentoringApp.Vie
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _statusMessage;
     [ObservableProperty] private bool _hasStatusMessage;
-
-    /// <summary>Called when a pair is successfully created (e.g. request accepted). Used by the Phase-2 path to refresh the dashboard.</summary>
-    public Func<Task>? OnPairCreated { get; set; }
 
     public BrowseMentorsViewModel(MatchingApiClient matchingClient, UserStore userStore, ReferenceApiClient referenceClient, ILocalizationService loc)
     {

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="App_Title" xml:space="preserve">
-    <value>MENTOR APP</value>
+    <value>Guide&amp;Grow</value>
   </data>
   <data name="Nav_Back" xml:space="preserve">
     <value>← Back</value>
@@ -853,6 +853,12 @@ The system is currently processing matches based on compatibility. Please wait u
   <data name="Selection_Choose_Button" xml:space="preserve">
     <value>✓ Choose This Mentor</value>
   </data>
+  <data name="Selection_ChooseKnown_Header" xml:space="preserve">
+    <value>Or choose someone you know</value>
+  </data>
+  <data name="Selection_ChooseKnown_Description" xml:space="preserve">
+    <value>Search any available mentor by name and pick them directly.</value>
+  </data>
   <data name="Supervisor_InactiveStudents_Header" xml:space="preserve">
     <value>Students with incomplete profiles:</value>
   </data>
@@ -1290,95 +1296,265 @@ You can still manage issues and review pair activity from this dashboard.</value
   <data name="Admin_ManageUsers_Class" xml:space="preserve">
     <value>Class:</value>
   </data>
-  <data name="Admin_CurrentPhase_Label" xml:space="preserve"><value>Current Phase</value></data>
-  <data name="Admin_PhaseProgress_Label" xml:space="preserve"><value>Phase Progress</value></data>
-  <data name="Admin_PhaseDeadlines_Label" xml:space="preserve"><value>Phase Deadlines</value></data>
-  <data name="Admin_ProcessComplete_NoDeadlines_Label" xml:space="preserve"><value>Process Complete. No active deadlines.</value></data>
-  <data name="Admin_PhaseActions_Label" xml:space="preserve"><value>Phase Actions</value></data>
-  <data name="Admin_GoToSystemSettings_Button" xml:space="preserve"><value>Go to System Settings</value></data>
-  <data name="Admin_SchoolConfig_Required_Label" xml:space="preserve"><value>Configure your school in Settings before adding students.</value></data>
-  <data name="Admin_SchoolConfig_InProgress_Hint" xml:space="preserve"><value>Add at least one class to unlock the next step.</value></data>
-  <data name="Admin_CompleteSchoolConfig_Button" xml:space="preserve"><value>✓ Complete School Setup</value></data>
-  <data name="Admin_CompleteSupervisorAssignment_Button" xml:space="preserve"><value>✓ Complete Supervisor Assignment</value></data>
-  <data name="Admin_SchoolConfig_NoClasses_Error" xml:space="preserve"><value>Please add at least one class before completing school setup.</value></data>
-  <data name="Admin_SupervisorAssignment_Incomplete_Error" xml:space="preserve"><value>Please assign all classes to supervisors before continuing.</value></data>
-  <data name="Admin_NoDeadlinesYet_Label" xml:space="preserve"><value>Deadlines become available once registration starts.</value></data>
-  <data name="Admin_ImportUsers_Instruction_Title" xml:space="preserve"><value>Import users to continue</value></data>
-  <data name="Admin_ImportUsers_Instruction_Body" xml:space="preserve"><value>Open the "Manage Users" tab from the sidebar to import supervisors and students. Once they are imported, click "Begin Registration" on the right.</value></data>
-  <data name="Admin_PhaseGuide_SchoolConfig" xml:space="preserve"><value>School Setup:\nAdd the grades and classes that participate in the program. This must be completed before importing users.</value></data>
-  <data name="Admin_GoToManageUsers_Button" xml:space="preserve"><value>Go to Manage Users</value></data>
-  <data name="Admin_BeginRegistration_Button" xml:space="preserve"><value>✓ Begin Registration</value></data>
-  <data name="Admin_Continue_Button" xml:space="preserve"><value>Continue</value></data>
-  <data name="Admin_ProcessComplete_Label" xml:space="preserve"><value>Process Complete</value></data>
-  <data name="Admin_NoticeBoard_Label" xml:space="preserve"><value>Notice Board</value></data>
-  <data name="Admin_NewIssue_Label" xml:space="preserve"><value>New Issue</value></data>
-  <data name="Admin_NoNotices_Label" xml:space="preserve"><value>No notices to display.</value></data>
-  <data name="Admin_NoticeBoard_Pending" xml:space="preserve"><value>Pending</value></data>
-  <data name="Admin_NoticeBoard_Resolved" xml:space="preserve"><value>Resolved</value></data>
-  <data name="Admin_NoPendingNotices_Label" xml:space="preserve"><value>No pending notices.</value></data>
-  <data name="Admin_NoResolvedNotices_Label" xml:space="preserve"><value>No resolved notices.</value></data>
-  <data name="Admin_ResolvedIssue_Label" xml:space="preserve"><value>Resolved</value></data>
-  <data name="Admin_ByAuthor_Format" xml:space="preserve"><value>By - {0}</value></data>
-  <data name="Admin_Menu_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
-  <data name="Admin_Menu_ManagePairs" xml:space="preserve"><value>Manage Pairs</value></data>
-  <data name="Admin_Menu_ManageUsers" xml:space="preserve"><value>Manage Users</value></data>
-  <data name="Admin_Menu_SystemSettings" xml:space="preserve"><value>System Settings</value></data>
-  <data name="Admin_PhaseGuide_Title" xml:space="preserve"><value>Phase Guide</value></data>
-  <data name="Admin_PhaseGuide_Import" xml:space="preserve"><value>Import Users:\nUpload Excel files to import Supervisors and Students into the system. This must be completed before starting the matching process.</value></data>
-  <data name="Admin_PhaseGuide_SupervisorAssignment" xml:space="preserve"><value>Assign Supervisors:\nDrag and drop classes onto each supervisor so that every supervisor is responsible for a group of students. All classes must be assigned before continuing.</value></data>
-  <data name="Admin_PhaseGuide_Phase1" xml:space="preserve"><value>Phase 1: Registration &amp; Manual Pairing\nStudents log in and fill in their details. Mentees can browse available mentors and send pairing requests. You set the deadline for this phase.</value></data>
-  <data name="Admin_PhaseGuide_Phase2" xml:space="preserve"><value>Phase 2: Selection Gallery &amp; Auto-Match\nUnmatched mentees are shown their top algorithmically ranked mentors and can choose one. When the deadline passes, any mentee who hasn't chosen is paired automatically.</value></data>
-  <data name="Admin_PhaseGuide_Phase3" xml:space="preserve"><value>Phase 3: Active Mentoring (Complete)\nThe matching process is complete. Pairs conduct mentoring sessions and log their hours. Supervisors track progress and resolve issues.</value></data>
-  <data name="Admin_StartSelectionStage_Button" xml:space="preserve"><value>▶ Start selection stage</value></data>
-  <data name="Admin_StartActiveMentoring_Button" xml:space="preserve"><value>▶ Start active mentoring stage</value></data>
-  <data name="Admin_ImportUsersInfo_Tooltip" xml:space="preserve"><value>Import Users Info</value></data>
-  <data name="Admin_Phase1Info_Tooltip" xml:space="preserve"><value>Phase 1 Info</value></data>
-  <data name="Admin_Phase2Info_Tooltip" xml:space="preserve"><value>Phase 2 Info</value></data>
-  <data name="Admin_Phase3Info_Tooltip" xml:space="preserve"><value>Phase 3 Info</value></data>
-  <data name="Table_Supervisor" xml:space="preserve"><value>Supervisor</value></data>
-  <data name="Table_Pairs" xml:space="preserve"><value>Pairs</value></data>
-  <data name="Table_Pending" xml:space="preserve"><value>Pending</value></data>
-  <data name="Table_Resolved" xml:space="preserve"><value>Resolved</value></data>
-  <data name="Table_FillProgress" xml:space="preserve"><value>Fill Progress</value></data>
-  <data name="Table_Action" xml:space="preserve"><value>Action</value></data>
-  <data name="Table_Inspect" xml:space="preserve"><value>Inspect</value></data>
-  <data name="Table_Role" xml:space="preserve"><value>Role</value></data>
-  <data name="Table_Mentor" xml:space="preserve"><value>Mentor</value></data>
-  <data name="Table_Mentee" xml:space="preserve"><value>Mentee</value></data>
-  <data name="ManagePairs_Title" xml:space="preserve"><value>Manage Pairs</value></data>
-  <data name="Common_Language" xml:space="preserve"><value>Language:</value></data>
-  <data name="Common_Instructions" xml:space="preserve"><value>Instructions:</value></data>
-  <data name="Common_Pair" xml:space="preserve"><value>Pair</value></data>
-  <data name="Common_Progress" xml:space="preserve"><value>Progress</value></data>
-  <data name="Common_HoursUnit" xml:space="preserve"><value>hrs</value></data>
-  <data name="IssueItem_Created_Label" xml:space="preserve"><value>Created:</value></data>
-  <data name="PairDetails_Hours_Tooltip" xml:space="preserve"><value>Meeting hours progress toward the required goal</value></data>
-  <data name="Supervisor_RandomlyMatched_Warning" xml:space="preserve"><value>⚠ {0} Randomly Matched – Profile Incomplete</value></data>
-  <data name="Supervisor_Issues_Title" xml:space="preserve"><value>Issues</value></data>
-  <data name="Supervisor_IssuesOf_Format" xml:space="preserve"><value>Issues of {0} &amp; {1}</value></data>
-  <data name="ManageUsers_GradeClass_Format" xml:space="preserve"><value>{0} · Class {1}</value></data>
-  <data name="ManageUsers_RoleFilter_All" xml:space="preserve"><value>All</value></data>
-  <data name="ManageUsers_RoleFilter_Supervisor" xml:space="preserve"><value>Supervisor</value></data>
-  <data name="ManageUsers_RoleFilter_Student" xml:space="preserve"><value>Student</value></data>
-  <data name="DB_Role_Admin" xml:space="preserve"><value>Admin</value></data>
-  <data name="DB_Role_Supervisor" xml:space="preserve"><value>Supervisor</value></data>
-  <data name="DB_Role_Student" xml:space="preserve"><value>Student</value></data>
-  <data name="MatchTier_Direct" xml:space="preserve"><value>Direct Request</value></data>
-  <data name="MatchTier_GalleryChoice" xml:space="preserve"><value>Gallery Choice</value></data>
-  <data name="MatchTier_AutoMatch" xml:space="preserve"><value>Auto Matched</value></data>
-  <data name="MatchTier_FallbackRandom" xml:space="preserve"><value>Random Match</value></data>
-  <data name="MatchTier_AdminManual" xml:space="preserve"><value>Admin Manual</value></data>
-  <data name="Student_RequestedAt_Label" xml:space="preserve"><value>Requested:</value></data>
-  <data name="Student_ExpertIn_Label" xml:space="preserve"><value>Expert in</value></data>
-  <data name="SysSettings_AdvanceYear_Button" xml:space="preserve"><value>📅 Next Year</value></data>
-  <data name="SysSettings_AdvanceYear_Tooltip" xml:space="preserve"><value>Advance to the next academic year: graduate the top grade, promote all others, and reset the admin wizard</value></data>
-  <data name="SysSettings_AdvanceYear_Confirm_Title" xml:space="preserve"><value>Advance to Next Academic Year?</value></data>
-  <data name="SysSettings_AdvanceYear_Confirm_Body" xml:space="preserve"><value>This will permanently:
+  <data name="Admin_CurrentPhase_Label" xml:space="preserve">
+    <value>Current Phase</value>
+  </data>
+  <data name="Admin_PhaseProgress_Label" xml:space="preserve">
+    <value>Phase Progress</value>
+  </data>
+  <data name="Admin_PhaseDeadlines_Label" xml:space="preserve">
+    <value>Phase Deadlines</value>
+  </data>
+  <data name="Admin_ProcessComplete_NoDeadlines_Label" xml:space="preserve">
+    <value>Process Complete. No active deadlines.</value>
+  </data>
+  <data name="Admin_PhaseActions_Label" xml:space="preserve">
+    <value>Phase Actions</value>
+  </data>
+  <data name="Admin_GoToSystemSettings_Button" xml:space="preserve">
+    <value>Go to System Settings</value>
+  </data>
+  <data name="Admin_SchoolConfig_Required_Label" xml:space="preserve">
+    <value>Configure your school in Settings before adding students.</value>
+  </data>
+  <data name="Admin_SchoolConfig_InProgress_Hint" xml:space="preserve">
+    <value>Add at least one class to unlock the next step.</value>
+  </data>
+  <data name="Admin_CompleteSchoolConfig_Button" xml:space="preserve">
+    <value>✓ Complete School Setup</value>
+  </data>
+  <data name="Admin_CompleteSupervisorAssignment_Button" xml:space="preserve">
+    <value>✓ Complete Supervisor Assignment</value>
+  </data>
+  <data name="Admin_SchoolConfig_NoClasses_Error" xml:space="preserve">
+    <value>Please add at least one class before completing school setup.</value>
+  </data>
+  <data name="Admin_SupervisorAssignment_Incomplete_Error" xml:space="preserve">
+    <value>Please assign all classes to supervisors before continuing.</value>
+  </data>
+  <data name="Admin_NoDeadlinesYet_Label" xml:space="preserve">
+    <value>Deadlines become available once registration starts.</value>
+  </data>
+  <data name="Admin_ImportUsers_Instruction_Title" xml:space="preserve">
+    <value>Import users to continue</value>
+  </data>
+  <data name="Admin_ImportUsers_Instruction_Body" xml:space="preserve">
+    <value>Open the "Manage Users" tab from the sidebar to import supervisors and students. Once they are imported, click "Begin Registration" on the right.</value>
+  </data>
+  <data name="Admin_PhaseGuide_SchoolConfig" xml:space="preserve">
+    <value>School Setup:\nAdd the grades and classes that participate in the program. This must be completed before importing users.</value>
+  </data>
+  <data name="Admin_GoToManageUsers_Button" xml:space="preserve">
+    <value>Go to Manage Users</value>
+  </data>
+  <data name="Admin_BeginRegistration_Button" xml:space="preserve">
+    <value>✓ Begin Registration</value>
+  </data>
+  <data name="Admin_Continue_Button" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="Admin_ProcessComplete_Label" xml:space="preserve">
+    <value>Process Complete</value>
+  </data>
+  <data name="Admin_NoticeBoard_Label" xml:space="preserve">
+    <value>Notice Board</value>
+  </data>
+  <data name="Admin_NewIssue_Label" xml:space="preserve">
+    <value>New Issue</value>
+  </data>
+  <data name="Admin_NoNotices_Label" xml:space="preserve">
+    <value>No notices to display.</value>
+  </data>
+  <data name="Admin_NoticeBoard_Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Admin_NoticeBoard_Resolved" xml:space="preserve">
+    <value>Resolved</value>
+  </data>
+  <data name="Admin_NoPendingNotices_Label" xml:space="preserve">
+    <value>No pending notices.</value>
+  </data>
+  <data name="Admin_NoResolvedNotices_Label" xml:space="preserve">
+    <value>No resolved notices.</value>
+  </data>
+  <data name="Admin_ResolvedIssue_Label" xml:space="preserve">
+    <value>Resolved</value>
+  </data>
+  <data name="Admin_ByAuthor_Format" xml:space="preserve">
+    <value>By - {0}</value>
+  </data>
+  <data name="Admin_Menu_Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Admin_Menu_ManagePairs" xml:space="preserve">
+    <value>Manage Pairs</value>
+  </data>
+  <data name="Admin_Menu_ManageUsers" xml:space="preserve">
+    <value>Manage Users</value>
+  </data>
+  <data name="Admin_Menu_SystemSettings" xml:space="preserve">
+    <value>System Settings</value>
+  </data>
+  <data name="Admin_PhaseGuide_Title" xml:space="preserve">
+    <value>Phase Guide</value>
+  </data>
+  <data name="Admin_PhaseGuide_Import" xml:space="preserve">
+    <value>Import Users:\nUpload Excel files to import Supervisors and Students into the system. This must be completed before starting the matching process.</value>
+  </data>
+  <data name="Admin_PhaseGuide_SupervisorAssignment" xml:space="preserve">
+    <value>Assign Supervisors:\nDrag and drop classes onto each supervisor so that every supervisor is responsible for a group of students. All classes must be assigned before continuing.</value>
+  </data>
+  <data name="Admin_PhaseGuide_Phase1" xml:space="preserve">
+    <value>Phase 1: Registration &amp; Manual Pairing\nStudents log in and fill in their details. Mentees can browse available mentors and send pairing requests. You set the deadline for this phase.</value>
+  </data>
+  <data name="Admin_PhaseGuide_Phase2" xml:space="preserve">
+    <value>Phase 2: Selection Gallery &amp; Auto-Match\nUnmatched mentees are shown their top algorithmically ranked mentors and can choose one. When the deadline passes, any mentee who hasn't chosen is paired automatically.</value>
+  </data>
+  <data name="Admin_PhaseGuide_Phase3" xml:space="preserve">
+    <value>Phase 3: Active Mentoring (Complete)\nThe matching process is complete. Pairs conduct mentoring sessions and log their hours. Supervisors track progress and resolve issues.</value>
+  </data>
+  <data name="Admin_StartSelectionStage_Button" xml:space="preserve">
+    <value>▶ Start selection stage</value>
+  </data>
+  <data name="Admin_StartActiveMentoring_Button" xml:space="preserve">
+    <value>▶ Start active mentoring stage</value>
+  </data>
+  <data name="Admin_ImportUsersInfo_Tooltip" xml:space="preserve">
+    <value>Import Users Info</value>
+  </data>
+  <data name="Admin_Phase1Info_Tooltip" xml:space="preserve">
+    <value>Phase 1 Info</value>
+  </data>
+  <data name="Admin_Phase2Info_Tooltip" xml:space="preserve">
+    <value>Phase 2 Info</value>
+  </data>
+  <data name="Admin_Phase3Info_Tooltip" xml:space="preserve">
+    <value>Phase 3 Info</value>
+  </data>
+  <data name="Table_Supervisor" xml:space="preserve">
+    <value>Supervisor</value>
+  </data>
+  <data name="Table_Pairs" xml:space="preserve">
+    <value>Pairs</value>
+  </data>
+  <data name="Table_Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Table_Resolved" xml:space="preserve">
+    <value>Resolved</value>
+  </data>
+  <data name="Table_FillProgress" xml:space="preserve">
+    <value>Fill Progress</value>
+  </data>
+  <data name="Table_Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Table_Inspect" xml:space="preserve">
+    <value>Inspect</value>
+  </data>
+  <data name="Table_Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="Table_Mentor" xml:space="preserve">
+    <value>Mentor</value>
+  </data>
+  <data name="Table_Mentee" xml:space="preserve">
+    <value>Mentee</value>
+  </data>
+  <data name="ManagePairs_Title" xml:space="preserve">
+    <value>Manage Pairs</value>
+  </data>
+  <data name="Common_Language" xml:space="preserve">
+    <value>Language:</value>
+  </data>
+  <data name="Common_Instructions" xml:space="preserve">
+    <value>Instructions:</value>
+  </data>
+  <data name="Common_Pair" xml:space="preserve">
+    <value>Pair</value>
+  </data>
+  <data name="Common_Progress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+  <data name="Common_HoursUnit" xml:space="preserve">
+    <value>hrs</value>
+  </data>
+  <data name="IssueItem_Created_Label" xml:space="preserve">
+    <value>Created:</value>
+  </data>
+  <data name="PairDetails_Hours_Tooltip" xml:space="preserve">
+    <value>Meeting hours progress toward the required goal</value>
+  </data>
+  <data name="Supervisor_RandomlyMatched_Warning" xml:space="preserve">
+    <value>⚠ {0} Randomly Matched – Profile Incomplete</value>
+  </data>
+  <data name="Supervisor_Issues_Title" xml:space="preserve">
+    <value>Issues</value>
+  </data>
+  <data name="Supervisor_IssuesOf_Format" xml:space="preserve">
+    <value>Issues of {0} &amp; {1}</value>
+  </data>
+  <data name="ManageUsers_GradeClass_Format" xml:space="preserve">
+    <value>{0} · Class {1}</value>
+  </data>
+  <data name="ManageUsers_RoleFilter_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="ManageUsers_RoleFilter_Supervisor" xml:space="preserve">
+    <value>Supervisor</value>
+  </data>
+  <data name="ManageUsers_RoleFilter_Student" xml:space="preserve">
+    <value>Student</value>
+  </data>
+  <data name="DB_Role_Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="DB_Role_Supervisor" xml:space="preserve">
+    <value>Supervisor</value>
+  </data>
+  <data name="DB_Role_Student" xml:space="preserve">
+    <value>Student</value>
+  </data>
+  <data name="MatchTier_Direct" xml:space="preserve">
+    <value>Direct Request</value>
+  </data>
+  <data name="MatchTier_GalleryChoice" xml:space="preserve">
+    <value>Gallery Choice</value>
+  </data>
+  <data name="MatchTier_AutoMatch" xml:space="preserve">
+    <value>Auto Matched</value>
+  </data>
+  <data name="MatchTier_FallbackRandom" xml:space="preserve">
+    <value>Random Match</value>
+  </data>
+  <data name="MatchTier_AdminManual" xml:space="preserve">
+    <value>Admin Manual</value>
+  </data>
+  <data name="Student_RequestedAt_Label" xml:space="preserve">
+    <value>Requested:</value>
+  </data>
+  <data name="Student_ExpertIn_Label" xml:space="preserve">
+    <value>Expert in</value>
+  </data>
+  <data name="SysSettings_AdvanceYear_Button" xml:space="preserve">
+    <value>📅 Next Year</value>
+  </data>
+  <data name="SysSettings_AdvanceYear_Tooltip" xml:space="preserve">
+    <value>Advance to the next academic year: graduate the top grade, promote all others, and reset the admin wizard</value>
+  </data>
+  <data name="SysSettings_AdvanceYear_Confirm_Title" xml:space="preserve">
+    <value>Advance to Next Academic Year?</value>
+  </data>
+  <data name="SysSettings_AdvanceYear_Confirm_Body" xml:space="preserve">
+    <value>This will permanently:
 • Remove all students in the highest grade (they graduate)
 • Promote every other student to the next grade
 • Delete all pairs, reviews, and pairing requests
 • Reset all admin settings to step 1
 
-This action cannot be undone. Continue?</value></data>
-  <data name="SysSettings_AdvanceYear_Success" xml:space="preserve"><value>✓ Advanced to the next academic year successfully.</value></data>
+This action cannot be undone. Continue?</value>
+  </data>
+  <data name="SysSettings_AdvanceYear_Success" xml:space="preserve">
+    <value>✓ Advanced to the next academic year successfully.</value>
+  </data>
 </root>

@@ -105,6 +105,18 @@ if (app.Environment.IsDevelopment())
 app.UseCors("WebClient");
 if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
+
+// Serve uploaded files (e.g. profile pictures). The upload endpoint writes to
+// {ContentRoot}/uploads, so we serve THAT exact folder at the "/uploads" URL —
+// independent of whether a wwwroot folder exists.
+var uploadsPhysicalPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
+Directory.CreateDirectory(uploadsPhysicalPath);
+app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPhysicalPath),
+    RequestPath = "/uploads"
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 

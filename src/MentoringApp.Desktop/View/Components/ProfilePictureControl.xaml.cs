@@ -71,7 +71,19 @@ namespace MentoringApp.View.Components
 
         private void UpdateDefaultAvatar()
         {
-            bool noImage = string.IsNullOrWhiteSpace(ImagePath) || !System.IO.File.Exists(ImagePath);
+            // An HTTP(S) URL is always treated as "has image" (we can't File.Exists a URL).
+            // A relative server path (e.g. "uploads/profile-pictures/42.jpg") also means there is an image.
+            // Only fall back to the default avatar when the path is genuinely empty.
+            bool isHttpUrl = !string.IsNullOrWhiteSpace(ImagePath) &&
+                             (ImagePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                              ImagePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
+            bool isRelativeServerPath = !string.IsNullOrWhiteSpace(ImagePath) &&
+                                        !System.IO.Path.IsPathRooted(ImagePath) &&
+                                        ImagePath.Contains('/');
+            bool isLocalFile = !string.IsNullOrWhiteSpace(ImagePath) &&
+                               System.IO.File.Exists(ImagePath);
+
+            bool noImage = !isHttpUrl && !isRelativeServerPath && !isLocalFile;
             SetValue(ShowDefaultAvatarPropertyKey, noImage);
 
             var defaultImage = Gender switch

@@ -42,6 +42,30 @@
             </div>
         </div>
     }
+
+    <hr class="divider" />
+
+    <div class="title">Choose someone you know</div>
+    <div class="subtitle">Search any available mentor by name and pick them directly.</div>
+
+    <input class="search-box" placeholder="Search by name…"
+           value="@Vm.SearchText"
+           @oninput="e => Vm.SearchText = e.Value?.ToString() ?? string.Empty" />
+
+    @foreach (var mentor in Vm.KnownMentors)
+    {
+        <div class="mentor-row">
+            <div class="mentor-info">
+                <div class="mentor-name">@mentor.MentorName</div>
+                <div class="mentor-meta">@mentor.SubjectName · @mentor.GradeClassDisplay</div>
+            </div>
+            <button class="btn-primary"
+                    disabled="@Vm.AlreadyMatched"
+                    @onclick="async () => await Vm.ChooseKnownMentorCommand.ExecuteAsync(mentor)">
+                Choose this mentor
+            </button>
+        </div>
+    }
 </div>
 
 <style>
@@ -82,6 +106,21 @@
     }
     .btn-primary:hover:not(:disabled) { background: #9333EA; }
     .btn-primary:disabled { opacity: .55; cursor: default; }
+    .divider { border: 0; border-top: 1px solid #E5E7EB; margin: 20px 0 16px; }
+    .search-box {
+        width: 100%; box-sizing: border-box;
+        padding: 9px 12px; margin-bottom: 12px;
+        border: 1px solid #D1D5DB; border-radius: 8px;
+        font-size: 13px;
+    }
+    .mentor-row {
+        background: white; border: 1px solid #E5E7EB; border-radius: 10px;
+        padding: 12px 14px; margin-bottom: 8px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .mentor-info { flex: 1; }
+    .mentor-name { font-size: 14px; font-weight: 600; color: #111827; }
+    .mentor-meta { font-size: 11px; color: #6B7280; margin-top: 2px; }
 </style>
 
 @code {

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Navigation Service Explained — MentoringApp</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f3f4f8;color:#1a1a2e;line-height:1.6}
+
+header{background:linear-gradient(135deg,#1a237e,#4a148c);color:white;padding:36px 48px}
+header h1{font-size:1.9rem;font-weight:700;margin-bottom:6px}
+header p{opacity:.8;font-size:.95rem}
+
+main{max-width:1020px;margin:0 auto;padding:36px 24px 72px}
+
+/* ── cards ── */
+.card{background:white;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);margin-bottom:30px;overflow:hidden}
+.card-head{padding:15px 26px;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:10px;color:white}
+.card-body{padding:22px 26px}
+.card-body p,.card-body li{font-size:.93rem;line-height:1.8}
+.card-body p+p{margin-top:10px}
+.card-body ul,.card-body ol{padding-left:22px;margin-top:8px}
+.card-body li{margin-bottom:5px}
+
+.h-purple{background:#4527a0}
+.h-blue  {background:#1565c0}
+.h-teal  {background:#00695c}
+.h-orange{background:#bf360c}
+.h-green {background:#1b5e20}
+.h-slate {background:#263238}
+.h-rose  {background:#880e4f}
+.h-navy  {background:#0d47a1}
+
+/* ── pre / code ── */
+pre{background:#1e1e2e;color:#cdd6f4;border-radius:10px;padding:16px 20px;font-size:.8rem;line-height:1.65;overflow-x:auto;margin:12px 0;tab-size:4}
+code{background:#eef0fa;border-radius:4px;padding:1px 6px;font-size:.83em;font-family:Consolas,monospace}
+.kw{color:#cba6f7}.str{color:#a6e3a1}.cm{color:#6c7086;font-style:italic}.cls{color:#89b4fa}.prop{color:#89dceb}.num{color:#fab387}
+
+/* ── callouts ── */
+.note{border-left:4px solid #4527a0;background:#ede7f6;padding:12px 16px;border-radius:0 8px 8px 0;font-size:.88rem;margin:14px 0}
+.tip {border-left:4px solid #00695c;background:#e8f5e9;padding:12px 16px;border-radius:0 8px 8px 0;font-size:.88rem;margin:14px 0}
+.warn{border-left:4px solid #bf360c;background:#fbe9e7;padding:12px 16px;border-radius:0 8px 8px 0;font-size:.88rem;margin:14px 0}
+
+/* ── big analogy box ── */
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.analogy-box{border-radius:10px;padding:16px;font-size:.88rem}
+.analogy-box h4{font-size:.85rem;font-weight:700;margin-bottom:6px}
+.real{background:#e8eaf6;border:2px solid #9fa8da}
+.code-side{background:#e3f2fd;border:2px solid #90caf9}
+
+/* ── visual stack diagram ── */
+.stack{display:flex;flex-direction:column;gap:0;max-width:480px;margin:14px auto}
+.stack-item{padding:12px 20px;text-align:center;font-size:.83rem;font-weight:600;border-radius:0;border:2px solid transparent;position:relative}
+.stack-item:first-child{border-radius:10px 10px 0 0}
+.stack-item:last-child{border-radius:0 0 10px 10px}
+.stack-item.top{background:#4527a0;color:white;border-color:#4527a0}
+.stack-item.mid{background:#6a1b9a;color:white;border-color:#6a1b9a}
+.stack-item.bot{background:#9c27b0;color:white;border-color:#9c27b0}
+.stack-item .sub{font-weight:normal;font-size:.75rem;opacity:.85;margin-top:2px}
+.stack-arrow{text-align:center;font-size:1.2rem;color:#7b1fa2;line-height:1.2}
+
+/* ── horizontal flow ── */
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:14px 0}
+.fbox{background:#e8eaf6;border:2px solid #9fa8da;border-radius:10px;padding:10px 14px;font-size:.8rem;font-weight:600;text-align:center;min-width:110px}
+.farrow{font-size:1.4rem;color:#5c6bc0;padding:0 5px;line-height:1}
+.flabel{font-size:.68rem;color:#555;display:block;margin-top:3px;font-weight:normal}
+
+/* ── history diagram ── */
+.hist{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0}
+.hist-item{background:#e3f2fd;border:1.5px solid #64b5f6;border-radius:6px;padding:6px 12px;font-size:.8rem;font-weight:600;position:relative}
+.hist-item.active{background:#1565c0;color:white;border-color:#1565c0}
+.hist-item.old{background:#fff3e0;border-color:#ffb74d}
+.hist-lbl{font-size:.7rem;color:#666;margin:0 4px}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.25);font-weight:800;font-size:.8rem;flex-shrink:0}
+
+h3{font-size:.95rem;font-weight:700;color:#1a237e;margin:16px 0 6px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗺 How Navigation Works — NavigationService &amp; Store</h1>
+  <p>MentoringApp — a clear, visual walkthrough of the custom MVVM navigation system</p>
+</header>
+
+<main>
+
+<!-- ── THE BIG PICTURE ── -->
+<div class="card">
+  <div class="card-head h-purple"><span class="badge">💡</span> The Big Picture — Why a custom navigation system?</div>
+  <div class="card-body">
+    <p>WPF has a built-in <code>Frame + Page</code> navigation system, but it's tightly coupled to WPF. Because this project shares the same <strong>ViewModel</strong> layer between WPF and Blazor Web, we can't use anything WPF-specific.</p>
+    <p>Instead, navigation is handled entirely in the ViewModel layer — the View just listens to a property and displays whatever ViewModel is active. This means the <em>same navigation logic works in both WPF and Blazor</em>.</p>
+
+    <div class="analogy">
+      <div class="analogy-box real">
+        <h4>📺 Real-world analogy</h4>
+        Think of a TV with one screen. A <strong>remote control</strong> changes what's on the screen by updating a "channel" variable. The TV doesn't know what channel 5 shows — it just displays whatever it's told. The remote keeps a <em>history</em> so you can press Back to return to the previous channel.
+      </div>
+      <div class="analogy-box code-side">
+        <h4>💻 In code</h4>
+        The <strong>ContentControl</strong> in MainWindow is the TV screen — it binds to <code>CurrentViewModel</code> and displays whatever ViewModel is set. The <strong>NavigationService</strong> is the remote — it changes <code>CurrentViewModel</code>. The <strong>NavigationStore</strong> keeps the back-stack history.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── THE THREE PIECES ── -->
+<div class="card">
+  <div class="card-head h-blue"><span class="badge">🧩</span> The Three Moving Pieces</div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:4px">
+
+      <div style="background:#e8eaf6;border-radius:10px;padding:14px">
+        <div style="font-weight:700;color:#283593;margin-bottom:6px">1. NavigationStore</div>
+        <div style="font-size:.83rem">Holds the <strong>current ViewModel</strong> and a <strong>back-stack</strong> (a Stack&lt;&gt;). When <code>CurrentViewModel</code> is set, the previous one is pushed onto the history stack. Fires an event when it changes.</div>
+      </div>
+
+      <div style="background:#e3f2fd;border-radius:10px;padding:14px">
+        <div style="font-weight:700;color:#0d47a1;margin-bottom:6px">2. NavigationService</div>
+        <div style="font-size:.83rem">The public API that all ViewModels call. It creates ViewModels (via DI), tells the Store to switch, and manages <strong>nested contexts</strong> — one stack of stores, one per shell level.</div>
+      </div>
+
+      <div style="background:#e8f5e9;border-radius:10px;padding:14px">
+        <div style="font-weight:700;color:#1b5e20;margin-bottom:6px">3. ContentControl + DataTemplates</div>
+        <div style="font-size:.83rem">The View is totally passive. <code>ContentControl</code> binds to the active ViewModel, and WPF automatically picks the matching View from <code>ViewModelViewMap.xaml</code> — no code-behind switch needed.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── NAVIGATIONSTORE ── -->
+<div class="card">
+  <div class="card-head h-teal"><span class="badge">1</span> NavigationStore — the back-stack in detail</div>
+  <div class="card-body">
+    <p>The store is a private class inside <code>NavigationService</code>. It holds a <strong>Stack</strong> of previously visited ViewModels and the current one.</p>
+
+    <pre><span class="cm">// Simplified from NavigationService.cs</span>
+<span class="kw">private class</span> <span class="cls">NavigationStore</span>
+{
+    <span class="kw">private readonly</span> Stack&lt;<span class="cls">INavigatable</span>&gt; _navigationHistory = <span class="kw">new</span>();
+    <span class="kw">private</span> <span class="cls">INavigatable</span> _currentViewModel;
+
+    <span class="kw">public bool</span> CanGoBack() => _navigationHistory.Count &gt; <span class="num">0</span>;
+
+    <span class="kw">public</span> <span class="cls">INavigatable</span> CurrentViewModel
+    {
+        <span class="kw">get</span> => _currentViewModel;
+        <span class="kw">set</span>
+        {
+            <span class="cm">// Push current to history before switching</span>
+            _navigationHistory.Push(_currentViewModel);
+            _currentViewModel = value;
+            CurrentViewModelChanged?.Invoke(); <span class="cm">// ← notifies the UI</span>
+        }
+    }
+
+    <span class="kw">public void</span> GoBack()
+    {
+        _currentViewModel = _navigationHistory.Pop(); <span class="cm">// restore previous</span>
+        CurrentViewModelChanged?.Invoke();
+    }
+
+    <span class="kw">public void</span> ResetTo(<span class="cls">INavigatable</span> vm)
+    {
+        _navigationHistory.Clear(); <span class="cm">// wipe history (no back button)</span>
+        _currentViewModel = vm;
+        CurrentViewModelChanged?.Invoke();
+    }
+
+    <span class="kw">public event</span> Action? CurrentViewModelChanged;
+}</pre>
+
+    <h3>How the back-stack changes as you navigate:</h3>
+    <p>Starting from Login, then going to Dashboard, then to Profile:</p>
+
+    <div style="margin:12px 0">
+      <div style="font-size:.8rem;color:#555;margin-bottom:4px">After login (navigate to Dashboard):</div>
+      <div class="hist">
+        <span class="hist-lbl">history stack →</span>
+        <div class="hist-item old">LoginVM</div>
+        <span style="font-size:1.2rem;color:#aaa">|</span>
+        <span class="hist-lbl">current →</span>
+        <div class="hist-item active">DashboardVM</div>
+      </div>
+
+      <div style="font-size:.8rem;color:#555;margin:10px 0 4px">After navigating to Profile:</div>
+      <div class="hist">
+        <span class="hist-lbl">history stack →</span>
+        <div class="hist-item old">LoginVM</div>
+        <div class="hist-item old">DashboardVM</div>
+        <span style="font-size:1.2rem;color:#aaa">|</span>
+        <span class="hist-lbl">current →</span>
+        <div class="hist-item active">ProfileVM</div>
+      </div>
+
+      <div style="font-size:.8rem;color:#555;margin:10px 0 4px">After pressing Back:</div>
+      <div class="hist">
+        <span class="hist-lbl">history stack →</span>
+        <div class="hist-item old">LoginVM</div>
+        <span style="font-size:1.2rem;color:#aaa">|</span>
+        <span class="hist-lbl">current →</span>
+        <div class="hist-item active">DashboardVM ← popped from stack</div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>NavigateToRootAsync</strong> calls <code>ResetTo()</code> instead of <code>CurrentViewModel = </code>. This <em>clears</em> the history stack — so no Back button appears. Used for sidebar navigation where going "back" makes no sense.
+    </div>
+  </div>
+</div>
+
+<!-- ── CONTEXT SYSTEM ── -->
+<div class="card">
+  <div class="card-head h-purple"><span class="badge">2</span> Nested Contexts — why there are two levels of navigation</div>
+  <div class="card-body">
+    <p>The app has two <em>independent</em> navigation areas that must not interfere with each other:</p>
+    <ul>
+      <li><strong>Outer context</strong> — the main window. Shows Login → Dashboard shell → etc.</li>
+      <li><strong>Inner context</strong> — the <em>content area inside the dashboard shell</em>. Shows Overview → Manage Users → Settings etc., while the sidebar stays visible.</li>
+    </ul>
+
+    <p>Each context has its <em>own</em> <code>NavigationStore</code> (its own back-stack). Pressing Back inside the shell only unwinds the shell's history, not the outer window's history.</p>
+
+    <div class="stack">
+      <div class="stack-item top">Outer context store<div class="sub">MainWindowViewModel — owns the window's ContentControl</div></div>
+      <div class="stack-arrow">↑ UseContext() pushes on top</div>
+      <div class="stack-item mid">Inner context store (Admin shell)<div class="sub">AdminDashboardViewModel — owns the shell's sub-page area</div></div>
+      <div class="stack-arrow">↑ UseContext() pushes on top (if another shell opens)</div>
+      <div class="stack-item bot">...another inner context if needed</div>
+    </div>
+
+    <h3>How a shell registers its context:</h3>
+    <pre><span class="cm">// AdminDashboardViewModel.cs — called when the admin shell loads</span>
+<span class="kw">public async</span> Task OnNavigatedToAsync()
+{
+    <span class="cm">// Registers a new inner context.
+    // From now on, NavigateToAsync() changes ActiveSubPage, NOT CurrentViewModel.</span>
+    _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
+
+    <span class="cm">// Now navigate within this inner context</span>
+    await _navigationService.NavigateToAsync&lt;<span class="cls">AdminOverviewViewModel</span>&gt;();
+}
+
+<span class="kw">public</span> Task OnNavigatedFromAsync()
+{
+    _navContext?.Dispose(); <span class="cm">// ← pops this context off the stack</span>
+    <span class="kw">return</span> Task.CompletedTask;
+}</pre>
+
+    <div class="tip">
+      <strong>Key insight:</strong> <code>UseContext(vm => ActiveSubPage = vm)</code> is a <strong>delegate</strong> (callback). The service stores it and calls it every time <code>NavigateToAsync()</code> is used. Because the admin shell is "on top" of the context stack, navigation affects <em>its</em> <code>ActiveSubPage</code>, not the outer window's <code>CurrentViewModel</code>.
+    </div>
+
+    <h3>How the stacks look after admin logs in:</h3>
+    <pre><span class="cm">Context stack (NavigationService._contextStack):
+  TOP →  vm => ActiveSubPage = vm      ← admin shell's delegate
+         vm => CurrentViewModel = vm   ← main window's delegate
+
+Store stack (NavigationService._storeStack):
+  TOP →  AdminShellStore  { current: AdminOverviewVM, history: [] }
+         MainWindowStore  { current: AdminDashboardVM, history: [LoginVM] }</span></pre>
+
+    <p>When the admin shell disposes (<code>_navContext.Dispose()</code>), both stacks shrink back to just the main window level.</p>
+  </div>
+</div>
+
+<!-- ── NAVIGATING ── -->
+<div class="card">
+  <div class="card-head h-orange"><span class="badge">3</span> NavigateToAsync — creating ViewModels via DI</div>
+  <div class="card-body">
+    <p>ViewModels are <strong>never</strong> created with <code>new</code>. The service uses <code>ActivatorUtilities.CreateInstance</code> to resolve all dependencies from the DI container automatically:</p>
+    <pre><span class="cm">// NavigationService.cs</span>
+<span class="kw">public async</span> Task NavigateToAsync&lt;<span class="cls">TViewModel</span>&gt;()
+    <span class="kw">where</span> <span class="cls">TViewModel</span> : <span class="kw">class</span>, <span class="cls">INavigatable</span>
+{
+    <span class="cm">// 1. Create the ViewModel — DI injects all its constructor parameters</span>
+    <span class="kw">var</span> vm = <span class="cls">ActivatorUtilities</span>.CreateInstance&lt;<span class="cls">TViewModel</span>&gt;(_serviceProvider);
+
+    <span class="cm">// 2. Tell the active store to switch</span>
+    await NavigateCoreAsync(vm, () => vm.OnNavigatedToAsync());
+}</pre>
+
+    <pre><span class="cm">// NavigateCoreAsync — the shared logic for all navigation calls</span>
+<span class="kw">private async</span> Task NavigateCoreAsync&lt;<span class="cls">TViewModel</span>&gt;(
+    <span class="cls">TViewModel</span> vm, <span class="cls">Func</span>&lt;Task&gt; onNavigatedTo, <span class="kw">bool</span> clearHistory = <span class="kw">false</span>)
+{
+    <span class="kw">var</span> currentStore = _storeStack.Peek(); <span class="cm">// get the active context's store</span>
+
+    <span class="cm">// Notify the current VM that it's leaving</span>
+    await currentStore.CurrentViewModel?.OnNavigatedFromAsync();
+
+    <span class="cm">// Switch (with or without clearing history)</span>
+    <span class="kw">if</span> (clearHistory)
+        currentStore.ResetTo(vm);           <span class="cm">// no back button</span>
+    <span class="kw">else</span>
+        currentStore.CurrentViewModel = vm; <span class="cm">// push old VM to history</span>
+
+    <span class="cm">// Notify the new VM that it has arrived (load data here)</span>
+    await onNavigatedTo();
+    CanGoBackChanged?.Invoke(); <span class="cm">// update Back button state in UI</span>
+}</pre>
+
+    <h3>Navigation with a parameter:</h3>
+    <pre><span class="cm">// Caller — AdminOverviewViewModel.cs</span>
+await _navigationService.NavigateToAsync&lt;<span class="cls">SupervisorDashboardViewModel</span>, <span class="kw">int</span>&gt;(chosen.Id);
+
+<span class="cm">// The target ViewModel receives it in OnNavigatedToAsync</span>
+<span class="kw">public async</span> Task OnNavigatedToAsync(<span class="kw">int</span> supervisorId)
+{
+    _currentSupervisorId = supervisorId;
+    await LoadSupervisorDataAsync(supervisorId); <span class="cm">// loads data for THIS supervisor</span>
+}</pre>
+
+    <div class="note">
+      <code>OnNavigatedToAsync()</code> is where ViewModels load their data. It's called <em>after</em> the VM is set as current, so the View is already rendered (with a loading state) while data fetches happen asynchronously.
+    </div>
+  </div>
+</div>
+
+<!-- ── VIEW BINDING ── -->
+<div class="card">
+  <div class="card-head h-green"><span class="badge">4</span> How the View updates — ContentControl + DataTemplates</div>
+  <div class="card-body">
+    <p>The View side is completely passive. <code>MainWindow.xaml</code> has a single <code>ContentControl</code> bound to <code>CurrentViewModel</code>:</p>
+    <pre><span class="cm">&lt;!-- MainWindow.xaml --&gt;</span>
+&lt;ContentControl <span class="prop">Content</span>="{Binding <span class="str">CurrentViewModel</span>}"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch" /&gt;</pre>
+
+    <p>WPF's <code>ContentControl</code> looks at the <em>type</em> of whatever object is in <code>Content</code> and searches for a matching <code>DataTemplate</code>. All the mappings live in <code>ViewModelViewMap.xaml</code>:</p>
+    <pre><span class="cm">&lt;!-- ViewModelViewMap.xaml — ViewModel → View mapping table --&gt;</span>
+&lt;DataTemplate DataType="{x:Type <span class="cls">uservm:LoginViewModel</span>}"&gt;
+    &lt;<span class="cls">userv:LoginView</span> /&gt;
+&lt;/DataTemplate&gt;
+
+&lt;DataTemplate DataType="{x:Type <span class="cls">adminvm:AdminDashboardViewModel</span>}"&gt;
+    &lt;<span class="cls">adminv:AdminDashboardView</span> /&gt;
+&lt;/DataTemplate&gt;
+
+&lt;DataTemplate DataType="{x:Type <span class="cls">adminvm:AdminOverviewViewModel</span>}"&gt;
+    &lt;<span class="cls">adminv:AdminOverviewView</span> /&gt;
+&lt;/DataTemplate&gt;
+<span class="cm">&lt;!-- ...one entry per ViewModel/View pair --&gt;</span></pre>
+
+    <div class="flow" style="margin:16px 0">
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="fbox">NavigationService<span class="flabel">calls ResetTo/set</span></div>
+      </div>
+      <span class="farrow">→</span>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="fbox">NavigationStore<span class="flabel">fires CurrentViewModelChanged</span></div>
+      </div>
+      <span class="farrow">→</span>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="fbox">Delegate fires<span class="flabel">CurrentViewModel = vm</span></div>
+      </div>
+      <span class="farrow">→</span>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="fbox">INotifyPropertyChanged<span class="flabel">WPF detects change</span></div>
+      </div>
+      <span class="farrow">→</span>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="fbox">ContentControl<span class="flabel">picks matching DataTemplate</span></div>
+      </div>
+      <span class="farrow">→</span>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="fbox">New View renders<span class="flabel">data binding auto-wires</span></div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Why DataTemplates instead of if/else in code-behind?</strong><br>
+      Zero code-behind switch statements. Adding a new screen means adding two lines to <code>ViewModelViewMap.xaml</code>. The rest is automatic. This also means WPF creates the View <em>fresh</em> every time, so there's no stale state in the UI.
+    </div>
+
+    <h3>The same pattern for the shell's sub-pages:</h3>
+    <pre><span class="cm">&lt;!-- AdminDashboardView.xaml — inner content area --&gt;</span>
+&lt;ContentControl <span class="prop">Content</span>="{Binding <span class="str">ActiveSubPage</span>}" /&gt;</pre>
+    <p>When <code>ActiveSubPage</code> changes (set by the inner context's delegate), WPF again looks up the DataTemplate for that ViewModel type and renders the correct sub-page view.</p>
+  </div>
+</div>
+
+<!-- ── INAGIVATABLE ── -->
+<div class="card">
+  <div class="card-head h-rose"><span class="badge">5</span> INavigatable — the lifecycle contract</div>
+  <div class="card-body">
+    <p>Every ViewModel that can be navigated to implements <code>INavigatable</code>. It provides two lifecycle hooks:</p>
+    <pre><span class="cm">// INavigatable.cs</span>
+<span class="kw">public interface</span> <span class="cls">INavigatable</span>
+{
+    <span class="cm">// Called AFTER this VM becomes current → load your data here</span>
+    Task OnNavigatedToAsync() => Task.CompletedTask;
+
+    <span class="cm">// Called BEFORE this VM stops being current → cleanup, stop timers</span>
+    Task OnNavigatedFromAsync() => Task.CompletedTask;
+}
+
+<span class="cm">// Variant that accepts a parameter (e.g. which supervisor to show)</span>
+<span class="kw">public interface</span> <span class="cls">INavigatable</span>&lt;<span class="cls">TParameter</span>&gt; : <span class="cls">INavigatable</span>
+{
+    Task OnNavigatedToAsync(<span class="cls">TParameter</span> parameter);
+}</pre>
+
+    <p>Both methods have default implementations (do nothing), so a ViewModel only overrides what it needs.</p>
+
+    <h3>Real examples:</h3>
+    <pre><span class="cm">// SupervisorDashboardViewModel — loads data when navigated to</span>
+<span class="kw">public async</span> Task OnNavigatedToAsync(<span class="kw">int</span> supervisorId)
+{
+    await LoadMatchingSettingsAsync();   <span class="cm">// sets IsPhase1Active first (no flicker)</span>
+    await LoadSupervisorDataAsync(supervisorId);
+    _ticker.Start();                     <span class="cm">// start the countdown timer</span>
+}
+
+<span class="kw">public</span> Task OnNavigatedFromAsync()
+{
+    _ticker.Stop();  <span class="cm">// stop timer when leaving this page</span>
+    <span class="kw">return</span> Task.CompletedTask;
+}
+
+<span class="cm">// AdminDashboardViewModel — shell opens/closes an inner context</span>
+<span class="kw">public async</span> Task OnNavigatedToAsync()
+{
+    _navContext = _navigationService.UseContext(vm => ActiveSubPage = vm);
+    await _navigationService.NavigateToAsync&lt;<span class="cls">AdminOverviewViewModel</span>&gt;();
+}
+<span class="kw">public</span> Task OnNavigatedFromAsync()
+{
+    _navContext?.Dispose();  <span class="cm">// collapse the inner context when shell leaves</span>
+    <span class="kw">return</span> Task.CompletedTask;
+}</pre>
+  </div>
+</div>
+
+<!-- ── COMPLETE EXAMPLE ── -->
+<div class="card">
+  <div class="card-head h-navy"><span class="badge">📖</span> Complete walkthrough — Admin logs in and inspects a supervisor</div>
+  <div class="card-body">
+    <ol style="line-height:2.2;font-size:.9rem">
+      <li>App starts → <code>MainWindowViewModel</code> calls <code>UseContext(vm => CurrentViewModel = vm)</code> → registers the outer context, outer store is now active.</li>
+      <li>App navigates to <code>LoginViewModel</code> → outer store's <code>CurrentViewModel = LoginVM</code> → event fires → delegate sets <code>CurrentViewModel</code> → WPF renders <code>LoginView</code>.</li>
+      <li>Admin enters credentials → service calls <code>NavigateToAsync&lt;AdminDashboardViewModel&gt;()</code> → <code>LoginVM</code> pushed to history, <code>AdminDashboardVM</code> becomes current → <code>AdminDashboardView</code> renders.</li>
+      <li><code>AdminDashboardViewModel.OnNavigatedToAsync()</code> runs → calls <code>UseContext(vm => ActiveSubPage = vm)</code> → a <strong>second (inner) store</strong> is pushed on top of the context stack.</li>
+      <li>Inside <code>OnNavigatedToAsync()</code> → calls <code>NavigateToAsync&lt;AdminOverviewViewModel&gt;()</code> → this now targets the <em>inner</em> store → <code>ActiveSubPage = AdminOverviewVM</code> → the shell's <code>ContentControl</code> renders <code>AdminOverviewView</code>.</li>
+      <li>Admin clicks "Inspect Supervisor" → calls <code>NavigateToAsync&lt;SupervisorDashboardViewModel, int&gt;(supervisorId)</code> → inner store pushes <code>AdminOverviewVM</code> to history, makes <code>SupervisorDashboardVM</code> current → renders <code>SupervisorDashboardView</code>.</li>
+      <li>Admin presses Back → <code>GoBackAsync()</code> → calls <code>OnNavigatedFromAsync()</code> on SupervisorDashboardVM (stops ticker) → pops <code>AdminOverviewVM</code> from history → <code>OnNavigatedToAsync()</code> on AdminOverviewVM runs (refreshes data) → back to overview.</li>
+    </ol>
+
+    <div style="margin-top:16px">
+      <pre><span class="cm">Context stack at step 5 (two levels active):</span>
+┌─────────────────────────────────────────────────────────────────────┐
+│  OUTER store  ·  current: AdminDashboardVM  ·  history: [LoginVM]   │
+├─────────────────────────────────────────────────────────────────────┤
+│  INNER store  ·  current: AdminOverviewVM   ·  history: []          │ ← active
+└─────────────────────────────────────────────────────────────────────┘
+  GoBackAsync() and NavigateToAsync() always target the TOP store.</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ── QUICK REFERENCE ── -->
+<div class="card">
+  <div class="card-head h-slate"><span class="badge">📋</span> Quick reference — which method to call?</div>
+  <div class="card-body">
+    <table style="width:100%;border-collapse:collapse;font-size:.88rem">
+      <tr style="background:#eceff1">
+        <th style="padding:9px 12px;text-align:left">Method</th>
+        <th style="padding:9px 12px;text-align:left">When to use</th>
+        <th style="padding:9px 12px;text-align:left">Back button?</th>
+      </tr>
+      <tr style="border-top:1px solid #e0e0e0">
+        <td style="padding:8px 12px"><code>NavigateToAsync&lt;VM&gt;()</code></td>
+        <td style="padding:8px 12px">Go deeper — user can press Back to return</td>
+        <td style="padding:8px 12px">✅ Yes</td>
+      </tr>
+      <tr style="border-top:1px solid #e0e0e0">
+        <td style="padding:8px 12px"><code>NavigateToAsync&lt;VM,P&gt;(param)</code></td>
+        <td style="padding:8px 12px">Go deeper, passing a parameter (e.g. an ID)</td>
+        <td style="padding:8px 12px">✅ Yes</td>
+      </tr>
+      <tr style="border-top:1px solid #e0e0e0">
+        <td style="padding:8px 12px"><code>NavigateToRootAsync&lt;VM&gt;()</code></td>
+        <td style="padding:8px 12px">Switch root section (sidebar navigation) — clears history</td>
+        <td style="padding:8px 12px">❌ No</td>
+      </tr>
+      <tr style="border-top:1px solid #e0e0e0">
+        <td style="padding:8px 12px"><code>NavigateToRootAsync&lt;VM,P&gt;(param)</code></td>
+        <td style="padding:8px 12px">Root switch with parameter — clears history</td>
+        <td style="padding:8px 12px">❌ No</td>
+      </tr>
+      <tr style="border-top:1px solid #e0e0e0">
+        <td style="padding:8px 12px"><code>GoBackAsync()</code></td>
+        <td style="padding:8px 12px">Return to the previous page in the current context</td>
+        <td style="padding:8px 12px">— (is the back action)</td>
+      </tr>
+      <tr style="border-top:1px solid #e0e0e0">
+        <td style="padding:8px 12px"><code>UseContext(delegate)</code></td>
+        <td style="padding:8px 12px">Shell ViewModels only — opens a new independent navigation zone</td>
+        <td style="padding:8px 12px">Depends on inner history</td>
+      </tr>
+    </table>
+
+    <div class="warn" style="margin-top:16px">
+      <strong>Common mistake:</strong> Navigating to a <em>shell ViewModel</em> (like <code>AdminDashboardViewModel</code>) instead of a sub-page ViewModel creates a new nested shell — and a new sidebar. Always navigate to the sub-page ViewModel (<code>AdminOverviewViewModel</code>) when you want to go to a specific page inside a shell that's already open.
+    </div>
+  </div>
+</div>
+
+</main>
+</body>
+</html>
