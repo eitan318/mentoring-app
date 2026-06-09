@@ -1,5 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
+    /// <summary>Flat row mirror of the Pairs table; mapped to/from <c>PairModel</c> in the service layer.</summary>
     public class PairDao
     {
         public int Id { get; set; }

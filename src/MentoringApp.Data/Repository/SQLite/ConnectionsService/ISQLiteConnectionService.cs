@@ -2,6 +2,10 @@
 
 namespace MentoringApp.Data.Acess.SQLite.ConnectionsService
 {
+    /// <summary>
+    /// Thin micro-ORM over SQLite: runs SQL and maps result rows to typed objects by reflection.
+    /// Every SQL repository depends on this instead of opening connections itself.
+    /// </summary>
     public interface ISQLiteConnectionService
     {
         T QuerySingle<T>(string sql, object parameters = null) where T : new();

@@ -12,9 +12,13 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Service
 {
+    /// <summary>
+    /// Generates a realistic set of fake supervisors, students, pairs, issues and reviews for
+    /// development/demo databases. Invoked by <see cref="SystemAdminService"/> after a DB recreate.
+    /// </summary>
     public class DummyDataSeeder
     {
-        // 0.1 → ~1 supervisor, ~6 users.  1.0 → ~8 supervisors, ~300 users.
+        // Controls dataset size. 0.1 → ~1 supervisor, ~6 users.  1.0 → ~8 supervisors, ~300 users.
         private const float Scale = 0.3f;
 
         private readonly UserService _userService;

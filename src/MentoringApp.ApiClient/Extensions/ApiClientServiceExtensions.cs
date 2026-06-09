@@ -3,8 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MentoringApp.ApiClient.Extensions;
 
+/// <summary>
+/// DI registration for the typed API clients. Registers each client with the given base URL and
+/// attaches the retry handler (and, in the auth overload, a Bearer-token handler) to its pipeline.
+/// </summary>
 public static class ApiClientServiceExtensions
 {
+    /// <summary>Registers all API clients with retry only (no auth) — used by anonymous flows.</summary>
     public static IServiceCollection AddApiClients(this IServiceCollection services, string baseUrl)
     {
         services.AddTransient<SimpleRetryHandler>();

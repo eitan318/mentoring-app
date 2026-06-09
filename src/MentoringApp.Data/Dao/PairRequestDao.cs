@@ -1,5 +1,6 @@
 namespace MentoringApp.Data.DTO
 {
+    /// <summary>Flat row mirror of the PairRequests table; mapped to/from <c>PairRequest</c>.</summary>
     public class PairRequestDao
     {
         public int Id { get; set; }

@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MentoringApp.Api.Helpers;
 
+/// <summary>Builds signed JWT access tokens (with the user's id/name/role claims) from <see cref="JwtSettings"/>. Called by the login endpoint.</summary>
 public static class JwtHelper
 {
     public static (string token, DateTime expiresAt) GenerateToken(UserModel user, JwtSettings settings)

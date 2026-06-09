@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IDbRepo"/>: drops and recreates the whole schema (used when RecreateDbOnStartup is set).</summary>
     internal class SqlDbRepo : IDbRepo
     {
         private readonly string _connectionString;

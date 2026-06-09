@@ -5,6 +5,7 @@ using MentoringApp.Data.Dao;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IGradeRepo"/> (grades lookup).</summary>
     internal class SqlGradeRepo : IGradeRepo
     {
         private readonly ISQLiteConnectionService _db;

@@ -4,6 +4,7 @@ using MentoringApp.Data.DTO;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IReviewRepo"/> (session reviews/logs).</summary>
     internal class SqlReviewRepo : IReviewRepo
     {
         private readonly ISQLiteConnectionService _db;

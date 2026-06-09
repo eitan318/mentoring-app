@@ -5,6 +5,7 @@ using MentoringApp.Data.Interfaces;
 
 namespace MentoringApp.Data.Acess.SQLite
 {
+    /// <summary>SQLite implementation of <see cref="IIssueCategoryRepo"/> (issue-category lookup).</summary>
     class SqlIssueCategoryRepo : IIssueCategoryRepo
     {
         private readonly ISQLiteConnectionService _db;

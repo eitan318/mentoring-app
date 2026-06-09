@@ -2,18 +2,21 @@ using MentoringApp.Model.User;
 
 namespace MentoringApp.ViewModel.Helpers
 {
+    /// <summary>A selectable gender choice (enum value + display text) for combo-box binding.</summary>
     public class GenderOption
     {
         public int Value { get; set; }
         public string Display { get; set; } = "";
     }
 
+    /// <summary>A selectable gender-preference choice (enum value + display text) for combo-box binding.</summary>
     public class GenderPreferenceOption
     {
         public int Value { get; set; }
         public string Display { get; set; } = "";
     }
 
+    /// <summary>Static lists and value→text converters for <see cref="Gender"/> / <see cref="GenderPreference"/>, used by registration and profile view models.</summary>
     public static class GenderHelper
     {
         public static readonly IReadOnlyList<GenderOption> GenderOptions = new List<GenderOption>

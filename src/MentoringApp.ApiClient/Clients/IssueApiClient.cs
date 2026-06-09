@@ -1,8 +1,8 @@
 using MentoringApp.Model;
-using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 
+/// <summary>Typed client for the /api/issues endpoints (create, resolve, forward, query issues).</summary>
 public class IssueApiClient(HttpClient http) : ApiClientBase(http)
 {
     public Task<IEnumerable<IssueModel>> GetAllAsync() =>

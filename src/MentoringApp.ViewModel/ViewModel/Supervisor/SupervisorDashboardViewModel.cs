@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Supervisor;
 
+/// <summary>Backs the supervisor dashboard: the supervisor's managed pairs, their progress, and the issues they need to handle.</summary>
 public partial class SupervisorDashboardViewModel : ObservableObject, INavigatable<int>
 {
     protected readonly INavigationService _navigationService;

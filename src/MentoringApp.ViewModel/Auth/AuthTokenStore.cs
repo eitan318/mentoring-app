@@ -1,5 +1,10 @@
 namespace MentoringApp.ViewModel.Auth;
 
+/// <summary>
+/// In-memory holder for the current JWT and the logged-in user's id/role/language (singleton).
+/// Read by <see cref="BearerTokenHandler"/> to attach the token to outgoing requests, and raises
+/// <see cref="SessionExpired"/> (once) when the API returns 401 so the app can return to login.
+/// </summary>
 public class AuthTokenStore
 {
     public event Action? SessionExpired;

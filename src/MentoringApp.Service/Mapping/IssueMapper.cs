@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Service.Mapping
 { 
+    /// <summary>Static mapper converting <see cref="IssueDao"/> rows into rich <see cref="IssueModel"/> objects (resolving the category).</summary>
     public static class IssueMapper
     {
         public static IssueModel ToModel(IssueDao dto, IssueCategoryModel category)

@@ -2,6 +2,10 @@ using MentoringApp.ViewModel.ViewModelHelper;
 
 namespace MentoringApp.ViewModel.Navigation
 {
+    /// <summary>
+    /// Contract for the stack-based navigation service that view models use to switch the active view
+    /// (with or without a parameter), reset the back-stack for root-level switches, and go back.
+    /// </summary>
     public interface INavigationService
     {
         /// <summary>Raised whenever CanGoBack may have changed, allowing reactive UI updates.</summary>

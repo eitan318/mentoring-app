@@ -7,6 +7,7 @@ using MentoringApp.ViewModel.ViewModelHelper;
 
 namespace MentoringApp.ViewModel.ViewModel.User;
 
+/// <summary>Backs the issue-detail view: loads a single issue by id and lets a supervisor resolve or forward it.</summary>
 public partial class IssueViewModel : ObservableObject, INavigatable<int>
 {
     [ObservableProperty] private IssueModel? _currentIssue;

@@ -5,6 +5,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/issues minimal-API endpoints: create, resolve, forward, and query student-reported issues.</summary>
 public static class IssueEndpoints
 {
     public static void MapIssueEndpoints(this WebApplication app)

@@ -1265,6 +1265,12 @@
   <data name="Issue_Forward_Button" xml:space="preserve">
     <value>קדם בעיה לאדמין</value>
   </data>
+  <data name="Issue_ForwardedBadge" xml:space="preserve">
+    <value>⚠ הועברה לאדמין</value>
+  </data>
+  <data name="Issue_Forward_Tooltip" xml:space="preserve">
+    <value>העבר בעיה זו לאדמין</value>
+  </data>
   <data name="Admin_ManageUsers_PhoneNumber" xml:space="preserve">
     <value>מספר טלפון:</value>
   </data>

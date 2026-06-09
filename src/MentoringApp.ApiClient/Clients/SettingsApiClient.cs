@@ -2,6 +2,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 
+/// <summary>Typed client for the /api/settings endpoints (phase deadlines, process flags, meeting-hours barrier).</summary>
 public class SettingsApiClient(HttpClient http) : ApiClientBase(http)
 {
     public Task<SettingsResponse> GetAllAsync() =>

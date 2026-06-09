@@ -3,6 +3,7 @@ using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 
+/// <summary>Typed client for the /api/reference endpoints (lookup data: subjects, grades, classes, issue categories).</summary>
 public class ReferenceApiClient(HttpClient http) : ApiClientBase(http)
 {
     public Task<IEnumerable<SubjectModel>> GetSubjectsAsync() =>

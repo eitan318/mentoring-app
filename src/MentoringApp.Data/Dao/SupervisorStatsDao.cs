@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Data.DTO
 {
+    /// <summary>Projection row from a JOIN/aggregate query: per-supervisor issue and pair counts for the admin dashboard.</summary>
     public class SupervisorStatsDao
     {
         public int Id { get; set; }

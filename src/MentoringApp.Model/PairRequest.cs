@@ -11,8 +11,11 @@ namespace MentoringApp.Model
         Accepted,
         Rejected
     }
+    /// <summary>
+    /// A request from a mentee to be paired with a specific mentor, awaiting the supervisor's
+    /// decision. Accepting it produces a <see cref="PairModel"/>. Display-only fields (names,
+    /// picture, gender, subject) are filled in by the service layer for the UI.
     /// </summary>
-    /// 
     public class PairRequest
     {
         public int Id { get; set; }

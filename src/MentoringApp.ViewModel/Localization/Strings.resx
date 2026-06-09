@@ -1158,6 +1158,15 @@ You can still manage issues and review pair activity from this dashboard.</value
   <data name="Issue_Resolve_Tooltip" xml:space="preserve">
     <value>Mark this issue as resolved</value>
   </data>
+  <data name="Issue_ForwardedBadge" xml:space="preserve">
+    <value>⚠ Forwarded to Admin</value>
+  </data>
+  <data name="Issue_Forward_Button" xml:space="preserve">
+    <value>Forward to Admin</value>
+  </data>
+  <data name="Issue_Forward_Tooltip" xml:space="preserve">
+    <value>Escalate this issue to the admin</value>
+  </data>
   <data name="Login_Step1" xml:space="preserve">
     <value>Step 1 of 2</value>
   </data>

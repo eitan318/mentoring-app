@@ -1,8 +1,8 @@
 using MentoringApp.Model;
-using MentoringApp.Model;
 
 namespace MentoringApp.ApiClient.Clients;
 
+/// <summary>Typed client for the /api/pairs endpoints (query and manage confirmed mentor–mentee pairs).</summary>
 public class PairApiClient(HttpClient http) : ApiClientBase(http)
 {
     public Task<IEnumerable<PairModel>> GetAllAsync() =>

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MentoringApp.Api.Endpoints;
 
+/// <summary>Maps the /api/users minimal-API endpoints: user CRUD, profile updates, and supervisor stats (auth required).</summary>
 public static class UserEndpoints
 {
     public static void MapUserEndpoints(this WebApplication app)

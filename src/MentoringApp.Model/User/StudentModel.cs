@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model.User
 {
+    /// <summary>
+    /// A student user. A student can act as a mentor, a mentee, or both, depending on which
+    /// profile(s) are set (<see cref="MentorProfile"/> / <see cref="MenteeProfile"/>).
+    /// </summary>
     public class StudentModel : UserModel
     {
         public GradeModel? Grade { get; set; }

@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace MentoringApp.Model
 {
+    /// <summary>
+    /// A session log / feedback entry written by a pair member, recording what was discussed
+    /// and how many hours the meeting lasted (counts toward the meeting-hours requirement).
+    /// </summary>
     public class Review : BaseModel
     {
         [SetsRequiredMembers]

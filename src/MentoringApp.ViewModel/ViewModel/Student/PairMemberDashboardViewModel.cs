@@ -18,6 +18,11 @@ namespace MentoringApp.ViewModel.ViewModel.Student
 {
 
     // ─── Pair dashboard base ───────────────────────────────────────────────────
+    /// <summary>
+    /// Shared base for the mentor and mentee dashboards (MentorDashboardViewModel /
+    /// MenteeDashboardViewModel). Holds the common pair data, meeting-hours progress and
+    /// review actions shown to a paired student.
+    /// </summary>
     public abstract partial class PairMemberDashboardViewModel : ObservableObject
     {
         public abstract string CounterpartRole { get; }

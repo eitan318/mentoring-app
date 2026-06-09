@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 
 namespace MentoringApp.ViewModel.ViewModel.Admin;
 
+/// <summary>Binding item pairing a supervisor with their assigned class slots, used by the supervisor-assignment UI.</summary>
 public class SupervisorSlot : ObservableObject
 {
     public UserModel Supervisor { get; }
@@ -19,6 +20,7 @@ public class SupervisorSlot : ObservableObject
     public SupervisorSlot(UserModel supervisor) { Supervisor = supervisor; }
 }
 
+/// <summary>Backs the admin system-settings screen: phase deadlines, meeting-hours barrier, and other global process settings.</summary>
 public partial class SystemSettingsViewModel : ObservableObject, INavigatable
 {
     private readonly ReferenceApiClient _referenceClient;
