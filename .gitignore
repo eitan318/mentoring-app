@@ -198,3 +198,6 @@ obj
 CLAUDE.md
 Tests
 .claude
+
+# Real local secrets - commit only the .template version
+src/MentoringApp.Api/appsettings.Development.json
